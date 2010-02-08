@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>FedICT eID Identity Provider Project</name>
+	<parent>
+		<!--
+			We want to limit duplicate work, so we reuse the eID Applet parent
+			POM. The eID Applet project also holds our JBoss AS runtime
+			configuration anyway.
+		-->
+		<groupId>be.fedict</groupId>
+		<artifactId>eid-applet</artifactId>
+		<version>1.0.1-SNAPSHOT</version>
+	</parent>
+	<groupId>be.fedict</groupId>
+	<artifactId>eid-idp</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<inceptionYear>2009</inceptionYear>
+	<scm>
+		<developerConnection>scm:svn:https://eid-idp.googlecode.com/svn/trunk</developerConnection>
+	</scm>
+	<modules>
+		<module>eid-idp-spi</module>
+		<module>eid-idp-protocol-simple</module>
+		<module>eid-idp-model</module>
+		<module>eid-idp-webapp</module>
+		<module>eid-idp-deploy</module>
+	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>be.fedict.eid-applet</groupId>
+				<artifactId>eid-applet-package</artifactId>
+				<version>${eid-applet.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>be.fedict.eid-applet</groupId>
+				<artifactId>eid-applet-service</artifactId>
+				<version>${eid-applet.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>be.fedict.eid-applet</groupId>
+				<artifactId>eid-applet-service-spi</artifactId>
+				<version>${eid-applet.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<properties>
+		<eid-applet.version>1.0.1-SNAPSHOT</eid-applet.version>
+	</properties>
+</project>
