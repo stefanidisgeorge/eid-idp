@@ -6,7 +6,7 @@
 	<listener>
 		<listener-class>org.jboss.seam.servlet.SeamListener</listener-class>
 	</listener>
-	
+
 	<servlet>
 		<servlet-name>Seam Resource Servlet</servlet-name>
 		<servlet-class>org.jboss.seam.servlet.SeamResourceServlet</servlet-class>
@@ -15,7 +15,7 @@
 		<servlet-name>Seam Resource Servlet</servlet-name>
 		<url-pattern>/seam/resource/*</url-pattern>
 	</servlet-mapping>
-	
+
 	<filter>
 		<filter-name>Seam Filter</filter-name>
 		<filter-class>org.jboss.seam.servlet.SeamFilter</filter-class>
@@ -24,7 +24,7 @@
 		<filter-name>Seam Filter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	
+
 	<!-- JBoss Richfaces -->
 	<context-param>
 		<param-name>org.richfaces.SKIN</param-name>
@@ -34,7 +34,7 @@
 		<param-name>org.ajax4jsf.VIEW_HANDLERS</param-name>
 		<param-value>com.sun.facelets.FaceletViewHandler</param-value>
 	</context-param>
-	
+
 	<!-- Facelets -->
 	<context-param>
 		<param-name>javax.faces.DEFAULT_SUFFIX</param-name>
@@ -44,7 +44,7 @@
 		<param-name>facelets.DEVELOPMENT</param-name>
 		<param-value>true</param-value>
 	</context-param>
-	
+
 	<!-- JSF -->
 	<servlet>
 		<servlet-name>Faces Servlet</servlet-name>
@@ -55,18 +55,74 @@
 		<servlet-name>Faces Servlet</servlet-name>
 		<url-pattern>*.seam</url-pattern>
 	</servlet-mapping>
-	
-	<!-- eID Applet -->
+
+	<!-- IdP protocol entry point -->
 	<servlet>
-		<servlet-name>AppletServiceServlet</servlet-name>
+		<servlet-name>ProtocolEntryServlet</servlet-name>
+		<servlet-class>be.fedict.eid.idp.webapp.ProtocolEntryServlet</servlet-class>
+		<init-param>
+			<param-name>UnknownProtocolPage</param-name>
+			<param-value>/unknown-protocol.seam</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ProtocolErrorPage</param-name>
+			<param-value>/protocol-error.seam</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ProtocolErrorMessageSessionAttribute</param-name>
+			<param-value>idpProtocolErrorMessage</param-value>
+		</init-param>
+		<init-param>
+			<param-name>IdentificationPage</param-name>
+			<param-value>/identification.seam</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ProtocolEntryServlet</servlet-name>
+		<url-pattern>/protocol/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- IdP protocol exit point -->
+	<servlet>
+		<servlet-name>ProtocolExitServlet</servlet-name>
+		<servlet-class>be.fedict.eid.idp.webapp.ProtocolExitServlet</servlet-class>
+		<init-param>
+			<param-name>ProtocolErrorPage</param-name>
+			<param-value>/protocol-error.seam</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ProtocolErrorMessageSessionAttribute</param-name>
+			<param-value>idpProtocolErrorMessage</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ProtocolResponsePostPage</param-name>
+			<param-value>/protocol-response-post.seam</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ResponseActionSessionAttribute</param-name>
+			<param-value>idpResponseAction</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ResponseAttributesSessionAttribute</param-name>
+			<param-value>idpResponseAttributes</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ProtocolExitServlet</servlet-name>
+		<url-pattern>/protocol-exit</url-pattern>
+	</servlet-mapping>
+
+	<!-- eID Applet Identification -->
+	<servlet>
+		<servlet-name>AppletIdentificationServiceServlet</servlet-name>
 		<servlet-class>be.fedict.eid.applet.service.AppletServiceServlet</servlet-class>
 		<init-param>
-			<param-name>IncludeCertificates</param-name>
+			<param-name>IncludeAddress</param-name>
 			<param-value>true</param-value>
 		</init-param>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>AppletServiceServlet</servlet-name>
-		<url-pattern>/applet-service</url-pattern>
+		<servlet-name>AppletIdentificationServiceServlet</servlet-name>
+		<url-pattern>/applet-identification-service</url-pattern>
 	</servlet-mapping>
 </web-app>
