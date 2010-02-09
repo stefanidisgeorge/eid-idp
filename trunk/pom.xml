@@ -23,9 +23,11 @@
 	</scm>
 	<modules>
 		<module>eid-idp-spi</module>
+		<module>eid-idp-sp-protocol-simple</module>
 		<module>eid-idp-protocol-simple</module>
 		<module>eid-idp-model</module>
 		<module>eid-idp-webapp</module>
+		<module>eid-idp-sp-webapp</module>
 		<module>eid-idp-deploy</module>
 	</modules>
 	<dependencyManagement>
@@ -38,6 +40,11 @@
 			<dependency>
 				<groupId>be.fedict.eid-applet</groupId>
 				<artifactId>eid-applet-service</artifactId>
+				<version>${eid-applet.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>be.fedict.eid-applet</groupId>
+				<artifactId>eid-applet-shared</artifactId>
 				<version>${eid-applet.version}</version>
 			</dependency>
 			<dependency>

@@ -7,17 +7,9 @@
 <body>
 <ui:composition template="/WEB-INF/template.xhtml">
 	<ui:define name="body">
-		<h2>Supported Protocol Services</h2>
-		<rich:dataTable value="#{idpProtocolServices}" var="row">
-			<rich:column>
-				<f:facet name="header">Name</f:facet>
-				<h:outputText value="#{row.name}" />
-			</rich:column>
-			<rich:column>
-				<f:facet name="header">Context Path</f:facet>
-				<h:outputText value="#{row.contextPath}" />
-			</rich:column>
-		</rich:dataTable>
+		<h2>Unknown Identity Provider Protocol</h2>
+		<p>The request you made uses a protocol that is not supported by
+		this eID IdP.</p>
 	</ui:define>
 </ui:composition>
 </body>

@@ -22,6 +22,18 @@
 					<modules>
 						<jarModule>
 							<groupId>be.fedict.eid-applet</groupId>
+							<artifactId>eid-applet-service</artifactId>
+							<includeInApplicationXml>true</includeInApplicationXml>
+							<bundleDir>lib</bundleDir>
+						</jarModule>
+						<jarModule>
+							<groupId>be.fedict.eid-applet</groupId>
+							<artifactId>eid-applet-shared</artifactId>
+							<includeInApplicationXml>true</includeInApplicationXml>
+							<bundleDir>lib</bundleDir>
+						</jarModule>
+						<jarModule>
+							<groupId>be.fedict.eid-applet</groupId>
 							<artifactId>eid-applet-service-spi</artifactId>
 							<includeInApplicationXml>true</includeInApplicationXml>
 						</jarModule>
@@ -50,6 +62,11 @@
 							<includeInApplicationXml>true</includeInApplicationXml>
 							<bundleDir>lib</bundleDir>
 						</jarModule>
+						<webModule>
+							<groupId>be.fedict.eid-idp</groupId>
+							<artifactId>eid-idp-sp-webapp</artifactId>
+							<contextRoot>/eid-idp-sp</contextRoot>
+						</webModule>
 					</modules>
 					<version>5</version>
 				</configuration>
@@ -72,9 +89,29 @@
 			<artifactId>eid-applet-service-spi</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>be.fedict.eid-applet</groupId>
+			<artifactId>eid-applet-service</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.lowagie</groupId>
+					<artifactId>itext</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>be.fedict.eid-applet</groupId>
+			<artifactId>eid-applet-shared</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
 			<artifactId>eid-idp-spi</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.lowagie</groupId>
+					<artifactId>itext</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
@@ -90,6 +127,12 @@
 		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
 			<artifactId>eid-idp-webapp</artifactId>
+			<type>war</type>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>be.fedict.eid-idp</groupId>
+			<artifactId>eid-idp-sp-webapp</artifactId>
 			<type>war</type>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
