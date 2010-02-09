@@ -1,0 +1,143 @@
+/*
+ * eID Identity Provider Project.
+ * Copyright (C) 2010 FedICT.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License version
+ * 3.0 as published by the Free Software Foundation.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, see 
+ * http://www.gnu.org/licenses/.
+ */
+
+package test.unit.be.fedict.eid.idp.protocol.saml2;
+
+import static org.junit.Assert.assertNotNull;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.UUID;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.xpath.XPathAPI;
+import org.easymock.EasyMock;
+import org.joda.time.DateTime;
+import org.junit.Test;
+import org.opensaml.Configuration;
+import org.opensaml.DefaultBootstrap;
+import org.opensaml.common.SAMLObjectBuilder;
+import org.opensaml.common.SAMLVersion;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.saml2.binding.encoding.HTTPPostEncoder;
+import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml2.metadata.Endpoint;
+import org.opensaml.ws.transport.OutTransport;
+import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
+import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.tidy.Tidy;
+
+public class SAML2ProtocolServiceTest {
+
+	private static final Log LOG = LogFactory
+			.getLog(SAML2ProtocolServiceTest.class);
+
+	@Test
+	public void testOpenSaml2Spike() throws Exception {
+		/*
+		 * Setup
+		 */
+		DefaultBootstrap.bootstrap();
+
+		XMLObjectBuilderFactory builderFactory = Configuration
+				.getBuilderFactory();
+		assertNotNull(builderFactory);
+
+		SAMLObjectBuilder<AuthnRequest> requestBuilder = (SAMLObjectBuilder<AuthnRequest>) builderFactory
+				.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
+		assertNotNull(requestBuilder);
+		AuthnRequest samlMessage = requestBuilder.buildObject();
+		samlMessage.setID(UUID.randomUUID().toString());
+		samlMessage.setVersion(SAMLVersion.VERSION_20);
+		samlMessage.setIssueInstant(new DateTime(0));
+
+		SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
+				.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
+		Endpoint samlEndpoint = endpointBuilder.buildObject();
+		samlEndpoint.setLocation("http://idp.be");
+		samlEndpoint.setResponseLocation("http://sp.be/response");
+
+		HttpServletResponse mockHttpServletResponse = EasyMock
+				.createMock(HttpServletResponse.class);
+		OutTransport outTransport = new HttpServletResponseAdapter(
+				mockHttpServletResponse, true);
+
+		BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
+		messageContext.setOutboundMessageTransport(outTransport);
+		messageContext.setPeerEntityEndpoint(samlEndpoint);
+		messageContext.setOutboundSAMLMessage(samlMessage);
+
+		VelocityEngine velocityEngine = new VelocityEngine();
+		velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
+				"classpath");
+		velocityEngine
+				.setProperty("classpath.resource.loader.class",
+						"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		velocityEngine.init();
+		HTTPPostEncoder encoder = new HTTPPostEncoder(velocityEngine,
+				"/templates/saml2-post-binding.vm");
+
+		/*
+		 * Expectations
+		 */
+		mockHttpServletResponse
+				.setHeader("Cache-control", "no-cache, no-store");
+		mockHttpServletResponse.setHeader("Pragma", "no-cache");
+		mockHttpServletResponse.setCharacterEncoding("UTF-8");
+		mockHttpServletResponse.setContentType("text/html");
+		mockHttpServletResponse.setHeader("Content-Type", "text/html");
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ServletOutputStream mockServletOutputStream = new ServletOutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+				baos.write(b);
+			}
+		};
+		EasyMock.expect(mockHttpServletResponse.getOutputStream()).andReturn(
+				mockServletOutputStream);
+
+		/*
+		 * Perform
+		 */
+		EasyMock.replay(mockHttpServletResponse);
+		encoder.encode(messageContext);
+
+		/*
+		 * Verify
+		 */
+		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
+				baos.toByteArray());
+		LOG.debug("SAML2 Request Browser POST: " + baos.toString());
+		Tidy tidy = new Tidy();
+		Document document = tidy.parseDOM(byteArrayInputStream, null);
+
+		Node actionNode = XPathAPI.selectSingleNode(document,
+				"//form[@action='http://idp.be']");
+		assertNotNull(actionNode);
+	}
+}

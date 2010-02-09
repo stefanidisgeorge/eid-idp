@@ -25,6 +25,7 @@
 		<module>eid-idp-spi</module>
 		<module>eid-idp-sp-protocol-simple</module>
 		<module>eid-idp-protocol-simple</module>
+		<module>eid-idp-protocol-saml2</module>
 		<module>eid-idp-model</module>
 		<module>eid-idp-webapp</module>
 		<module>eid-idp-sp-webapp</module>
@@ -52,9 +53,20 @@
 				<artifactId>eid-applet-service-spi</artifactId>
 				<version>${eid-applet.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.opensaml</groupId>
+				<artifactId>opensaml</artifactId>
+				<version>2.3.2</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<properties>
 		<eid-applet.version>1.0.1-SNAPSHOT</eid-applet.version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>shibboleth</id>
+			<url>http://shibboleth.internet2.edu/downloads/maven2/</url>
+		</repository>
+	</repositories>
 </project>

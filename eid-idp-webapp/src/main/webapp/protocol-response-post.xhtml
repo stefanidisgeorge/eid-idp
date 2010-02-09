@@ -14,7 +14,9 @@
 			<ui:repeat value="#{idpResponseAttributes}" var="item">
 				<input type="hidden" name="#{item.name}" value="#{item.value}" />
 			</ui:repeat>
-			<input type="submit" value="Submit" />
+			<noscript>
+				<input type="submit" value="Submit" />
+			</noscript>
 		</form>
 		<script type="text/javascript">
 			document.getElementById('response-form').submit();
