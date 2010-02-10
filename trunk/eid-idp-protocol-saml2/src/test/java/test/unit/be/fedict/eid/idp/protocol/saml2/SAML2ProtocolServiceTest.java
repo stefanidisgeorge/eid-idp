@@ -130,6 +130,7 @@ public class SAML2ProtocolServiceTest {
 		/*
 		 * Verify
 		 */
+		EasyMock.verify(mockHttpServletResponse);
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
 				baos.toByteArray());
 		LOG.debug("SAML2 Request Browser POST: " + baos.toString());

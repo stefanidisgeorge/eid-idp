@@ -24,4 +24,17 @@
 		<servlet-name>SimpleProtocolLandingServlet</servlet-name>
 		<url-pattern>/simple-landing</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AuthenticationRequestServlet</servlet-name>
+		<servlet-class>be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet</servlet-class>
+		<init-param>
+			<param-name>ParametersFromRequest</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AuthenticationRequestServlet</servlet-name>
+		<url-pattern>/saml-request</url-pattern>
+	</servlet-mapping>
 </web-app>
