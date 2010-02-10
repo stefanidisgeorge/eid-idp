@@ -46,6 +46,12 @@ public class ProtocolServiceManagerBean implements ProtocolServiceManager {
 	public IdentityProviderProtocolService findProtocolService(
 			String contextPath) {
 		LOG.debug("find protocol service for context path: " + contextPath);
+		if (null == contextPath) {
+			/*
+			 * Can happen if we browse directly to ./eid-idp/protocol
+			 */
+			return null;
+		}
 		List<IdentityProviderProtocolType> protocolServices = getProtocolServices();
 		for (IdentityProviderProtocolType protocol : protocolServices) {
 			if (contextPath.equals(protocol.getContextPath())) {

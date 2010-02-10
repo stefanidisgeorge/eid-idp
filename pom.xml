@@ -25,6 +25,7 @@
 		<module>eid-idp-spi</module>
 		<module>eid-idp-sp-protocol-simple</module>
 		<module>eid-idp-protocol-simple</module>
+		<module>eid-idp-sp-protocol-saml2</module>
 		<module>eid-idp-protocol-saml2</module>
 		<module>eid-idp-model</module>
 		<module>eid-idp-webapp</module>

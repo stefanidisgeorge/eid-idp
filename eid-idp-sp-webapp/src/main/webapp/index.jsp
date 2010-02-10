@@ -17,6 +17,9 @@ identification/authentication protocols towards the eID IdP.</p>
 	<li><a
 		href="https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/foobar">Unsupported
 	Protocol</a></li>
+	<li><a
+		href="saml-request?IdPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/saml2&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/saml2-landing">SAML2
+	eID IdP Request</a></li>
 </ul>
 </body>
 </html>
