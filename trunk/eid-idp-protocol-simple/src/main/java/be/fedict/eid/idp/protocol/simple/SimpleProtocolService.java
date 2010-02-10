@@ -68,8 +68,8 @@ public class SimpleProtocolService implements IdentityProviderProtocolService {
 	}
 
 	public ReturnResponse handleReturnResponse(HttpSession httpSession,
-			Identity identity, Address address, HttpServletResponse response)
-			throws Exception {
+			Identity identity, Address address, String authenticatedIdentifier,
+			HttpServletResponse response) throws Exception {
 		LOG.debug("handle return response");
 		String targetUrl = getTargetUrl(httpSession);
 		ReturnResponse returnResponse = new ReturnResponse(targetUrl);

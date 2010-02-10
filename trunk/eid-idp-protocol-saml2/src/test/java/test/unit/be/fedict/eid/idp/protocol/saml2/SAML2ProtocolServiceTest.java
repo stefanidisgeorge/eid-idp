@@ -23,11 +23,16 @@ import static org.junit.Assert.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
@@ -51,6 +56,8 @@ import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.tidy.Tidy;
+
+import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolService;
 
 public class SAML2ProtocolServiceTest {
 
@@ -140,5 +147,42 @@ public class SAML2ProtocolServiceTest {
 		Node actionNode = XPathAPI.selectSingleNode(document,
 				"//form[@action='http://idp.be']");
 		assertNotNull(actionNode);
+	}
+
+	@Test
+	public void testHandleIncomingRequest() throws Exception {
+		// setup
+		SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
+		HttpServletRequest mockHttpServletRequest = EasyMock
+				.createMock(HttpServletRequest.class);
+
+		InputStream samlRequestInputStream = SAML2ProtocolServiceTest.class
+				.getResourceAsStream("/saml-request.xml");
+		byte[] samlRequest = IOUtils.toByteArray(samlRequestInputStream);
+		byte[] encodedSamlRequest = Base64.encodeBase64(samlRequest);
+
+		// expectations
+		EasyMock.expect(mockHttpServletRequest.getMethod()).andReturn("POST");
+		EasyMock.expect(mockHttpServletRequest.getParameter("RelayState"))
+				.andStubReturn(null);
+		EasyMock.expect(mockHttpServletRequest.getParameter("SAMLRequest"))
+				.andReturn(new String(encodedSamlRequest));
+		EasyMock.expect(mockHttpServletRequest.getRequestURL()).andReturn(
+				new StringBuffer("http://idp.be"));
+
+		HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
+		EasyMock.expect(mockHttpServletRequest.getSession()).andReturn(
+				mockHttpSession);
+		mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
+				+ ".TargetUrl", "http://sp.be/response");
+
+		// prepare
+		EasyMock.replay(mockHttpServletRequest, mockHttpSession);
+
+		// operate
+		saml2ProtocolService.handleIncomingRequest(mockHttpServletRequest);
+
+		// verify
+		EasyMock.verify(mockHttpServletRequest, mockHttpSession);
 	}
 }
