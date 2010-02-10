@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.applet.service.impl.handler.AuthenticationDataMessageHandler;
 import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
@@ -100,10 +101,12 @@ public class ProtocolExitServlet extends HttpServlet {
 				.getAttribute(IdentityDataMessageHandler.IDENTITY_SESSION_ATTRIBUTE);
 		Address address = (Address) httpSession
 				.getAttribute(IdentityDataMessageHandler.ADDRESS_SESSION_ATTRIBUTE);
+		String authenticatedIdentifier = (String) httpSession
+				.getAttribute(AuthenticationDataMessageHandler.AUTHENTICATED_USER_IDENTIFIER_SESSION_ATTRIBUTE);
 		ReturnResponse returnResponse;
 		try {
 			returnResponse = protocolService.handleReturnResponse(httpSession,
-					identity, address, response);
+					identity, address, authenticatedIdentifier, response);
 		} catch (Exception e) {
 			LOG.error("protocol error: " + e.getMessage(), e);
 			httpSession.setAttribute(

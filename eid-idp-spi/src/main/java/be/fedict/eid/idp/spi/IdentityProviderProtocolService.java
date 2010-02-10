@@ -117,6 +117,9 @@ public interface IdentityProviderProtocolService {
 	 * @param address
 	 *            the eID address (in case of an eID identification operation,
 	 *            else <code>null</code>)
+	 * @param authenticatedIdentifier
+	 *            contains the user identifier in case of an eID authentication
+	 *            operation, else <code>null</code>.
 	 * @param response
 	 *            the HTTP response.
 	 * @return the response object in case a Browser POST should be constructed.
@@ -127,6 +130,6 @@ public interface IdentityProviderProtocolService {
 	 *             response.
 	 */
 	ReturnResponse handleReturnResponse(HttpSession httpSession,
-			Identity identity, Address address, HttpServletResponse response)
-			throws Exception;
+			Identity identity, Address address, String authenticatedIdentifier,
+			HttpServletResponse response) throws Exception;
 }

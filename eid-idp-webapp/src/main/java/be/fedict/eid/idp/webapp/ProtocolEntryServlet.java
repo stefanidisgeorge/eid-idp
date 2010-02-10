@@ -65,6 +65,8 @@ public class ProtocolEntryServlet extends HttpServlet {
 
 	private String identificationPageInitParam;
 
+	private String authenticationWithIdentificationPageInitParam;
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		this.unknownProtocolPageInitParam = getRequiredInitParameter(config,
@@ -75,6 +77,8 @@ public class ProtocolEntryServlet extends HttpServlet {
 				config, "ProtocolErrorMessageSessionAttribute");
 		this.identificationPageInitParam = getRequiredInitParameter(config,
 				"IdentificationPage");
+		this.authenticationWithIdentificationPageInitParam = getRequiredInitParameter(
+				config, "AuthenticationWithIdentificationPage");
 	}
 
 	private String getRequiredInitParameter(ServletConfig config,
@@ -138,6 +142,11 @@ public class ProtocolEntryServlet extends HttpServlet {
 				case IDENTIFICATION:
 					response.sendRedirect(request.getContextPath()
 							+ this.identificationPageInitParam);
+					break;
+				case AUTHENTICATION_WITH_IDENTIFICATION:
+					response
+							.sendRedirect(request.getContextPath()
+									+ this.authenticationWithIdentificationPageInitParam);
 					break;
 				default:
 					throw new RuntimeException("cannot handle IdP flow: "

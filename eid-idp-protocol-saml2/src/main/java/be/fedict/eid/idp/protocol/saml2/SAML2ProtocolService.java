@@ -24,6 +24,13 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opensaml.DefaultBootstrap;
+import org.opensaml.common.SAMLObject;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
+import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
+import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
@@ -40,19 +47,54 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 	private static final Log LOG = LogFactory
 			.getLog(SAML2ProtocolService.class);
 
+	public static final String TARGET_URL_SESSION_ATTRIBUTE = SAML2ProtocolService.class
+			.getName()
+			+ ".TargetUrl";
+
+	private void setTargetUrl(String targetUrl, HttpServletRequest request) {
+		HttpSession httpSession = request.getSession();
+		httpSession.setAttribute(TARGET_URL_SESSION_ATTRIBUTE, targetUrl);
+	}
+
+	private String getTargetUrl(HttpSession httpSession) {
+		String targetUrl = (String) httpSession
+				.getAttribute(TARGET_URL_SESSION_ATTRIBUTE);
+		return targetUrl;
+	}
+
 	public IdentityProviderFlow handleIncomingRequest(HttpServletRequest request)
 			throws Exception {
 		LOG.debug("handling incoming request");
-		// TODO
+		DefaultBootstrap.bootstrap();
+
+		BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext = new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
+		messageContext
+				.setInboundMessageTransport(new HttpServletRequestAdapter(
+						request));
+
+		SAMLMessageDecoder decoder = new HTTPPostDecoder();
+		decoder.decode(messageContext);
+
+		SAMLObject samlObject = messageContext.getInboundSAMLMessage();
+		LOG.debug("SAML object class: " + samlObject.getClass().getName());
+		if (false == samlObject instanceof AuthnRequest) {
+			throw new IllegalArgumentException(
+					"expected a SAML2 AuthnRequest document");
+		}
+		AuthnRequest authnRequest = (AuthnRequest) samlObject;
+		String targetUrl = authnRequest.getAssertionConsumerServiceURL();
+		LOG.debug("target URL: " + targetUrl);
+		setTargetUrl(targetUrl, request);
+
 		return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
 	}
 
 	public ReturnResponse handleReturnResponse(HttpSession httpSession,
-			Identity identity, Address address, HttpServletResponse response)
-			throws Exception {
+			Identity identity, Address address, String authenticatedIdentifier,
+			HttpServletResponse response) throws Exception {
 		LOG.debug("handle return response");
+		LOG.debug("authenticated identifier: " + authenticatedIdentifier);
 		// TODO
 		return null;
 	}
-
 }
