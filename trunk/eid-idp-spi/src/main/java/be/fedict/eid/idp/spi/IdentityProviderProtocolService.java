@@ -18,9 +18,6 @@
 
 package be.fedict.eid.idp.spi;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -39,14 +36,6 @@ import be.fedict.eid.applet.service.Identity;
 public interface IdentityProviderProtocolService {
 
 	/**
-	 * The possible internal flows provided by the eID IdP.
-	 * 
-	 */
-	public enum IdentityProviderFlow {
-		IDENTIFICATION, AUTHENTICATION, AUTHENTICATION_WITH_IDENTIFICATION;
-	};
-
-	/**
 	 * Handles an incoming request for this protocol.
 	 * 
 	 * @param request
@@ -59,51 +48,6 @@ public interface IdentityProviderProtocolService {
 	 */
 	IdentityProviderFlow handleIncomingRequest(HttpServletRequest request)
 			throws Exception;
-
-	/**
-	 * The return response. This is used to construct a Browser POST to get back
-	 * to the Service Provider.
-	 */
-	public static class ReturnResponse {
-		private final String actionUrl;
-		private final List<Attribute> attributes;
-
-		public ReturnResponse(String actionUrl) {
-			this.actionUrl = actionUrl;
-			this.attributes = new LinkedList<Attribute>();
-		}
-
-		public void addAttribute(String name, String value) {
-			Attribute attribute = new Attribute(name, value);
-			this.attributes.add(attribute);
-		}
-
-		public String getActionUrl() {
-			return this.actionUrl;
-		}
-
-		public List<Attribute> getAttributes() {
-			return this.attributes;
-		}
-
-		public static class Attribute {
-			private final String name;
-			private final String value;
-
-			public Attribute(String name, String value) {
-				this.name = name;
-				this.value = value;
-			}
-
-			public String getName() {
-				return this.name;
-			}
-
-			public String getValue() {
-				return this.value;
-			}
-		}
-	}
 
 	/**
 	 * Handles the outgoing response to return to the Service Provider web

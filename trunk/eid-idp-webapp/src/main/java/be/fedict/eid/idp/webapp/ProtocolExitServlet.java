@@ -37,7 +37,7 @@ import be.fedict.eid.applet.service.impl.handler.AuthenticationDataMessageHandle
 import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService.ReturnResponse;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 /**
  * Protocol Exit Servlet. Operates as a broker towards protocol services.

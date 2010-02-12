@@ -28,7 +28,9 @@ import org.apache.commons.logging.LogFactory;
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.sp.protocol.simple.SimpleProtocolConstants;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 /**
  * A protocol service that implements a very simple eID identification protocol.

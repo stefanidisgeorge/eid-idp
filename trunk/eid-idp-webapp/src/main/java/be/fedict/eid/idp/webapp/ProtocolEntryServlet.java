@@ -32,8 +32,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService.IdentityProviderFlow;
 
 /**
  * The main entry point for authentication protocols. This servlet serves as a
