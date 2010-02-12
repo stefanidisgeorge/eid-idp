@@ -34,7 +34,9 @@ import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 /**
  * SAML2 Browser POST Profile protocol service.
