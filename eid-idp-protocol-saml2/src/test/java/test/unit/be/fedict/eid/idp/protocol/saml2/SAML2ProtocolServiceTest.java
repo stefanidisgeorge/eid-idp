@@ -18,12 +18,14 @@
 
 package test.unit.be.fedict.eid.idp.protocol.saml2;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.ServletOutputStream;
@@ -57,7 +59,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.tidy.Tidy;
 
+import be.fedict.eid.applet.service.Address;
+import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolService;
+import be.fedict.eid.idp.spi.NameValuePair;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 public class SAML2ProtocolServiceTest {
 
@@ -171,10 +177,12 @@ public class SAML2ProtocolServiceTest {
 				new StringBuffer("http://idp.be"));
 
 		HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
-		EasyMock.expect(mockHttpServletRequest.getSession()).andReturn(
+		EasyMock.expect(mockHttpServletRequest.getSession()).andStubReturn(
 				mockHttpSession);
 		mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
 				+ ".TargetUrl", "http://sp.be/response");
+		mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
+				+ ".RelayState", null);
 
 		// prepare
 		EasyMock.replay(mockHttpServletRequest, mockHttpSession);
@@ -184,5 +192,68 @@ public class SAML2ProtocolServiceTest {
 
 		// verify
 		EasyMock.verify(mockHttpServletRequest, mockHttpSession);
+	}
+
+	@Test
+	public void testHandleReturnResponse() throws Exception {
+		// setup
+		SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
+
+		HttpSession httpSession;
+		Address address = new Address();
+		String authenticatedIdentifier = "authn-id";
+		HttpServletResponse response;
+		Identity identity = new Identity();
+		HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
+		HttpServletResponse mockHttpServletResponse = EasyMock
+				.createMock(HttpServletResponse.class);
+
+		// expectations
+		EasyMock
+				.expect(
+						mockHttpSession
+								.getAttribute(SAML2ProtocolService.TARGET_URL_SESSION_ATTRIBUTE))
+				.andStubReturn("target-url");
+		EasyMock
+				.expect(
+						mockHttpSession
+								.getAttribute(SAML2ProtocolService.RELAY_STATE_SESSION_ATTRIBUTE))
+				.andStubReturn("relay-state");
+
+		// prepare
+		EasyMock.replay(mockHttpSession);
+
+		// operate
+		ReturnResponse returnResponse = saml2ProtocolService
+				.handleReturnResponse(mockHttpSession, identity, address,
+						authenticatedIdentifier, mockHttpServletResponse);
+
+		// verify
+		EasyMock.verify(mockHttpSession);
+		assertNotNull(returnResponse);
+		assertEquals("target-url", returnResponse.getActionUrl());
+		List<NameValuePair> attributes = returnResponse.getAttributes();
+		assertNotNull(attributes);
+		NameValuePair relayStateAttribute = null;
+		NameValuePair samlResponseAttribute = null;
+		for (NameValuePair attribute : attributes) {
+			if ("RelayState".equals(attribute.getName())) {
+				relayStateAttribute = attribute;
+				continue;
+			}
+			if ("SAMLResponse".equals(attribute.getName())) {
+				samlResponseAttribute = attribute;
+				continue;
+			}
+		}
+		assertNotNull(relayStateAttribute);
+		assertEquals("relay-state", relayStateAttribute.getValue());
+		assertNotNull("no SAMLResponse attribute", samlResponseAttribute);
+		String encodedSamlResponse = samlResponseAttribute.getValue();
+		assertNotNull(encodedSamlResponse);
+		String samlResponse = new String(Base64
+				.decodeBase64(encodedSamlResponse));
+		LOG.debug("SAML response: " + samlResponse);
+		// TODO
 	}
 }

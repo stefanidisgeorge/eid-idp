@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.log.Log4JLogChute;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
@@ -161,6 +162,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		velocityEngine
 				.setProperty("classpath.resource.loader.class",
 						"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		velocityEngine.setProperty(
+				RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+				Log4JLogChute.class.getName());
 		try {
 			velocityEngine.init();
 		} catch (Exception e) {
