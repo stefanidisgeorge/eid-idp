@@ -18,19 +18,40 @@
 
 package be.fedict.eid.idp.protocol.saml2;
 
+import java.util.List;
+import java.util.UUID;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
+import org.opensaml.common.SAMLObjectBuilder;
+import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
+import org.opensaml.common.binding.encoding.SAMLMessageEncoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.AuthnContext;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.AuthnStatement;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.NameID;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.Status;
+import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.XMLObjectBuilderFactory;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
@@ -53,6 +74,10 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 			.getName()
 			+ ".TargetUrl";
 
+	public static final String RELAY_STATE_SESSION_ATTRIBUTE = SAML2ProtocolService.class
+			.getName()
+			+ ".RelayState";
+
 	private void setTargetUrl(String targetUrl, HttpServletRequest request) {
 		HttpSession httpSession = request.getSession();
 		httpSession.setAttribute(TARGET_URL_SESSION_ATTRIBUTE, targetUrl);
@@ -62,6 +87,17 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		String targetUrl = (String) httpSession
 				.getAttribute(TARGET_URL_SESSION_ATTRIBUTE);
 		return targetUrl;
+	}
+
+	private void setRelayState(String relayState, HttpServletRequest request) {
+		HttpSession httpSession = request.getSession();
+		httpSession.setAttribute(RELAY_STATE_SESSION_ATTRIBUTE, relayState);
+	}
+
+	private String getRelayState(HttpSession httpSession) {
+		String relayState = (String) httpSession
+				.getAttribute(RELAY_STATE_SESSION_ATTRIBUTE);
+		return relayState;
 	}
 
 	public IdentityProviderFlow handleIncomingRequest(HttpServletRequest request)
@@ -88,6 +124,9 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		LOG.debug("target URL: " + targetUrl);
 		setTargetUrl(targetUrl, request);
 
+		String relayState = messageContext.getRelayState();
+		setRelayState(relayState, request);
+
 		return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
 	}
 
@@ -96,7 +135,84 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 			HttpServletResponse response) throws Exception {
 		LOG.debug("handle return response");
 		LOG.debug("authenticated identifier: " + authenticatedIdentifier);
-		// TODO
-		return null;
+		String targetUrl = getTargetUrl(httpSession);
+		String relayState = getRelayState(httpSession);
+
+		try {
+			DefaultBootstrap.bootstrap();
+		} catch (ConfigurationException e) {
+			throw new ServletException("opensaml config error: "
+					+ e.getMessage(), e);
+		}
+
+		XMLObjectBuilderFactory builderFactory = Configuration
+				.getBuilderFactory();
+
+		SAMLObjectBuilder<Response> responseBuilder = (SAMLObjectBuilder<Response>) builderFactory
+				.getBuilder(Response.DEFAULT_ELEMENT_NAME);
+		Response samlResponse = responseBuilder.buildObject();
+		DateTime issueInstant = new DateTime();
+		samlResponse.setIssueInstant(issueInstant);
+		samlResponse.setVersion(SAMLVersion.VERSION_20);
+		String samlResponseId = "saml-response-" + UUID.randomUUID().toString();
+		samlResponse.setID(samlResponseId);
+
+		SAMLObjectBuilder<Status> statusBuilder = (SAMLObjectBuilder<Status>) builderFactory
+				.getBuilder(Status.DEFAULT_ELEMENT_NAME);
+		Status status = statusBuilder.buildObject();
+		samlResponse.setStatus(status);
+		SAMLObjectBuilder<StatusCode> statusCodeBuilder = (SAMLObjectBuilder<StatusCode>) builderFactory
+				.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME);
+		StatusCode statusCode = statusCodeBuilder.buildObject();
+		status.setStatusCode(statusCode);
+		statusCode.setValue(StatusCode.SUCCESS_URI);
+
+		List<Assertion> assertions = samlResponse.getAssertions();
+		SAMLObjectBuilder<Assertion> assertionBuilder = (SAMLObjectBuilder<Assertion>) builderFactory
+				.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
+		Assertion assertion = assertionBuilder.buildObject();
+		assertions.add(assertion);
+		assertion.setVersion(SAMLVersion.VERSION_20);
+		String assertionId = "assertion-" + UUID.randomUUID().toString();
+		assertion.setID(assertionId);
+		assertion.setIssueInstant(issueInstant);
+		SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory
+				.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
+		Issuer issuer = issuerBuilder.buildObject();
+		assertion.setIssuer(issuer);
+		issuer.setValue("http://www.e-contract.be/"); // TODO
+
+		SAMLObjectBuilder<Subject> subjectBuilder = (SAMLObjectBuilder<Subject>) builderFactory
+				.getBuilder(Subject.DEFAULT_ELEMENT_NAME);
+		Subject subject = subjectBuilder.buildObject();
+		assertion.setSubject(subject);
+		SAMLObjectBuilder<NameID> nameIdBuilder = (SAMLObjectBuilder<NameID>) builderFactory
+				.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
+		NameID nameId = nameIdBuilder.buildObject();
+		subject.setNameID(nameId);
+		nameId.setValue(authenticatedIdentifier);
+
+		List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
+		SAMLObjectBuilder<AuthnStatement> authnStatementBuilder = (SAMLObjectBuilder<AuthnStatement>) builderFactory
+				.getBuilder(AuthnStatement.DEFAULT_ELEMENT_NAME);
+		AuthnStatement authnStatement = authnStatementBuilder.buildObject();
+		authnStatements.add(authnStatement);
+		authnStatement.setAuthnInstant(issueInstant);
+		SAMLObjectBuilder<AuthnContext> authnContextBuilder = (SAMLObjectBuilder<AuthnContext>) builderFactory
+				.getBuilder(AuthnContext.DEFAULT_ELEMENT_NAME);
+		AuthnContext authnContext = authnContextBuilder.buildObject();
+		authnStatement.setAuthnContext(authnContext);
+
+		ReturnResponse returnResponse = new ReturnResponse(targetUrl);
+
+		SAMLMessageEncoder messageEncoder = new HTTPPostEncoder();
+		BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
+		messageContext.setOutboundSAMLMessage(samlResponse);
+		messageContext.setRelayState(relayState);
+		OutTransport outTransport = new HTTPOutTransport(returnResponse);
+		messageContext.setOutboundMessageTransport(outTransport);
+
+		messageEncoder.encode(messageContext);
+		return returnResponse;
 	}
 }
