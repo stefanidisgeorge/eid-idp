@@ -37,4 +37,21 @@
 		<servlet-name>AuthenticationRequestServlet</servlet-name>
 		<url-pattern>/saml-request</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AuthenticationResponseServlet</servlet-name>
+		<servlet-class>be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseServlet</servlet-class>
+		<init-param>
+			<param-name>IdentifierSessionAttribute</param-name>
+			<param-value>Identifier</param-value>
+		</init-param>
+		<init-param>
+			<param-name>RedirectPage</param-name>
+			<param-value>/authn-result.jsp</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AuthenticationResponseServlet</servlet-name>
+		<url-pattern>/saml2-landing</url-pattern>
+	</servlet-mapping>
 </web-app>
