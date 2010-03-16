@@ -18,14 +18,21 @@
 
 package test.unit.be.fedict.eid.idp.protocol.openid;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -33,15 +40,30 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Test;
+import org.mortbay.jetty.SessionManager;
+import org.mortbay.jetty.servlet.HashSessionManager;
+import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.testing.ServletTester;
 import org.openid4java.OpenIDException;
+import org.openid4java.association.Association;
+import org.openid4java.association.AssociationException;
+import org.openid4java.consumer.ConsumerException;
 import org.openid4java.consumer.ConsumerManager;
 import org.openid4java.consumer.VerificationResult;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.discovery.Identifier;
 import org.openid4java.message.AuthRequest;
+import org.openid4java.message.AuthSuccess;
 import org.openid4java.message.Message;
+import org.openid4java.message.MessageException;
+import org.openid4java.message.MessageExtension;
 import org.openid4java.message.ParameterList;
+import org.openid4java.message.ax.AxMessage;
+import org.openid4java.message.ax.FetchRequest;
+import org.openid4java.message.ax.FetchResponse;
+import org.openid4java.server.InMemoryServerAssociationStore;
+import org.openid4java.server.RealmVerifier;
+import org.openid4java.server.ServerAssociationStore;
 import org.openid4java.server.ServerManager;
 
 public class OpenIDProtocolServiceTest {
@@ -67,20 +89,53 @@ public class OpenIDProtocolServiceTest {
 		private static final Log LOG = LogFactory
 				.getLog(OpenIDIdentityServlet.class);
 
+		private static final boolean USE_YADIS = true;
+
 		@Override
 		protected void doGet(HttpServletRequest request,
 				HttpServletResponse response) throws ServletException,
 				IOException {
 			LOG.debug("doGet");
 			PrintWriter printWriter = response.getWriter();
-			printWriter.println("<html>");
-			printWriter.println("<head>");
-			printWriter.println("<link rel=\"openid.server\" href=\""
-					+ OpenIDProtocolServiceTest.location + "/producer\"/>");
+			if (request.getRequestURI().endsWith("/xrds")) {
+				LOG.debug("returning the YADIS XRDS document");
+				printWriter
+						.println("<xrds:XRDS xmlns:xrds=\"xri://$xrds\" xmlns=\"xri://$xrd*($v*2.0)\">");
+				printWriter.println("<XRD>");
+				printWriter.println("<Service>");
+				printWriter
+						.println("<Type>http://specs.openid.net/auth/2.0/signon</Type>");
+				printWriter.println("<URI>"
+						+ OpenIDProtocolServiceTest.location
+						+ "/producer</URI>");
+				printWriter.println("<LocalID>"
+						+ OpenIDProtocolServiceTest.location
+						+ "/identity</LocalID>");
+				printWriter.println("</Service>");
+				printWriter.println("</XRD>");
+				printWriter.println("</xrds:XRDS>");
+				return;
+			}
+			if (USE_YADIS) {
+				printWriter.println("<html>");
+				printWriter.println("<head>");
+				printWriter
+						.println("<meta http-equiv=\"X-XRDS-Location\" content=\""
+								+ OpenIDProtocolServiceTest.location
+								+ "/identity/xrds\"/>");
+				printWriter.println("</head>");
+				printWriter.println("<body><p>OpenID Identity URL</p></body>");
+				printWriter.println("</html>");
+			} else {
+				printWriter.println("<html>");
+				printWriter.println("<head>");
+				printWriter.println("<link rel=\"openid2.provider\" href=\""
+						+ OpenIDProtocolServiceTest.location + "/producer\"/>");
 
-			printWriter.println("</head>");
-			printWriter.println("<body><p>OpenID Identity URL</p></body>");
-			printWriter.println("</html>");
+				printWriter.println("</head>");
+				printWriter.println("<body><p>OpenID Identity URL</p></body>");
+				printWriter.println("</html>");
+			}
 		}
 
 	}
@@ -92,13 +147,44 @@ public class OpenIDProtocolServiceTest {
 		private static final Log LOG = LogFactory
 				.getLog(OpenIDConsumerServlet.class);
 
+		public static final String CONSUMER_MANAGER_ATTRIBUTE = OpenIDConsumerServlet.class
+				.getName()
+				+ ".ConsumerManager";
+
+		public static final String USER_ID_SESSION_ATTRIBUTE = OpenIDConsumerServlet.class
+				.getName()
+				+ ".UserId";
+
+		public static final String FIRST_NAME_SESSION_ATTRIBUTE = OpenIDConsumerServlet.class
+				.getName()
+				+ ".FirstName";
+
+		private ConsumerManager consumerManager;
+
+		@Override
+		public void init(ServletConfig config) throws ServletException {
+			super.init(config);
+			ServletContext servletContext = config.getServletContext();
+			this.consumerManager = (ConsumerManager) servletContext
+					.getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
+			if (null == this.consumerManager) {
+				try {
+					this.consumerManager = new ConsumerManager();
+				} catch (ConsumerException e) {
+					throw new ServletException(
+							"could not init OpenID ConsumerManager");
+				}
+				servletContext.setAttribute(CONSUMER_MANAGER_ATTRIBUTE,
+						this.consumerManager);
+			}
+		}
+
 		@Override
 		protected void doGet(HttpServletRequest request,
 				HttpServletResponse response) throws ServletException,
 				IOException {
 			LOG.debug("doGet");
 			try {
-				ConsumerManager consumerManager = new ConsumerManager();
 				String openIdMode = request.getParameter("openid.mode");
 				if ("id_res".equals(openIdMode)) {
 					LOG.debug("id_res");
@@ -111,13 +197,31 @@ public class OpenIDProtocolServiceTest {
 					if (queryString != null && queryString.length() > 0) {
 						receivingUrl.append("?").append(queryString);
 					}
-					VerificationResult verificationResult = consumerManager
+					VerificationResult verificationResult = this.consumerManager
 							.verify(receivingUrl.toString(), parameterList,
 									discovered);
 					Identifier identifier = verificationResult.getVerifiedId();
 					if (null != identifier) {
 						String userId = identifier.getIdentifier();
-						LOG.debug("userId");
+						LOG.debug("userId: " + userId);
+						HttpSession httpSession = request.getSession();
+						httpSession.setAttribute(USER_ID_SESSION_ATTRIBUTE,
+								userId);
+						Message authResponse = verificationResult
+								.getAuthResponse();
+						if (authResponse.hasExtension(AxMessage.OPENID_NS_AX)) {
+							MessageExtension messageExtension = authResponse
+									.getExtension(AxMessage.OPENID_NS_AX);
+							if (messageExtension instanceof FetchResponse) {
+								FetchResponse fetchResponse = (FetchResponse) messageExtension;
+								String firstName = fetchResponse
+										.getAttributeValueByTypeUri("http://schema.openid.net/namePerson/first");
+								httpSession
+										.setAttribute(
+												FIRST_NAME_SESSION_ATTRIBUTE,
+												firstName);
+							}
+						}
 						PrintWriter printWriter = response.getWriter();
 						printWriter.println("<html>");
 						printWriter.println("<body>" + userId + "</body>");
@@ -128,16 +232,28 @@ public class OpenIDProtocolServiceTest {
 				} else {
 					String userIdentifier = OpenIDProtocolServiceTest.location
 							+ "/identity";
-					List discoveries = consumerManager.discover(userIdentifier);
+					LOG.debug("discovering the identity...");
+					List discoveries = this.consumerManager
+							.discover(userIdentifier);
+					LOG.debug("associating with the IdP...");
 					DiscoveryInformation discovered = consumerManager
 							.associate(discoveries);
-					LOG.debug("discovered");
 					request.getSession()
 							.setAttribute("openid-disc", discovered);
 					AuthRequest authRequest = consumerManager.authenticate(
 							discovered, OpenIDProtocolServiceTest.location
 									+ "/consumer");
-					LOG.debug("goto producer");
+
+					/*
+					 * We also piggy-back an attribute fetch request.
+					 */
+					FetchRequest fetchRequest = FetchRequest
+							.createFetchRequest();
+					fetchRequest.addAttribute("name",
+							"http://schema.openid.net/namePerson/first", true);
+					authRequest.addExtension(fetchRequest);
+
+					LOG.debug("redirecting to producer with authn request...");
 					response.sendRedirect(authRequest.getDestinationUrl(true));
 				}
 			} catch (OpenIDException e) {
@@ -153,6 +269,32 @@ public class OpenIDProtocolServiceTest {
 		private static final Log LOG = LogFactory
 				.getLog(OpenIDProducerServlet.class);
 
+		public static final String SERVER_MANAGER_ATTRIBUTE = OpenIDConsumerServlet.class
+				.getName()
+				+ ".ServerManager";
+
+		private ServerManager serverManager;
+
+		@Override
+		public void init(ServletConfig config) throws ServletException {
+			super.init(config);
+			ServletContext servletContext = config.getServletContext();
+			this.serverManager = (ServerManager) servletContext
+					.getAttribute(SERVER_MANAGER_ATTRIBUTE);
+			if (null == this.serverManager) {
+				this.serverManager = new ServerManager();
+				this.serverManager
+						.setSharedAssociations(new InMemoryServerAssociationStore());
+				this.serverManager
+						.setPrivateAssociations(new InMemoryServerAssociationStore());
+				this.serverManager
+						.setOPEndpointUrl(OpenIDProtocolServiceTest.location
+								+ "/producer");
+				servletContext.setAttribute(SERVER_MANAGER_ATTRIBUTE,
+						this.serverManager);
+			}
+		}
+
 		@Override
 		protected void doGet(HttpServletRequest request,
 				HttpServletResponse response) throws ServletException,
@@ -161,15 +303,70 @@ public class OpenIDProtocolServiceTest {
 			String openIdMode = request.getParameter("openid.mode");
 			if ("checkid_setup".equals(openIdMode)) {
 				LOG.debug("checkid_setup");
-				ServerManager manager = new ServerManager();
-				manager.setOPEndpointUrl(OpenIDProtocolServiceTest.location
-						+ "/producer");
 				ParameterList parameterList = new ParameterList(request
 						.getParameterMap());
-				Message message = manager.authResponse(parameterList,
-						OpenIDProtocolServiceTest.location + "/identity",
-						OpenIDProtocolServiceTest.location + "/identity", true);
-				response.sendRedirect(message.getDestinationUrl(true));
+				LOG.debug("redirecting to the consumer...");
+
+				try {
+					RealmVerifier realmVerifier = this.serverManager
+							.getRealmVerifier();
+					AuthRequest authRequest = AuthRequest.createAuthRequest(
+							parameterList, realmVerifier);
+					Message message = this.serverManager.authResponse(
+							parameterList, OpenIDProtocolServiceTest.location
+									+ "/identity",
+							OpenIDProtocolServiceTest.location + "/identity",
+							true, false);
+					if (message instanceof AuthSuccess) {
+						AuthSuccess authSuccess = (AuthSuccess) message;
+						if (authRequest.hasExtension(AxMessage.OPENID_NS_AX)) {
+							MessageExtension messageExtension = authRequest
+									.getExtension(AxMessage.OPENID_NS_AX);
+							if (messageExtension instanceof FetchRequest) {
+								FetchRequest fetchRequest = (FetchRequest) messageExtension;
+								Map<String, String> requiredAttributes = fetchRequest
+										.getAttributes(true);
+								FetchResponse fetchResponse = FetchResponse
+										.createFetchResponse();
+								for (Map.Entry<String, String> requiredAttribute : requiredAttributes
+										.entrySet()) {
+									String alias = requiredAttribute.getKey();
+									String typeUri = requiredAttribute
+											.getValue();
+									LOG.debug("attribute alias: " + alias);
+									LOG.debug("attribute typeUri: " + typeUri);
+									if ("http://schema.openid.net/namePerson/first"
+											.equals(requiredAttribute
+													.getValue())) {
+										fetchResponse.addAttribute(alias,
+												typeUri, "sample-first-name");
+									}
+								}
+								authSuccess.addExtension(fetchResponse);
+								authSuccess
+										.setSignExtensions(new String[] { AxMessage.OPENID_NS_AX });
+							}
+						}
+						/*
+						 * We manually sign the auth response as we also want to
+						 * add our own attributes.
+						 */
+						String handle = authRequest.getHandle();
+						ServerAssociationStore serverAssociationStore = this.serverManager
+								.getSharedAssociations();
+						Association association = serverAssociationStore
+								.load(handle);
+						authSuccess.setSignature(association.sign(authSuccess
+								.getSignedText()));
+					}
+					response.sendRedirect(message.getDestinationUrl(true));
+				} catch (MessageException e) {
+					LOG.error("message recreation error: " + e.getMessage(), e);
+					throw new ServletException("message recreation error");
+				} catch (AssociationException e) {
+					LOG.error("association error: " + e.getMessage(), e);
+					throw new ServletException("association error");
+				}
 			}
 		}
 
@@ -178,17 +375,26 @@ public class OpenIDProtocolServiceTest {
 				HttpServletResponse response) throws ServletException,
 				IOException {
 			LOG.debug("doPost");
+			ParameterList parameterList = new ParameterList(request
+					.getParameterMap());
 			String openIdMode = request.getParameter("openid.mode");
 			if ("associate".equals(openIdMode)) {
+				/*
+				 * We should only allow SSL here. Thus also no need for DH,
+				 * no-encryption is just fine.
+				 */
 				LOG.debug("associate");
-				ServerManager manager = new ServerManager();
-				ParameterList parameterList = new ParameterList(request
-						.getParameterMap());
-				Message message = manager.associationResponse(parameterList);
+				Message message = this.serverManager
+						.associationResponse(parameterList);
 				String keyValueFormEncoding = message.keyValueFormEncoding();
 				LOG.debug("form encoding: " + keyValueFormEncoding);
 				PrintWriter printWriter = response.getWriter();
 				printWriter.print(keyValueFormEncoding);
+			} else if ("check_authentication".equals(openIdMode)) {
+				LOG.debug("check_authentication");
+				Message message = this.serverManager.verify(parameterList);
+				String keyValueFormEncoding = message.keyValueFormEncoding();
+				response.getWriter().print(keyValueFormEncoding);
 			}
 		}
 	}
@@ -200,21 +406,43 @@ public class OpenIDProtocolServiceTest {
 		// setup
 		this.servletTester = new ServletTester();
 		this.servletTester.addServlet(OpenIDConsumerServlet.class, "/consumer");
-		this.servletTester.addServlet(OpenIDIdentityServlet.class, "/identity");
+		this.servletTester.addServlet(OpenIDIdentityServlet.class,
+				"/identity/*");
 		this.servletTester.addServlet(OpenIDProducerServlet.class, "/producer");
 		this.servletTester.start();
-		this.location = this.servletTester.createSocketConnector(true);
-		LOG.debug("location: " + this.location);
+		location = this.servletTester.createSocketConnector(true);
+		LOG.debug("location: " + location);
 
 		HttpClient httpClient = new HttpClient();
 		httpClient.getParams().setParameter(
 				"http.protocol.allow-circular-redirects", Boolean.TRUE);
-		GetMethod getMethod = new GetMethod(this.location + "/consumer");
+		GetMethod getMethod = new GetMethod(location + "/consumer");
 
 		// operate
 		int statusCode = httpClient.executeMethod(getMethod);
 
 		// verify
 		LOG.debug("status code: " + statusCode);
+		assertEquals(HttpServletResponse.SC_OK, statusCode);
+
+		SessionHandler sessionHandler = this.servletTester.getContext()
+				.getSessionHandler();
+		SessionManager sessionManager = sessionHandler.getSessionManager();
+		HashSessionManager hashSessionManager = (HashSessionManager) sessionManager;
+		LOG.debug("# sessions: " + hashSessionManager.getSessions());
+		assertEquals(1, hashSessionManager.getSessions());
+		Map<String, HttpSession> sessionMap = hashSessionManager
+				.getSessionMap();
+		LOG.debug("session map: " + sessionMap);
+		Entry<String, HttpSession> sessionEntry = sessionMap.entrySet()
+				.iterator().next();
+		HttpSession httpSession = sessionEntry.getValue();
+		String userId = (String) httpSession
+				.getAttribute(OpenIDConsumerServlet.USER_ID_SESSION_ATTRIBUTE);
+		LOG.debug("userId session attribute: " + userId);
+		assertEquals(location + "/identity", userId);
+		String firstName = (String) httpSession
+				.getAttribute(OpenIDConsumerServlet.FIRST_NAME_SESSION_ATTRIBUTE);
+		assertEquals("sample-first-name", firstName);
 	}
 }
