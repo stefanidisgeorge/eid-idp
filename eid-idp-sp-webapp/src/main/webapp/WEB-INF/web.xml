@@ -4,6 +4,7 @@
 	version="2.5">
 	<display-name>eID IdP SP</display-name>
 
+	<!-- Simple Identification Protocol -->
 	<servlet>
 		<servlet-name>SimpleProtocolLandingServlet</servlet-name>
 		<servlet-class>be.fedict.eid.idp.sp.protocol.simple.SimpleProtocolLandingServlet</servlet-class>
@@ -25,8 +26,9 @@
 		<url-pattern>/simple-landing</url-pattern>
 	</servlet-mapping>
 
+	<!-- SAML2 Authentication Protocol -->
 	<servlet>
-		<servlet-name>AuthenticationRequestServlet</servlet-name>
+		<servlet-name>SAML2AuthenticationRequestServlet</servlet-name>
 		<servlet-class>be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet</servlet-class>
 		<init-param>
 			<param-name>ParametersFromRequest</param-name>
@@ -34,12 +36,12 @@
 		</init-param>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>AuthenticationRequestServlet</servlet-name>
+		<servlet-name>SAML2AuthenticationRequestServlet</servlet-name>
 		<url-pattern>/saml-request</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>AuthenticationResponseServlet</servlet-name>
+		<servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
 		<servlet-class>be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseServlet</servlet-class>
 		<init-param>
 			<param-name>IdentifierSessionAttribute</param-name>
@@ -51,7 +53,21 @@
 		</init-param>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>AuthenticationResponseServlet</servlet-name>
+		<servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
 		<url-pattern>/saml2-landing</url-pattern>
+	</servlet-mapping>
+
+	<!-- OpenID Authentication Protocol -->
+	<servlet>
+		<servlet-name>OpenIDAuthenticationRequestServlet</servlet-name>
+		<servlet-class>be.fedict.eid.idp.sp.protocol.openid.AuthenticationRequestServlet</servlet-class>
+		<init-param>
+			<param-name>ParametersFromRequest</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>OpenIDAuthenticationRequestServlet</servlet-name>
+		<url-pattern>/openid-request</url-pattern>
 	</servlet-mapping>
 </web-app>
