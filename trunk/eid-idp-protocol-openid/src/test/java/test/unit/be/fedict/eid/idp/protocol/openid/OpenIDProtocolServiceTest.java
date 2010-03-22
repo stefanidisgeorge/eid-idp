@@ -102,16 +102,23 @@ public class OpenIDProtocolServiceTest {
 				printWriter
 						.println("<xrds:XRDS xmlns:xrds=\"xri://$xrds\" xmlns=\"xri://$xrd*($v*2.0)\">");
 				printWriter.println("<XRD>");
+
+				printWriter.println("<Service>");
+				printWriter
+						.println("<Type>http://specs.openid.net/auth/2.0/server</Type>");
+				printWriter.println("<URI>"
+						+ OpenIDProtocolServiceTest.location
+						+ "/producer</URI>");
+				printWriter.println("</Service>");
+
 				printWriter.println("<Service>");
 				printWriter
 						.println("<Type>http://specs.openid.net/auth/2.0/signon</Type>");
 				printWriter.println("<URI>"
 						+ OpenIDProtocolServiceTest.location
 						+ "/producer</URI>");
-				printWriter.println("<LocalID>"
-						+ OpenIDProtocolServiceTest.location
-						+ "/identity</LocalID>");
 				printWriter.println("</Service>");
+
 				printWriter.println("</XRD>");
 				printWriter.println("</xrds:XRDS>");
 				return;
@@ -243,6 +250,8 @@ public class OpenIDProtocolServiceTest {
 					AuthRequest authRequest = consumerManager.authenticate(
 							discovered, OpenIDProtocolServiceTest.location
 									+ "/consumer");
+					authRequest.setClaimed(AuthRequest.SELECT_ID);
+					authRequest.setIdentity(AuthRequest.SELECT_ID);
 
 					/*
 					 * We also piggy-back an attribute fetch request.
@@ -312,11 +321,10 @@ public class OpenIDProtocolServiceTest {
 							.getRealmVerifier();
 					AuthRequest authRequest = AuthRequest.createAuthRequest(
 							parameterList, realmVerifier);
+					String userId = OpenIDProtocolServiceTest.location
+							+ "/identity/idp/123456789";
 					Message message = this.serverManager.authResponse(
-							parameterList, OpenIDProtocolServiceTest.location
-									+ "/identity",
-							OpenIDProtocolServiceTest.location + "/identity",
-							true, false);
+							parameterList, userId, userId, true, false);
 					if (message instanceof AuthSuccess) {
 						AuthSuccess authSuccess = (AuthSuccess) message;
 						if (authRequest.hasExtension(AxMessage.OPENID_NS_AX)) {
@@ -405,7 +413,8 @@ public class OpenIDProtocolServiceTest {
 
 		// setup
 		this.servletTester = new ServletTester();
-		this.servletTester.addServlet(OpenIDConsumerServlet.class, "/consumer");
+		this.servletTester.addServlet(OpenIDConsumerServlet.class,
+				"/consumer/*");
 		this.servletTester.addServlet(OpenIDIdentityServlet.class,
 				"/identity/*");
 		this.servletTester.addServlet(OpenIDProducerServlet.class, "/producer");
@@ -440,7 +449,7 @@ public class OpenIDProtocolServiceTest {
 		String userId = (String) httpSession
 				.getAttribute(OpenIDConsumerServlet.USER_ID_SESSION_ATTRIBUTE);
 		LOG.debug("userId session attribute: " + userId);
-		assertEquals(location + "/identity", userId);
+		assertEquals(location + "/identity/idp/123456789", userId);
 		String firstName = (String) httpSession
 				.getAttribute(OpenIDConsumerServlet.FIRST_NAME_SESSION_ATTRIBUTE);
 		assertEquals("sample-first-name", firstName);

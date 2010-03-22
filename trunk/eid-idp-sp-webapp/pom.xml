@@ -25,6 +25,11 @@
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>be.fedict.eid-idp</groupId>
+			<artifactId>eid-idp-sp-protocol-openid</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging-api</artifactId>
 			<scope>provided</scope>
