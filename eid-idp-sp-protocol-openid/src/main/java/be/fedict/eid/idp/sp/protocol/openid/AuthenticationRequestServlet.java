@@ -56,9 +56,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
 	private boolean parametersFromRequest;
 
-	private String idpDestination;
-
 	private String spDestination;
+
+	private String userIdentifier;
 
 	private ConsumerManager consumerManager;
 
@@ -71,9 +71,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
 					.parseBoolean(parametersFromRequest);
 		}
 		if (false == this.parametersFromRequest) {
-			this.idpDestination = getRequiredInitParameter("IdPDestination",
-					config);
 			this.spDestination = getRequiredInitParameter("SPDestination",
+					config);
+			this.userIdentifier = getRequiredInitParameter("UserIdentifier",
 					config);
 		} else {
 			LOG
@@ -108,16 +108,33 @@ public class AuthenticationRequestServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		String userIdentifier = this.idpDestination + "/identity";
-		LOG.debug("discovering the identity...");
+		String spDestination;
+		String userIdentifier;
+		if (this.parametersFromRequest) {
+			LOG
+					.warn("Retrieving parameters from the request. Only use for debugging!");
+			spDestination = request.getParameter("SPDestination");
+			if (null == spDestination) {
+				throw new ServletException("SPDestination parameter required");
+			}
+			userIdentifier = request.getParameter("UserIdentifier");
+			if (null == userIdentifier) {
+				throw new ServletException("UserIdentifier parameter required");
+			}
+		} else {
+			spDestination = this.spDestination;
+			userIdentifier = this.userIdentifier;
+		}
 		try {
+			LOG.debug("discovering the identity...");
 			List discoveries = this.consumerManager.discover(userIdentifier);
 			LOG.debug("associating with the IdP...");
-			DiscoveryInformation discovered = consumerManager
+			DiscoveryInformation discovered = this.consumerManager
 					.associate(discoveries);
 			request.getSession().setAttribute("openid-disc", discovered);
-			AuthRequest authRequest = consumerManager.authenticate(discovered,
-					this.spDestination);
+			
+			AuthRequest authRequest = this.consumerManager.authenticate(
+					discovered, this.spDestination);
 			authRequest.setClaimed(AuthRequest.SELECT_ID);
 			authRequest.setIdentity(AuthRequest.SELECT_ID);
 
