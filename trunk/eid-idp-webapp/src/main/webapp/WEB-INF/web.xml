@@ -56,6 +56,11 @@
 		<url-pattern>*.seam</url-pattern>
 	</servlet-mapping>
 
+	<!-- IdP protocol services extension points -->
+	<listener>
+		<listener-class>be.fedict.eid.idp.webapp.IdentityProviderServletContextListener</listener-class>
+	</listener>
+
 	<!-- IdP protocol entry point -->
 	<servlet>
 		<servlet-name>ProtocolEntryServlet</servlet-name>
