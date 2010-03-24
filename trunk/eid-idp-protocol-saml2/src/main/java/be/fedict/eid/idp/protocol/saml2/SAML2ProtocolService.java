@@ -39,6 +39,9 @@ import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.common.binding.encoding.SAMLMessageEncoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.saml2.core.AttributeStatement;
+import org.opensaml.saml2.core.AttributeValue;
 import org.opensaml.saml2.core.AuthnContext;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.AuthnStatement;
@@ -51,7 +54,9 @@ import org.opensaml.saml2.core.Subject;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.schema.XSString;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
@@ -203,6 +208,20 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		AuthnContext authnContext = authnContextBuilder.buildObject();
 		authnStatement.setAuthnContext(authnContext);
 
+		List<AttributeStatement> attributeStatements = assertion
+				.getAttributeStatements();
+		SAMLObjectBuilder<AttributeStatement> attributeStatementBuilder = (SAMLObjectBuilder<AttributeStatement>) builderFactory
+				.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
+		AttributeStatement attributeStatement = attributeStatementBuilder
+				.buildObject();
+		attributeStatements.add(attributeStatement);
+		addAttribute("urn:be:fedict:eid:idp:name", identity.getName(),
+				builderFactory, attributeStatement);
+		addAttribute("urn:be:fedict:eid:idp:firstName",
+				identity.getFirstName(), builderFactory, attributeStatement);
+		addAttribute("urn:be:fedict:eid:idp:gender", identity.getGender()
+				.name(), builderFactory, attributeStatement);
+
 		ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 
 		SAMLMessageEncoder messageEncoder = new HTTPPostEncoder();
@@ -214,5 +233,25 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 
 		messageEncoder.encode(messageContext);
 		return returnResponse;
+	}
+
+	private void addAttribute(String attributeName, String attributeValue,
+			XMLObjectBuilderFactory builderFactory,
+			AttributeStatement attributeStatement) {
+		List<Attribute> attributes = attributeStatement.getAttributes();
+
+		SAMLObjectBuilder<Attribute> attributeBuilder = (SAMLObjectBuilder<Attribute>) builderFactory
+				.getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
+		Attribute nameAttribute = attributeBuilder.buildObject();
+
+		attributes.add(nameAttribute);
+
+		nameAttribute.setName(attributeName);
+		XMLObjectBuilder<XSString> stringBuilder = builderFactory
+				.getBuilder(XSString.TYPE_NAME);
+		XSString nameAttributeValue = (XSString) stringBuilder.buildObject(
+				AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+		nameAttributeValue.setValue(attributeValue);
+		nameAttribute.getAttributeValues().add(nameAttributeValue);
 	}
 }

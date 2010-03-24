@@ -36,6 +36,8 @@ import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.saml2.core.AttributeStatement;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.Response;
@@ -45,6 +47,7 @@ import org.opensaml.saml2.core.Subject;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.SecurityException;
 
 public class AuthenticationResponseServlet extends HttpServlet {
@@ -58,54 +61,35 @@ public class AuthenticationResponseServlet extends HttpServlet {
 
 	private String redirectPage;
 
-	private boolean parametersFromRequest;
+	private String nameSessionAttribute;
+
+	private String firstNameSessionAttribute;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
-		String parametersFromRequest = config
-				.getInitParameter("ParametersFromRequest");
-		if (null != parametersFromRequest) {
-			this.parametersFromRequest = Boolean
-					.parseBoolean(parametersFromRequest);
+		this.identifierSessionAttribute = getRequiredInitParameter(
+				"IdentifierSessionAttribute", config);
+		this.redirectPage = getRequiredInitParameter("RedirectPage", config);
+		this.nameSessionAttribute = config
+				.getInitParameter("NameSessionAttribute");
+		this.firstNameSessionAttribute = config
+				.getInitParameter("FirstNameSessionAttribute");
+	}
+
+	private String getRequiredInitParameter(String parameterName,
+			ServletConfig config) throws ServletException {
+		String value = config.getInitParameter(parameterName);
+		if (null == value) {
+			throw new ServletException(parameterName
+					+ " init-param is required");
 		}
-		if (false == this.parametersFromRequest) {
-			this.identifierSessionAttribute = config
-					.getInitParameter("IdentifierSessionAttribute");
-			if (null == this.identifierSessionAttribute) {
-				throw new ServletException(
-						"missing IdentifierSessionAttribute init-param");
-			}
-			this.redirectPage = config.getInitParameter("RedirectPage");
-			if (null == this.redirectPage) {
-				throw new ServletException("RedirectPage init-param required");
-			}
-		}
+		return value;
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		LOG.debug("doPost");
-
-		String identifierSessionAttribute;
-		String redirectPage;
-		if (this.parametersFromRequest) {
-			LOG
-					.warn("Retrieving parameters from request. For testing purposes only!!!");
-			identifierSessionAttribute = request
-					.getParameter("IdentifierSessionAttribute");
-			if (null == identifierSessionAttribute) {
-				throw new ServletException(
-						"IdentifierSessionAttribute parameter missing");
-			}
-			redirectPage = request.getParameter("RedirectPage");
-			if (null == redirectPage) {
-				throw new ServletException("RedirectPage parameter missing");
-			}
-		} else {
-			identifierSessionAttribute = this.identifierSessionAttribute;
-			redirectPage = this.redirectPage;
-		}
 
 		HttpSession httpSession = request.getSession();
 		httpSession.removeAttribute(this.identifierSessionAttribute);
@@ -160,7 +144,37 @@ public class AuthenticationResponseServlet extends HttpServlet {
 		Subject subject = assertion.getSubject();
 		NameID nameId = subject.getNameID();
 		String identifier = nameId.getValue();
-		httpSession.setAttribute(identifierSessionAttribute, identifier);
-		response.sendRedirect(request.getContextPath() + redirectPage);
+		httpSession.setAttribute(this.identifierSessionAttribute, identifier);
+
+		List<AttributeStatement> attributeStatements = assertion
+				.getAttributeStatements();
+		if (false == attributeStatements.isEmpty()) {
+			AttributeStatement attributeStatement = attributeStatements.get(0);
+			List<Attribute> attributes = attributeStatement.getAttributes();
+			for (Attribute attribute : attributes) {
+				String attributeName = attribute.getName();
+				if ("urn:be:fedict:eid:idp:name".equals(attributeName)) {
+					if (null != this.nameSessionAttribute) {
+						XSString attributeValue = (XSString) attribute
+								.getAttributeValues().get(0);
+						httpSession.setAttribute(this.nameSessionAttribute,
+								attributeValue.getValue());
+					}
+					continue;
+				}
+				if ("urn:be:fedict:eid:idp:firstName".equals(attributeName)) {
+					if (null != this.firstNameSessionAttribute) {
+						XSString attributeValue = (XSString) attribute
+								.getAttributeValues().get(0);
+						httpSession.setAttribute(
+								this.firstNameSessionAttribute, attributeValue
+										.getValue());
+					}
+					continue;
+				}
+			}
+		}
+
+		response.sendRedirect(request.getContextPath() + this.redirectPage);
 	}
 }

@@ -11,6 +11,14 @@
 		<th>Identifier</th>
 		<td><%=session.getAttribute("Identifier")%></td>
 	</tr>
+	<tr>
+		<th>Name</th>
+		<td><%=session.getAttribute("Name")%></td>
+	</tr>
+	<tr>
+		<th>First name</th>
+		<td><%=session.getAttribute("FirstName")%></td>
+	</tr>
 </table>
 <a href="index.jsp">Back</a>
 </body>

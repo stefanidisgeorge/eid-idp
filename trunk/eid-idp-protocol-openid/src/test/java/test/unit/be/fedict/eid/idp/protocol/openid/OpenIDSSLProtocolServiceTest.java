@@ -460,6 +460,11 @@ public class OpenIDSSLProtocolServiceTest {
 	}
 
 	@Test
+	public void testDummy() throws Exception {
+		// empty
+	}
+
+	// @Test
 	public void testOpenIDSpike() throws Exception {
 		LOG.debug("OpenID spike");
 

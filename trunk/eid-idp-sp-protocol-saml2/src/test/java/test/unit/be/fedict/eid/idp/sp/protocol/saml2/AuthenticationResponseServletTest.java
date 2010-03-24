@@ -61,7 +61,10 @@ public class AuthenticationResponseServletTest {
 		this.servletTester = new ServletTester();
 		ServletHolder servletHolder = this.servletTester.addServlet(
 				AuthenticationResponseServlet.class, "/");
-		servletHolder.setInitParameter("ParametersFromRequest", "true");
+		servletHolder.setInitParameter("IdentifierSessionAttribute",
+				"identifier");
+		servletHolder.setInitParameter("RedirectPage", "target-page");
+		servletHolder.setInitParameter("NameSessionAttribute", "name");
 		this.servletTester.start();
 		this.location = this.servletTester.createSocketConnector(true);
 	}
@@ -98,10 +101,8 @@ public class AuthenticationResponseServletTest {
 		LOG.debug("URL: " + this.location);
 		HttpClient httpClient = new HttpClient();
 		PostMethod postMethod = new PostMethod(this.location);
-		NameValuePair[] body = {
-				new NameValuePair("SAMLResponse", encodedSamlResponse),
-				new NameValuePair("IdentifierSessionAttribute", "identifier"),
-				new NameValuePair("RedirectPage", "target-page") };
+		NameValuePair[] body = { new NameValuePair("SAMLResponse",
+				encodedSamlResponse) };
 		postMethod.setRequestBody(body);
 
 		// operate
@@ -132,5 +133,8 @@ public class AuthenticationResponseServletTest {
 		String identifierValue = (String) httpSession
 				.getAttribute("identifier");
 		assertEquals("authn-id", identifierValue);
+
+		String nameValue = (String) httpSession.getAttribute("name");
+		assertEquals("test-name", nameValue);
 	}
 }

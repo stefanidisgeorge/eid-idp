@@ -51,6 +51,14 @@
 			<param-name>RedirectPage</param-name>
 			<param-value>/authn-result.jsp</param-value>
 		</init-param>
+		<init-param>
+			<param-name>NameSessionAttribute</param-name>
+			<param-value>Name</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FirstNameSessionAttribute</param-name>
+			<param-value>FirstName</param-value>
+		</init-param>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
