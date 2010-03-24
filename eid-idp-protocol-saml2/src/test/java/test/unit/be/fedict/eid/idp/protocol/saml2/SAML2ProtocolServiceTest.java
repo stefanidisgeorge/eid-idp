@@ -60,6 +60,7 @@ import org.w3c.dom.Node;
 import org.w3c.tidy.Tidy;
 
 import be.fedict.eid.applet.service.Address;
+import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolService;
 import be.fedict.eid.idp.spi.NameValuePair;
@@ -204,6 +205,9 @@ public class SAML2ProtocolServiceTest {
 		String authenticatedIdentifier = "authn-id";
 		HttpServletResponse response;
 		Identity identity = new Identity();
+		identity.name = "test-name";
+		identity.firstName = "test-first-name";
+		identity.gender = Gender.MALE;
 		HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
 		HttpServletResponse mockHttpServletResponse = EasyMock
 				.createMock(HttpServletResponse.class);
