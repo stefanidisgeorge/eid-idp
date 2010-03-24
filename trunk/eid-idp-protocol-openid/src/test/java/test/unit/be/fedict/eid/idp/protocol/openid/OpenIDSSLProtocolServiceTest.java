@@ -20,12 +20,41 @@ package test.unit.be.fedict.eid.idp.protocol.openid;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.SignatureException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -34,13 +63,29 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Test;
 import org.mortbay.jetty.SessionManager;
+import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.HashSessionManager;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.testing.ServletTester;
@@ -66,7 +111,7 @@ import org.openid4java.server.RealmVerifier;
 import org.openid4java.server.ServerAssociationStore;
 import org.openid4java.server.ServerManager;
 
-public class OpenIDProtocolServiceTest {
+public class OpenIDSSLProtocolServiceTest {
 
 	private static final Log LOG = LogFactory
 			.getLog(OpenIDProtocolServiceTest.class);
@@ -74,6 +119,8 @@ public class OpenIDProtocolServiceTest {
 	private ServletTester servletTester;
 
 	private static String location;
+
+	private static String sslLocation;
 
 	@After
 	public void tearDown() throws Exception {
@@ -107,19 +154,15 @@ public class OpenIDProtocolServiceTest {
 				printWriter
 						.println("<Type>http://specs.openid.net/auth/2.0/server</Type>");
 				printWriter.println("<URI>"
-						+ OpenIDProtocolServiceTest.location
+						+ OpenIDSSLProtocolServiceTest.sslLocation
 						+ "/producer</URI>");
 				printWriter.println("</Service>");
 
-				/*
-				 * Next is used by the RP to check whether the OP is allowed to
-				 * issue this OP selected identifier.
-				 */
 				printWriter.println("<Service>");
 				printWriter
 						.println("<Type>http://specs.openid.net/auth/2.0/signon</Type>");
 				printWriter.println("<URI>"
-						+ OpenIDProtocolServiceTest.location
+						+ OpenIDSSLProtocolServiceTest.sslLocation
 						+ "/producer</URI>");
 				printWriter.println("</Service>");
 
@@ -132,7 +175,7 @@ public class OpenIDProtocolServiceTest {
 				printWriter.println("<head>");
 				printWriter
 						.println("<meta http-equiv=\"X-XRDS-Location\" content=\""
-								+ OpenIDProtocolServiceTest.location
+								+ OpenIDSSLProtocolServiceTest.sslLocation
 								+ "/identity/xrds\"/>");
 				printWriter.println("</head>");
 				printWriter.println("<body><p>OpenID Identity URL</p></body>");
@@ -141,7 +184,8 @@ public class OpenIDProtocolServiceTest {
 				printWriter.println("<html>");
 				printWriter.println("<head>");
 				printWriter.println("<link rel=\"openid2.provider\" href=\""
-						+ OpenIDProtocolServiceTest.location + "/producer\"/>");
+						+ OpenIDSSLProtocolServiceTest.location
+						+ "/producer\"/>");
 
 				printWriter.println("</head>");
 				printWriter.println("<body><p>OpenID Identity URL</p></body>");
@@ -199,15 +243,18 @@ public class OpenIDProtocolServiceTest {
 				String openIdMode = request.getParameter("openid.mode");
 				if ("id_res".equals(openIdMode)) {
 					LOG.debug("id_res");
+					LOG.debug("request URL: " + request.getRequestURL());
 					ParameterList parameterList = new ParameterList(request
 							.getParameterMap());
 					DiscoveryInformation discovered = (DiscoveryInformation) request
 							.getSession().getAttribute("openid-disc");
-					StringBuffer receivingUrl = request.getRequestURL();
+					String receivingUrl = "https://" + request.getServerName()
+							+ ":" + request.getLocalPort() + "/consumer";
 					String queryString = request.getQueryString();
 					if (queryString != null && queryString.length() > 0) {
-						receivingUrl.append("?").append(queryString);
+						receivingUrl += "?" + queryString;
 					}
+					LOG.debug("receiving url: " + receivingUrl);
 					VerificationResult verificationResult = this.consumerManager
 							.verify(receivingUrl.toString(), parameterList,
 									discovered);
@@ -241,7 +288,7 @@ public class OpenIDProtocolServiceTest {
 						LOG.warn("no verified identifier");
 					}
 				} else {
-					String userIdentifier = OpenIDProtocolServiceTest.location
+					String userIdentifier = OpenIDSSLProtocolServiceTest.sslLocation
 							+ "/identity";
 					LOG.debug("discovering the identity...");
 					List discoveries = this.consumerManager
@@ -252,7 +299,8 @@ public class OpenIDProtocolServiceTest {
 					request.getSession()
 							.setAttribute("openid-disc", discovered);
 					AuthRequest authRequest = consumerManager.authenticate(
-							discovered, OpenIDProtocolServiceTest.location
+							discovered,
+							OpenIDSSLProtocolServiceTest.sslLocation
 									+ "/consumer");
 					authRequest.setClaimed(AuthRequest.SELECT_ID);
 					authRequest.setIdentity(AuthRequest.SELECT_ID);
@@ -301,7 +349,7 @@ public class OpenIDProtocolServiceTest {
 				this.serverManager
 						.setPrivateAssociations(new InMemoryServerAssociationStore());
 				this.serverManager
-						.setOPEndpointUrl(OpenIDProtocolServiceTest.location
+						.setOPEndpointUrl(OpenIDSSLProtocolServiceTest.sslLocation
 								+ "/producer");
 				servletContext.setAttribute(SERVER_MANAGER_ATTRIBUTE,
 						this.serverManager);
@@ -325,7 +373,7 @@ public class OpenIDProtocolServiceTest {
 							.getRealmVerifier();
 					AuthRequest authRequest = AuthRequest.createAuthRequest(
 							parameterList, realmVerifier);
-					String userId = OpenIDProtocolServiceTest.location
+					String userId = OpenIDSSLProtocolServiceTest.sslLocation
 							+ "/identity/idp/123456789";
 					Message message = this.serverManager.authResponse(
 							parameterList, userId, userId, true, false);
@@ -422,6 +470,35 @@ public class OpenIDProtocolServiceTest {
 		this.servletTester.addServlet(OpenIDIdentityServlet.class,
 				"/identity/*");
 		this.servletTester.addServlet(OpenIDProducerServlet.class, "/producer");
+
+		Security.addProvider(new BouncyCastleProvider());
+
+		KeyPair keyPair = generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate certificate = generateSelfSignedCertificate(keyPair,
+				"CN=localhost", notBefore, notAfter);
+		File tmpP12File = File.createTempFile("ssl-", ".p12");
+		tmpP12File.deleteOnExit();
+		LOG.debug("p12 file: " + tmpP12File.getAbsolutePath());
+		persistKey(tmpP12File, keyPair.getPrivate(), certificate, "secret"
+				.toCharArray(), "secret".toCharArray());
+
+		SslSocketConnector sslSocketConnector = new SslSocketConnector();
+		sslSocketConnector.setKeystore(tmpP12File.getAbsolutePath());
+		sslSocketConnector.setTruststore(tmpP12File.getAbsolutePath());
+		sslSocketConnector.setTruststoreType("pkcs12");
+		sslSocketConnector.setKeystoreType("pkcs12");
+		sslSocketConnector.setPassword("secret");
+		sslSocketConnector.setKeyPassword("secret");
+		sslSocketConnector.setTrustPassword("secret");
+		sslSocketConnector.setMaxIdleTime(30000);
+		int sslPort = getFreePort();
+		sslSocketConnector.setPort(sslPort);
+		this.servletTester.getContext().getServer().addConnector(
+				sslSocketConnector);
+		sslLocation = "https://localhost:" + sslPort;
+
 		this.servletTester.start();
 		location = this.servletTester.createSocketConnector(true);
 		LOG.debug("location: " + location);
@@ -429,7 +506,14 @@ public class OpenIDProtocolServiceTest {
 		HttpClient httpClient = new HttpClient();
 		httpClient.getParams().setParameter(
 				"http.protocol.allow-circular-redirects", Boolean.TRUE);
-		GetMethod getMethod = new GetMethod(location + "/consumer");
+		// GetMethod getMethod = new GetMethod(location + "/consumer");
+
+		ProtocolSocketFactory protocolSocketFactory = new MyProtocolSocketFactory(
+				certificate);
+		Protocol myProtocol = new Protocol("https", protocolSocketFactory,
+				sslPort);
+		Protocol.registerProtocol("https", myProtocol);
+		GetMethod getMethod = new GetMethod(sslLocation + "/consumer");
 
 		// operate
 		int statusCode = httpClient.executeMethod(getMethod);
@@ -453,9 +537,225 @@ public class OpenIDProtocolServiceTest {
 		String userId = (String) httpSession
 				.getAttribute(OpenIDConsumerServlet.USER_ID_SESSION_ATTRIBUTE);
 		LOG.debug("userId session attribute: " + userId);
-		assertEquals(location + "/identity/idp/123456789", userId);
+		assertEquals(sslLocation + "/identity/idp/123456789", userId);
 		String firstName = (String) httpSession
 				.getAttribute(OpenIDConsumerServlet.FIRST_NAME_SESSION_ATTRIBUTE);
 		assertEquals("sample-first-name", firstName);
+	}
+
+	private static class MyTrustManager implements X509TrustManager {
+
+		private static final Log LOG = LogFactory.getLog(MyTrustManager.class);
+
+		private final X509Certificate serverCertificate;
+
+		public MyTrustManager(X509Certificate serverCertificate) {
+			this.serverCertificate = serverCertificate;
+		}
+
+		public void checkClientTrusted(X509Certificate[] chain, String authType)
+				throws CertificateException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void checkServerTrusted(X509Certificate[] chain, String authType)
+				throws CertificateException {
+			LOG.debug("check server trusted");
+			LOG.debug("auth type: " + authType);
+			if (false == this.serverCertificate.equals(chain[0])) {
+				throw new CertificateException("untrusted server certificate");
+			}
+		}
+
+		public X509Certificate[] getAcceptedIssuers() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	private static class MySSLSocketFactory extends SSLSocketFactory {
+
+		private final SSLContext sslContext;
+
+		public MySSLSocketFactory(X509Certificate serverCertificate)
+				throws NoSuchAlgorithmException, KeyManagementException {
+			this.sslContext = SSLContext.getInstance("SSL");
+			TrustManager trustManager = new MyTrustManager(serverCertificate);
+			TrustManager[] trustManagers = { trustManager };
+			this.sslContext.init(null, trustManagers, null);
+		}
+
+		@Override
+		public Socket createSocket(String host, int port,
+				InetAddress clientHost, int clientPort) throws IOException,
+				UnknownHostException {
+			return this.sslContext.getSocketFactory().createSocket(host, port,
+					clientHost, clientPort);
+		}
+
+		public Socket createSocket(String host, int port) throws IOException,
+				UnknownHostException {
+			return this.sslContext.getSocketFactory().createSocket(host, port);
+		}
+
+		public Socket createSocket(Socket socket, String host, int port,
+				boolean autoClose) throws IOException, UnknownHostException {
+			return this.sslContext.getSocketFactory().createSocket(socket,
+					host, port, autoClose);
+		}
+
+		@Override
+		public String[] getDefaultCipherSuites() {
+			return this.sslContext.getSocketFactory().getDefaultCipherSuites();
+		}
+
+		@Override
+		public String[] getSupportedCipherSuites() {
+			return this.sslContext.getSocketFactory()
+					.getSupportedCipherSuites();
+		}
+
+		@Override
+		public Socket createSocket(InetAddress host, int port)
+				throws IOException {
+			return this.sslContext.getSocketFactory().createSocket(host, port);
+		}
+
+		@Override
+		public Socket createSocket(InetAddress address, int port,
+				InetAddress localAddress, int localPort) throws IOException {
+			return this.sslContext.getSocketFactory().createSocket(address,
+					port, localAddress, localPort);
+		}
+
+	}
+
+	public static class MyProtocolSocketFactory implements
+			ProtocolSocketFactory {
+		private final SSLContext sslContext;
+
+		public MyProtocolSocketFactory(X509Certificate serverCertificate)
+				throws NoSuchAlgorithmException, KeyManagementException {
+			this.sslContext = SSLContext.getInstance("SSL");
+			TrustManager trustManager = new MyTrustManager(serverCertificate);
+			TrustManager[] trustManagers = { trustManager };
+			this.sslContext.init(null, trustManagers, null);
+		}
+
+		public Socket createSocket(String host, int port) throws IOException,
+				UnknownHostException {
+			return this.sslContext.getSocketFactory().createSocket(host, port);
+		}
+
+		public Socket createSocket(String host, int port,
+				InetAddress localHost, int localPort) throws IOException,
+				UnknownHostException {
+			return this.sslContext.getSocketFactory().createSocket(host, port,
+					localHost, localPort);
+		}
+
+		public Socket createSocket(String host, int port,
+				InetAddress localHost, int localPort,
+				HttpConnectionParams params) throws IOException,
+				UnknownHostException, ConnectTimeoutException {
+			return this.sslContext.getSocketFactory().createSocket(host, port,
+					localHost, localPort);
+		}
+
+	}
+
+	private KeyPair generateKeyPair() throws Exception {
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		SecureRandom random = new SecureRandom();
+		keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
+				RSAKeyGenParameterSpec.F4), random);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		return keyPair;
+	}
+
+	private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
+			throws IOException {
+		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
+				.getEncoded());
+		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+				(ASN1Sequence) new ASN1InputStream(bais).readObject());
+		return new SubjectKeyIdentifier(info);
+	}
+
+	private AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
+			throws IOException {
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
+				.getEncoded());
+		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+				(ASN1Sequence) new ASN1InputStream(bais).readObject());
+
+		return new AuthorityKeyIdentifier(info);
+	}
+
+	private void persistKey(File pkcs12keyStore, PrivateKey privateKey,
+			X509Certificate certificate, char[] keyStorePassword,
+			char[] keyEntryPassword) throws KeyStoreException,
+			NoSuchAlgorithmException, CertificateException, IOException {
+		KeyStore keyStore = KeyStore.getInstance("pkcs12");
+		keyStore.load(null, keyStorePassword);
+		keyStore.setKeyEntry("default", privateKey, keyEntryPassword,
+				new Certificate[] { certificate });
+		FileOutputStream keyStoreOut = new FileOutputStream(pkcs12keyStore);
+		keyStore.store(keyStoreOut, keyStorePassword);
+		keyStoreOut.close();
+	}
+
+	private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
+			String subjectDn, DateTime notBefore, DateTime notAfter)
+			throws IOException, InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException {
+		PublicKey subjectPublicKey = keyPair.getPublic();
+		PrivateKey issuerPrivateKey = keyPair.getPrivate();
+		String signatureAlgorithm = "SHA1WithRSAEncryption";
+		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+		certificateGenerator.reset();
+		certificateGenerator.setPublicKey(subjectPublicKey);
+		certificateGenerator.setSignatureAlgorithm(signatureAlgorithm);
+		certificateGenerator.setNotBefore(notBefore.toDate());
+		certificateGenerator.setNotAfter(notAfter.toDate());
+		X509Principal issuerDN = new X509Principal(subjectDn);
+		certificateGenerator.setIssuerDN(issuerDN);
+		certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
+		certificateGenerator.setSerialNumber(new BigInteger(128,
+				new SecureRandom()));
+
+		certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
+				false, createSubjectKeyId(subjectPublicKey));
+		PublicKey issuerPublicKey;
+		issuerPublicKey = subjectPublicKey;
+		certificateGenerator.addExtension(
+				X509Extensions.AuthorityKeyIdentifier, false,
+				createAuthorityKeyId(issuerPublicKey));
+
+		certificateGenerator.addExtension(X509Extensions.BasicConstraints,
+				false, new BasicConstraints(true));
+
+		X509Certificate certificate;
+		certificate = certificateGenerator.generate(issuerPrivateKey);
+
+		/*
+		 * Next certificate factory trick is needed to make sure that the
+		 * certificate delivered to the caller is provided by the default
+		 * security provider instead of BouncyCastle. If we don't do this trick
+		 * we might run into trouble when trying to use the CertPath validator.
+		 */
+		CertificateFactory certificateFactory = CertificateFactory
+				.getInstance("X.509");
+		certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(certificate
+						.getEncoded()));
+		return certificate;
+	}
+
+	private static int getFreePort() throws Exception {
+		ServerSocket serverSocket = new ServerSocket(0);
+		int port = serverSocket.getLocalPort();
+		serverSocket.close();
+		return port;
 	}
 }
