@@ -73,6 +73,10 @@
 			<param-name>ParametersFromRequest</param-name>
 			<param-value>true</param-value>
 		</init-param>
+		<init-param>
+			<param-name>TrustServer</param-name>
+			<param-value>true</param-value>
+		</init-param>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>OpenIDAuthenticationRequestServlet</servlet-name>
