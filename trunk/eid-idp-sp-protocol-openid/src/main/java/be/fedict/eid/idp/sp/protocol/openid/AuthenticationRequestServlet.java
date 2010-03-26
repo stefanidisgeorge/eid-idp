@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.OpenIDException;
-import org.openid4java.consumer.ConsumerException;
 import org.openid4java.consumer.ConsumerManager;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.message.AuthRequest;
@@ -62,6 +61,8 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
 	private ConsumerManager consumerManager;
 
+	private boolean trustServer;
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		String parametersFromRequest = config
@@ -78,6 +79,20 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		} else {
 			LOG
 					.warn("ParametersFromRequest should not be used for production configurations");
+		}
+		String trustServer = config.getInitParameter("TrustServer");
+		if (null != trustServer) {
+			this.trustServer = Boolean.parseBoolean(trustServer);
+		}
+		if (this.trustServer) {
+			LOG.warn("Trusting all SSL server certificates!");
+			try {
+				OpenIDSSLSocketFactory.installAllTrusted();
+			} catch (Exception e) {
+				throw new ServletException(
+						"could not install OpenID SSL Socket Factory: "
+								+ e.getMessage(), e);
+			}
 		}
 
 		ServletContext servletContext = config.getServletContext();
@@ -132,7 +147,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			DiscoveryInformation discovered = this.consumerManager
 					.associate(discoveries);
 			request.getSession().setAttribute("openid-disc", discovered);
-			
+
 			AuthRequest authRequest = this.consumerManager.authenticate(
 					discovered, this.spDestination);
 			authRequest.setClaimed(AuthRequest.SELECT_ID);
