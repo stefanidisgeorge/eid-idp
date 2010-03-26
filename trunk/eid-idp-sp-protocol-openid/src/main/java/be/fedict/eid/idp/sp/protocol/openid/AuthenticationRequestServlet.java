@@ -86,7 +86,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		if (null == this.consumerManager) {
 			try {
 				this.consumerManager = new ConsumerManager();
-			} catch (ConsumerException e) {
+			} catch (Exception e) {
 				throw new ServletException(
 						"could not init OpenID ConsumerManager");
 			}

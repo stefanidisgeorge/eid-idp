@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -51,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -143,6 +145,8 @@ public class OpenIDSSLProtocolServiceTest {
 				HttpServletResponse response) throws ServletException,
 				IOException {
 			LOG.debug("doGet");
+			LOG.debug("request URL: " + request.getRequestURL());
+			LOG.debug("request port: " + request.getLocalPort());
 			PrintWriter printWriter = response.getWriter();
 			if (request.getRequestURI().endsWith("/xrds")) {
 				LOG.debug("returning the YADIS XRDS document");
@@ -225,7 +229,7 @@ public class OpenIDSSLProtocolServiceTest {
 			if (null == this.consumerManager) {
 				try {
 					this.consumerManager = new ConsumerManager();
-				} catch (ConsumerException e) {
+				} catch (Exception e) {
 					throw new ServletException(
 							"could not init OpenID ConsumerManager");
 				}
@@ -464,7 +468,7 @@ public class OpenIDSSLProtocolServiceTest {
 		// empty
 	}
 
-	// @Test
+	@Test
 	public void testOpenIDSpike() throws Exception {
 		LOG.debug("OpenID spike");
 
@@ -513,6 +517,10 @@ public class OpenIDSSLProtocolServiceTest {
 				"http.protocol.allow-circular-redirects", Boolean.TRUE);
 		// GetMethod getMethod = new GetMethod(location + "/consumer");
 
+		MySSLSocketFactory mySSLSocketFactory = new MySSLSocketFactory(
+				certificate);
+		HttpsURLConnection.setDefaultSSLSocketFactory(mySSLSocketFactory);
+
 		ProtocolSocketFactory protocolSocketFactory = new MyProtocolSocketFactory(
 				certificate);
 		Protocol myProtocol = new Protocol("https", protocolSocketFactory,
@@ -560,6 +568,7 @@ public class OpenIDSSLProtocolServiceTest {
 
 		public void checkClientTrusted(X509Certificate[] chain, String authType)
 				throws CertificateException {
+			LOG.error("checkClientTrusted");
 			throw new UnsupportedOperationException();
 		}
 
@@ -573,6 +582,7 @@ public class OpenIDSSLProtocolServiceTest {
 		}
 
 		public X509Certificate[] getAcceptedIssuers() {
+			LOG.error("getAcceptedIssuers");
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -587,6 +597,11 @@ public class OpenIDSSLProtocolServiceTest {
 			TrustManager trustManager = new MyTrustManager(serverCertificate);
 			TrustManager[] trustManagers = { trustManager };
 			this.sslContext.init(null, trustManagers, null);
+		}
+
+		@Override
+		public Socket createSocket() throws IOException {
+			return this.sslContext.getSocketFactory().createSocket();
 		}
 
 		@Override
