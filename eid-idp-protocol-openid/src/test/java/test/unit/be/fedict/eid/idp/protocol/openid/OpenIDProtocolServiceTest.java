@@ -47,7 +47,6 @@ import org.mortbay.jetty.testing.ServletTester;
 import org.openid4java.OpenIDException;
 import org.openid4java.association.Association;
 import org.openid4java.association.AssociationException;
-import org.openid4java.consumer.ConsumerException;
 import org.openid4java.consumer.ConsumerManager;
 import org.openid4java.consumer.VerificationResult;
 import org.openid4java.discovery.DiscoveryInformation;
@@ -61,6 +60,7 @@ import org.openid4java.message.ParameterList;
 import org.openid4java.message.ax.AxMessage;
 import org.openid4java.message.ax.FetchRequest;
 import org.openid4java.message.ax.FetchResponse;
+import org.openid4java.message.pape.PapeResponse;
 import org.openid4java.server.InMemoryServerAssociationStore;
 import org.openid4java.server.RealmVerifier;
 import org.openid4java.server.ServerAssociationStore;
@@ -359,6 +359,11 @@ public class OpenIDProtocolServiceTest {
 										.setSignExtensions(new String[] { AxMessage.OPENID_NS_AX });
 							}
 						}
+						PapeResponse papeResponse = PapeResponse
+								.createPapeResponse();
+						papeResponse
+								.setAuthPolicies(PapeResponse.PAPE_POLICY_MULTI_FACTOR_PHYSICAL);
+						authSuccess.addExtension(papeResponse);
 						/*
 						 * We manually sign the auth response as we also want to
 						 * add our own attributes.
