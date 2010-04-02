@@ -299,6 +299,7 @@ public class OpenIDSSLProtocolServiceTest {
 					LOG.debug("associating with the IdP...");
 					DiscoveryInformation discovered = consumerManager
 							.associate(discoveries);
+
 					request.getSession()
 							.setAttribute("openid-disc", discovered);
 					AuthRequest authRequest = consumerManager.authenticate(

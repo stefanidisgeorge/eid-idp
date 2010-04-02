@@ -21,6 +21,7 @@ package be.fedict.eid.idp.protocol.saml2;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -105,7 +106,12 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		return relayState;
 	}
 
-	public IdentityProviderFlow handleIncomingRequest(HttpServletRequest request)
+	public void init(ServletContext servletContext) {
+		LOG.debug("init");
+	}
+
+	public IdentityProviderFlow handleIncomingRequest(
+			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		LOG.debug("handling incoming request");
 		DefaultBootstrap.bootstrap();

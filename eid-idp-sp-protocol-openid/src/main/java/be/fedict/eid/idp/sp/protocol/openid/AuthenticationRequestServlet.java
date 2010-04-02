@@ -21,6 +21,8 @@ package be.fedict.eid.idp.sp.protocol.openid;
 import java.io.IOException;
 import java.util.List;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -30,11 +32,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.openid4java.OpenIDException;
 import org.openid4java.consumer.ConsumerManager;
+import org.openid4java.discovery.Discovery;
 import org.openid4java.discovery.DiscoveryInformation;
+import org.openid4java.discovery.html.HtmlResolver;
+import org.openid4java.discovery.xri.XriResolver;
+import org.openid4java.discovery.yadis.YadisResolver;
 import org.openid4java.message.AuthRequest;
 import org.openid4java.message.ax.FetchRequest;
+import org.openid4java.server.RealmVerifierFactory;
+import org.openid4java.util.HttpFetcherFactory;
 
 /**
  * OpenID authentication request servlet.
@@ -100,7 +109,28 @@ public class AuthenticationRequestServlet extends HttpServlet {
 				.getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
 		if (null == this.consumerManager) {
 			try {
-				this.consumerManager = new ConsumerManager();
+				if (this.trustServer) {
+					SSLContext sslContext = SSLContext.getInstance("SSL");
+					TrustManager trustManager = new OpenIDTrustManager();
+					TrustManager[] trustManagers = { trustManager };
+					sslContext.init(null, trustManagers, null);
+					HttpFetcherFactory httpFetcherFactory = new HttpFetcherFactory(
+							sslContext,
+							SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+					YadisResolver yadisResolver = new YadisResolver(
+							httpFetcherFactory);
+					RealmVerifierFactory realmFactory = new RealmVerifierFactory(
+							yadisResolver);
+					HtmlResolver htmlResolver = new HtmlResolver(
+							httpFetcherFactory);
+					XriResolver xriResolver = Discovery.getXriResolver();
+					Discovery discovery = new Discovery(htmlResolver,
+							yadisResolver, xriResolver);
+					this.consumerManager = new ConsumerManager(realmFactory,
+							discovery, httpFetcherFactory);
+				} else {
+					this.consumerManager = new ConsumerManager();
+				}
 			} catch (Exception e) {
 				throw new ServletException(
 						"could not init OpenID ConsumerManager");
@@ -142,14 +172,16 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		}
 		try {
 			LOG.debug("discovering the identity...");
+			LOG.debug("user identifier: " + userIdentifier);
 			List discoveries = this.consumerManager.discover(userIdentifier);
 			LOG.debug("associating with the IdP...");
 			DiscoveryInformation discovered = this.consumerManager
 					.associate(discoveries);
 			request.getSession().setAttribute("openid-disc", discovered);
 
+			LOG.debug("SP destination: " + spDestination);
 			AuthRequest authRequest = this.consumerManager.authenticate(
-					discovered, this.spDestination);
+					discovered, spDestination);
 			authRequest.setClaimed(AuthRequest.SELECT_ID);
 			authRequest.setIdentity(AuthRequest.SELECT_ID);
 

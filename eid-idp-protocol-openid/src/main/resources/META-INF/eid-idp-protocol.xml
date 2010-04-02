@@ -9,5 +9,9 @@
 			<ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServlet</ServletClass>
 			<ContextPath>/openid-identity</ContextPath>
 		</Endpoint>
+		<Endpoint>
+			<ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServlet</ServletClass>
+			<ContextPath>/openid-identity/xrds</ContextPath>
+		</Endpoint>
 	</Endpoints>
 </IdentityProviderProtocol>

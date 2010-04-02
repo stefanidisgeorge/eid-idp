@@ -160,8 +160,9 @@ public class OpenIDSSLSocketFactory extends SSLSocketFactory {
 			OpenIDSSLSocketFactory openIDSSLSocketFactory = new OpenIDSSLSocketFactory();
 			HttpsURLConnection
 					.setDefaultSSLSocketFactory(openIDSSLSocketFactory);
+			System.setProperty("java.protocol.handler.pkgs", "javax.net.ssl");
 			HttpsURLConnection
-					.setDefaultHostnameVerifier(new OpenIDHostnameVerifier());
+					.setDefaultHostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 		} else {
 			LOG.debug("OpenID SSL Socket Factory already installed.");
 		}

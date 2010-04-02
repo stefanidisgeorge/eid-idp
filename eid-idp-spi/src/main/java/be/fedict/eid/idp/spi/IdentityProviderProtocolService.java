@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.spi;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,18 +37,28 @@ import be.fedict.eid.applet.service.Identity;
 public interface IdentityProviderProtocolService {
 
 	/**
+	 * Initializes this protocol service handler.
+	 * 
+	 * @param servletContext
+	 */
+	void init(ServletContext servletContext);
+
+	/**
 	 * Handles an incoming request for this protocol.
 	 * 
 	 * @param request
 	 *            the HTTP request.
+	 * @param response
+	 *            the HTTP response. Can be used if the protocol handler does
+	 *            not want to continue via the regular IdP flow.
 	 * @return the flow to be continued in the IdP.
 	 * 
 	 * @throws Exception
 	 *             in case this protocol service cannot handle the incoming
 	 *             request.
 	 */
-	IdentityProviderFlow handleIncomingRequest(HttpServletRequest request)
-			throws Exception;
+	IdentityProviderFlow handleIncomingRequest(HttpServletRequest request,
+			HttpServletResponse response) throws Exception;
 
 	/**
 	 * Handles the outgoing response to return to the Service Provider web

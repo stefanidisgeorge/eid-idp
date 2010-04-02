@@ -19,9 +19,13 @@
 package be.fedict.eid.idp.webapp;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 
 /**
  * The main entry point for authentication protocols. This servlet serves as a
@@ -54,6 +59,10 @@ public class ProtocolEntryServlet extends HttpServlet {
 			.getName()
 			+ ".ContextPath";
 
+	public static final String PROTOCOL_SERVICES_ATTRIBUTE = ProtocolEntryServlet.class
+			.getName()
+			+ ".ProtocolServices";
+
 	@EJB
 	private ProtocolServiceManager protocolServiceManager;
 
@@ -67,8 +76,31 @@ public class ProtocolEntryServlet extends HttpServlet {
 
 	private String authenticationWithIdentificationPageInitParam;
 
+	public static Map<String, IdentityProviderProtocolService> getProtocolServices(
+			ServletContext servletContext) throws ServletException {
+		Map<String, IdentityProviderProtocolService> protocolServices = findProtocolServices(servletContext);
+		return protocolServices;
+	}
+
+	public static Map<String, IdentityProviderProtocolService> findProtocolServices(
+			ServletContext servletContext) throws ServletException {
+		Map<String, IdentityProviderProtocolService> protocolServices = (Map<String, IdentityProviderProtocolService>) servletContext
+				.getAttribute(PROTOCOL_SERVICES_ATTRIBUTE);
+		return protocolServices;
+	}
+
+	private static void setProtocolService(
+			Map<String, IdentityProviderProtocolService> protocolServices,
+			ServletContext servletContext) {
+		servletContext.setAttribute(PROTOCOL_SERVICES_ATTRIBUTE,
+				protocolServices);
+	}
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
+		/*
+		 * Get init-params.
+		 */
 		this.unknownProtocolPageInitParam = getRequiredInitParameter(config,
 				"UnknownProtocolPage");
 		this.protocolErrorPageInitParam = getRequiredInitParameter(config,
@@ -79,6 +111,31 @@ public class ProtocolEntryServlet extends HttpServlet {
 				"IdentificationPage");
 		this.authenticationWithIdentificationPageInitParam = getRequiredInitParameter(
 				config, "AuthenticationWithIdentificationPage");
+
+		/*
+		 * Initialize the protocol services.
+		 */
+		ServletContext servletContext = config.getServletContext();
+		if (null == findProtocolServices(servletContext)) {
+			Map<String, IdentityProviderProtocolService> protocolServices = new HashMap<String, IdentityProviderProtocolService>();
+			setProtocolService(protocolServices, servletContext);
+			List<IdentityProviderProtocolType> identityProviderProtocols = this.protocolServiceManager
+					.getProtocolServices();
+			for (IdentityProviderProtocolType identityProviderProtocol : identityProviderProtocols) {
+				String name = identityProviderProtocol.getName();
+				LOG.debug("protocol name: " + name);
+				IdentityProviderProtocolService protocolService = this.protocolServiceManager
+						.getProtocolService(identityProviderProtocol);
+				String contextPath = identityProviderProtocol.getContextPath();
+				if (protocolServices.containsKey(contextPath)) {
+					throw new ServletException(
+							"protocol service for context path already registered: "
+									+ contextPath);
+				}
+				protocolService.init(servletContext);
+				protocolServices.put(contextPath, protocolService);
+			}
+		}
 	}
 
 	private String getRequiredInitParameter(ServletConfig config,
@@ -117,8 +174,22 @@ public class ProtocolEntryServlet extends HttpServlet {
 		return contextPath;
 	}
 
+	public static IdentityProviderProtocolService getProtocolService(
+			HttpServletRequest request) throws ServletException {
+		String contextPath = getProtocolServiceContextPath(request);
+		ServletContext servletContext = request.getServletContext();
+		Map<String, IdentityProviderProtocolService> protocolServices = getProtocolServices(servletContext);
+		IdentityProviderProtocolService protocolService = protocolServices
+				.get(contextPath);
+		if (null == protocolService) {
+			throw new ServletException("no protocol service for context path: "
+					+ contextPath);
+		}
+		return protocolService;
+	}
+
 	private void handleRequest(HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+			HttpServletResponse response) throws IOException, ServletException {
 		LOG.debug("handle request");
 		LOG.debug("request URI: " + request.getRequestURI());
 		LOG.debug("request method: " + request.getMethod());
@@ -128,43 +199,46 @@ public class ProtocolEntryServlet extends HttpServlet {
 		LOG.debug("request path translated: " + request.getPathTranslated());
 		String protocolServiceContextPath = request.getPathInfo();
 		setProtocolServiceContextPath(protocolServiceContextPath, request);
-		/*
-		 * TODO: optimize, no need to scan the classpath in search for protocol
-		 * services each time.
-		 */
-		IdentityProviderProtocolService protocolService = this.protocolServiceManager
-				.findProtocolService(protocolServiceContextPath);
-		if (null != protocolService) {
-			try {
-				IdentityProviderFlow idpFlow = protocolService
-						.handleIncomingRequest(request);
-				switch (idpFlow) {
-				case IDENTIFICATION:
-					response.sendRedirect(request.getContextPath()
-							+ this.identificationPageInitParam);
-					break;
-				case AUTHENTICATION_WITH_IDENTIFICATION:
-					response
-							.sendRedirect(request.getContextPath()
-									+ this.authenticationWithIdentificationPageInitParam);
-					break;
-				default:
-					throw new RuntimeException("cannot handle IdP flow: "
-							+ idpFlow);
-				}
-			} catch (Exception e) {
-				LOG.error("protocol error: " + e.getMessage(), e);
-				HttpSession httpSession = request.getSession();
-				httpSession.setAttribute(
-						this.protocolErrorMessageSessionAttributeInitParam, e
-								.getMessage());
-				response.sendRedirect(request.getContextPath()
-						+ this.protocolErrorPageInitParam);
-			}
-		} else {
+
+		ServletContext servletContext = request.getServletContext();
+		Map<String, IdentityProviderProtocolService> protocolServices = getProtocolServices(servletContext);
+		IdentityProviderProtocolService protocolService = protocolServices
+				.get(protocolServiceContextPath);
+		if (null == protocolService) {
 			LOG.warn("unsupported protocol: " + protocolServiceContextPath);
 			response.sendRedirect(request.getContextPath()
 					+ this.unknownProtocolPageInitParam);
+			return;
+		}
+
+		try {
+			IdentityProviderFlow idpFlow = protocolService
+					.handleIncomingRequest(request, response);
+			if (null == idpFlow) {
+				LOG
+						.debug("the protocol service handler defined its own response flow");
+				return;
+			}
+			switch (idpFlow) {
+			case IDENTIFICATION:
+				response.sendRedirect(request.getContextPath()
+						+ this.identificationPageInitParam);
+				break;
+			case AUTHENTICATION_WITH_IDENTIFICATION:
+				response.sendRedirect(request.getContextPath()
+						+ this.authenticationWithIdentificationPageInitParam);
+				break;
+			default:
+				throw new RuntimeException("cannot handle IdP flow: " + idpFlow);
+			}
+		} catch (Exception e) {
+			LOG.error("protocol error: " + e.getMessage(), e);
+			HttpSession httpSession = request.getSession();
+			httpSession.setAttribute(
+					this.protocolErrorMessageSessionAttributeInitParam, e
+							.getMessage());
+			response.sendRedirect(request.getContextPath()
+					+ this.protocolErrorPageInitParam);
 		}
 	}
 }

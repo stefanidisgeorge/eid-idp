@@ -189,7 +189,8 @@ public class SAML2ProtocolServiceTest {
 		EasyMock.replay(mockHttpServletRequest, mockHttpSession);
 
 		// operate
-		saml2ProtocolService.handleIncomingRequest(mockHttpServletRequest);
+		saml2ProtocolService
+				.handleIncomingRequest(mockHttpServletRequest, null);
 
 		// verify
 		EasyMock.verify(mockHttpServletRequest, mockHttpSession);
