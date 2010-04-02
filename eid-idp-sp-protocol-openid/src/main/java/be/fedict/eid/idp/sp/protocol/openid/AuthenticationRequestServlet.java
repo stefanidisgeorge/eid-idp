@@ -29,6 +29,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -140,6 +141,18 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		}
 	}
 
+	public static ConsumerManager getConsumerManager(HttpServletRequest request) {
+		HttpSession httpSession = request.getSession();
+		ServletContext servletContext = httpSession.getServletContext();
+		ConsumerManager consumerManager = (ConsumerManager) servletContext
+				.getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
+		if (null == consumerManager) {
+			throw new IllegalStateException(
+					"no ConsumerManager found in ServletContext");
+		}
+		return consumerManager;
+	}
+
 	private String getRequiredInitParameter(String parameterName,
 			ServletConfig config) throws ServletException {
 		String value = config.getInitParameter(parameterName);
@@ -189,8 +202,10 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			 * We also piggy-back an attribute fetch request.
 			 */
 			FetchRequest fetchRequest = FetchRequest.createFetchRequest();
-			fetchRequest.addAttribute("fullName",
-					"http://axschema.org/namePerson", true);
+			fetchRequest.addAttribute("firstName",
+					"http://axschema.org/namePerson/first", true);
+			fetchRequest.addAttribute("name",
+					"http://axschema.org/namePerson/last", true);
 			authRequest.addExtension(fetchRequest);
 
 			LOG.debug("redirecting to producer with authn request...");

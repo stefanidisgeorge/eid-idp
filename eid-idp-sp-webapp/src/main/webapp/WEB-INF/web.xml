@@ -82,4 +82,29 @@
 		<servlet-name>OpenIDAuthenticationRequestServlet</servlet-name>
 		<url-pattern>/openid-request</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>OpenIDAuthenticationResponseServlet</servlet-name>
+		<servlet-class>be.fedict.eid.idp.sp.protocol.openid.AuthenticationResponseServlet</servlet-class>
+		<init-param>
+			<param-name>IdentifierSessionAttribute</param-name>
+			<param-value>Identifier</param-value>
+		</init-param>
+		<init-param>
+			<param-name>RedirectPage</param-name>
+			<param-value>/openid-result.jsp</param-value>
+		</init-param>
+		<init-param>
+			<param-name>NameSessionAttribute</param-name>
+			<param-value>Name</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FirstNameSessionAttribute</param-name>
+			<param-value>FirstName</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>OpenIDAuthenticationResponseServlet</servlet-name>
+		<url-pattern>/openid-landing</url-pattern>
+	</servlet-mapping>
 </web-app>

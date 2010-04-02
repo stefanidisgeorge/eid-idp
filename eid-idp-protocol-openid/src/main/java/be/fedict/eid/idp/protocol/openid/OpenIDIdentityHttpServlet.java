@@ -48,7 +48,7 @@ public class OpenIDIdentityHttpServlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		LOG.debug("doGet");
 		String location = "https://" + request.getServerName() + ":"
-				+ request.getServerPort() + "/eid-idp/";
+				+ request.getServerPort() + "/eid-idp";
 		LOG.debug("location: " + location);
 		PrintWriter printWriter = response.getWriter();
 		if (request.getRequestURI().endsWith("/xrds")) {
@@ -66,7 +66,10 @@ public class OpenIDIdentityHttpServlet extends HttpServlet {
 			printWriter.println("<Service>");
 			printWriter
 					.println("<Type>http://specs.openid.net/auth/2.0/signon</Type>");
-			printWriter.println("<URI>" + location + "/protocol/openid</URI>");
+			printWriter.println("<URI>" + "https://" + request.getServerName()
+					+ "/eid-idp" + "/protocol/openid</URI>"); // XXX:
+			// port
+			// removed
 			printWriter.println("</Service>");
 
 			printWriter.println("</XRD>");

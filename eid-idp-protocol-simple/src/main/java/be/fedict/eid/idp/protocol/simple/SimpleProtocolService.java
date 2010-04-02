@@ -18,7 +18,6 @@
 
 package be.fedict.eid.idp.protocol.simple;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,7 +73,8 @@ public class SimpleProtocolService implements IdentityProviderProtocolService {
 
 	public ReturnResponse handleReturnResponse(HttpSession httpSession,
 			Identity identity, Address address, String authenticatedIdentifier,
-			HttpServletResponse response) throws Exception {
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 		LOG.debug("handle return response");
 		String targetUrl = getTargetUrl(httpSession);
 		ReturnResponse returnResponse = new ReturnResponse(targetUrl);

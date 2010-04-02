@@ -231,7 +231,7 @@ public class SAML2ProtocolServiceTest {
 		// operate
 		ReturnResponse returnResponse = saml2ProtocolService
 				.handleReturnResponse(mockHttpSession, identity, address,
-						authenticatedIdentifier, mockHttpServletResponse);
+						authenticatedIdentifier, null, mockHttpServletResponse);
 
 		// verify
 		EasyMock.verify(mockHttpSession);
