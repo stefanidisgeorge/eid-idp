@@ -18,12 +18,24 @@
 
 package be.fedict.eid.idp.protocol.openid;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openid4java.message.AuthRequest;
+import org.openid4java.message.Message;
+import org.openid4java.message.MessageException;
+import org.openid4java.message.ParameterList;
+import org.openid4java.server.InMemoryServerAssociationStore;
+import org.openid4java.server.RealmVerifier;
+import org.openid4java.server.ServerManager;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
@@ -42,9 +54,91 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 	private static final Log LOG = LogFactory
 			.getLog(OpenIDProtocolService.class);
 
-	public IdentityProviderFlow handleIncomingRequest(HttpServletRequest request)
+	public static final String SERVER_MANAGER_ATTRIBUTE = OpenIDProtocolService.class
+			.getName()
+			+ ".ServerManager";
+
+	private ServerManager getServerManager(HttpServletRequest request) {
+		HttpSession httpSession = request.getSession();
+		ServletContext servletContext = httpSession.getServletContext();
+		ServerManager serverManager = (ServerManager) servletContext
+				.getAttribute(SERVER_MANAGER_ATTRIBUTE);
+		if (null != serverManager) {
+			return serverManager;
+		}
+		LOG.debug("creating an OpenID server manager");
+		serverManager = new ServerManager();
+		serverManager
+				.setSharedAssociations(new InMemoryServerAssociationStore());
+		serverManager
+				.setPrivateAssociations(new InMemoryServerAssociationStore());
+		String location = "https://" + request.getServerName() + ":"
+				+ request.getServerPort() + "/eid-idp";
+		String opEndpointUrl = location + "/producer";
+		LOG.debug("OP endpoint URL: " + opEndpointUrl);
+		serverManager.setOPEndpointUrl(opEndpointUrl);
+		servletContext.setAttribute(SERVER_MANAGER_ATTRIBUTE, serverManager);
+		return serverManager;
+	}
+
+	public void init(ServletContext servletContext) {
+		LOG.debug("init");
+	}
+
+	public IdentityProviderFlow handleIncomingRequest(
+			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		LOG.debug("handleIncomingRequest");
+		ServerManager serverManager = getServerManager(request);
+		ParameterList parameterList = new ParameterList(request
+				.getParameterMap());
+		String openIdMode = request.getParameter("openid.mode");
+		if ("associate".equals(openIdMode)) {
+			return doAssociation(response, serverManager, parameterList);
+		}
+		if ("check_authentication".equals(openIdMode)) {
+			return doCheckAuthentication(response, serverManager, parameterList);
+		}
+		if ("checkid_setup".equals(openIdMode)) {
+			return doCheckIdSetup(response, serverManager, parameterList);
+		}
+		throw new ServletException("unknown OpenID mode: " + openIdMode);
+	}
+
+	private IdentityProviderFlow doCheckIdSetup(HttpServletResponse response,
+			ServerManager serverManager, ParameterList parameterList)
+			throws MessageException {
+		LOG.debug("checkid_setup");
+		RealmVerifier realmVerifier = serverManager.getRealmVerifier();
+		AuthRequest authRequest = AuthRequest.createAuthRequest(parameterList,
+				realmVerifier);
+		// TODO: store authRequest
+		return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
+	}
+
+	private IdentityProviderFlow doCheckAuthentication(
+			HttpServletResponse response, ServerManager serverManager,
+			ParameterList parameterList) throws IOException {
+		LOG.debug("check_authentication");
+		Message message = serverManager.verify(parameterList);
+		String keyValueFormEncoding = message.keyValueFormEncoding();
+		response.getWriter().print(keyValueFormEncoding);
+		return null;
+	}
+
+	private IdentityProviderFlow doAssociation(HttpServletResponse response,
+			ServerManager serverManager, ParameterList parameterList)
+			throws IOException {
+		/*
+		 * We should only allow SSL here. Thus also no need for DH,
+		 * no-encryption is just fine.
+		 */
+		LOG.debug("associate");
+		Message message = serverManager.associationResponse(parameterList);
+		String keyValueFormEncoding = message.keyValueFormEncoding();
+		LOG.debug("form encoding: " + keyValueFormEncoding);
+		PrintWriter printWriter = response.getWriter();
+		printWriter.print(keyValueFormEncoding);
 		return null;
 	}
 
@@ -52,6 +146,7 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 			Identity identity, Address address, String authenticatedIdentifier,
 			HttpServletResponse response) throws Exception {
 		LOG.debug("handleReturnResponse");
+		
 		return null;
 	}
 }

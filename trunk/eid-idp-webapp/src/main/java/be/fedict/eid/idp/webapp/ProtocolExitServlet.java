@@ -20,7 +20,6 @@ package be.fedict.eid.idp.webapp;
 
 import java.io.IOException;
 
-import javax.ejb.EJB;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -35,7 +34,6 @@ import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.applet.service.impl.handler.AuthenticationDataMessageHandler;
 import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
-import be.fedict.eid.idp.model.ProtocolServiceManager;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.ReturnResponse;
 
@@ -50,9 +48,6 @@ public class ProtocolExitServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final Log LOG = LogFactory.getLog(ProtocolExitServlet.class);
-
-	@EJB
-	private ProtocolServiceManager protocolServiceManager;
 
 	private String protocolErrorPageInitParam;
 
@@ -91,10 +86,8 @@ public class ProtocolExitServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		LOG.debug("doGet");
-		String contextPath = ProtocolEntryServlet
-				.getProtocolServiceContextPath(request);
-		IdentityProviderProtocolService protocolService = this.protocolServiceManager
-				.findProtocolService(contextPath);
+		IdentityProviderProtocolService protocolService = ProtocolEntryServlet
+				.getProtocolService(request);
 
 		HttpSession httpSession = request.getSession();
 		Identity identity = (Identity) httpSession

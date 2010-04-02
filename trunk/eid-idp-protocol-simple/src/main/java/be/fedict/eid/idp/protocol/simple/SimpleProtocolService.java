@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.protocol.simple;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -58,7 +60,8 @@ public class SimpleProtocolService implements IdentityProviderProtocolService {
 		return targetUrl;
 	}
 
-	public IdentityProviderFlow handleIncomingRequest(HttpServletRequest request)
+	public IdentityProviderFlow handleIncomingRequest(
+			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		LOG.debug("handle incoming request");
 		String targetUrl = request.getParameter("Target");
@@ -92,5 +95,9 @@ public class SimpleProtocolService implements IdentityProviderProtocolService {
 				SimpleProtocolConstants.MUNICIPALITY_PARAMETER,
 				address.municipality);
 		return returnResponse;
+	}
+
+	public void init(ServletContext servletContext) {
+		LOG.debug("init");
 	}
 }

@@ -29,6 +29,9 @@ import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 public interface ProtocolServiceManager {
 
 	IdentityProviderProtocolService findProtocolService(String contextPath);
-	
+
 	List<IdentityProviderProtocolType> getProtocolServices();
+
+	IdentityProviderProtocolService getProtocolService(
+			IdentityProviderProtocolType identityProviderProtocol);
 }

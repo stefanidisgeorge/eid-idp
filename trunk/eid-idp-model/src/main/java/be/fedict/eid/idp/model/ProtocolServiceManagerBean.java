@@ -55,34 +55,7 @@ public class ProtocolServiceManagerBean implements ProtocolServiceManager {
 		List<IdentityProviderProtocolType> protocolServices = getProtocolServices();
 		for (IdentityProviderProtocolType protocol : protocolServices) {
 			if (contextPath.equals(protocol.getContextPath())) {
-				ClassLoader classLoader = Thread.currentThread()
-						.getContextClassLoader();
-				LOG.debug("loading protocol service class: "
-						+ protocol.getProtocolService());
-				Class<?> protocolServiceClass;
-				try {
-					protocolServiceClass = classLoader.loadClass(protocol
-							.getProtocolService());
-				} catch (ClassNotFoundException e) {
-					LOG.error("protocol service class not found: "
-							+ protocol.getProtocolService(), e);
-					return null;
-				}
-				if (false == IdentityProviderProtocolService.class
-						.isAssignableFrom(protocolServiceClass)) {
-					LOG.error("illegal protocol service class: "
-							+ protocol.getProtocolService());
-					return null;
-				}
-				IdentityProviderProtocolService protocolService;
-				try {
-					protocolService = (IdentityProviderProtocolService) protocolServiceClass
-							.newInstance();
-				} catch (Exception e) {
-					LOG.error("could not init the protocol service object: "
-							+ e.getMessage(), e);
-					return null;
-				}
+				IdentityProviderProtocolService protocolService = getProtocolService(protocol);
 				return protocolService;
 			}
 		}
@@ -127,5 +100,38 @@ public class ProtocolServiceManagerBean implements ProtocolServiceManager {
 			protocolServices.add(identityProviderProtocol);
 		}
 		return protocolServices;
+	}
+
+	public IdentityProviderProtocolService getProtocolService(
+			IdentityProviderProtocolType identityProviderProtocol) {
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+		LOG.debug("loading protocol service class: "
+				+ identityProviderProtocol.getProtocolService());
+		Class<?> protocolServiceClass;
+		try {
+			protocolServiceClass = classLoader
+					.loadClass(identityProviderProtocol.getProtocolService());
+		} catch (ClassNotFoundException e) {
+			LOG.error("protocol service class not found: "
+					+ identityProviderProtocol.getProtocolService(), e);
+			return null;
+		}
+		if (false == IdentityProviderProtocolService.class
+				.isAssignableFrom(protocolServiceClass)) {
+			LOG.error("illegal protocol service class: "
+					+ identityProviderProtocol.getProtocolService());
+			return null;
+		}
+		IdentityProviderProtocolService protocolService;
+		try {
+			protocolService = (IdentityProviderProtocolService) protocolServiceClass
+					.newInstance();
+		} catch (Exception e) {
+			LOG.error("could not init the protocol service object: "
+					+ e.getMessage(), e);
+			return null;
+		}
+		return protocolService;
 	}
 }
