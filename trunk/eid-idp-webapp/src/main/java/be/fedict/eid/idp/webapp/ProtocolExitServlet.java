@@ -99,7 +99,8 @@ public class ProtocolExitServlet extends HttpServlet {
 		ReturnResponse returnResponse;
 		try {
 			returnResponse = protocolService.handleReturnResponse(httpSession,
-					identity, address, authenticatedIdentifier, response);
+					identity, address, authenticatedIdentifier, request,
+					response);
 		} catch (Exception e) {
 			LOG.error("protocol error: " + e.getMessage(), e);
 			httpSession.setAttribute(

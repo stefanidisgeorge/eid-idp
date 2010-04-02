@@ -143,7 +143,8 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 
 	public ReturnResponse handleReturnResponse(HttpSession httpSession,
 			Identity identity, Address address, String authenticatedIdentifier,
-			HttpServletResponse response) throws Exception {
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 		LOG.debug("handle return response");
 		LOG.debug("authenticated identifier: " + authenticatedIdentifier);
 		String targetUrl = getTargetUrl(httpSession);

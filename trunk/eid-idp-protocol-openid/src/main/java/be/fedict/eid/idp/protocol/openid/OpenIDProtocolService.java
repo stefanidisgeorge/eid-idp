@@ -20,6 +20,7 @@ package be.fedict.eid.idp.protocol.openid;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,12 +30,20 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openid4java.association.Association;
 import org.openid4java.message.AuthRequest;
+import org.openid4java.message.AuthSuccess;
 import org.openid4java.message.Message;
 import org.openid4java.message.MessageException;
+import org.openid4java.message.MessageExtension;
 import org.openid4java.message.ParameterList;
+import org.openid4java.message.ax.AxMessage;
+import org.openid4java.message.ax.FetchRequest;
+import org.openid4java.message.ax.FetchResponse;
+import org.openid4java.message.pape.PapeResponse;
 import org.openid4java.server.InMemoryServerAssociationStore;
 import org.openid4java.server.RealmVerifier;
+import org.openid4java.server.ServerAssociationStore;
 import org.openid4java.server.ServerManager;
 
 import be.fedict.eid.applet.service.Address;
@@ -100,20 +109,43 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 			return doCheckAuthentication(response, serverManager, parameterList);
 		}
 		if ("checkid_setup".equals(openIdMode)) {
-			return doCheckIdSetup(response, serverManager, parameterList);
+			return doCheckIdSetup(request, response, serverManager,
+					parameterList);
 		}
 		throw new ServletException("unknown OpenID mode: " + openIdMode);
 	}
 
-	private IdentityProviderFlow doCheckIdSetup(HttpServletResponse response,
-			ServerManager serverManager, ParameterList parameterList)
-			throws MessageException {
+	private IdentityProviderFlow doCheckIdSetup(HttpServletRequest request,
+			HttpServletResponse response, ServerManager serverManager,
+			ParameterList parameterList) throws MessageException {
 		LOG.debug("checkid_setup");
 		RealmVerifier realmVerifier = serverManager.getRealmVerifier();
 		AuthRequest authRequest = AuthRequest.createAuthRequest(parameterList,
 				realmVerifier);
-		// TODO: store authRequest
+		// cannot store authRequest since it's not serializable.
+		HttpSession httpSession = request.getSession();
+		storeParameterList(parameterList, httpSession);
 		return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
+	}
+
+	private static final String OPENID_PARAMETER_LIST_SESSION_ATTRIBUTE = OpenIDProtocolService.class
+			.getName()
+			+ ".ParameterList";
+
+	private void storeParameterList(ParameterList parameterList,
+			HttpSession httpSession) {
+		httpSession.setAttribute(OPENID_PARAMETER_LIST_SESSION_ATTRIBUTE,
+				parameterList);
+	}
+
+	private ParameterList retrieveParameterList(HttpSession httpSession) {
+		ParameterList parameterList = (ParameterList) httpSession
+				.getAttribute(OPENID_PARAMETER_LIST_SESSION_ATTRIBUTE);
+		if (null == parameterList) {
+			throw new IllegalStateException(
+					"missing session OpenID ParameterList");
+		}
+		return parameterList;
 	}
 
 	private IdentityProviderFlow doCheckAuthentication(
@@ -144,9 +176,76 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 
 	public ReturnResponse handleReturnResponse(HttpSession httpSession,
 			Identity identity, Address address, String authenticatedIdentifier,
-			HttpServletResponse response) throws Exception {
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 		LOG.debug("handleReturnResponse");
-		
+		ServerManager serverManager = getServerManager(request);
+		RealmVerifier realmVerifier = serverManager.getRealmVerifier();
+		ParameterList parameterList = retrieveParameterList(httpSession);
+		AuthRequest authRequest = AuthRequest.createAuthRequest(parameterList,
+				realmVerifier);
+
+		String location = "https://" + request.getServerName() + ":"
+				+ request.getServerPort()
+				+ "/eid-idp/endpoints/openid-identity";
+		String userId = location + "?" + identity.getNationalNumber();
+		LOG.debug("user identifier: " + userId);
+
+		Message message = serverManager.authResponse(parameterList, userId,
+				userId, true, false);
+		if (message instanceof AuthSuccess) {
+			AuthSuccess authSuccess = (AuthSuccess) message;
+			if (authRequest.hasExtension(AxMessage.OPENID_NS_AX)) {
+				MessageExtension messageExtension = authRequest
+						.getExtension(AxMessage.OPENID_NS_AX);
+				if (messageExtension instanceof FetchRequest) {
+					FetchRequest fetchRequest = (FetchRequest) messageExtension;
+					Map<String, String> requiredAttributes = fetchRequest
+							.getAttributes(true);
+					FetchResponse fetchResponse = FetchResponse
+							.createFetchResponse();
+					for (Map.Entry<String, String> requiredAttribute : requiredAttributes
+							.entrySet()) {
+						String alias = requiredAttribute.getKey();
+						String typeUri = requiredAttribute.getValue();
+						LOG.debug("attribute alias: " + alias);
+						LOG.debug("attribute typeUri: " + typeUri);
+						if ("http://axschema.org/namePerson/first"
+								.equals(typeUri)) {
+							fetchResponse.addAttribute(alias, typeUri, identity
+									.getFirstName());
+							continue;
+						}
+						if ("http://axschema.org/namePerson/last"
+								.equals(typeUri)) {
+							fetchResponse.addAttribute(alias, typeUri, identity
+									.getName());
+							continue;
+						}
+					}
+					authSuccess.addExtension(fetchResponse);
+					authSuccess
+							.setSignExtensions(new String[] { AxMessage.OPENID_NS_AX });
+				}
+			}
+			PapeResponse papeResponse = PapeResponse.createPapeResponse();
+			papeResponse
+					.setAuthPolicies(PapeResponse.PAPE_POLICY_MULTI_FACTOR_PHYSICAL);
+			authSuccess.addExtension(papeResponse);
+			/*
+			 * We manually sign the auth response as we also want to add our own
+			 * attributes.
+			 */
+			String handle = authRequest.getHandle();
+			ServerAssociationStore serverAssociationStore = serverManager
+					.getSharedAssociations();
+			Association association = serverAssociationStore.load(handle);
+			authSuccess.setSignature(association.sign(authSuccess
+					.getSignedText()));
+		}
+		String destinationUrl = message.getDestinationUrl(true);
+		LOG.debug("destination URL: " + destinationUrl);
+		response.sendRedirect(destinationUrl);
 		return null;
 	}
 }
