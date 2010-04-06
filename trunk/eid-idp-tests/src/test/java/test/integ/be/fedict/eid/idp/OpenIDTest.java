@@ -19,7 +19,6 @@
 package test.integ.be.fedict.eid.idp;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import java.awt.Component;
 import java.io.IOException;
@@ -47,7 +46,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
-import org.apache.commons.httpclient.Cookie;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -69,6 +68,7 @@ import be.fedict.eid.applet.Runtime;
 import be.fedict.eid.applet.Status;
 import be.fedict.eid.applet.View;
 import be.fedict.eid.idp.sp.protocol.openid.AuthenticationRequestServlet;
+import be.fedict.eid.idp.sp.protocol.openid.AuthenticationResponseServlet;
 
 /**
  * Integration tests for the OpenID protocol.
@@ -110,6 +110,12 @@ public class OpenIDTest {
 				"https://localhost/eid-idp/endpoints/openid-identity");
 		reqServletHolder.setInitParameter("TrustServer", "true");
 
+		ServletHolder responseServletHolder = this.servletTester.addServlet(
+				AuthenticationResponseServlet.class, "/openid-response");
+		responseServletHolder.setInitParameter("RedirectPage", "/target");
+		responseServletHolder.setInitParameter("IdentifierSessionAttribute",
+				"identifier");
+
 		this.servletTester.start();
 		String location = this.servletTester.createSocketConnector(true);
 		LOG.debug("location: " + location);
@@ -117,13 +123,19 @@ public class OpenIDTest {
 		HttpState httpState = new HttpState();
 		HttpClient httpClient = new HttpClient();
 		httpClient.setState(httpState);
-		// httpClient.getParams().setCookiePolicy(
-		// org.apache.commons.httpclient.cookie.CookiePolicy.RFC_2109);
+		httpClient
+				.getParams()
+				.setCookiePolicy(
+						org.apache.commons.httpclient.cookie.CookiePolicy.BROWSER_COMPATIBILITY);
+		httpClient.getParams().setParameter(
+				"http.protocol.allow-circular-redirects", Boolean.TRUE);
+
 		GetMethod getMethod = new GetMethod(
 				location
 						+ "/openid-request?SPDestination="
 						+ location
 						+ "/openid-response&UserIdentifier=https://localhost/eid-idp/endpoints/openid-identity");
+		getMethod.setFollowRedirects(false);
 
 		ProtocolSocketFactory protocolSocketFactory = new MyProtocolSocketFactory();
 		Protocol myProtocol = new Protocol("https", protocolSocketFactory, 443);
@@ -134,26 +146,51 @@ public class OpenIDTest {
 
 		// verify
 		LOG.debug("status code: " + statusCode);
-		assertEquals(HttpServletResponse.SC_OK, statusCode);
+		assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
 		LOG.debug("response body: " + getMethod.getResponseBodyAsString());
+		Header jettySetCookieHeader = getMethod.getResponseHeader("Set-Cookie");
+		String jettySessionCookieValue = jettySetCookieHeader.getValue();
+		LOG.debug("jetty session cookie value: " + jettySessionCookieValue);
+
+		String idpLocation = getMethod.getResponseHeader("Location").getValue();
+		LOG.debug("IdP location: " + idpLocation);
+		getMethod = new GetMethod(idpLocation);
+		getMethod.setFollowRedirects(false);
+		statusCode = httpClient.executeMethod(getMethod);
+		assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
+		LOG.debug("response body: " + getMethod.getResponseBodyAsString());
+
+		String idpSessionCookieValue = getMethod
+				.getResponseHeader("Set-Cookie").getValue();
+		LOG.debug("IdP session cookie value: " + idpSessionCookieValue);
+		String idpSeamLocation = getMethod.getResponseHeader("Location")
+				.getValue();
+		getMethod = new GetMethod(idpSeamLocation);
+		getMethod.setFollowRedirects(false);
+		getMethod.addRequestHeader("Cookie", idpSessionCookieValue);
+		statusCode = httpClient.executeMethod(getMethod);
+		assertEquals(HttpServletResponse.SC_OK, statusCode);
+		cookieManager.setSessionCookieValue(idpSessionCookieValue);
 
 		Messages messages = new Messages(Locale.getDefault());
 		Runtime runtime = new TestRuntime();
 		View view = new TestView();
 		Controller controller = new Controller(view, runtime, messages);
 
-		String sessionCookie = null;
-		Cookie[] cookies = httpClient.getState().getCookies();
-		for (Cookie cookie : cookies) {
-			LOG.debug("cookie: " + cookie.getName() + "=" + cookie.getValue()
-					+ " (" + cookie.getPath() + ")");
-			if ("JSESSIONID".equals(cookie.getName())
-					&& "/eid-idp".equals(cookie.getPath())) {
-				sessionCookie = cookie.getValue();
-			}
-		}
-		assertNotNull(sessionCookie);
-		cookieManager.setSessionCookie(sessionCookie);
+		/*
+		 * Context jettyContext = this.servletTester.getContext();
+		 * SessionHandler jettySessionHandler =
+		 * jettyContext.getSessionHandler(); SessionManager jettySessionManager
+		 * = jettySessionHandler .getSessionManager(); HashSessionManager
+		 * hashSessionManager = (HashSessionManager) jettySessionManager;
+		 * LOG.debug("# sessions: " + hashSessionManager.getSessions());
+		 * assertEquals(1, hashSessionManager.getSessions()); Map<String,
+		 * HttpSession> sessionMap = hashSessionManager .getSessionMap();
+		 * LOG.debug("session map: " + sessionMap); HttpSession jettyHttpSession
+		 * = sessionMap.values().iterator().next(); String jettySessionId =
+		 * jettyHttpSession.getId(); LOG.debug("jetty HTTP session id: " +
+		 * jettySessionId);
+		 */
 
 		// operate
 		controller.run();
@@ -163,11 +200,20 @@ public class OpenIDTest {
 		// httpClient.setState(httpState);
 		LOG.debug("continue to eID IdP exit page...");
 		getMethod = new GetMethod("https://localhost/eid-idp/protocol-exit");
-		getMethod.addRequestHeader("Cookie", "JSESSIONID=" + sessionCookie
-				+ "; Path=/eid-idp; Secure");
+		getMethod.addRequestHeader("Cookie", idpSessionCookieValue);
+		getMethod.setFollowRedirects(false);
 		statusCode = httpClient.executeMethod(getMethod);
 		LOG.debug("status code: " + statusCode);
-		assertEquals(HttpServletResponse.SC_OK, statusCode);
+		assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
+		String jettyResponseLocation = getMethod.getResponseHeader("Location")
+				.getValue();
+
+		getMethod = new GetMethod(jettyResponseLocation);
+		getMethod.setFollowRedirects(false);
+		statusCode = httpClient.executeMethod(getMethod);
+		LOG.debug("status code: " + statusCode);
+		assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
+
 		LOG.debug("response body: " + getMethod.getResponseBodyAsString());
 	}
 
@@ -175,10 +221,10 @@ public class OpenIDTest {
 
 		private static final Log LOG = LogFactory.getLog(MyCookieManager.class);
 
-		private String sessionCookie;
+		private String sessionCookieValue;
 
-		public void setSessionCookie(String sessionCookie) {
-			this.sessionCookie = sessionCookie;
+		public void setSessionCookieValue(String sessionCookieValue) {
+			this.sessionCookieValue = sessionCookieValue;
 		}
 
 		@Override
@@ -187,9 +233,8 @@ public class OpenIDTest {
 			LOG.debug("get: " + uri + ": " + requestHeaders);
 			Map<String, List<String>> result = super.get(uri, requestHeaders);
 			if (uri.toString().contains("/eid-idp")) {
-				if (null != this.sessionCookie) {
-					result.get("Cookie")
-							.add("JSESSIONID=" + this.sessionCookie);
+				if (null != this.sessionCookieValue) {
+					result.get("Cookie").add(this.sessionCookieValue);
 				}
 			}
 			LOG.debug("result: " + result);
