@@ -37,6 +37,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -306,8 +307,6 @@ public class OpenIDSSLProtocolServiceTest {
 							discovered,
 							OpenIDSSLProtocolServiceTest.sslLocation
 									+ "/consumer");
-					authRequest.setClaimed(AuthRequest.SELECT_ID);
-					authRequest.setIdentity(AuthRequest.SELECT_ID);
 
 					/*
 					 * We also piggy-back an attribute fetch request.
@@ -723,8 +722,10 @@ public class OpenIDSSLProtocolServiceTest {
 	private void persistKey(File pkcs12keyStore, PrivateKey privateKey,
 			X509Certificate certificate, char[] keyStorePassword,
 			char[] keyEntryPassword) throws KeyStoreException,
-			NoSuchAlgorithmException, CertificateException, IOException {
-		KeyStore keyStore = KeyStore.getInstance("pkcs12");
+			NoSuchAlgorithmException, CertificateException, IOException,
+			NoSuchProviderException {
+		KeyStore keyStore = KeyStore.getInstance("pkcs12",
+				BouncyCastleProvider.PROVIDER_NAME);
 		keyStore.load(null, keyStorePassword);
 		keyStore.setKeyEntry("default", privateKey, keyEntryPassword,
 				new Certificate[] { certificate });

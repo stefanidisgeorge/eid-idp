@@ -195,8 +195,6 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			LOG.debug("SP destination: " + spDestination);
 			AuthRequest authRequest = this.consumerManager.authenticate(
 					discovered, spDestination);
-			authRequest.setClaimed(AuthRequest.SELECT_ID);
-			authRequest.setIdentity(AuthRequest.SELECT_ID);
 
 			/*
 			 * We also piggy-back an attribute fetch request.

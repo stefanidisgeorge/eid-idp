@@ -34,6 +34,20 @@
 		<module>eid-idp-sp-webapp</module>
 		<module>eid-idp-deploy</module>
 	</modules>
+	<profiles>
+		<profile>
+			<id>tests</id>
+			<activation>
+				<property>
+					<name>env</name>
+					<value>tests</value>
+				</property>
+			</activation>
+			<modules>
+				<module>eid-idp-tests</module>
+			</modules>
+		</profile>
+	</profiles>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
