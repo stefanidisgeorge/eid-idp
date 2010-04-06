@@ -101,8 +101,11 @@ public class AuthenticationResponseServlet extends HttpServlet {
 				.getParameterMap());
 		DiscoveryInformation discovered = (DiscoveryInformation) request
 				.getSession().getAttribute("openid-disc");
-		String receivingUrl = "https://" + request.getServerName() + ":"
-				+ request.getLocalPort() + "/eid-idp-sp/openid-landing";
+		LOG.debug("request context path: " + request.getContextPath());
+		LOG.debug("request URI: " + request.getRequestURI());
+		String receivingUrl = request.getScheme() + "://"
+				+ request.getServerName() + ":" + request.getLocalPort()
+				+ request.getRequestURI();
 		String queryString = request.getQueryString();
 		if (queryString != null && queryString.length() > 0) {
 			receivingUrl += "?" + queryString;

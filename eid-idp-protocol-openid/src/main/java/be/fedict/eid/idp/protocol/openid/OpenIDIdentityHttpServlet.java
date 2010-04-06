@@ -66,10 +66,7 @@ public class OpenIDIdentityHttpServlet extends HttpServlet {
 			printWriter.println("<Service>");
 			printWriter
 					.println("<Type>http://specs.openid.net/auth/2.0/signon</Type>");
-			printWriter.println("<URI>" + "https://" + request.getServerName()
-					+ "/eid-idp" + "/protocol/openid</URI>"); // XXX:
-			// port
-			// removed
+			printWriter.println("<URI>" + location + "/protocol/openid</URI>");
 			printWriter.println("</Service>");
 
 			printWriter.println("</XRD>");

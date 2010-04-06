@@ -83,7 +83,7 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 				.setPrivateAssociations(new InMemoryServerAssociationStore());
 		String location = "https://" + request.getServerName() + ":"
 				+ request.getServerPort() + "/eid-idp";
-		String opEndpointUrl = location + "/producer";
+		String opEndpointUrl = location + "/protocol/openid";
 		LOG.debug("OP endpoint URL: " + opEndpointUrl);
 		serverManager.setOPEndpointUrl(opEndpointUrl);
 		servletContext.setAttribute(SERVER_MANAGER_ATTRIBUTE, serverManager);
