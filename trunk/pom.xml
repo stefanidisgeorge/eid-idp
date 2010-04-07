@@ -31,6 +31,7 @@
 		<module>eid-idp-protocol-openid</module>
 		<module>eid-idp-model</module>
 		<module>eid-idp-webapp</module>
+		<module>eid-idp-webapp-control</module>
 		<module>eid-idp-sp-webapp</module>
 		<module>eid-idp-deploy</module>
 	</modules>
