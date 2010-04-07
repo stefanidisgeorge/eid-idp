@@ -15,3 +15,4 @@ The following OpenID enabled applications can accept the eID IdP OpenID identity
  * http://www.mychores.co.uk
  * https://www.hampr.com/
  * http://redbirdapps.com/
+ * http://demand.openid.net/
