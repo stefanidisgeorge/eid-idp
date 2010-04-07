@@ -61,6 +61,10 @@
 							<groupId>be.fedict.eid-idp</groupId>
 							<artifactId>eid-idp-model</artifactId>
 						</ejbModule>
+						<ejbModule>
+							<groupId>be.fedict.eid-idp</groupId>
+							<artifactId>eid-idp-webapp-control</artifactId>
+						</ejbModule>
 						<webModule>
 							<groupId>be.fedict.eid-idp</groupId>
 							<artifactId>eid-idp-webapp</artifactId>
@@ -159,6 +163,19 @@
 		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
 			<artifactId>eid-idp-model</artifactId>
+			<type>ejb</type>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>be.fedict.eid-idp</groupId>
+			<artifactId>eid-idp-model</artifactId>
+			<type>ejb-client</type>
+			<version>1.0.0-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>be.fedict.eid-idp</groupId>
+			<artifactId>eid-idp-webapp-control</artifactId>
 			<type>ejb</type>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
