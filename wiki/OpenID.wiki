@@ -17,3 +17,4 @@ The following OpenID enabled applications can accept the eID IdP OpenID identity
  * http://redbirdapps.com/
  * http://demand.openid.net/
  * http://www.wikispaces.com/
+ * http://jyte.com
