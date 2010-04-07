@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.association.Association;
+import org.openid4java.discovery.UrlIdentifier;
 import org.openid4java.message.AuthRequest;
 import org.openid4java.message.AuthSuccess;
 import org.openid4java.message.Message;
@@ -190,6 +191,9 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 				+ "/eid-idp/endpoints/openid-identity";
 		String userId = location + "?" + identity.getNationalNumber();
 		LOG.debug("user identifier: " + userId);
+		UrlIdentifier urlIdentifier = new UrlIdentifier(userId);
+		userId = urlIdentifier.getIdentifier();
+		LOG.debug("normalized user identifier: " + userId);
 
 		Message message = serverManager.authResponse(parameterList, userId,
 				userId, true, false);

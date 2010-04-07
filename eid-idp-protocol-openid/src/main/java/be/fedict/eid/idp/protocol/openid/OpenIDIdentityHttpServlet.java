@@ -53,6 +53,7 @@ public class OpenIDIdentityHttpServlet extends HttpServlet {
 		PrintWriter printWriter = response.getWriter();
 		if (request.getRequestURI().endsWith("/xrds")) {
 			LOG.debug("returning the YADIS XRDS document");
+			response.setContentType("application/xrds+xml");
 			printWriter
 					.println("<xrds:XRDS xmlns:xrds=\"xri://$xrds\" xmlns=\"xri://$xrd*($v*2.0)\">");
 			printWriter.println("<XRD>");

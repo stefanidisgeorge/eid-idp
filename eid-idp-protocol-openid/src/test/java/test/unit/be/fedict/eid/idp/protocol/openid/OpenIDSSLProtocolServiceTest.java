@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -96,8 +95,12 @@ import org.openid4java.association.Association;
 import org.openid4java.association.AssociationException;
 import org.openid4java.consumer.ConsumerManager;
 import org.openid4java.consumer.VerificationResult;
+import org.openid4java.discovery.Discovery;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.discovery.Identifier;
+import org.openid4java.discovery.html.HtmlResolver;
+import org.openid4java.discovery.xri.XriResolver;
+import org.openid4java.discovery.yadis.YadisResolver;
 import org.openid4java.message.AuthRequest;
 import org.openid4java.message.AuthSuccess;
 import org.openid4java.message.Message;
@@ -110,8 +113,10 @@ import org.openid4java.message.ax.FetchResponse;
 import org.openid4java.message.pape.PapeResponse;
 import org.openid4java.server.InMemoryServerAssociationStore;
 import org.openid4java.server.RealmVerifier;
+import org.openid4java.server.RealmVerifierFactory;
 import org.openid4java.server.ServerAssociationStore;
 import org.openid4java.server.ServerManager;
+import org.openid4java.util.HttpFetcherFactory;
 
 public class OpenIDSSLProtocolServiceTest {
 
@@ -228,7 +233,24 @@ public class OpenIDSSLProtocolServiceTest {
 					.getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
 			if (null == this.consumerManager) {
 				try {
-					this.consumerManager = new ConsumerManager();
+					SSLContext sslContext = SSLContext.getInstance("SSL");
+					TrustManager trustManager = new OpenIDTrustManager();
+					TrustManager[] trustManagers = { trustManager };
+					sslContext.init(null, trustManagers, null);
+					HttpFetcherFactory httpFetcherFactory = new HttpFetcherFactory(
+							sslContext,
+							org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+					YadisResolver yadisResolver = new YadisResolver(
+							httpFetcherFactory);
+					RealmVerifierFactory realmFactory = new RealmVerifierFactory(
+							yadisResolver);
+					HtmlResolver htmlResolver = new HtmlResolver(
+							httpFetcherFactory);
+					XriResolver xriResolver = Discovery.getXriResolver();
+					Discovery discovery = new Discovery(htmlResolver,
+							yadisResolver, xriResolver);
+					this.consumerManager = new ConsumerManager(realmFactory,
+							discovery, httpFetcherFactory);
 				} catch (Exception e) {
 					throw new ServletException(
 							"could not init OpenID ConsumerManager");
@@ -524,9 +546,9 @@ public class OpenIDSSLProtocolServiceTest {
 		/*
 		 * Next is for ConsumerManager to be able to trust the OP.
 		 */
-		MySSLSocketFactory mySSLSocketFactory = new MySSLSocketFactory(
-				certificate);
-		HttpsURLConnection.setDefaultSSLSocketFactory(mySSLSocketFactory);
+		// MySSLSocketFactory mySSLSocketFactory = new MySSLSocketFactory(
+		// certificate);
+		// HttpsURLConnection.setDefaultSSLSocketFactory(mySSLSocketFactory);
 
 		ProtocolSocketFactory protocolSocketFactory = new MyProtocolSocketFactory(
 				certificate);
