@@ -1,5 +1,13 @@
 #summary OpenID
 
+= eID IdP as OpenID identity provider =
+
+The eID IdP product can act as an OpenID identity provider. For the eID IdP instance running on the e-contract.be server, your OpenID identifier is:
+https://www.e-contract.be/eid-idp/endpoints/openid-identity/xrds
+
+Copy and paste this identifier when web applications ask for your OpenID identifier.
+
+
 = OpenID Applications =
 
 The following OpenID enabled applications can accept the eID IdP OpenID identity:
