@@ -19,3 +19,4 @@ The following OpenID enabled applications accept the eID IdP OpenID identity:
  * http://www.wikispaces.com/
  * http://jyte.com
  * http://trac.openidenabled.com/trac/
+ * http://getsatisfaction.com/
