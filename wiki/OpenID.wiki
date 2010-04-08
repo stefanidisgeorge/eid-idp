@@ -21,3 +21,4 @@ The following OpenID enabled applications accept the eID IdP OpenID identity:
  * http://trac.openidenabled.com/trac/
  * http://getsatisfaction.com/
  * http://www.pokersource.info/
+ * http://identi.ca/
