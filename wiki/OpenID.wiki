@@ -10,7 +10,7 @@ Copy and paste this identifier when web applications ask for your OpenID identif
 
 = OpenID Applications =
 
-The following OpenID enabled applications can accept the eID IdP OpenID identity:
+The following OpenID enabled applications accept the eID IdP OpenID identity:
  * https://www.e-contract.be/eid-idp-sp/
  * http://www.mychores.co.uk
  * https://www.hampr.com/
