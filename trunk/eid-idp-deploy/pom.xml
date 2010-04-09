@@ -150,12 +150,10 @@
 		<dependency>
 			<groupId>be.fedict.eid-trust-service</groupId>
 			<artifactId>eid-trust-service-client</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>be.fedict.eid-trust-service</groupId>
 			<artifactId>eid-trust-service-xkms2-ws</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
@@ -235,12 +233,10 @@
 		<dependency>
 			<groupId>org.openid4java</groupId>
 			<artifactId>openid4java-nodeps</artifactId>
-			<version>0.9.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.guice</groupId>
 			<artifactId>guice</artifactId>
-			<version>2.0</version>
 		</dependency>
 		<!--
 			The following dependencies are all provided by the Java EE runtime.
