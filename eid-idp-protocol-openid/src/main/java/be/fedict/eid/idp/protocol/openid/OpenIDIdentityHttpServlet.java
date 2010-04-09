@@ -54,6 +54,7 @@ public class OpenIDIdentityHttpServlet extends HttpServlet {
 		if (request.getRequestURI().endsWith("/xrds")) {
 			LOG.debug("returning the YADIS XRDS document");
 			response.setContentType("application/xrds+xml");
+			printWriter.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			printWriter
 					.println("<xrds:XRDS xmlns:xrds=\"xri://$xrds\" xmlns=\"xri://$xrd*($v*2.0)\">");
 			printWriter.println("<XRD>");
@@ -74,10 +75,14 @@ public class OpenIDIdentityHttpServlet extends HttpServlet {
 			printWriter.println("</xrds:XRDS>");
 			return;
 		}
+		LOG.debug("returning the HTML identity document");
+		String xrdsLocation = location + "/endpoints/openid-identity/xrds";
+		response.setContentType("text/html");
+		response.addHeader("X-XRDS-Location", xrdsLocation);
 		printWriter.println("<html>");
 		printWriter.println("<head>");
 		printWriter.println("<meta http-equiv=\"X-XRDS-Location\" content=\""
-				+ location + "/endpoints/openid-identity/xrds\"/>");
+				+ xrdsLocation + "\"/>");
 		printWriter.println("</head>");
 		printWriter.println("<body><p>OpenID Identity URL</p></body>");
 		printWriter.println("</html>");

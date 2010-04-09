@@ -7,10 +7,10 @@
 		<artifactId>eid-idp</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<name>FedICT eID Identity Provider Model</name>
-	<description>EJB3 Model for eID Identity Provider</description>
+	<name>FedICT eID IdP Admin Webapp Control</name>
+	<description>EJB3 Seam Controller Components for eID Identity Provider Admin Web Application</description>
 	<groupId>be.fedict.eid-idp</groupId>
-	<artifactId>eid-idp-model</artifactId>
+	<artifactId>eid-idp-admin-webapp-control</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>ejb</packaging>
 	<build>
@@ -36,18 +36,9 @@
 	<dependencies>
 		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
-			<artifactId>eid-idp-spi</artifactId>
+			<artifactId>eid-idp-model</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>be.fedict.eid-trust-service</groupId>
-			<artifactId>eid-trust-service-client</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>be.fedict.eid-applet</groupId>
-			<artifactId>eid-applet-service-spi</artifactId>
-			<scope>provided</scope>
+			<type>ejb-client</type>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
@@ -71,6 +62,10 @@
 			<artifactId>servlet-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>javax.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>
 		</dependency>
@@ -91,21 +86,6 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

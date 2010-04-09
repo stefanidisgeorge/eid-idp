@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pages xmlns="http://jboss.com/products/seam/pages" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://jboss.com/products/seam/pages http://jboss.com/products/seam/pages-2.0.xsd">
+	xsi:schemaLocation="http://jboss.com/products/seam/pages http://jboss.com/products/seam/pages-2.0.xsd"
+	login-view-id="/login.xhtml">
+
+	<exception class="org.jboss.seam.security.AuthorizationException">
+		<end-conversation />
+		<redirect view-id="/authorization.xhtml">
+			<message>You do not have the necessary security privileges to perform
+				this action.</message>
+		</redirect>
+	</exception>
+
+	<page view-id="/registration.xhtml" action="#{idpRegistration.register}"></page>
+
+	<page view-id="/admin/*">
+		<!-- login-required="true" keeps on looping over the eID login page -->
+		<restrict>#{s:hasRole('admin')}</restrict>
+	</page>
+
+	<exception class="org.jboss.seam.security.NotLoggedInException">
+		<redirect view-id="/login.xhtml">
+			<message>You must be logged in to perform this action</message>
+		</redirect>
+	</exception>
+
+	<page view-id="*">
+		<navigation from-action="#{identity.logout()}">
+			<redirect view-id="/main.xhtml" />
+		</navigation>
+	</page>
 </pages>
