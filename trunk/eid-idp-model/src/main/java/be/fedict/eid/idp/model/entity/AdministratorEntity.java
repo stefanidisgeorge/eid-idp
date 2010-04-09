@@ -36,7 +36,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import static be.fedict.eid.idp.model.entity.AdministratorEntity.COUNT_QUERY;
 
 @Entity
-@Table(name = "administrators")
+@Table(name = "idp_administrators")
 @NamedQueries(@NamedQuery(name = COUNT_QUERY, query = "SELECT COUNT(admin) FROM AdministratorEntity AS admin"))
 public class AdministratorEntity implements Serializable {
 

@@ -31,7 +31,7 @@ import javax.persistence.Table;
 import org.apache.commons.codec.digest.DigestUtils;
 
 @Entity
-@Table(name = "registrations")
+@Table(name = "idp_registrations")
 public class RegistrationEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
