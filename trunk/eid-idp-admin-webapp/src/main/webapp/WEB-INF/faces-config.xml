@@ -7,4 +7,20 @@
 	<application>
 		<view-handler>com.sun.facelets.FaceletViewHandler</view-handler>
 	</application>
+
+	<lifecycle>
+		<phase-listener>be.fedict.eid.idp.admin.webapp.CredentialsPhaseListener</phase-listener>
+	</lifecycle>
+
+	<navigation-rule>
+		<from-view-id>/main.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>register</from-outcome>
+			<to-view-id>/register.xhtml</to-view-id>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>login</from-outcome>
+			<to-view-id>/admin/main.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
 </faces-config>

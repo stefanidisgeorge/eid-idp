@@ -5,5 +5,16 @@
 	xsi:schemaLocation="http://jboss.com/products/seam/core http://jboss.com/products/seam/core-2.1.xsd
         http://jboss.com/products/seam/components http://jboss.com/products/seam/components-2.1.xsd
         http://jboss.com/products/seam/security http://jboss.com/products/seam/security-2.1.xsd">
+
 	<core:init jndi-pattern="fedict/eid/idp/admin/webapp/#{ejbName}" />
+
+	<!-- security configuration -->
+	<security:identity authenticate-method="#{idpAuthenticator.authenticate}" />
+	<event type="org.jboss.seam.security.notLoggedIn">
+		<action execute="#{redirect.captureCurrentView}" />
+	</event>
+	<event type="org.jboss.seam.security.postAuthenticate">
+		<action execute="#{redirect.returnToCapturedView}" />
+	</event>
+
 </components>

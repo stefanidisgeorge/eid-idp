@@ -6,17 +6,19 @@
 	xmlns:f="http://java.sun.com/jsf/core">
 <body>
 <ui:composition template="/WEB-INF/template.xhtml">
-	<ui:param name="activeMenu" value="main" />
+	<ui:param name="activeMenu" value="config" />
 	<ui:define name="body">
-		<h2>Welcome</h2>
+		<h2>Configuration</h2>
 		<h:form>
-			<p><h:commandLink action="register">
-				<h:outputText value="Register" />
-			</h:commandLink></p>
-
-			<p><h:commandLink action="login">
-				<h:outputText value="Login" />
-			</h:commandLink></p>
+			<rich:tabPanel switchType="client">
+				<rich:tab label="PKI validation">
+					<h:panelGrid columns="2">
+						<h:outputText value="eID Trust Service XKMS2 URL:" />
+						<h:inputText value="#{idpConfig.xkmsUrl}" />
+					</h:panelGrid>
+					<h:commandButton value="Save" action="#{idpConfig.save}" />
+				</rich:tab>
+			</rich:tabPanel>
 		</h:form>
 	</ui:define>
 </ui:composition>

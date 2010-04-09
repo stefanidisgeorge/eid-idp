@@ -45,6 +45,7 @@ import org.openid4java.message.pape.PapeResponse;
 import org.openid4java.server.InMemoryServerAssociationStore;
 import org.openid4java.server.RealmVerifier;
 import org.openid4java.server.ServerAssociationStore;
+import org.openid4java.server.ServerException;
 import org.openid4java.server.ServerManager;
 
 import be.fedict.eid.applet.service.Address;
@@ -240,12 +241,7 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 			 * We manually sign the auth response as we also want to add our own
 			 * attributes.
 			 */
-			String handle = authRequest.getHandle();
-			ServerAssociationStore serverAssociationStore = serverManager
-					.getSharedAssociations();
-			Association association = serverAssociationStore.load(handle);
-			authSuccess.setSignature(association.sign(authSuccess
-					.getSignedText()));
+			serverManager.sign(authSuccess);
 		}
 		String destinationUrl = message.getDestinationUrl(true);
 		LOG.debug("destination URL: " + destinationUrl);

@@ -57,6 +57,16 @@
 							<artifactId>eid-idp-protocol-openid</artifactId>
 							<includeInApplicationXml>true</includeInApplicationXml>
 						</jarModule>
+						<jarModule>
+							<groupId>be.fedict.eid-trust-service</groupId>
+							<artifactId>eid-trust-service-client</artifactId>
+							<includeInApplicationXml>true</includeInApplicationXml>
+						</jarModule>
+						<jarModule>
+							<groupId>be.fedict.eid-trust-service</groupId>
+							<artifactId>eid-trust-service-xkms2-ws</artifactId>
+							<includeInApplicationXml>true</includeInApplicationXml>
+						</jarModule>
 						<ejbModule>
 							<groupId>be.fedict.eid-idp</groupId>
 							<artifactId>eid-idp-model</artifactId>
@@ -64,6 +74,10 @@
 						<ejbModule>
 							<groupId>be.fedict.eid-idp</groupId>
 							<artifactId>eid-idp-webapp-control</artifactId>
+						</ejbModule>
+						<ejbModule>
+							<groupId>be.fedict.eid-idp</groupId>
+							<artifactId>eid-idp-admin-webapp-control</artifactId>
 						</ejbModule>
 						<webModule>
 							<groupId>be.fedict.eid-idp</groupId>
@@ -134,6 +148,16 @@
 			<artifactId>eid-applet-shared</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>be.fedict.eid-trust-service</groupId>
+			<artifactId>eid-trust-service-client</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>be.fedict.eid-trust-service</groupId>
+			<artifactId>eid-trust-service-xkms2-ws</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
 			<artifactId>eid-idp-spi</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
@@ -186,6 +210,12 @@
 		</dependency>
 		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
+			<artifactId>eid-idp-admin-webapp-control</artifactId>
+			<type>ejb</type>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>be.fedict.eid-idp</groupId>
 			<artifactId>eid-idp-webapp</artifactId>
 			<type>war</type>
 			<version>1.0.0-SNAPSHOT</version>
@@ -215,6 +245,11 @@
 		<!--
 			The following dependencies are all provided by the Java EE runtime.
 		-->
+		<dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-rt</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging-api</artifactId>
@@ -279,6 +314,11 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk16</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bctsp-jdk16</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
