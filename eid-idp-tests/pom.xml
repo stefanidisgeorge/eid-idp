@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>be.fedict.eid-applet</groupId>
 			<artifactId>eid-applet-core</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>${eid-applet.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -76,7 +76,6 @@
 		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymockclassextension</artifactId>
-			<version>2.5.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
