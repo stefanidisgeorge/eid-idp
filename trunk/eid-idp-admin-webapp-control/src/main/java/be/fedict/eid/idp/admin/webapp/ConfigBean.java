@@ -44,11 +44,14 @@ public class ConfigBean implements Config {
 
 	private String xkmsUrl;
 
+	private String hmacSecret;
+
 	@Override
 	@PostConstruct
 	public void postConstruct() {
 		this.log.debug("postConstruct");
 		this.xkmsUrl = this.configManager.getXkmsUrl();
+		this.hmacSecret = this.configManager.getHmacSecret();
 	}
 
 	@Remove
@@ -67,11 +70,22 @@ public class ConfigBean implements Config {
 	public String save() {
 		this.log.debug("save");
 		this.configManager.setXkmsUrl(this.xkmsUrl);
+		this.configManager.setHmacSecret(this.hmacSecret);
 		return null;
 	}
 
 	@Override
 	public void setXkmsUrl(String xkmsUrl) {
 		this.xkmsUrl = xkmsUrl;
+	}
+
+	@Override
+	public String getHmacSecret() {
+		return this.hmacSecret;
+	}
+
+	@Override
+	public void setHmacSecret(String hmacSecret) {
+		this.hmacSecret = hmacSecret;
 	}
 }

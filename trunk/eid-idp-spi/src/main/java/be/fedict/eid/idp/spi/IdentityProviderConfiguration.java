@@ -16,33 +16,20 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.admin.webapp;
+package be.fedict.eid.idp.spi;
 
-import javax.ejb.Local;
+/**
+ * Interface towards the configuration of the eID IdP.
+ * 
+ * @author Frank Cornelis
+ * 
+ */
+public interface IdentityProviderConfiguration {
 
-@Local
-public interface Config {
-
-	/*
-	 * Accessors.
+	/**
+	 * Gives back the secret used to HMAC the user identifiers.
+	 * 
+	 * @return secret, or <code>null</code> if not set.
 	 */
-	String getXkmsUrl();
-
-	void setXkmsUrl(String xkmsUrl);
-
-	String getHmacSecret();
-
-	void setHmacSecret(String hmacSecret);
-
-	/*
-	 * Actions.
-	 */
-	String save();
-
-	/*
-	 * Lifecycle.
-	 */
-	void destroy();
-
-	void postConstruct();
+	byte[] getHmacSecret();
 }

@@ -31,22 +31,47 @@ public class ConfigManagerBean implements ConfigManager {
 	private EntityManager entityManager;
 
 	public String getXkmsUrl() {
+		return getConfigValue(ConfigNames.XKMS_URL);
+	}
+
+	public void setXkmsUrl(String xkmsUrl) {
+		setConfigValue(ConfigNames.XKMS_URL, xkmsUrl);
+	}
+
+	private String getConfigValue(ConfigNames configName) {
 		ConfigEntity config = this.entityManager.find(ConfigEntity.class,
-				ConfigNames.XKMS_URL.name());
+				configName.name());
 		if (null != config) {
-			return config.getValue();
+			String value = config.getValue();
+			if (null == value) {
+				return null;
+			}
+			if (value.isEmpty()) {
+				return null;
+			}
+			return value;
 		}
 		return null;
 	}
 
-	public void setXkmsUrl(String xkmsUrl) {
+	private void setConfigValue(ConfigNames configName, String value) {
 		ConfigEntity config = this.entityManager.find(ConfigEntity.class,
-				ConfigNames.XKMS_URL.name());
+				configName.name());
 		if (null == config) {
-			config = new ConfigEntity(ConfigNames.XKMS_URL.name(), xkmsUrl);
+			config = new ConfigEntity(configName.name(), value);
 			this.entityManager.persist(config);
 		} else {
-			config.setValue(xkmsUrl);
+			config.setValue(value);
 		}
+	}
+
+	@Override
+	public String getHmacSecret() {
+		return getConfigValue(ConfigNames.HMAC_SECRET);
+	}
+
+	@Override
+	public void setHmacSecret(String hmacSecret) {
+		setConfigValue(ConfigNames.HMAC_SECRET, hmacSecret);
 	}
 }

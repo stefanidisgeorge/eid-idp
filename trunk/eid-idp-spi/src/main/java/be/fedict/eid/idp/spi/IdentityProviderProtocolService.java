@@ -40,8 +40,10 @@ public interface IdentityProviderProtocolService {
 	 * Initializes this protocol service handler.
 	 * 
 	 * @param servletContext
+	 * @param configuration
 	 */
-	void init(ServletContext servletContext);
+	void init(ServletContext servletContext,
+			IdentityProviderConfiguration configuration);
 
 	/**
 	 * Handles an incoming request for this protocol.

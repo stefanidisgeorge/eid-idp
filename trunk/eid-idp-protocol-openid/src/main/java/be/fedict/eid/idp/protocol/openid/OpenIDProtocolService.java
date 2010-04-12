@@ -20,17 +20,22 @@ package be.fedict.eid.idp.protocol.openid;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openid4java.association.Association;
 import org.openid4java.discovery.UrlIdentifier;
 import org.openid4java.message.AuthRequest;
 import org.openid4java.message.AuthSuccess;
@@ -44,12 +49,11 @@ import org.openid4java.message.ax.FetchResponse;
 import org.openid4java.message.pape.PapeResponse;
 import org.openid4java.server.InMemoryServerAssociationStore;
 import org.openid4java.server.RealmVerifier;
-import org.openid4java.server.ServerAssociationStore;
-import org.openid4java.server.ServerException;
 import org.openid4java.server.ServerManager;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.ReturnResponse;
@@ -68,6 +72,8 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 	public static final String SERVER_MANAGER_ATTRIBUTE = OpenIDProtocolService.class
 			.getName()
 			+ ".ServerManager";
+
+	private IdentityProviderConfiguration configuration;
 
 	private ServerManager getServerManager(HttpServletRequest request) {
 		HttpSession httpSession = request.getSession();
@@ -92,8 +98,10 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 		return serverManager;
 	}
 
-	public void init(ServletContext servletContext) {
+	public void init(ServletContext servletContext,
+			IdentityProviderConfiguration configuration) {
 		LOG.debug("init");
+		this.configuration = configuration;
 	}
 
 	public IdentityProviderFlow handleIncomingRequest(
@@ -190,7 +198,30 @@ public class OpenIDProtocolService implements IdentityProviderProtocolService {
 		String location = "https://" + request.getServerName() + ":"
 				+ request.getServerPort()
 				+ "/eid-idp/endpoints/openid-identity";
-		String userId = location + "?" + identity.getNationalNumber();
+		String uniqueId = identity.getNationalNumber();
+		byte[] hmacSecret = this.configuration.getHmacSecret();
+		if (null != hmacSecret) {
+			SecretKey macKey = new SecretKeySpec(hmacSecret, "HmacSHA1");
+			Mac mac;
+			try {
+				mac = Mac.getInstance(macKey.getAlgorithm());
+			} catch (NoSuchAlgorithmException e) {
+				throw new RuntimeException("HMAC algo not available: "
+						+ e.getMessage());
+			}
+			try {
+				mac.init(macKey);
+			} catch (InvalidKeyException e) {
+				LOG.error("invalid secret key: " + e.getMessage(), e);
+				throw new RuntimeException("invalid secret");
+			}
+			mac.update(uniqueId.getBytes());
+			byte[] resultHMac = mac.doFinal();
+			String resultHex = new String(Hex.encodeHex(resultHMac))
+					.toUpperCase();
+			uniqueId = resultHex;
+		}
+		String userId = location + "?" + uniqueId;
 		LOG.debug("user identifier: " + userId);
 		UrlIdentifier urlIdentifier = new UrlIdentifier(userId);
 		userId = urlIdentifier.getIdentifier();

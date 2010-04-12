@@ -26,4 +26,8 @@ public interface ConfigManager {
 	String getXkmsUrl();
 
 	void setXkmsUrl(String xkmsUrl);
+
+	String getHmacSecret();
+
+	void setHmacSecret(String hmacSecret);
 }
