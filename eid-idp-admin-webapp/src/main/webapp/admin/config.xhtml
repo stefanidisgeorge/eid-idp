@@ -18,6 +18,13 @@
 					</h:panelGrid>
 					<h:commandButton value="Save" action="#{idpConfig.save}" />
 				</rich:tab>
+				<rich:tab label="Pseudonyms">
+					<h:panelGrid columns="2">
+						<h:outputText value="Default HMAC-SHA1 secret (hexadecimal):" />
+						<h:inputText value="#{idpConfig.hmacSecret}" />
+					</h:panelGrid>
+					<h:commandButton value="Save" action="#{idpConfig.save}" />
+				</rich:tab>
 			</rich:tabPanel>
 		</h:form>
 	</ui:define>

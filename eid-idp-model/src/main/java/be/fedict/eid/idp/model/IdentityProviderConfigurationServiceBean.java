@@ -16,33 +16,32 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.admin.webapp;
+package be.fedict.eid.idp.model;
 
-import javax.ejb.Local;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
 
-@Local
-public interface Config {
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
-	/*
-	 * Accessors.
-	 */
-	String getXkmsUrl();
+@Stateless
+public class IdentityProviderConfigurationServiceBean implements
+		IdentityProviderConfigurationService {
 
-	void setXkmsUrl(String xkmsUrl);
+	@EJB
+	private ConfigManager configManager;
 
-	String getHmacSecret();
-
-	void setHmacSecret(String hmacSecret);
-
-	/*
-	 * Actions.
-	 */
-	String save();
-
-	/*
-	 * Lifecycle.
-	 */
-	void destroy();
-
-	void postConstruct();
+	@Override
+	public byte[] getHmacSecret() {
+		String secretValue = this.configManager.getHmacSecret();
+		if (null == secretValue) {
+			return null;
+		}
+		try {
+			return Hex.decodeHex(secretValue.toCharArray());
+		} catch (DecoderException e) {
+			throw new RuntimeException("HEX decoder error: " + e.getMessage(),
+					e);
+		}
+	}
 }

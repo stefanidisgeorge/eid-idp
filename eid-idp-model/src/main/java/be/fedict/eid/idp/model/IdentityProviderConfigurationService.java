@@ -16,33 +16,14 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.admin.webapp;
+package be.fedict.eid.idp.model;
 
 import javax.ejb.Local;
 
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+
 @Local
-public interface Config {
+public interface IdentityProviderConfigurationService extends
+		IdentityProviderConfiguration {
 
-	/*
-	 * Accessors.
-	 */
-	String getXkmsUrl();
-
-	void setXkmsUrl(String xkmsUrl);
-
-	String getHmacSecret();
-
-	void setHmacSecret(String hmacSecret);
-
-	/*
-	 * Actions.
-	 */
-	String save();
-
-	/*
-	 * Lifecycle.
-	 */
-	void destroy();
-
-	void postConstruct();
 }

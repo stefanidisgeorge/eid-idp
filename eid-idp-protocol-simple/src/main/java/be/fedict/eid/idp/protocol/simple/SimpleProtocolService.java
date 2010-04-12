@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.sp.protocol.simple.SimpleProtocolConstants;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.ReturnResponse;
@@ -97,7 +98,8 @@ public class SimpleProtocolService implements IdentityProviderProtocolService {
 		return returnResponse;
 	}
 
-	public void init(ServletContext servletContext) {
+	public void init(ServletContext servletContext,
+			IdentityProviderConfiguration configuration) {
 		LOG.debug("init");
 	}
 }

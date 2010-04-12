@@ -35,7 +35,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import be.fedict.eid.idp.model.IdentityProviderConfigurationService;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
@@ -65,6 +67,9 @@ public class ProtocolEntryServlet extends HttpServlet {
 
 	@EJB
 	private ProtocolServiceManager protocolServiceManager;
+
+	@EJB
+	IdentityProviderConfigurationService identityProviderConfigurationService;
 
 	private String unknownProtocolPageInitParam;
 
@@ -132,7 +137,8 @@ public class ProtocolEntryServlet extends HttpServlet {
 							"protocol service for context path already registered: "
 									+ contextPath);
 				}
-				protocolService.init(servletContext);
+				protocolService.init(servletContext,
+						this.identityProviderConfigurationService);
 				protocolServices.put(contextPath, protocolService);
 			}
 		}

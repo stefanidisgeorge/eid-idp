@@ -20,5 +20,5 @@ package be.fedict.eid.idp.model;
 
 public enum ConfigNames {
 
-	XKMS_URL
+	XKMS_URL, HMAC_SECRET
 }

@@ -61,6 +61,7 @@ import org.opensaml.xml.schema.XSString;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.ReturnResponse;
@@ -106,7 +107,8 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		return relayState;
 	}
 
-	public void init(ServletContext servletContext) {
+	public void init(ServletContext servletContext,
+			IdentityProviderConfiguration configuration) {
 		LOG.debug("init");
 	}
 
