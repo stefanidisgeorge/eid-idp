@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.admin.webapp;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
@@ -44,6 +45,7 @@ public class ConfigBean implements Config {
 	private String xkmsUrl;
 
 	@Override
+	@PostConstruct
 	public void postConstruct() {
 		this.log.debug("postConstruct");
 		this.xkmsUrl = this.configManager.getXkmsUrl();
