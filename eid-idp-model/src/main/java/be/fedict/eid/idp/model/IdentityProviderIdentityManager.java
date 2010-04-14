@@ -16,29 +16,26 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.spi;
+package be.fedict.eid.idp.model;
 
 import java.security.cert.X509Certificate;
 
-/**
- * Interface towards the configuration of the eID IdP.
- * 
- * @author Frank Cornelis
- * 
- */
-public interface IdentityProviderConfiguration {
+import javax.ejb.Local;
+
+@Local
+public interface IdentityProviderIdentityManager {
 
 	/**
-	 * Gives back the secret used to HMAC the user identifiers.
-	 * 
-	 * @return secret, or <code>null</code> if not set.
+	 * When the system starts up we need to manage the eID IdP identity somehow.
+	 * This is the place.
 	 */
-	byte[] getHmacSecret();
+	void startup();
 
 	/**
-	 * Gives back the identity of this eID IdP system.
+	 * Gives back the eID IdP identity.
 	 * 
-	 * @return
+	 * @return the X509 certificate representing the identity of the eID IdP
+	 *         system.
 	 */
 	X509Certificate getIdentity();
 }

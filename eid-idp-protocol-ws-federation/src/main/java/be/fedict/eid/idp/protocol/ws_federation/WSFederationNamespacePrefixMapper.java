@@ -54,6 +54,9 @@ public class WSFederationNamespacePrefixMapper extends NamespacePrefixMapper {
 				.put(
 						"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 						"wsu");
+		prefixes.put("http://docs.oasis-open.org/ws-sx/ws-trust/200512",
+				"trust");
+		prefixes.put("http://www.w3.org/2001/XMLSchema", "xs");
 	}
 
 	@Override

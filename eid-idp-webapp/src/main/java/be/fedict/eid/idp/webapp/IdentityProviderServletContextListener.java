@@ -30,7 +30,10 @@ import javax.servlet.ServletRegistration.Dynamic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import be.fedict.eid.idp.model.IdentityProviderConfigurationService;
+import be.fedict.eid.idp.model.IdentityProviderIdentityManager;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import be.fedict.eid.idp.spi.protocol.EndpointType;
 import be.fedict.eid.idp.spi.protocol.EndpointsType;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
@@ -41,11 +44,34 @@ public class IdentityProviderServletContextListener implements
 	@EJB
 	private ProtocolServiceManager protocolServiceManager;
 
+	@EJB
+	private IdentityProviderConfigurationService identityProviderConfigurationService;
+
+	@EJB
+	private IdentityProviderIdentityManager identityProviderIdentityManager;
+
 	private static final Log LOG = LogFactory
 			.getLog(IdentityProviderServletContextListener.class);
 
 	public void contextInitialized(ServletContextEvent event) {
 		LOG.debug("contextInitialized");
+
+		this.identityProviderIdentityManager.startup();
+
+		initProtocolServices(event);
+
+		initIdentityProviderConfiguration(event);
+	}
+
+	private void initIdentityProviderConfiguration(ServletContextEvent event) {
+		ServletContext servletContext = event.getServletContext();
+		servletContext
+				.setAttribute(
+						IdentityProviderConfigurationFactory.IDENTITY_PROVIDER_CONFIGURATION_CONTEXT_ATTRIBUTE,
+						this.identityProviderConfigurationService);
+	}
+
+	private void initProtocolServices(ServletContextEvent event) {
 		ServletContext servletContext = event.getServletContext();
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
