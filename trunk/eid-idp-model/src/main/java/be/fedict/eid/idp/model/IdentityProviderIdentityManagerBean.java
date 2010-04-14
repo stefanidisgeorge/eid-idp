@@ -16,29 +16,33 @@
  * http://www.gnu.org/licenses/.
  */
 
-package test.unit.be.fedict.eid.idp.protocol.ws_federation;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+package be.fedict.eid.idp.model;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Enumeration;
+import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -49,83 +53,20 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.easymock.EasyMock;
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.testing.ServletTester;
 
-import be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServlet;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
+import be.fedict.eid.idp.model.entity.IdentityProviderIdentityEntity;
 
-public class WSFederationMetadataHttpServletTest {
+@Stateless
+public class IdentityProviderIdentityManagerBean implements
+		IdentityProviderIdentityManager {
 
 	private static final Log LOG = LogFactory
-			.getLog(WSFederationMetadataHttpServletTest.class);
+			.getLog(IdentityProviderIdentityManagerBean.class);
 
-	private ServletTester servletTester;
-
-	private String location;
-
-	@BeforeClass
-	public static void init() throws Exception {
-		Security.addProvider(new BouncyCastleProvider());
-	}
-
-	@Before
-	public void setUp() throws Exception {
-		KeyPair keyPair = generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = generateSelfSignedCertificate(keyPair,
-				"CN=Test", notBefore, notAfter);
-		this.servletTester = new ServletTester();
-		this.servletTester.setContextPath("/eid-idp");
-		ServletHolder servletHolder = this.servletTester.addServlet(
-				WSFederationMetadataHttpServlet.class,
-				"/ws-federation-metadata");
-
-		IdentityProviderConfiguration mockConfiguration = EasyMock
-				.createMock(IdentityProviderConfiguration.class);
-		EasyMock.expect(mockConfiguration.getIdentity()).andStubReturn(
-				certificate);
-		EasyMock.replay(mockConfiguration);
-		this.servletTester.start();
-		servletHolder
-				.getServletHandler()
-				.getServletContext()
-				.setAttribute(
-						IdentityProviderConfigurationFactory.IDENTITY_PROVIDER_CONFIGURATION_CONTEXT_ATTRIBUTE,
-						mockConfiguration);
-
-		this.location = this.servletTester.createSocketConnector(true)
-				+ "/eid-idp/ws-federation-metadata";
-	}
-
-	@Test
-	public void get() throws Exception {
-		// setup
-		LOG.debug("URL: " + this.location);
-		HttpClient httpClient = new HttpClient();
-		GetMethod getMethod = new GetMethod(this.location);
-
-		// operate
-		int result = httpClient.executeMethod(getMethod);
-
-		// verify
-		assertEquals(HttpServletResponse.SC_OK, result);
-		String responseBody = getMethod.getResponseBodyAsString();
-		LOG.debug("Response body: " + responseBody);
-		Header contentTypeHeader = getMethod.getResponseHeader("Content-Type");
-		assertNotNull(contentTypeHeader);
-		assertEquals("application/samlmetadata+xml", contentTypeHeader
-				.getValue());
-	}
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	private KeyPair generateKeyPair() throws Exception {
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -200,5 +141,104 @@ public class WSFederationMetadataHttpServletTest {
 				.generateCertificate(new ByteArrayInputStream(certificate
 						.getEncoded()));
 		return certificate;
+	}
+
+	private void persistKey(File pkcs12keyStore, PrivateKey privateKey,
+			X509Certificate certificate, char[] keyStorePassword,
+			char[] keyEntryPassword) throws Exception {
+		KeyStore keyStore = KeyStore.getInstance("pkcs12");
+		keyStore.load(null, keyStorePassword);
+		keyStore.setKeyEntry("default", privateKey, keyEntryPassword,
+				new Certificate[] { certificate });
+		FileOutputStream keyStoreOut = new FileOutputStream(pkcs12keyStore);
+		keyStore.store(keyStoreOut, keyStorePassword);
+		keyStoreOut.close();
+	}
+
+	@Override
+	public void startup() {
+		LOG.debug("startup");
+		List<IdentityProviderIdentityEntity> idpIdentities = IdentityProviderIdentityEntity
+				.getAll(this.entityManager);
+		if (false == idpIdentities.isEmpty()) {
+			return;
+		}
+
+		LOG
+				.debug("no IdP identities available, will create a temporary identity right now...");
+		KeyPair keyPair;
+		try {
+			keyPair = generateKeyPair();
+		} catch (Exception e) {
+			throw new RuntimeException("could not generate RSA key pair: "
+					+ e.getMessage(), e);
+		}
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate certificate;
+		try {
+			certificate = generateSelfSignedCertificate(keyPair, "CN=Test",
+					notBefore, notAfter);
+		} catch (Exception e) {
+			throw new RuntimeException(
+					"could not generate self-signed certificate: "
+							+ e.getMessage(), e);
+		}
+		File tmpP12File;
+		try {
+			tmpP12File = File.createTempFile("eid-idp-", ".p12");
+		} catch (IOException e) {
+			throw new RuntimeException("error creating temp keystore file: "
+					+ e.getMessage(), e);
+		}
+		try {
+			persistKey(tmpP12File, keyPair.getPrivate(), certificate, "secret"
+					.toCharArray(), "secret".toCharArray());
+		} catch (Exception e) {
+			throw new RuntimeException("error persisting the P12 keystore: "
+					+ e.getMessage(), e);
+		}
+
+		IdentityProviderIdentityEntity identityEntity = new IdentityProviderIdentityEntity(
+				tmpP12File.getAbsolutePath(), "secret");
+		this.entityManager.persist(identityEntity);
+		LOG.debug("eID IdP identity: " + identityEntity.getId());
+	}
+
+	@Override
+	public X509Certificate getIdentity() {
+		List<IdentityProviderIdentityEntity> idpIdentities = IdentityProviderIdentityEntity
+				.getAll(this.entityManager);
+		if (idpIdentities.isEmpty()) {
+			throw new IllegalStateException("no eID IdP identity present");
+		}
+		IdentityProviderIdentityEntity identityEntity = idpIdentities.get(0);
+		KeyStore keyStore;
+		try {
+			keyStore = KeyStore.getInstance("PKCS12");
+		} catch (KeyStoreException e) {
+			throw new RuntimeException("p12 error");
+		}
+		String p12Location = identityEntity.getP12Location();
+		LOG.debug("P12 location: " + p12Location);
+		FileInputStream fileInputStream;
+		try {
+			fileInputStream = new FileInputStream(new File(p12Location));
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException("P12 keystore not found: " + p12Location
+					+ ": " + e.getMessage(), e);
+		}
+		try {
+			keyStore.load(fileInputStream, identityEntity.getP12Password()
+					.toCharArray());
+			Enumeration<String> aliases = keyStore.aliases();
+			String alias = aliases.nextElement();
+			X509Certificate certificate = (X509Certificate) keyStore
+					.getCertificate(alias);
+			return certificate;
+		} catch (Exception e) {
+			throw new RuntimeException("error loading P12 keystore: "
+					+ e.getMessage(), e);
+		}
 	}
 }

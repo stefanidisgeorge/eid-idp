@@ -16,29 +16,17 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.spi;
+package be.fedict.eid.idp.mbean;
 
-import java.security.cert.X509Certificate;
+import javax.ejb.Local;
 
 /**
- * Interface towards the configuration of the eID IdP.
+ * For somehow reason we really need to define an EJB3 interface on the MBean.
  * 
  * @author Frank Cornelis
  * 
  */
-public interface IdentityProviderConfiguration {
+@Local
+public interface IdentityProviderMBeanLocal {
 
-	/**
-	 * Gives back the secret used to HMAC the user identifiers.
-	 * 
-	 * @return secret, or <code>null</code> if not set.
-	 */
-	byte[] getHmacSecret();
-
-	/**
-	 * Gives back the identity of this eID IdP system.
-	 * 
-	 * @return
-	 */
-	X509Certificate getIdentity();
 }

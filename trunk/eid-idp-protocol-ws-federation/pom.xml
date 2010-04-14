@@ -34,6 +34,7 @@
 						<configuration>
 							<schemaIncludes>
 								<schemaInclude>ws-federation.xsd</schemaInclude>
+								<schemaInclude>ws-trust-1.3.xsd</schemaInclude>
 							</schemaIncludes>
 							<debug>true</debug>
 							<verbose>true</verbose>
@@ -68,6 +69,10 @@
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -114,8 +119,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
+			<groupId>be.fedict.eid-applet</groupId>
+			<artifactId>eid-applet-service-signer</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.santuario</groupId>
+			<artifactId>xmlsec</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

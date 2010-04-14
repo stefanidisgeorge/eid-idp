@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.model;
 
+import java.security.cert.X509Certificate;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
@@ -31,6 +33,9 @@ public class IdentityProviderConfigurationServiceBean implements
 	@EJB
 	private ConfigManager configManager;
 
+	@EJB
+	private IdentityProviderIdentityManager identityProviderIdentityManager;
+
 	@Override
 	public byte[] getHmacSecret() {
 		String secretValue = this.configManager.getHmacSecret();
@@ -43,5 +48,10 @@ public class IdentityProviderConfigurationServiceBean implements
 			throw new RuntimeException("HEX decoder error: " + e.getMessage(),
 					e);
 		}
+	}
+
+	@Override
+	public X509Certificate getIdentity() {
+		return this.identityProviderIdentityManager.getIdentity();
 	}
 }
