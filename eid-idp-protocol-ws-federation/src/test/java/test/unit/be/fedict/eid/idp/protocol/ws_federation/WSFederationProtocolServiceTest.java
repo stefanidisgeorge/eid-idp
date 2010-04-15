@@ -23,10 +23,21 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URLDecoder;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -53,8 +64,20 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.Init;
 import org.apache.xml.security.utils.Constants;
 import org.apache.xpath.XPathAPI;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.easymock.EasyMock;
+import org.joda.time.DateTime;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -67,6 +90,7 @@ import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
 import be.fedict.eid.idp.protocol.ws_federation.WSFederationProtocolService;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.NameValuePair;
 import be.fedict.eid.idp.spi.ReturnResponse;
 
@@ -74,6 +98,11 @@ public class WSFederationProtocolServiceTest {
 
 	private static final Log LOG = LogFactory
 			.getLog(WSFederationProtocolServiceTest.class);
+
+	@BeforeClass
+	public static void init() throws Exception {
+		Security.addProvider(new BouncyCastleProvider());
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -85,6 +114,12 @@ public class WSFederationProtocolServiceTest {
 		// setup
 		WSFederationProtocolService testedInstance = new WSFederationProtocolService();
 
+		KeyPair keyPair = generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate certificate = generateSelfSignedCertificate(keyPair,
+				"CN=Test", notBefore, notAfter);
+
 		HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
 		Identity identity = new Identity();
 		identity.name = "test-name";
@@ -94,6 +129,8 @@ public class WSFederationProtocolServiceTest {
 				.createMock(HttpServletRequest.class);
 		HttpServletResponse mockResponse = EasyMock
 				.createMock(HttpServletResponse.class);
+		IdentityProviderConfiguration mockIdentityProviderConfiguration = EasyMock
+				.createMock(IdentityProviderConfiguration.class);
 
 		// expectations
 		EasyMock
@@ -106,17 +143,25 @@ public class WSFederationProtocolServiceTest {
 						mockHttpSession
 								.getAttribute(WSFederationProtocolService.WCTX_SESSION_ATTRIBUTE))
 				.andStubReturn("some-context-identifier");
+		EasyMock.expect(mockIdentityProviderConfiguration.getIdentity())
+				.andStubReturn(certificate);
+		EasyMock.expect(
+				mockIdentityProviderConfiguration.getPrivateIdentityKey())
+				.andStubReturn(keyPair.getPrivate());
 
 		// prepare
-		EasyMock.replay(mockHttpSession, mockRequest, mockResponse);
+		EasyMock.replay(mockHttpSession, mockRequest, mockResponse,
+				mockIdentityProviderConfiguration);
 
 		// operate
+		testedInstance.init(null, mockIdentityProviderConfiguration);
 		ReturnResponse result = testedInstance.handleReturnResponse(
 				mockHttpSession, identity, address, authenticatedIdentifier,
 				mockRequest, mockResponse);
 
 		// verify
-		EasyMock.verify(mockHttpSession, mockRequest, mockResponse);
+		EasyMock.verify(mockHttpSession, mockRequest, mockResponse,
+				mockIdentityProviderConfiguration);
 		assertEquals("http://return.to.here", result.getActionUrl());
 		assertAttribute(result, "wa", "wsignin1.0");
 		assertAttribute(result, "wctx", "some-context-identifier");
@@ -125,7 +170,7 @@ public class WSFederationProtocolServiceTest {
 		LOG.debug("wresult: " + wresult);
 	}
 
-	//@Test
+	// @Test
 	public void testSignatureVerification() throws Exception {
 		// setup
 		InputStream documentInputStream = WSFederationProtocolServiceTest.class
@@ -257,5 +302,80 @@ public class WSFederationProtocolServiceTest {
 		public Iterator iterator() {
 			return Collections.singletonList(this.node).iterator();
 		}
+	}
+
+	private KeyPair generateKeyPair() throws Exception {
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		SecureRandom random = new SecureRandom();
+		keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
+				RSAKeyGenParameterSpec.F4), random);
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		return keyPair;
+	}
+
+	private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
+			throws IOException {
+		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
+				.getEncoded());
+		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+				(ASN1Sequence) new ASN1InputStream(bais).readObject());
+		return new SubjectKeyIdentifier(info);
+	}
+
+	private AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
+			throws IOException {
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
+				.getEncoded());
+		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+				(ASN1Sequence) new ASN1InputStream(bais).readObject());
+
+		return new AuthorityKeyIdentifier(info);
+	}
+
+	private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
+			String subjectDn, DateTime notBefore, DateTime notAfter)
+			throws Exception {
+		PublicKey subjectPublicKey = keyPair.getPublic();
+		PrivateKey issuerPrivateKey = keyPair.getPrivate();
+		String signatureAlgorithm = "SHA1WithRSAEncryption";
+		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+		certificateGenerator.reset();
+		certificateGenerator.setPublicKey(subjectPublicKey);
+		certificateGenerator.setSignatureAlgorithm(signatureAlgorithm);
+		certificateGenerator.setNotBefore(notBefore.toDate());
+		certificateGenerator.setNotAfter(notAfter.toDate());
+		X509Principal issuerDN = new X509Principal(subjectDn);
+		certificateGenerator.setIssuerDN(issuerDN);
+		certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
+		certificateGenerator.setSerialNumber(new BigInteger(128,
+				new SecureRandom()));
+
+		certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
+				false, createSubjectKeyId(subjectPublicKey));
+		PublicKey issuerPublicKey;
+		issuerPublicKey = subjectPublicKey;
+		certificateGenerator.addExtension(
+				X509Extensions.AuthorityKeyIdentifier, false,
+				createAuthorityKeyId(issuerPublicKey));
+
+		certificateGenerator.addExtension(X509Extensions.BasicConstraints,
+				false, new BasicConstraints(true));
+
+		X509Certificate certificate;
+		certificate = certificateGenerator.generate(issuerPrivateKey);
+
+		/*
+		 * Next certificate factory trick is needed to make sure that the
+		 * certificate delivered to the caller is provided by the default
+		 * security provider instead of BouncyCastle. If we don't do this trick
+		 * we might run into trouble when trying to use the CertPath validator.
+		 */
+		CertificateFactory certificateFactory = CertificateFactory
+				.getInstance("X.509");
+		certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(certificate
+						.getEncoded()));
+		return certificate;
 	}
 }

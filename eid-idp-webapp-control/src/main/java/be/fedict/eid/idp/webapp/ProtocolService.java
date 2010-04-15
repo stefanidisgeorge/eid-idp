@@ -32,4 +32,9 @@ public interface ProtocolService {
 	 * Lifecycle.
 	 */
 	void destroy();
+
+	/*
+	 * Accesors.
+	 */
+	String getThumbprint();
 }
