@@ -32,6 +32,8 @@ import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.ProtectionParameter;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -207,6 +209,13 @@ public class IdentityProviderIdentityManagerBean implements
 
 	@Override
 	public X509Certificate getIdentity() {
+		PrivateKeyEntry privateKeyEntry = getPrivateKeyEntry();
+		X509Certificate certificate = (X509Certificate) privateKeyEntry
+				.getCertificate();
+		return certificate;
+	}
+
+	private PrivateKeyEntry getPrivateKeyEntry() {
 		List<IdentityProviderIdentityEntity> idpIdentities = IdentityProviderIdentityEntity
 				.getAll(this.entityManager);
 		if (idpIdentities.isEmpty()) {
@@ -229,16 +238,25 @@ public class IdentityProviderIdentityManagerBean implements
 					+ ": " + e.getMessage(), e);
 		}
 		try {
-			keyStore.load(fileInputStream, identityEntity.getP12Password()
-					.toCharArray());
+			char[] password = identityEntity.getP12Password().toCharArray();
+			keyStore.load(fileInputStream, password);
 			Enumeration<String> aliases = keyStore.aliases();
 			String alias = aliases.nextElement();
-			X509Certificate certificate = (X509Certificate) keyStore
-					.getCertificate(alias);
-			return certificate;
+			ProtectionParameter protectionParameter = new KeyStore.PasswordProtection(
+					password);
+			PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) keyStore
+					.getEntry(alias, protectionParameter);
+			return privateKeyEntry;
 		} catch (Exception e) {
 			throw new RuntimeException("error loading P12 keystore: "
 					+ e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public PrivateKey getPrivateIdentityKey() {
+		PrivateKeyEntry privateKeyEntry = getPrivateKeyEntry();
+		PrivateKey privateKey = privateKeyEntry.getPrivateKey();
+		return privateKey;
 	}
 }

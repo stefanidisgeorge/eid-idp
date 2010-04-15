@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.model;
 
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
 import javax.ejb.EJB;
@@ -53,5 +54,10 @@ public class IdentityProviderConfigurationServiceBean implements
 	@Override
 	public X509Certificate getIdentity() {
 		return this.identityProviderIdentityManager.getIdentity();
+	}
+
+	@Override
+	public PrivateKey getPrivateIdentityKey() {
+		return this.identityProviderIdentityManager.getPrivateIdentityKey();
 	}
 }

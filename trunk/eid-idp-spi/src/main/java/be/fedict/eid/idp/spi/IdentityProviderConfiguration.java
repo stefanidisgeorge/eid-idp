@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.spi;
 
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
 /**
@@ -41,4 +42,12 @@ public interface IdentityProviderConfiguration {
 	 * @return
 	 */
 	X509Certificate getIdentity();
+
+	/**
+	 * Gives back the private key corresponding with the identity of this eID
+	 * IdP system.
+	 * 
+	 * @return
+	 */
+	PrivateKey getPrivateIdentityKey();
 }
