@@ -7,7 +7,7 @@
 	<Endpoints>
 		<Endpoint>
 			<ServletClass>be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServlet</ServletClass>
-			<ContextPath>/ws-federation-metadata</ContextPath>
+			<ContextPath>/ws-federation-metadata.xml</ContextPath>
 		</Endpoint>
 	</Endpoints>
 </IdentityProviderProtocol>
