@@ -125,7 +125,7 @@ public class WSFederationProtocolServiceTest {
 		LOG.debug("wresult: " + wresult);
 	}
 
-	// @Test
+	//@Test
 	public void testSignatureVerification() throws Exception {
 		// setup
 		InputStream documentInputStream = WSFederationProtocolServiceTest.class

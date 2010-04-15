@@ -57,7 +57,8 @@ import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.ReturnResponse;
 
 /**
- * WS-Federation Web (Passive) Requestors.
+ * WS-Federation Web (Passive) Requestors. We could use OpenAM (OpenSS0), but
+ * then again they're also just doing a wrapping around the JAXB classes.
  * 
  * @author Frank Cornelis
  * 

@@ -20,9 +20,11 @@ package test.unit.be.fedict.eid.idp.protocol.ws_federation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -35,6 +37,12 @@ import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -58,7 +66,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.testing.ServletTester;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
 import be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServlet;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
@@ -94,6 +108,8 @@ public class WSFederationMetadataHttpServletTest {
 				.createMock(IdentityProviderConfiguration.class);
 		EasyMock.expect(mockConfiguration.getIdentity()).andStubReturn(
 				certificate);
+		EasyMock.expect(mockConfiguration.getPrivateIdentityKey())
+				.andStubReturn(keyPair.getPrivate());
 		EasyMock.replay(mockConfiguration);
 		this.servletTester.start();
 		servletHolder
@@ -125,6 +141,48 @@ public class WSFederationMetadataHttpServletTest {
 		assertNotNull(contentTypeHeader);
 		assertEquals("application/samlmetadata+xml", contentTypeHeader
 				.getValue());
+	}
+
+	@Test
+	public void testSignatureVerification() throws Exception {
+		// setup
+		InputStream documentInputStream = WSFederationProtocolServiceTest.class
+				.getResourceAsStream("/FederationMetadata.xml");
+		assertNotNull(documentInputStream);
+
+		Document document = loadDocument(documentInputStream);
+
+		NodeList signatureNodeList = document.getElementsByTagNameNS(
+				XMLSignature.XMLNS, "Signature");
+		assertEquals(1, signatureNodeList.getLength());
+		Node signatureNode = signatureNodeList.item(0);
+
+		KeyInfoKeySelector keySelector = new KeyInfoKeySelector();
+		DOMValidateContext domValidateContext = new DOMValidateContext(
+				keySelector, signatureNode);
+
+		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory
+				.getInstance();
+		XMLSignature xmlSignature = xmlSignatureFactory
+				.unmarshalXMLSignature(domValidateContext);
+
+		// operate
+		boolean validity = xmlSignature.validate(domValidateContext);
+
+		// verify
+		assertTrue(validity);
+	}
+
+	private Document loadDocument(InputStream documentInputStream)
+			throws ParserConfigurationException, SAXException, IOException {
+		InputSource inputSource = new InputSource(documentInputStream);
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+				.newInstance();
+		documentBuilderFactory.setNamespaceAware(true);
+		DocumentBuilder documentBuilder = documentBuilderFactory
+				.newDocumentBuilder();
+		Document document = documentBuilder.parse(inputSource);
+		return document;
 	}
 
 	private KeyPair generateKeyPair() throws Exception {
