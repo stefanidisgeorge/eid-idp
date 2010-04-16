@@ -179,19 +179,19 @@ public class WSFederationProtocolService implements
 		returnResponse.addAttribute("wa", "wsignin1.0");
 		String wctx = retrieveWctx(httpSession);
 		returnResponse.addAttribute("wctx", wctx);
-		String wresult = getWResult(wctx, wtrealm, identity,
+		String wresult = getWResult(wctx, wtrealm, identity, address,
 				authenticatedIdentifier);
 		returnResponse.addAttribute("wresult", wresult);
 		return returnResponse;
 	}
 
 	private String getWResult(String wctx, String wtrealm, Identity identity,
-			String authenticatedIdentifier) throws JAXBException,
-			DatatypeConfigurationException, ParserConfigurationException,
-			TransformerException, NoSuchAlgorithmException,
-			InvalidAlgorithmParameterException, MarshalException,
-			XMLSignatureException, TransformerFactoryConfigurationError,
-			IOException {
+			Address address, String authenticatedIdentifier)
+			throws JAXBException, DatatypeConfigurationException,
+			ParserConfigurationException, TransformerException,
+			NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+			MarshalException, XMLSignatureException,
+			TransformerFactoryConfigurationError, IOException {
 		ObjectFactory trustObjectFactory = new ObjectFactory();
 		RequestSecurityTokenResponseCollectionType requestSecurityTokenResponseCollection = trustObjectFactory
 				.createRequestSecurityTokenResponseCollectionType();
@@ -264,11 +264,48 @@ public class WSFederationProtocolService implements
 
 		List<Object> attributes = attributeStatement
 				.getAttributeOrEncryptedAttribute();
-		AttributeType nameAttribute = samlObjectFactory.createAttributeType();
-		attributes.add(nameAttribute);
-		nameAttribute
-				.setName("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
-		nameAttribute.getAttributeValue().add(identity.getName());
+
+		addAttribute(WSFederationConstants.FIRST_NAME_CLAIM_TYPE_URI, identity
+				.getFirstName(), samlObjectFactory, attributes);
+		addAttribute(WSFederationConstants.LAST_NAME_CLAIM_TYPE_URI, identity
+				.getName(), samlObjectFactory, attributes);
+		addAttribute(
+				"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+				identity.getFirstName() + " " + identity.getName(),
+				samlObjectFactory, attributes);
+		addAttribute(WSFederationConstants.COUNTRY_CLAIM_TYPE_URI, "BE",
+				samlObjectFactory, attributes);
+		String genderValue;
+		switch (identity.getGender()) {
+		case MALE:
+			genderValue = "1";
+			break;
+		case FEMALE:
+			genderValue = "2";
+			break;
+		default:
+			genderValue = "0";
+			break;
+		}
+		addAttribute(WSFederationConstants.GENDER_CLAIM_TYPE_URI, genderValue,
+				samlObjectFactory, attributes);
+
+		addAttribute(WSFederationConstants.PPID_CLAIM_TYPE_URI,
+				authenticatedIdentifier, samlObjectFactory, attributes);
+		addAttribute(WSFederationConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
+				address.getStreetAndNumber(), samlObjectFactory, attributes);
+		addAttribute(WSFederationConstants.LOCALITY_CLAIM_TYPE_URI, address
+				.getMunicipality(), samlObjectFactory, attributes);
+		addAttribute(WSFederationConstants.POSTAL_CODE_CLAIM_TYPE_URI, address
+				.getZip(), samlObjectFactory, attributes);
+
+		AttributeType dobAttribute = samlObjectFactory.createAttributeType();
+		attributes.add(dobAttribute);
+		dobAttribute
+				.setName(WSFederationConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI);
+		dobAttribute.getAttributeValue().add(
+				datatypeFactory.newXMLGregorianCalendar(identity
+						.getDateOfBirth()));
 
 		ConditionsType conditions = samlObjectFactory.createConditionsType();
 		assertion.setConditions(conditions);
@@ -313,7 +350,16 @@ public class WSFederationProtocolService implements
 		return new String(outputStream.toByteArray());
 	}
 
-	protected void writeDocument(Document document,
+	private void addAttribute(String attributeUri, String attributeValue,
+			oasis.names.tc.saml._2_0.assertion.ObjectFactory samlObjectFactory,
+			List<Object> attributes) {
+		AttributeType attribute = samlObjectFactory.createAttributeType();
+		attributes.add(attribute);
+		attribute.setName(attributeUri);
+		attribute.getAttributeValue().add(attributeValue);
+	}
+
+	private void writeDocument(Document document,
 			OutputStream documentOutputStream)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
