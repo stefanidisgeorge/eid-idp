@@ -39,6 +39,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -87,6 +88,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import be.fedict.eid.applet.service.Address;
+import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
 import be.fedict.eid.idp.protocol.ws_federation.WSFederationProtocolService;
@@ -123,7 +125,13 @@ public class WSFederationProtocolServiceTest {
 		HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
 		Identity identity = new Identity();
 		identity.name = "test-name";
+		identity.firstName = "test-first-name";
+		identity.dateOfBirth = new GregorianCalendar();
+		identity.gender = Gender.MALE;
 		Address address = new Address();
+		address.streetAndNumber = "test-street 1234";
+		address.zip = "5678";
+		address.municipality = "test-city";
 		String authenticatedIdentifier = "test-auth-identifier";
 		HttpServletRequest mockRequest = EasyMock
 				.createMock(HttpServletRequest.class);

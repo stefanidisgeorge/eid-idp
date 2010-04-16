@@ -185,19 +185,48 @@ public class WSFederationMetadataHttpServlet extends HttpServlet {
 		securityTokenService.setClaimTypesOffered(claimTypesOffered);
 		List<ClaimType> claimTypes = claimTypesOffered.getClaimType();
 		org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory authObjectFactory = new org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory();
-		ClaimType nameClaimType = authObjectFactory.createClaimType();
-		claimTypes.add(nameClaimType);
-		nameClaimType
-				.setUri("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
-		nameClaimType.setOptional(true);
-		DisplayNameType nameDisplayName = authObjectFactory
-				.createDisplayNameType();
-		nameDisplayName.setValue("Name");
-		nameClaimType.setDisplayName(nameDisplayName);
-		DescriptionType nameDescription = authObjectFactory
-				.createDescriptionType();
-		nameDescription.setValue("The name of the subject.");
-		nameClaimType.setDescription(nameDescription);
+
+		addClaimType("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+				"Name", "The name of the Subject.",
+				authObjectFactory, claimTypes);
+		addClaimType(WSFederationConstants.FIRST_NAME_CLAIM_TYPE_URI,
+				"FirstName", "Preferred name or first name of a Subject.",
+				authObjectFactory, claimTypes);
+		addClaimType(WSFederationConstants.LAST_NAME_CLAIM_TYPE_URI,
+				"LastName", "Surname or family name of a Subject.",
+				authObjectFactory, claimTypes);
+		addClaimType(WSFederationConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
+				"StreetAddress",
+				"Street address component of a Subject's address information.",
+				authObjectFactory, claimTypes);
+		addClaimType(
+				WSFederationConstants.LOCALITY_CLAIM_TYPE_URI,
+				"Locality",
+				"This attribute contains the name of a locality, such as a city, county or other geographic region.",
+				authObjectFactory, claimTypes);
+		addClaimType(
+				WSFederationConstants.POSTAL_CODE_CLAIM_TYPE_URI,
+				"PostalCode",
+				"The postal code attribute type specifies the postal code of the named object.",
+				authObjectFactory, claimTypes);
+		addClaimType(WSFederationConstants.COUNTRY_CLAIM_TYPE_URI, "Country",
+				"This attribute contains a two-letter ISO 3166 country code.",
+				authObjectFactory, claimTypes);
+		addClaimType(
+				WSFederationConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI,
+				"DateOfBirth",
+				"The date of birth of a Subject in a form allowed by the xs:date data type.",
+				authObjectFactory, claimTypes);
+		addClaimType(
+				WSFederationConstants.GENDER_CLAIM_TYPE_URI,
+				"Gender",
+				"Gender of a Subject that can have any of these exact string values – '0' (meaning unspecified), '1' (meaning Male) or '2' (meaning Female). Using these values allows them to be language neutral.",
+				authObjectFactory, claimTypes);
+		addClaimType(
+				WSFederationConstants.PPID_CLAIM_TYPE_URI,
+				"PPID",
+				"A private personal identifier (PPID) that identifies the Subject to a Relying Party.",
+				authObjectFactory, claimTypes);
 
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
 				.newInstance();
@@ -221,6 +250,26 @@ public class WSFederationMetadataHttpServlet extends HttpServlet {
 		signDocument(document, privateKey, certificate, id);
 
 		writeDocument(document, outputStream);
+	}
+
+	private void addClaimType(
+			String claimUri,
+			String displayName,
+			String description,
+			org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory authObjectFactory,
+			List<ClaimType> claimTypes) {
+		ClaimType claim = authObjectFactory.createClaimType();
+		claimTypes.add(claim);
+		claim.setUri(claimUri);
+		claim.setOptional(true);
+		DisplayNameType claimDisplayName = authObjectFactory
+				.createDisplayNameType();
+		claimDisplayName.setValue(displayName);
+		claim.setDisplayName(claimDisplayName);
+		DescriptionType claimDescription = authObjectFactory
+				.createDescriptionType();
+		claimDescription.setValue(description);
+		claim.setDescription(claimDescription);
 	}
 
 	private void signDocument(Document document, PrivateKey privateKey,
