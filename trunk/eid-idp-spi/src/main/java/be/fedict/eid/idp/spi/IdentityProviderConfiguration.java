@@ -39,6 +39,8 @@ public interface IdentityProviderConfiguration {
 	/**
 	 * Gives back the identity of this eID IdP system.
 	 * 
+	 * TODO: should be a chain.
+	 * 
 	 * @return
 	 */
 	X509Certificate getIdentity();

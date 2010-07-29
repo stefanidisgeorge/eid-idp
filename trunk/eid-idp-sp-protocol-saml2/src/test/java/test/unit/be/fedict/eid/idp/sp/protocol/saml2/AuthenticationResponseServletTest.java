@@ -20,6 +20,7 @@ package test.unit.be.fedict.eid.idp.sp.protocol.saml2;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -91,9 +92,19 @@ public class AuthenticationResponseServletTest {
 
 	@Test
 	public void testPostSamlResponse() throws Exception {
+		doPostSamlResponseTest("/saml-response.xml");
+	}
+
+	//@Test
+	public void testPostSignedSamlResponse() throws Exception {
+		doPostSamlResponseTest("/saml-response-signed.xml");
+	}
+
+	private void doPostSamlResponseTest(String samlResponseResourceName)
+			throws IOException {
 		// setup
 		InputStream samlResponseInputStream = AuthenticationResponseServletTest.class
-				.getResourceAsStream("/saml-response.xml");
+				.getResourceAsStream(samlResponseResourceName);
 		String samlResponse = IOUtils.toString(samlResponseInputStream);
 		String encodedSamlResponse = Base64.encodeBase64String(samlResponse
 				.getBytes());

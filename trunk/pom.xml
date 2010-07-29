@@ -87,12 +87,12 @@
 			<dependency>
 				<groupId>org.openid4java</groupId>
 				<artifactId>openid4java-consumer</artifactId>
-				<version>0.9.6-SNAPSHOT</version>
+				<version>${openid4java.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openid4java</groupId>
 				<artifactId>openid4java-nodeps</artifactId>
-				<version>0.9.6-SNAPSHOT</version>
+				<version>${openid4java.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.guice</groupId>
@@ -104,5 +104,7 @@
 	<properties>
 		<eid-applet.version>1.0.1-SNAPSHOT</eid-applet.version>
 		<eid-trust-service.version>1.0.0-SNAPSHOT</eid-trust-service.version>
+		<!-- http://code.google.com/p/openid4java/issues/detail?id=114 -->
+		<openid4java.version>0.9.6-SNAPSHOT</openid4java.version>
 	</properties>
 </project>

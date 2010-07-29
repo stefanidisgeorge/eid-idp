@@ -43,21 +43,28 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.AttributeStatement;
 import org.opensaml.saml2.core.AttributeValue;
+import org.opensaml.saml2.core.Audience;
+import org.opensaml.saml2.core.AudienceRestriction;
 import org.opensaml.saml2.core.AuthnContext;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.AuthnStatement;
+import org.opensaml.saml2.core.Conditions;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml2.core.SubjectConfirmationData;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.schema.XSString;
+import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.xml.security.x509.BasicX509Credential;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
@@ -77,6 +84,8 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 	private static final Log LOG = LogFactory
 			.getLog(SAML2ProtocolService.class);
 
+	private IdentityProviderConfiguration configuration;
+
 	public static final String TARGET_URL_SESSION_ATTRIBUTE = SAML2ProtocolService.class
 			.getName()
 			+ ".TargetUrl";
@@ -84,6 +93,10 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 	public static final String RELAY_STATE_SESSION_ATTRIBUTE = SAML2ProtocolService.class
 			.getName()
 			+ ".RelayState";
+
+	public static final String IN_RESPONSE_TO_SESSION_ATTRIBUTE = SAML2ProtocolService.class
+			.getName()
+			+ ".InResponseTo";
 
 	private void setTargetUrl(String targetUrl, HttpServletRequest request) {
 		HttpSession httpSession = request.getSession();
@@ -94,6 +107,18 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		String targetUrl = (String) httpSession
 				.getAttribute(TARGET_URL_SESSION_ATTRIBUTE);
 		return targetUrl;
+	}
+
+	private void setInResponseTo(String inResponseTo, HttpServletRequest request) {
+		HttpSession httpSession = request.getSession();
+		httpSession
+				.setAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE, inResponseTo);
+	}
+
+	private String getInResponseTo(HttpSession httpSession) {
+		String inResponseTo = (String) httpSession
+				.getAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE);
+		return inResponseTo;
 	}
 
 	private void setRelayState(String relayState, HttpServletRequest request) {
@@ -107,16 +132,93 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		return relayState;
 	}
 
+	private XMLObjectBuilderFactory builderFactory;
+
+	private SAMLObjectBuilder<Response> responseBuilder;
+
+	private SAMLObjectBuilder<Status> statusBuilder;
+
+	private SAMLObjectBuilder<StatusCode> statusCodeBuilder;
+
+	private SAMLObjectBuilder<Assertion> assertionBuilder;
+
+	private SAMLObjectBuilder<Issuer> issuerBuilder;
+
+	private SAMLObjectBuilder<Conditions> conditionsBuilder;
+
+	private SAMLObjectBuilder<AudienceRestriction> audienceRestrictionBuilder;
+
+	private SAMLObjectBuilder<Audience> audienceBuilder;
+
+	private SAMLObjectBuilder<Subject> subjectBuilder;
+
+	private SAMLObjectBuilder<NameID> nameIdBuilder;
+
+	private SAMLObjectBuilder<SubjectConfirmation> subjectConfirmationBuilder;
+
+	private SAMLObjectBuilder<AuthnStatement> authnStatementBuilder;
+
+	private SAMLObjectBuilder<SubjectConfirmationData> subjectConfirmationDataBuilder;
+
+	private SAMLObjectBuilder<AuthnContext> authnContextBuilder;
+
+	private SAMLObjectBuilder<AttributeStatement> attributeStatementBuilder;
+
+	private SAMLObjectBuilder<Attribute> attributeBuilder;
+
+	private XMLObjectBuilder<XSString> stringBuilder;
+
 	public void init(ServletContext servletContext,
 			IdentityProviderConfiguration configuration) {
 		LOG.debug("init");
+		this.configuration = configuration;
+
+		try {
+			DefaultBootstrap.bootstrap();
+		} catch (ConfigurationException e) {
+			throw new RuntimeException("OpenSAML configuration error: "
+					+ e.getMessage(), e);
+		}
+		this.builderFactory = Configuration.getBuilderFactory();
+		this.responseBuilder = (SAMLObjectBuilder<Response>) builderFactory
+				.getBuilder(Response.DEFAULT_ELEMENT_NAME);
+		this.statusBuilder = (SAMLObjectBuilder<Status>) builderFactory
+				.getBuilder(Status.DEFAULT_ELEMENT_NAME);
+		this.statusCodeBuilder = (SAMLObjectBuilder<StatusCode>) builderFactory
+				.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME);
+		this.assertionBuilder = (SAMLObjectBuilder<Assertion>) builderFactory
+				.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
+		this.issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory
+				.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
+		this.conditionsBuilder = (SAMLObjectBuilder<Conditions>) builderFactory
+				.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
+		this.audienceRestrictionBuilder = (SAMLObjectBuilder<AudienceRestriction>) builderFactory
+				.getBuilder(AudienceRestriction.DEFAULT_ELEMENT_NAME);
+		this.audienceBuilder = (SAMLObjectBuilder<Audience>) builderFactory
+				.getBuilder(Audience.DEFAULT_ELEMENT_NAME);
+		this.subjectBuilder = (SAMLObjectBuilder<Subject>) builderFactory
+				.getBuilder(Subject.DEFAULT_ELEMENT_NAME);
+		this.nameIdBuilder = (SAMLObjectBuilder<NameID>) builderFactory
+				.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
+		this.subjectConfirmationBuilder = (SAMLObjectBuilder<SubjectConfirmation>) builderFactory
+				.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
+		this.authnStatementBuilder = (SAMLObjectBuilder<AuthnStatement>) builderFactory
+				.getBuilder(AuthnStatement.DEFAULT_ELEMENT_NAME);
+		this.subjectConfirmationDataBuilder = (SAMLObjectBuilder<SubjectConfirmationData>) builderFactory
+				.getBuilder(SubjectConfirmationData.DEFAULT_ELEMENT_NAME);
+		this.authnContextBuilder = (SAMLObjectBuilder<AuthnContext>) builderFactory
+				.getBuilder(AuthnContext.DEFAULT_ELEMENT_NAME);
+		this.attributeStatementBuilder = (SAMLObjectBuilder<AttributeStatement>) builderFactory
+				.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
+		this.attributeBuilder = (SAMLObjectBuilder<Attribute>) builderFactory
+				.getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
+		this.stringBuilder = builderFactory.getBuilder(XSString.TYPE_NAME);
 	}
 
 	public IdentityProviderFlow handleIncomingRequest(
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		LOG.debug("handling incoming request");
-		DefaultBootstrap.bootstrap();
 
 		BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext = new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
 		messageContext
@@ -140,6 +242,9 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		String relayState = messageContext.getRelayState();
 		setRelayState(relayState, request);
 
+		String inResponseTo = authnRequest.getID();
+		setInResponseTo(inResponseTo, request);
+
 		return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
 	}
 
@@ -151,6 +256,7 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 		LOG.debug("authenticated identifier: " + authenticatedIdentifier);
 		String targetUrl = getTargetUrl(httpSession);
 		String relayState = getRelayState(httpSession);
+		String inResponseTo = getInResponseTo(httpSession);
 
 		try {
 			DefaultBootstrap.bootstrap();
@@ -159,68 +265,76 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 					+ e.getMessage(), e);
 		}
 
-		XMLObjectBuilderFactory builderFactory = Configuration
-				.getBuilderFactory();
-
-		SAMLObjectBuilder<Response> responseBuilder = (SAMLObjectBuilder<Response>) builderFactory
-				.getBuilder(Response.DEFAULT_ELEMENT_NAME);
 		Response samlResponse = responseBuilder.buildObject();
 		DateTime issueInstant = new DateTime();
 		samlResponse.setIssueInstant(issueInstant);
 		samlResponse.setVersion(SAMLVersion.VERSION_20);
+		samlResponse.setDestination(targetUrl);
 		String samlResponseId = "saml-response-" + UUID.randomUUID().toString();
 		samlResponse.setID(samlResponseId);
 
-		SAMLObjectBuilder<Status> statusBuilder = (SAMLObjectBuilder<Status>) builderFactory
-				.getBuilder(Status.DEFAULT_ELEMENT_NAME);
 		Status status = statusBuilder.buildObject();
 		samlResponse.setStatus(status);
-		SAMLObjectBuilder<StatusCode> statusCodeBuilder = (SAMLObjectBuilder<StatusCode>) builderFactory
-				.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME);
 		StatusCode statusCode = statusCodeBuilder.buildObject();
 		status.setStatusCode(statusCode);
 		statusCode.setValue(StatusCode.SUCCESS_URI);
 
 		List<Assertion> assertions = samlResponse.getAssertions();
-		SAMLObjectBuilder<Assertion> assertionBuilder = (SAMLObjectBuilder<Assertion>) builderFactory
-				.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
 		Assertion assertion = assertionBuilder.buildObject();
 		assertions.add(assertion);
 		assertion.setVersion(SAMLVersion.VERSION_20);
 		String assertionId = "assertion-" + UUID.randomUUID().toString();
 		assertion.setID(assertionId);
 		assertion.setIssueInstant(issueInstant);
-		SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory
-				.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
+
 		Issuer issuer = issuerBuilder.buildObject();
 		assertion.setIssuer(issuer);
 		issuer.setValue("http://www.e-contract.be/"); // TODO
 
-		SAMLObjectBuilder<Subject> subjectBuilder = (SAMLObjectBuilder<Subject>) builderFactory
-				.getBuilder(Subject.DEFAULT_ELEMENT_NAME);
+		Conditions conditions = conditionsBuilder.buildObject();
+		assertion.setConditions(conditions);
+		DateTime notBefore = issueInstant;
+		DateTime notAfter = issueInstant.plusMinutes(5); // TODO: configurable
+		conditions.setNotBefore(notBefore);
+		conditions.setNotOnOrAfter(notAfter);
+		List<AudienceRestriction> audienceRestrictionList = conditions
+				.getAudienceRestrictions();
+		AudienceRestriction audienceRestriction = audienceRestrictionBuilder
+				.buildObject();
+		audienceRestrictionList.add(audienceRestriction);
+		List<Audience> audiences = audienceRestriction.getAudiences();
+		Audience audience = audienceBuilder.buildObject();
+		audiences.add(audience);
+		audience.setAudienceURI(targetUrl);
+
 		Subject subject = subjectBuilder.buildObject();
 		assertion.setSubject(subject);
-		SAMLObjectBuilder<NameID> nameIdBuilder = (SAMLObjectBuilder<NameID>) builderFactory
-				.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
 		NameID nameId = nameIdBuilder.buildObject();
 		subject.setNameID(nameId);
 		nameId.setValue(authenticatedIdentifier);
+		List<SubjectConfirmation> subjectConfirmations = subject
+				.getSubjectConfirmations();
+		SubjectConfirmation subjectConfirmation = subjectConfirmationBuilder
+				.buildObject();
+		subjectConfirmations.add(subjectConfirmation);
+		subjectConfirmation.setMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer");
+		SubjectConfirmationData subjectConfirmationData = subjectConfirmationDataBuilder
+				.buildObject();
+		subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
+		subjectConfirmationData.setRecipient(targetUrl);
+		subjectConfirmationData.setInResponseTo(inResponseTo);
+		subjectConfirmationData.setNotBefore(notBefore);
+		subjectConfirmationData.setNotOnOrAfter(notAfter);
 
 		List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
-		SAMLObjectBuilder<AuthnStatement> authnStatementBuilder = (SAMLObjectBuilder<AuthnStatement>) builderFactory
-				.getBuilder(AuthnStatement.DEFAULT_ELEMENT_NAME);
 		AuthnStatement authnStatement = authnStatementBuilder.buildObject();
 		authnStatements.add(authnStatement);
 		authnStatement.setAuthnInstant(issueInstant);
-		SAMLObjectBuilder<AuthnContext> authnContextBuilder = (SAMLObjectBuilder<AuthnContext>) builderFactory
-				.getBuilder(AuthnContext.DEFAULT_ELEMENT_NAME);
 		AuthnContext authnContext = authnContextBuilder.buildObject();
 		authnStatement.setAuthnContext(authnContext);
 
 		List<AttributeStatement> attributeStatements = assertion
 				.getAttributeStatements();
-		SAMLObjectBuilder<AttributeStatement> attributeStatementBuilder = (SAMLObjectBuilder<AttributeStatement>) builderFactory
-				.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
 		AttributeStatement attributeStatement = attributeStatementBuilder
 				.buildObject();
 		attributeStatements.add(attributeStatement);
@@ -233,10 +347,14 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 
 		ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 
-		SAMLMessageEncoder messageEncoder = new HTTPPostEncoder();
+		HTTPPostEncoder messageEncoder = new HTTPPostEncoder();
 		BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
 		messageContext.setOutboundSAMLMessage(samlResponse);
 		messageContext.setRelayState(relayState);
+		BasicX509Credential credential = new BasicX509Credential();
+		credential.setPrivateKey(this.configuration.getPrivateIdentityKey());
+		credential.setEntityCertificate(this.configuration.getIdentity());
+		messageContext.setOutboundSAMLMessageSigningCredential(credential);
 		OutTransport outTransport = new HTTPOutTransport(returnResponse);
 		messageContext.setOutboundMessageTransport(outTransport);
 
@@ -249,15 +367,11 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 			AttributeStatement attributeStatement) {
 		List<Attribute> attributes = attributeStatement.getAttributes();
 
-		SAMLObjectBuilder<Attribute> attributeBuilder = (SAMLObjectBuilder<Attribute>) builderFactory
-				.getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
 		Attribute nameAttribute = attributeBuilder.buildObject();
 
 		attributes.add(nameAttribute);
 
 		nameAttribute.setName(attributeName);
-		XMLObjectBuilder<XSString> stringBuilder = builderFactory
-				.getBuilder(XSString.TYPE_NAME);
 		XSString nameAttributeValue = (XSString) stringBuilder.buildObject(
 				AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
 		nameAttributeValue.setValue(attributeValue);
