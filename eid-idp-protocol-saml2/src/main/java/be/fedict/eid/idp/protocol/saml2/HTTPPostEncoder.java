@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.xml.security.Init;
 import org.opensaml.Configuration;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.binding.SAMLMessageContext;
@@ -38,6 +39,10 @@ public class HTTPPostEncoder extends BaseSAML2MessageEncoder {
 
 	private static final Log LOG = LogFactory.getLog(HTTPPostEncoder.class);
 
+	static {
+		Init.init();
+	}
+
 	@Override
 	protected void doEncode(MessageContext messageContext)
 			throws MessageEncodingException {
@@ -50,6 +55,8 @@ public class HTTPPostEncoder extends BaseSAML2MessageEncoder {
 					"Invalid message context type, this encoder only support SAMLMessageContext");
 		}
 		SAMLMessageContext samlMessageContext = (SAMLMessageContext) messageContext;
+
+		signMessage(samlMessageContext);
 
 		if (!(messageContext.getOutboundMessageTransport() instanceof HTTPOutTransport)) {
 			LOG
