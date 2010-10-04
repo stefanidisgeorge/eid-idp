@@ -1,0 +1,5 @@
+#summary References
+
+= References =
+
+  * http://www.microsoft.com/mscorp/twc/endtoendtrust/vision/uprove.aspx
