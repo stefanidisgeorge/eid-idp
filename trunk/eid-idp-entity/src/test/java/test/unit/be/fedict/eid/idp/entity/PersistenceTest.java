@@ -16,23 +16,22 @@
  * http://www.gnu.org/licenses/.
  */
 
-package test.unit.be.fedict.eid.idp.model;
+package test.unit.be.fedict.eid.idp.entity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
+import be.fedict.eid.idp.entity.AdministratorEntity;
+import be.fedict.eid.idp.entity.ConfigEntity;
+import be.fedict.eid.idp.entity.IdentityProviderIdentityEntity;
+import be.fedict.eid.idp.entity.RegistrationEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import be.fedict.eid.idp.model.entity.AdministratorEntity;
-import be.fedict.eid.idp.model.entity.ConfigEntity;
-import be.fedict.eid.idp.model.entity.IdentityProviderIdentityEntity;
-import be.fedict.eid.idp.model.entity.RegistrationEntity;
 
 public class PersistenceTest {
 

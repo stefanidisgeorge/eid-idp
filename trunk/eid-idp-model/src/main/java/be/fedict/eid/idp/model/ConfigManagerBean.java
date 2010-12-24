@@ -22,7 +22,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import be.fedict.eid.idp.model.entity.ConfigEntity;
+import be.fedict.eid.idp.entity.ConfigEntity;
 
 @Stateless
 public class ConfigManagerBean implements ConfigManager {

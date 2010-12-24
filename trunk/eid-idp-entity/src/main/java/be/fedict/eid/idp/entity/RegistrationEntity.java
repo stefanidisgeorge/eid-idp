@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model.entity;
+package be.fedict.eid.idp.entity;
 
 import java.io.Serializable;
 import java.security.PublicKey;
@@ -26,21 +26,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Query;
 import javax.persistence.Table;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import static be.fedict.eid.idp.model.entity.AdministratorEntity.COUNT_QUERY;
-
 @Entity
-@Table(name = "idp_administrators")
-@NamedQueries(@NamedQuery(name = COUNT_QUERY, query = "SELECT COUNT(admin) FROM AdministratorEntity AS admin"))
-public class AdministratorEntity implements Serializable {
-
-	public static final String COUNT_QUERY = "AdministratorEntity.query.count";
+@Table(name = "idp_registrations")
+public class RegistrationEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,11 +40,11 @@ public class AdministratorEntity implements Serializable {
 
 	private String subject;
 
-	public AdministratorEntity() {
+	public RegistrationEntity() {
 		super();
 	}
 
-	public AdministratorEntity(X509Certificate certificate) {
+	public RegistrationEntity(X509Certificate certificate) {
 		this.id = getId(certificate);
 		this.subject = certificate.getSubjectX500Principal().toString();
 	}
@@ -82,17 +74,11 @@ public class AdministratorEntity implements Serializable {
 		return id;
 	}
 
-	public static boolean isAdministrator(X509Certificate certificate,
+	public static boolean isRegistered(X509Certificate certificate,
 			EntityManager entityManager) {
 		String id = getId(certificate);
-		AdministratorEntity registration = entityManager.find(
-				AdministratorEntity.class, id);
+		RegistrationEntity registration = entityManager.find(
+				RegistrationEntity.class, id);
 		return null != registration;
-	}
-
-	public static boolean hasAdmins(EntityManager entityManager) {
-		Query query = entityManager.createNamedQuery(COUNT_QUERY);
-		Long count = (Long) query.getSingleResult();
-		return 0 != count;
 	}
 }
