@@ -24,11 +24,10 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import be.fedict.eid.idp.entity.AdministratorEntity;
+import be.fedict.eid.idp.entity.RegistrationEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import be.fedict.eid.idp.model.entity.AdministratorEntity;
-import be.fedict.eid.idp.model.entity.RegistrationEntity;
 
 @Stateless
 public class AdminManagerBean implements AdminManager {

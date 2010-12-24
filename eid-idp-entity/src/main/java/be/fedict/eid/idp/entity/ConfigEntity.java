@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model.entity;
+package be.fedict.eid.idp.entity;
 
 import java.io.Serializable;
 
