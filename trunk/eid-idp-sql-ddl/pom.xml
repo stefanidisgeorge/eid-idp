@@ -63,6 +63,28 @@
                             </hibernateDialect>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>oracle</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate-sql-ddl</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                ${project.build.directory}/classes
+                            </outputDirectory>
+                            <outputName>eid-idp-ddl-oracle.sql</outputName>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>be.fedict.eid-idp</groupId>
+                                    <artifactId>eid-idp-entity</artifactId>
+                                </artifactItem>
+                            </artifactItems>
+                            <hibernateDialect>
+                                org.hibernate.dialect.Oracle10gDialect
+                            </hibernateDialect>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
