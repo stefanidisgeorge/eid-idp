@@ -18,38 +18,30 @@
 
 package be.fedict.eid.idp.spi;
 
-import java.security.PrivateKey;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * Interface towards the configuration of the eID IdP.
- * 
+ *
  * @author Frank Cornelis
- * 
  */
 public interface IdentityProviderConfiguration {
 
-	/**
-	 * Gives back the secret used to HMAC the user identifiers.
-	 * 
-	 * @return secret, or <code>null</code> if not set.
-	 */
-	byte[] getHmacSecret();
+    /**
+     * Gives back the secret used to HMAC the user identifiers.
+     *
+     * @return secret, or <code>null</code> if not set.
+     */
+    byte[] getHmacSecret();
 
-	/**
-	 * Gives back the identity of this eID IdP system.
-	 * 
-	 * TODO: should be a chain.
-	 * 
-	 * @return
-	 */
-	X509Certificate getIdentity();
+    /**
+     * @return the identity of this eID IdP system.
+     */
+    KeyStore.PrivateKeyEntry getIdentity();
 
-	/**
-	 * Gives back the private key corresponding with the identity of this eID
-	 * IdP system.
-	 * 
-	 * @return
-	 */
-	PrivateKey getPrivateIdentityKey();
-}
+    /**
+     * @return certificate chain of the eID IdP identity.
+     */
+    List<X509Certificate> getIdentityCertificateChain();}

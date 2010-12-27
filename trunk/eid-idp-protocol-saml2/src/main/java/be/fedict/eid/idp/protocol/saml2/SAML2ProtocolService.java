@@ -49,6 +49,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.UUID;
 
@@ -327,9 +329,11 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
         BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
         messageContext.setOutboundSAMLMessage(samlResponse);
         messageContext.setRelayState(relayState);
+
+        KeyStore.PrivateKeyEntry idpIdentity = this.configuration.getIdentity();
         BasicX509Credential credential = new BasicX509Credential();
-        credential.setPrivateKey(this.configuration.getPrivateIdentityKey());
-        credential.setEntityCertificate(this.configuration.getIdentity());
+        credential.setPrivateKey(idpIdentity.getPrivateKey());
+        credential.setEntityCertificate((X509Certificate) idpIdentity.getCertificate());
         messageContext.setOutboundSAMLMessageSigningCredential(credential);
         OutTransport outTransport = new HTTPOutTransport(returnResponse);
         messageContext.setOutboundMessageTransport(outTransport);

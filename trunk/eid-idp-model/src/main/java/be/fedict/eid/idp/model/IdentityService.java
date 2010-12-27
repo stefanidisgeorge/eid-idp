@@ -18,7 +18,30 @@
 
 package be.fedict.eid.idp.model;
 
-public enum ConfigNames {
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 
-	XKMS_URL, HMAC_SECRET
+import javax.ejb.Local;
+import java.security.KeyStore;
+
+@Local
+public interface IdentityService extends IdentityProviderConfiguration {
+
+    /**
+     * Reload the currently configured identity
+     */
+    void reloadIdentity();
+
+    KeyStore.PrivateKeyEntry setIdentity(KeyStoreType keyStoreType,
+                                         String keyStorePath,
+                                         String keyStoreSecret);
+
+    /**
+     * @return if the IdP's identity is configured or not.
+     */
+    boolean isIdentityConfigured();
+
+    /**
+     * @return digest of the active identity's certificate.
+     */
+    String getIdentityFingerprint();
 }

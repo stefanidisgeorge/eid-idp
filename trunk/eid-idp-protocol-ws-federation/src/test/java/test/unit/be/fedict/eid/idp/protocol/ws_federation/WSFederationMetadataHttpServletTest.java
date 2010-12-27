@@ -18,32 +18,10 @@
 
 package test.unit.be.fedict.eid.idp.protocol.ws_federation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.spec.RSAKeyGenParameterSpec;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignatureFactory;
-import javax.xml.crypto.dsig.dom.DOMValidateContext;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
+import be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServlet;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -51,11 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -72,191 +46,203 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
-import be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServlet;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.RSAKeyGenParameterSpec;
+
+import static org.junit.Assert.*;
 
 public class WSFederationMetadataHttpServletTest {
 
-	private static final Log LOG = LogFactory
-			.getLog(WSFederationMetadataHttpServletTest.class);
+    private static final Log LOG = LogFactory
+            .getLog(WSFederationMetadataHttpServletTest.class);
 
-	private ServletTester servletTester;
+    private String location;
 
-	private String location;
+    @BeforeClass
+    public static void init() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
-	@BeforeClass
-	public static void init() throws Exception {
-		Security.addProvider(new BouncyCastleProvider());
-	}
+    @Before
+    public void setUp() throws Exception {
+        KeyPair keyPair = generateKeyPair();
+        DateTime notBefore = new DateTime();
+        DateTime notAfter = notBefore.plusMonths(1);
+        X509Certificate certificate = generateSelfSignedCertificate(keyPair,
+                "CN=Test", notBefore, notAfter);
 
-	@Before
-	public void setUp() throws Exception {
-		KeyPair keyPair = generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = generateSelfSignedCertificate(keyPair,
-				"CN=Test", notBefore, notAfter);
-		this.servletTester = new ServletTester();
-		this.servletTester.setContextPath("/eid-idp");
-		ServletHolder servletHolder = this.servletTester.addServlet(
-				WSFederationMetadataHttpServlet.class,
-				"/ws-federation-metadata");
+        KeyStore.PrivateKeyEntry identity =
+                new KeyStore.PrivateKeyEntry(keyPair.getPrivate(), new Certificate[]{certificate});
 
-		IdentityProviderConfiguration mockConfiguration = EasyMock
-				.createMock(IdentityProviderConfiguration.class);
-		EasyMock.expect(mockConfiguration.getIdentity()).andStubReturn(
-				certificate);
-		EasyMock.expect(mockConfiguration.getPrivateIdentityKey())
-				.andStubReturn(keyPair.getPrivate());
-		EasyMock.replay(mockConfiguration);
-		this.servletTester.start();
-		servletHolder
-				.getServletHandler()
-				.getServletContext()
-				.setAttribute(
-						IdentityProviderConfigurationFactory.IDENTITY_PROVIDER_CONFIGURATION_CONTEXT_ATTRIBUTE,
-						mockConfiguration);
+        ServletTester servletTester = new ServletTester();
+        servletTester.setContextPath("/eid-idp");
+        ServletHolder servletHolder = servletTester.addServlet(
+                WSFederationMetadataHttpServlet.class,
+                "/ws-federation-metadata");
 
-		this.location = this.servletTester.createSocketConnector(true)
-				+ "/eid-idp/ws-federation-metadata";
-	}
+        IdentityProviderConfiguration mockConfiguration = EasyMock
+                .createMock(IdentityProviderConfiguration.class);
+        EasyMock.expect(mockConfiguration.getIdentity()).andStubReturn(
+                identity);
+        EasyMock.replay(mockConfiguration);
+        servletTester.start();
+        servletHolder
+                .getServletHandler()
+                .getServletContext()
+                .setAttribute(
+                        IdentityProviderConfigurationFactory.IDENTITY_PROVIDER_CONFIGURATION_CONTEXT_ATTRIBUTE,
+                        mockConfiguration);
 
-	@Test
-	public void get() throws Exception {
-		// setup
-		LOG.debug("URL: " + this.location);
-		HttpClient httpClient = new HttpClient();
-		GetMethod getMethod = new GetMethod(this.location);
+        this.location = servletTester.createSocketConnector(true)
+                + "/eid-idp/ws-federation-metadata";
+    }
 
-		// operate
-		int result = httpClient.executeMethod(getMethod);
+    @Test
+    public void get() throws Exception {
+        // setup
+        LOG.debug("URL: " + this.location);
+        HttpClient httpClient = new HttpClient();
+        GetMethod getMethod = new GetMethod(this.location);
 
-		// verify
-		assertEquals(HttpServletResponse.SC_OK, result);
-		String responseBody = getMethod.getResponseBodyAsString();
-		LOG.debug("Response body: " + responseBody);
-		Header contentTypeHeader = getMethod.getResponseHeader("Content-Type");
-		assertNotNull(contentTypeHeader);
-		assertEquals("application/samlmetadata+xml", contentTypeHeader
-				.getValue());
-	}
+        // operate
+        int result = httpClient.executeMethod(getMethod);
 
-	@Test
-	public void testSignatureVerification() throws Exception {
-		// setup
-		InputStream documentInputStream = WSFederationProtocolServiceTest.class
-				.getResourceAsStream("/FederationMetadata.xml");
-		assertNotNull(documentInputStream);
+        // verify
+        assertEquals(HttpServletResponse.SC_OK, result);
+        String responseBody = getMethod.getResponseBodyAsString();
+        LOG.debug("Response body: " + responseBody);
+        Header contentTypeHeader = getMethod.getResponseHeader("Content-Type");
+        assertNotNull(contentTypeHeader);
+        assertEquals("application/samlmetadata+xml", contentTypeHeader
+                .getValue());
+    }
 
-		Document document = loadDocument(documentInputStream);
+    @Test
+    public void testSignatureVerification() throws Exception {
+        // setup
+        InputStream documentInputStream = WSFederationProtocolServiceTest.class
+                .getResourceAsStream("/FederationMetadata.xml");
+        assertNotNull(documentInputStream);
 
-		NodeList signatureNodeList = document.getElementsByTagNameNS(
-				XMLSignature.XMLNS, "Signature");
-		assertEquals(1, signatureNodeList.getLength());
-		Node signatureNode = signatureNodeList.item(0);
+        Document document = loadDocument(documentInputStream);
 
-		KeyInfoKeySelector keySelector = new KeyInfoKeySelector();
-		DOMValidateContext domValidateContext = new DOMValidateContext(
-				keySelector, signatureNode);
+        NodeList signatureNodeList = document.getElementsByTagNameNS(
+                XMLSignature.XMLNS, "Signature");
+        assertEquals(1, signatureNodeList.getLength());
+        Node signatureNode = signatureNodeList.item(0);
 
-		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory
-				.getInstance();
-		XMLSignature xmlSignature = xmlSignatureFactory
-				.unmarshalXMLSignature(domValidateContext);
+        KeyInfoKeySelector keySelector = new KeyInfoKeySelector();
+        DOMValidateContext domValidateContext = new DOMValidateContext(
+                keySelector, signatureNode);
 
-		// operate
-		boolean validity = xmlSignature.validate(domValidateContext);
+        XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory
+                .getInstance();
+        XMLSignature xmlSignature = xmlSignatureFactory
+                .unmarshalXMLSignature(domValidateContext);
 
-		// verify
-		assertTrue(validity);
-	}
+        // operate
+        boolean validity = xmlSignature.validate(domValidateContext);
 
-	private Document loadDocument(InputStream documentInputStream)
-			throws ParserConfigurationException, SAXException, IOException {
-		InputSource inputSource = new InputSource(documentInputStream);
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
-				.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder = documentBuilderFactory
-				.newDocumentBuilder();
-		Document document = documentBuilder.parse(inputSource);
-		return document;
-	}
+        // verify
+        assertTrue(validity);
+    }
 
-	private KeyPair generateKeyPair() throws Exception {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-		SecureRandom random = new SecureRandom();
-		keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
-				RSAKeyGenParameterSpec.F4), random);
-		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-		return keyPair;
-	}
+    private Document loadDocument(InputStream documentInputStream)
+            throws ParserConfigurationException, SAXException, IOException {
+        InputSource inputSource = new InputSource(documentInputStream);
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+                .newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder = documentBuilderFactory
+                .newDocumentBuilder();
+        return documentBuilder.parse(inputSource);
+    }
 
-	private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
-			throws IOException {
-		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
-				.getEncoded());
-		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-				(ASN1Sequence) new ASN1InputStream(bais).readObject());
-		return new SubjectKeyIdentifier(info);
-	}
+    private KeyPair generateKeyPair() throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        SecureRandom random = new SecureRandom();
+        keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
+                RSAKeyGenParameterSpec.F4), random);
+        return keyPairGenerator.generateKeyPair();
+    }
 
-	private AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
-			throws IOException {
+    private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
+            throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
+                .getEncoded());
+        SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+                (ASN1Sequence) new ASN1InputStream(bais).readObject());
+        return new SubjectKeyIdentifier(info);
+    }
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
-				.getEncoded());
-		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-				(ASN1Sequence) new ASN1InputStream(bais).readObject());
+    private AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
+            throws IOException {
 
-		return new AuthorityKeyIdentifier(info);
-	}
+        ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
+                .getEncoded());
+        SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+                (ASN1Sequence) new ASN1InputStream(bais).readObject());
 
-	private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
-			String subjectDn, DateTime notBefore, DateTime notAfter)
-			throws Exception {
-		PublicKey subjectPublicKey = keyPair.getPublic();
-		PrivateKey issuerPrivateKey = keyPair.getPrivate();
-		String signatureAlgorithm = "SHA1WithRSAEncryption";
-		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
-		certificateGenerator.reset();
-		certificateGenerator.setPublicKey(subjectPublicKey);
-		certificateGenerator.setSignatureAlgorithm(signatureAlgorithm);
-		certificateGenerator.setNotBefore(notBefore.toDate());
-		certificateGenerator.setNotAfter(notAfter.toDate());
-		X509Principal issuerDN = new X509Principal(subjectDn);
-		certificateGenerator.setIssuerDN(issuerDN);
-		certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
-		certificateGenerator.setSerialNumber(new BigInteger(128,
-				new SecureRandom()));
+        return new AuthorityKeyIdentifier(info);
+    }
 
-		certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
-				false, createSubjectKeyId(subjectPublicKey));
-		PublicKey issuerPublicKey;
-		issuerPublicKey = subjectPublicKey;
-		certificateGenerator.addExtension(
-				X509Extensions.AuthorityKeyIdentifier, false,
-				createAuthorityKeyId(issuerPublicKey));
+    private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
+                                                          String subjectDn, DateTime notBefore, DateTime notAfter)
+            throws Exception {
+        PublicKey subjectPublicKey = keyPair.getPublic();
+        PrivateKey issuerPrivateKey = keyPair.getPrivate();
+        String signatureAlgorithm = "SHA1WithRSAEncryption";
+        X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+        certificateGenerator.reset();
+        certificateGenerator.setPublicKey(subjectPublicKey);
+        certificateGenerator.setSignatureAlgorithm(signatureAlgorithm);
+        certificateGenerator.setNotBefore(notBefore.toDate());
+        certificateGenerator.setNotAfter(notAfter.toDate());
+        X509Principal issuerDN = new X509Principal(subjectDn);
+        certificateGenerator.setIssuerDN(issuerDN);
+        certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
+        certificateGenerator.setSerialNumber(new BigInteger(128,
+                new SecureRandom()));
 
-		certificateGenerator.addExtension(X509Extensions.BasicConstraints,
-				false, new BasicConstraints(true));
+        certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
+                false, createSubjectKeyId(subjectPublicKey));
+        PublicKey issuerPublicKey;
+        issuerPublicKey = subjectPublicKey;
+        certificateGenerator.addExtension(
+                X509Extensions.AuthorityKeyIdentifier, false,
+                createAuthorityKeyId(issuerPublicKey));
 
-		X509Certificate certificate;
-		certificate = certificateGenerator.generate(issuerPrivateKey);
+        certificateGenerator.addExtension(X509Extensions.BasicConstraints,
+                false, new BasicConstraints(true));
 
-		/*
-		 * Next certificate factory trick is needed to make sure that the
-		 * certificate delivered to the caller is provided by the default
-		 * security provider instead of BouncyCastle. If we don't do this trick
-		 * we might run into trouble when trying to use the CertPath validator.
-		 */
-		CertificateFactory certificateFactory = CertificateFactory
-				.getInstance("X.509");
-		certificate = (X509Certificate) certificateFactory
-				.generateCertificate(new ByteArrayInputStream(certificate
-						.getEncoded()));
-		return certificate;
-	}
+        X509Certificate certificate;
+        certificate = certificateGenerator.generate(issuerPrivateKey);
+
+        /*
+           * Next certificate factory trick is needed to make sure that the
+           * certificate delivered to the caller is provided by the default
+           * security provider instead of BouncyCastle. If we don't do this trick
+           * we might run into trouble when trying to use the CertPath validator.
+           */
+        CertificateFactory certificateFactory = CertificateFactory
+                .getInstance("X.509");
+        certificate = (X509Certificate) certificateFactory
+                .generateCertificate(new ByteArrayInputStream(certificate
+                        .getEncoded()));
+        return certificate;
+    }
 }

@@ -18,15 +18,8 @@
 
 package be.fedict.eid.idp.webapp;
 
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Remove;
-import javax.ejb.Stateful;
-
-import org.apache.commons.codec.digest.DigestUtils;
+import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.Factory;
@@ -35,51 +28,35 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.datamodel.DataModel;
 import org.jboss.seam.log.Log;
 
-import be.fedict.eid.idp.model.IdentityProviderIdentityManager;
-import be.fedict.eid.idp.model.ProtocolServiceManager;
-import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
+import javax.ejb.EJB;
+import javax.ejb.Remove;
+import javax.ejb.Stateful;
+import java.util.List;
 
 @Stateful
 @Name("idpProtocolService")
 @LocalBinding(jndiBinding = "fedict/eid/idp/webapp/ProtocolServiceBean")
 public class ProtocolServiceBean implements ProtocolService {
 
-	@Logger
-	private Log log;
+    @Logger
+    private Log log;
 
-	@DataModel
-	private List<IdentityProviderProtocolType> idpProtocolServices;
+    @DataModel
+    private List<IdentityProviderProtocolType> idpProtocolServices;
 
-	@EJB
-	private ProtocolServiceManager protocolServiceManager;
+    @EJB
+    private ProtocolServiceManager protocolServiceManager;
 
-	@EJB
-	private IdentityProviderIdentityManager identityProviderIdentityManager;
+    @Factory("idpProtocolServices")
+    public void initProtocolServices() {
+        this.log.debug("init idpProtocolServices");
+        this.idpProtocolServices = this.protocolServiceManager
+                .getProtocolServices();
+    }
 
-	@Factory("idpProtocolServices")
-	public void initProtocolServices() {
-		this.log.debug("init idpProtocolServices");
-		this.idpProtocolServices = this.protocolServiceManager
-				.getProtocolServices();
-	}
-
-	@Remove
-	@Destroy
-	public void destroy() {
-		this.log.debug("destroy");
-	}
-
-	@Override
-	public String getThumbprint() {
-		X509Certificate certificate = this.identityProviderIdentityManager
-				.getIdentity();
-		String thumbprint;
-		try {
-			thumbprint = DigestUtils.shaHex(certificate.getEncoded());
-		} catch (CertificateEncodingException e) {
-			throw new RuntimeException(
-					"cert encoding error: " + e.getMessage(), e);
-		}
-		return thumbprint;
-	}
+    @Remove
+    @Destroy
+    public void destroy() {
+        this.log.debug("destroy");
+    }
 }

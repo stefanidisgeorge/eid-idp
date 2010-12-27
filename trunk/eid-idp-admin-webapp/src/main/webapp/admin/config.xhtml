@@ -1,33 +1,74 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:rich="http://richfaces.org/rich"
-	xmlns:f="http://java.sun.com/jsf/core">
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://jboss.com/products/seam/taglib">
 <body>
 <ui:composition template="/WEB-INF/template.xhtml">
-	<ui:param name="activeMenu" value="config" />
-	<ui:define name="body">
-		<h2>Configuration</h2>
-		<h:form>
-			<rich:tabPanel switchType="client">
-				<rich:tab label="PKI validation">
-					<h:panelGrid columns="2">
-						<h:outputText value="eID Trust Service XKMS2 URL:" />
-						<h:inputText value="#{idpConfig.xkmsUrl}" />
-					</h:panelGrid>
-					<h:commandButton value="Save" action="#{idpConfig.save}" />
-				</rich:tab>
-				<rich:tab label="Pseudonyms">
-					<h:panelGrid columns="2">
-						<h:outputText value="Default HMAC-SHA1 secret (hexadecimal):" />
-						<h:inputText value="#{idpConfig.hmacSecret}" />
-					</h:panelGrid>
-					<h:commandButton value="Save" action="#{idpConfig.save}" />
-				</rich:tab>
-			</rich:tabPanel>
-		</h:form>
-	</ui:define>
+    <ui:param name="activeMenu" value="config"/>
+    <ui:define name="body">
+        <h2>Configuration</h2>
+        <h:form>
+            <rich:tabPanel switchType="client">
+                <rich:tab label="PKI validation">
+                    <h:panelGrid columns="2">
+                        <h:outputText value="eID Trust Service XKMS2 URL:"/>
+                        <h:inputText value="#{idpConfig.xkmsUrl}"/>
+                    </h:panelGrid>
+                    <h:commandButton value="Save" action="#{idpConfig.save}"/>
+                </rich:tab>
+                <rich:tab label="Pseudonyms">
+                    <h:panelGrid columns="2">
+                        <h:outputText
+                                value="Default HMAC-SHA1 secret (hexadecimal):"/>
+                        <h:inputText value="#{idpConfig.hmacSecret}"/>
+                    </h:panelGrid>
+                    <h:commandButton value="Save" action="#{idpConfig.save}"/>
+                </rich:tab>
+                <rich:tab label="IdP Identity">
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="Keystore Type"
+                                       for="keystore_type"/>
+                        <s:decorate>
+                            <h:selectOneMenu id="keystore_type"
+                                             value="#{idpConfig.keyStoreType}"
+                                             required="true">
+                                <f:selectItems value="#{keyStoreTypes}"/>
+                                <h:message for="keystore_type"
+                                           styleClass="error"/>
+                            </h:selectOneMenu>
+                        </s:decorate>
+                        <h:outputLabel
+                                value="Keystore Path"
+                                for="keystore_path"/>
+                        <s:decorate>
+                            <h:inputText id="keystore_path"
+                                         value="#{idpConfig.keyStorePath}"
+                                         required="true">
+                            </h:inputText>
+                            <h:message for="keystore_path" styleClass="error"/>
+                        </s:decorate>
+
+                        <h:outputLabel
+                                value="Keystore Password"
+                                for="keystore_pw"/>
+                        <s:decorate>
+                            <h:inputText id="keystore_pw"
+                                         value="#{idpConfig.keyStorePassword}"
+                                         required="true">
+                            </h:inputText>
+                            <h:message for="keystore_pw" styleClass="error"/>
+                        </s:decorate>
+
+                    </h:panelGrid>
+                    <h:commandButton value="Save" action="#{idpConfig.save}"/>
+                </rich:tab>
+            </rich:tabPanel>
+        </h:form>
+    </ui:define>
 </ui:composition>
 </body>
 </html>

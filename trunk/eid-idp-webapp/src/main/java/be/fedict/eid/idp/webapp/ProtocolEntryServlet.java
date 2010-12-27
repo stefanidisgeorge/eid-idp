@@ -35,9 +35,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import be.fedict.eid.idp.model.IdentityProviderConfigurationService;
+import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
@@ -69,7 +68,7 @@ public class ProtocolEntryServlet extends HttpServlet {
 	private ProtocolServiceManager protocolServiceManager;
 
 	@EJB
-	IdentityProviderConfigurationService identityProviderConfigurationService;
+    IdentityService identityService;
 
 	private String unknownProtocolPageInitParam;
 
@@ -138,7 +137,7 @@ public class ProtocolEntryServlet extends HttpServlet {
 									+ contextPath);
 				}
 				protocolService.init(servletContext,
-						this.identityProviderConfigurationService);
+						this.identityService);
 				protocolServices.put(contextPath, protocolService);
 			}
 		}

@@ -18,67 +18,61 @@
 
 package be.fedict.eid.idp.entity;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import org.apache.commons.codec.digest.DigestUtils;
-
 @Entity
-@Table(name = "idp_registrations")
+@Table(name = Constants.DATABASE_TABLE_PREFIX + "registrations")
 public class RegistrationEntity implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private String id;
+    private String id;
 
-	private String subject;
+    private String subject;
 
-	public RegistrationEntity() {
-		super();
-	}
+    public RegistrationEntity() {
+        super();
+    }
 
-	public RegistrationEntity(X509Certificate certificate) {
-		this.id = getId(certificate);
-		this.subject = certificate.getSubjectX500Principal().toString();
-	}
+    public RegistrationEntity(X509Certificate certificate) {
+        this.id = getId(certificate);
+        this.subject = certificate.getSubjectX500Principal().toString();
+    }
 
-	@Id
-	public String getId() {
-		return this.id;
-	}
+    @Id
+    public String getId() {
+        return this.id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	@Column(nullable = false)
-	public String getSubject() {
-		return this.subject;
-	}
+    @Column(nullable = false)
+    public String getSubject() {
+        return this.subject;
+    }
 
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
-	private static String getId(X509Certificate certificate) {
-		PublicKey publicKey = certificate.getPublicKey();
-		byte[] encodedPublicKey = publicKey.getEncoded();
-		String id = DigestUtils.sha256Hex(encodedPublicKey);
-		return id;
-	}
+    private static String getId(X509Certificate certificate) {
+        PublicKey publicKey = certificate.getPublicKey();
+        byte[] encodedPublicKey = publicKey.getEncoded();
+        return DigestUtils.sha256Hex(encodedPublicKey);
+    }
 
-	public static boolean isRegistered(X509Certificate certificate,
-			EntityManager entityManager) {
-		String id = getId(certificate);
-		RegistrationEntity registration = entityManager.find(
-				RegistrationEntity.class, id);
-		return null != registration;
-	}
+    public static boolean isRegistered(X509Certificate certificate,
+                                       EntityManager entityManager) {
+        String id = getId(certificate);
+        RegistrationEntity registration = entityManager.find(
+                RegistrationEntity.class, id);
+        return null != registration;
+    }
 }
