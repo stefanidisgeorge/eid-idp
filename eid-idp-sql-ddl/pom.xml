@@ -41,6 +41,28 @@
                             </hibernateDialect>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>postgresql</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate-sql-ddl</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                ${project.build.directory}/classes
+                            </outputDirectory>
+                            <outputName>eid-idp-ddl-postgresql.sql</outputName>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>be.fedict.eid-idp</groupId>
+                                    <artifactId>eid-idp-entity</artifactId>
+                                </artifactItem>
+                            </artifactItems>
+                            <hibernateDialect>
+                                org.hibernate.dialect.PostgreSQLDialect
+                            </hibernateDialect>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>

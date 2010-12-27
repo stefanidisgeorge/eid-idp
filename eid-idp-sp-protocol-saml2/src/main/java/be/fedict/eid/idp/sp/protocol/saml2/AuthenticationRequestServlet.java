@@ -71,7 +71,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			this.parametersFromRequest = Boolean
 					.parseBoolean(parametersFromRequest);
 		}
-		if (false == this.parametersFromRequest) {
+		if (!this.parametersFromRequest) {
 			this.idpDestination = getRequiredInitParameter("IdPDestination",
 					config);
 			this.spDestination = getRequiredInitParameter("SPDestination",
