@@ -64,7 +64,7 @@
             </activation>
             <modules>
                 <module>eid-idp-sql-ddl</module>
-                <!--<module>eid-idp-admin-manual</module>-->
+                <module>eid-idp-admin-manual</module>
                 <module>eid-idp-mysql-distribution</module>
             </modules>
             <properties>
@@ -83,7 +83,7 @@
             </activation>
             <modules>
                 <module>eid-idp-sql-ddl</module>
-                <!--<module>eid-idp-admin-manual</module>-->
+                <module>eid-idp-admin-manual</module>
                 <module>eid-idp-postgresql-distribution</module>
             </modules>
             <properties>
@@ -102,7 +102,7 @@
             </activation>
             <modules>
                 <module>eid-idp-sql-ddl</module>
-                <!--<module>eid-idp-admin-manual</module>-->
+                <module>eid-idp-admin-manual</module>
                 <module>eid-idp-oracle-distribution</module>
             </modules>
             <properties>
