@@ -23,18 +23,13 @@ import javax.ejb.Local;
 @Local
 public interface ProtocolService {
 
-	/*
-	 * Factory.
-	 */
-	void initProtocolServices();
+    /*
+      * Factory.
+      */
+    void initProtocolServices();
 
-	/*
-	 * Lifecycle.
-	 */
-	void destroy();
-
-	/*
-	 * Accesors.
-	 */
-	String getThumbprint();
+    /*
+      * Lifecycle.
+      */
+    void destroy();
 }

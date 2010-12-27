@@ -18,13 +18,8 @@
 
 package test.unit.be.fedict.eid.idp.entity;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-
 import be.fedict.eid.idp.entity.AdministratorEntity;
-import be.fedict.eid.idp.entity.ConfigEntity;
-import be.fedict.eid.idp.entity.IdentityProviderIdentityEntity;
+import be.fedict.eid.idp.entity.ConfigPropertyEntity;
 import be.fedict.eid.idp.entity.RegistrationEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,52 +28,55 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+
 public class PersistenceTest {
 
-	private static final Log LOG = LogFactory.getLog(PersistenceTest.class);
+    private static final Log LOG = LogFactory.getLog(PersistenceTest.class);
 
-	private EntityManager entityManager;
+    private EntityManager entityManager;
 
-	@Before
-	public void setUp() throws Exception {
-		Class.forName("org.hsqldb.jdbcDriver");
-		Ejb3Configuration configuration = new Ejb3Configuration();
-		configuration.setProperty("hibernate.dialect",
-				"org.hibernate.dialect.HSQLDialect");
-		configuration.setProperty("hibernate.connection.driver_class",
-				"org.hsqldb.jdbcDriver");
-		configuration.setProperty("hibernate.connection.url",
-				"jdbc:hsqldb:mem:beta");
-		configuration.setProperty("hibernate.hbm2ddl.auto", "create");
-		configuration.addAnnotatedClass(AdministratorEntity.class);
-		configuration.addAnnotatedClass(ConfigEntity.class);
-		configuration.addAnnotatedClass(IdentityProviderIdentityEntity.class);
-		configuration.addAnnotatedClass(RegistrationEntity.class);
-		EntityManagerFactory entityManagerFactory = configuration
-				.buildEntityManagerFactory();
+    @Before
+    public void setUp() throws Exception {
+        Class.forName("org.hsqldb.jdbcDriver");
+        Ejb3Configuration configuration = new Ejb3Configuration();
+        configuration.setProperty("hibernate.dialect",
+                "org.hibernate.dialect.HSQLDialect");
+        configuration.setProperty("hibernate.connection.driver_class",
+                "org.hsqldb.jdbcDriver");
+        configuration.setProperty("hibernate.connection.url",
+                "jdbc:hsqldb:mem:beta");
+        configuration.setProperty("hibernate.hbm2ddl.auto", "create");
+        configuration.addAnnotatedClass(AdministratorEntity.class);
+        configuration.addAnnotatedClass(ConfigPropertyEntity.class);
+        configuration.addAnnotatedClass(RegistrationEntity.class);
+        EntityManagerFactory entityManagerFactory = configuration
+                .buildEntityManagerFactory();
 
-		this.entityManager = entityManagerFactory.createEntityManager();
-		this.entityManager.getTransaction().begin();
-	}
+        this.entityManager = entityManagerFactory.createEntityManager();
+        this.entityManager.getTransaction().begin();
+    }
 
-	@After
-	public void tearDown() throws Exception {
-		EntityTransaction entityTransaction = this.entityManager
-				.getTransaction();
-		LOG.debug("entity manager open: " + this.entityManager.isOpen());
-		LOG.debug("entity transaction active: " + entityTransaction.isActive());
-		if (entityTransaction.isActive()) {
-			if (entityTransaction.getRollbackOnly()) {
-				entityTransaction.rollback();
-			} else {
-				entityTransaction.commit();
-			}
-		}
-		this.entityManager.close();
-	}
+    @After
+    public void tearDown() throws Exception {
+        EntityTransaction entityTransaction = this.entityManager
+                .getTransaction();
+        LOG.debug("entity manager open: " + this.entityManager.isOpen());
+        LOG.debug("entity transaction active: " + entityTransaction.isActive());
+        if (entityTransaction.isActive()) {
+            if (entityTransaction.getRollbackOnly()) {
+                entityTransaction.rollback();
+            } else {
+                entityTransaction.commit();
+            }
+        }
+        this.entityManager.close();
+    }
 
-	@Test
-	public void testCorrectNamedQueries() throws Exception {
-		// empty
-	}
+    @Test
+    public void testCorrectNamedQueries() throws Exception {
+        // empty
+    }
 }

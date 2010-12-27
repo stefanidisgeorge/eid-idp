@@ -1,5 +1,5 @@
 /*
- * eID Identity Provider Project.
+ * eID Digital Signature Service Project.
  * Copyright (C) 2010 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -18,32 +18,12 @@
 
 package be.fedict.eid.idp.model;
 
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-
 import javax.ejb.Local;
 
 @Local
-public interface IdentityProviderIdentityManager {
+public interface Configuration {
 
-	/**
-	 * When the system starts up we need to manage the eID IdP identity somehow.
-	 * This is the place.
-	 */
-	void startup();
+    void setValue(ConfigProperty configProperty, Object value);
 
-	/**
-	 * Gives back the eID IdP identity.
-	 * 
-	 * @return the X509 certificate representing the identity of the eID IdP
-	 *         system.
-	 */
-	X509Certificate getIdentity();
-
-	/**
-	 * Gives back the private key corresponding with the eID IdP identity.
-	 * 
-	 * @return
-	 */
-	PrivateKey getPrivateIdentityKey();
+    <T> T getValue(ConfigProperty configProperty, Class<T> type);
 }

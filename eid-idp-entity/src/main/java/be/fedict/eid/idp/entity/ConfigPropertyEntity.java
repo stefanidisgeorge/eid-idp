@@ -18,46 +18,45 @@
 
 package be.fedict.eid.idp.entity;
 
-import java.io.Serializable;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 @Entity
-@Table(name = "idp_configuration")
-public class ConfigEntity implements Serializable {
+@Table(name = Constants.DATABASE_TABLE_PREFIX + "configuration")
+public class ConfigPropertyEntity implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private String name;
+    private String name;
 
-	private String value;
+    private String value;
 
-	public ConfigEntity() {
-		super();
-	}
+    public ConfigPropertyEntity() {
+        super();
+    }
 
-	public ConfigEntity(String name, String value) {
-		this.name = name;
-		this.value = value;
-	}
+    public ConfigPropertyEntity(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
 
-	@Id
-	public String getName() {
-		return this.name;
-	}
+    @Id
+    public String getName() {
+        return this.name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getValue() {
-		return this.value;
-	}
+    public String getValue() {
+        return this.value;
+    }
 
-	public void setValue(String value) {
-		this.value = value;
-	}
+    public void setValue(String value) {
+        this.value = value;
+    }
 
 }

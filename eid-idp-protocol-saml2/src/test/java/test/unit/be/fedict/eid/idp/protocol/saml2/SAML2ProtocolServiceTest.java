@@ -18,32 +18,13 @@
 
 package test.unit.be.fedict.eid.idp.protocol.saml2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.List;
-import java.util.UUID;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
+import be.fedict.eid.applet.service.Address;
+import be.fedict.eid.applet.service.Gender;
+import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolService;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.NameValuePair;
+import be.fedict.eid.idp.spi.ReturnResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -54,11 +35,7 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xpath.XPathAPI;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -82,310 +59,321 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.tidy.Tidy;
 
-import be.fedict.eid.applet.service.Address;
-import be.fedict.eid.applet.service.Gender;
-import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolService;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.NameValuePair;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.*;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class SAML2ProtocolServiceTest {
 
-	private static final Log LOG = LogFactory
-			.getLog(SAML2ProtocolServiceTest.class);
+    private static final Log LOG = LogFactory
+            .getLog(SAML2ProtocolServiceTest.class);
 
-	@BeforeClass
-	public static void before() {
-		Security.addProvider(new BouncyCastleProvider());
-	}
+    @BeforeClass
+    public static void before() {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
-	@Test
-	public void testOpenSaml2Spike() throws Exception {
-		/*
-		 * Setup
-		 */
-		DefaultBootstrap.bootstrap();
+    @Test
+    public void testOpenSaml2Spike() throws Exception {
+        /*
+           * Setup
+           */
+        DefaultBootstrap.bootstrap();
 
-		XMLObjectBuilderFactory builderFactory = Configuration
-				.getBuilderFactory();
-		assertNotNull(builderFactory);
+        XMLObjectBuilderFactory builderFactory = Configuration
+                .getBuilderFactory();
+        assertNotNull(builderFactory);
 
-		SAMLObjectBuilder<AuthnRequest> requestBuilder = (SAMLObjectBuilder<AuthnRequest>) builderFactory
-				.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
-		assertNotNull(requestBuilder);
-		AuthnRequest samlMessage = requestBuilder.buildObject();
-		samlMessage.setID(UUID.randomUUID().toString());
-		samlMessage.setVersion(SAMLVersion.VERSION_20);
-		samlMessage.setIssueInstant(new DateTime(0));
+        SAMLObjectBuilder<AuthnRequest> requestBuilder = (SAMLObjectBuilder<AuthnRequest>) builderFactory
+                .getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
+        assertNotNull(requestBuilder);
+        AuthnRequest samlMessage = requestBuilder.buildObject();
+        samlMessage.setID(UUID.randomUUID().toString());
+        samlMessage.setVersion(SAMLVersion.VERSION_20);
+        samlMessage.setIssueInstant(new DateTime(0));
 
-		SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
-				.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
-		Endpoint samlEndpoint = endpointBuilder.buildObject();
-		samlEndpoint.setLocation("http://idp.be");
-		samlEndpoint.setResponseLocation("http://sp.be/response");
+        SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
+                .getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
+        Endpoint samlEndpoint = endpointBuilder.buildObject();
+        samlEndpoint.setLocation("http://idp.be");
+        samlEndpoint.setResponseLocation("http://sp.be/response");
 
-		HttpServletResponse mockHttpServletResponse = EasyMock
-				.createMock(HttpServletResponse.class);
-		OutTransport outTransport = new HttpServletResponseAdapter(
-				mockHttpServletResponse, true);
+        HttpServletResponse mockHttpServletResponse = EasyMock
+                .createMock(HttpServletResponse.class);
+        OutTransport outTransport = new HttpServletResponseAdapter(
+                mockHttpServletResponse, true);
 
-		BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
-		messageContext.setOutboundMessageTransport(outTransport);
-		messageContext.setPeerEntityEndpoint(samlEndpoint);
-		messageContext.setOutboundSAMLMessage(samlMessage);
+        BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
+        messageContext.setOutboundMessageTransport(outTransport);
+        messageContext.setPeerEntityEndpoint(samlEndpoint);
+        messageContext.setOutboundSAMLMessage(samlMessage);
 
-		VelocityEngine velocityEngine = new VelocityEngine();
-		velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
-				"classpath");
-		velocityEngine
-				.setProperty("classpath.resource.loader.class",
-						"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-		velocityEngine.init();
-		HTTPPostEncoder encoder = new HTTPPostEncoder(velocityEngine,
-				"/templates/saml2-post-binding.vm");
+        VelocityEngine velocityEngine = new VelocityEngine();
+        velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
+                "classpath");
+        velocityEngine
+                .setProperty("classpath.resource.loader.class",
+                        "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        velocityEngine.init();
+        HTTPPostEncoder encoder = new HTTPPostEncoder(velocityEngine,
+                "/templates/saml2-post-binding.vm");
 
-		/*
-		 * Expectations
-		 */
-		mockHttpServletResponse
-				.setHeader("Cache-control", "no-cache, no-store");
-		mockHttpServletResponse.setHeader("Pragma", "no-cache");
-		mockHttpServletResponse.setCharacterEncoding("UTF-8");
-		mockHttpServletResponse.setContentType("text/html");
-		mockHttpServletResponse.setHeader("Content-Type", "text/html");
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ServletOutputStream mockServletOutputStream = new ServletOutputStream() {
-			@Override
-			public void write(int b) throws IOException {
-				baos.write(b);
-			}
-		};
-		EasyMock.expect(mockHttpServletResponse.getOutputStream()).andReturn(
-				mockServletOutputStream);
+        /*
+           * Expectations
+           */
+        mockHttpServletResponse
+                .setHeader("Cache-control", "no-cache, no-store");
+        mockHttpServletResponse.setHeader("Pragma", "no-cache");
+        mockHttpServletResponse.setCharacterEncoding("UTF-8");
+        mockHttpServletResponse.setContentType("text/html");
+        mockHttpServletResponse.setHeader("Content-Type", "text/html");
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ServletOutputStream mockServletOutputStream = new ServletOutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                baos.write(b);
+            }
+        };
+        EasyMock.expect(mockHttpServletResponse.getOutputStream()).andReturn(
+                mockServletOutputStream);
 
-		/*
-		 * Perform
-		 */
-		EasyMock.replay(mockHttpServletResponse);
-		encoder.encode(messageContext);
+        /*
+           * Perform
+           */
+        EasyMock.replay(mockHttpServletResponse);
+        encoder.encode(messageContext);
 
-		/*
-		 * Verify
-		 */
-		EasyMock.verify(mockHttpServletResponse);
-		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
-				baos.toByteArray());
-		LOG.debug("SAML2 Request Browser POST: " + baos.toString());
-		Tidy tidy = new Tidy();
-		Document document = tidy.parseDOM(byteArrayInputStream, null);
+        /*
+           * Verify
+           */
+        EasyMock.verify(mockHttpServletResponse);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
+                baos.toByteArray());
+        LOG.debug("SAML2 Request Browser POST: " + baos.toString());
+        Tidy tidy = new Tidy();
+        Document document = tidy.parseDOM(byteArrayInputStream, null);
 
-		Node actionNode = XPathAPI.selectSingleNode(document,
-				"//form[@action='http://idp.be']");
-		assertNotNull(actionNode);
-	}
+        Node actionNode = XPathAPI.selectSingleNode(document,
+                "//form[@action='http://idp.be']");
+        assertNotNull(actionNode);
+    }
 
-	@Test
-	public void testHandleIncomingRequest() throws Exception {
-		// setup
-		SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
-		HttpServletRequest mockHttpServletRequest = EasyMock
-				.createMock(HttpServletRequest.class);
+    @Test
+    public void testHandleIncomingRequest() throws Exception {
+        // setup
+        SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
+        HttpServletRequest mockHttpServletRequest = EasyMock
+                .createMock(HttpServletRequest.class);
 
-		InputStream samlRequestInputStream = SAML2ProtocolServiceTest.class
-				.getResourceAsStream("/saml-request.xml");
-		byte[] samlRequest = IOUtils.toByteArray(samlRequestInputStream);
-		byte[] encodedSamlRequest = Base64.encodeBase64(samlRequest);
+        InputStream samlRequestInputStream = SAML2ProtocolServiceTest.class
+                .getResourceAsStream("/saml-request.xml");
+        byte[] samlRequest = IOUtils.toByteArray(samlRequestInputStream);
+        byte[] encodedSamlRequest = Base64.encodeBase64(samlRequest);
 
-		// expectations
-		EasyMock.expect(mockHttpServletRequest.getMethod()).andReturn("POST");
-		EasyMock.expect(mockHttpServletRequest.getParameter("RelayState"))
-				.andStubReturn(null);
-		EasyMock.expect(mockHttpServletRequest.getParameter("SAMLRequest"))
-				.andReturn(new String(encodedSamlRequest));
-		EasyMock.expect(mockHttpServletRequest.getRequestURL()).andReturn(
-				new StringBuffer("http://idp.be"));
+        // expectations
+        EasyMock.expect(mockHttpServletRequest.getMethod()).andReturn("POST");
+        EasyMock.expect(mockHttpServletRequest.getParameter("RelayState"))
+                .andStubReturn(null);
+        EasyMock.expect(mockHttpServletRequest.getParameter("SAMLRequest"))
+                .andReturn(new String(encodedSamlRequest));
+        EasyMock.expect(mockHttpServletRequest.getRequestURL()).andReturn(
+                new StringBuffer("http://idp.be"));
 
-		HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
-		EasyMock.expect(mockHttpServletRequest.getSession()).andStubReturn(
-				mockHttpSession);
-		mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
-				+ ".TargetUrl", "http://sp.be/response");
-		mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
-				+ ".RelayState", null);
-		mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
-				+ ".InResponseTo", "a77a1c87-e590-47d7-a3e0-afea455ebc01");
+        HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
+        EasyMock.expect(mockHttpServletRequest.getSession()).andStubReturn(
+                mockHttpSession);
+        mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
+                + ".TargetUrl", "http://sp.be/response");
+        mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
+                + ".RelayState", null);
+        mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
+                + ".InResponseTo", "a77a1c87-e590-47d7-a3e0-afea455ebc01");
 
-		// prepare
-		EasyMock.replay(mockHttpServletRequest, mockHttpSession);
+        // prepare
+        EasyMock.replay(mockHttpServletRequest, mockHttpSession);
 
-		// operate
-		saml2ProtocolService
-				.handleIncomingRequest(mockHttpServletRequest, null);
+        // operate
+        saml2ProtocolService
+                .handleIncomingRequest(mockHttpServletRequest, null);
 
-		// verify
-		EasyMock.verify(mockHttpServletRequest, mockHttpSession);
-	}
+        // verify
+        EasyMock.verify(mockHttpServletRequest, mockHttpSession);
+    }
 
-	@Test
-	public void testHandleReturnResponse() throws Exception {
-		// setup
-		SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
+    @Test
+    public void testHandleReturnResponse() throws Exception {
+        // setup
+        SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
 
-		HttpSession httpSession;
-		Address address = new Address();
-		String authenticatedIdentifier = "authn-id";
-		HttpServletResponse response;
-		Identity identity = new Identity();
-		identity.name = "test-name";
-		identity.firstName = "test-first-name";
-		identity.gender = Gender.MALE;
-		HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
-		HttpServletResponse mockHttpServletResponse = EasyMock
-				.createMock(HttpServletResponse.class);
+        HttpSession httpSession;
+        Address address = new Address();
+        String authenticatedIdentifier = "authn-id";
+        HttpServletResponse response;
+        Identity identity = new Identity();
+        identity.name = "test-name";
+        identity.firstName = "test-first-name";
+        identity.gender = Gender.MALE;
+        HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
+        HttpServletResponse mockHttpServletResponse = EasyMock
+                .createMock(HttpServletResponse.class);
 
-		KeyPair keyPair = generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = generateSelfSignedCertificate(keyPair,
-				"CN=Test", notBefore, notAfter);
-		IdentityProviderConfiguration mockConfiguration = EasyMock
-				.createMock(IdentityProviderConfiguration.class);
+        KeyPair keyPair = generateKeyPair();
+        DateTime notBefore = new DateTime();
+        DateTime notAfter = notBefore.plusMonths(1);
+        X509Certificate certificate = generateSelfSignedCertificate(keyPair,
+                "CN=Test", notBefore, notAfter);
 
-		// expectations
-		EasyMock
-				.expect(
-						mockHttpSession
-								.getAttribute(SAML2ProtocolService.TARGET_URL_SESSION_ATTRIBUTE))
-				.andStubReturn("http://127.0.0.1");
-		EasyMock
-				.expect(
-						mockHttpSession
-								.getAttribute(SAML2ProtocolService.RELAY_STATE_SESSION_ATTRIBUTE))
-				.andStubReturn("relay-state");
-		EasyMock.expect(
-				mockHttpSession.getAttribute(SAML2ProtocolService.class
-						.getName()
-						+ ".InResponseTo")).andStubReturn(
-				"a77a1c87-e590-47d7-a3e0-afea455ebc01");
+        KeyStore.PrivateKeyEntry idpIdentity =
+                new KeyStore.PrivateKeyEntry(keyPair.getPrivate(), new Certificate[]{certificate});
 
-		EasyMock.expect(mockConfiguration.getPrivateIdentityKey())
-				.andStubReturn(keyPair.getPrivate());
-		EasyMock.expect(mockConfiguration.getIdentity()).andStubReturn(
-				certificate);
+        IdentityProviderConfiguration mockConfiguration = EasyMock
+                .createMock(IdentityProviderConfiguration.class);
 
-		// prepare
-		EasyMock.replay(mockHttpSession, mockConfiguration);
+        // expectations
+        EasyMock
+                .expect(
+                        mockHttpSession
+                                .getAttribute(SAML2ProtocolService.TARGET_URL_SESSION_ATTRIBUTE))
+                .andStubReturn("http://127.0.0.1");
+        EasyMock
+                .expect(
+                        mockHttpSession
+                                .getAttribute(SAML2ProtocolService.RELAY_STATE_SESSION_ATTRIBUTE))
+                .andStubReturn("relay-state");
+        EasyMock.expect(
+                mockHttpSession.getAttribute(SAML2ProtocolService.class
+                        .getName()
+                        + ".InResponseTo")).andStubReturn(
+                "a77a1c87-e590-47d7-a3e0-afea455ebc01");
 
-		// operate
-		saml2ProtocolService.init(null, mockConfiguration);
-		ReturnResponse returnResponse = saml2ProtocolService
-				.handleReturnResponse(mockHttpSession, identity, address,
-						authenticatedIdentifier, null, mockHttpServletResponse);
+        EasyMock.expect(mockConfiguration.getIdentity()).andStubReturn(
+                idpIdentity);
 
-		// verify
-		EasyMock.verify(mockHttpSession, mockConfiguration);
-		assertNotNull(returnResponse);
-		assertEquals("http://127.0.0.1", returnResponse.getActionUrl());
-		List<NameValuePair> attributes = returnResponse.getAttributes();
-		assertNotNull(attributes);
-		NameValuePair relayStateAttribute = null;
-		NameValuePair samlResponseAttribute = null;
-		for (NameValuePair attribute : attributes) {
-			if ("RelayState".equals(attribute.getName())) {
-				relayStateAttribute = attribute;
-				continue;
-			}
-			if ("SAMLResponse".equals(attribute.getName())) {
-				samlResponseAttribute = attribute;
-				continue;
-			}
-		}
-		assertNotNull(relayStateAttribute);
-		assertEquals("relay-state", relayStateAttribute.getValue());
-		assertNotNull("no SAMLResponse attribute", samlResponseAttribute);
-		String encodedSamlResponse = samlResponseAttribute.getValue();
-		assertNotNull(encodedSamlResponse);
-		String samlResponse = new String(Base64
-				.decodeBase64(encodedSamlResponse));
-		LOG.debug("SAML response: " + samlResponse);
-		File tmpFile = File.createTempFile("saml-response-", ".xml");
-		FileUtils.writeStringToFile(tmpFile, samlResponse);
-		LOG.debug("tmp file: " + tmpFile.getAbsolutePath());
-	}
+        // prepare
+        EasyMock.replay(mockHttpSession, mockConfiguration);
 
-	private KeyPair generateKeyPair() throws Exception {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-		SecureRandom random = new SecureRandom();
-		keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
-				RSAKeyGenParameterSpec.F4), random);
-		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-		return keyPair;
-	}
+        // operate
+        saml2ProtocolService.init(null, mockConfiguration);
+        ReturnResponse returnResponse = saml2ProtocolService
+                .handleReturnResponse(mockHttpSession, identity, address,
+                        authenticatedIdentifier, null, mockHttpServletResponse);
 
-	private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
-			throws IOException {
-		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
-				.getEncoded());
-		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-				(ASN1Sequence) new ASN1InputStream(bais).readObject());
-		return new SubjectKeyIdentifier(info);
-	}
+        // verify
+        EasyMock.verify(mockHttpSession, mockConfiguration);
+        assertNotNull(returnResponse);
+        assertEquals("http://127.0.0.1", returnResponse.getActionUrl());
+        List<NameValuePair> attributes = returnResponse.getAttributes();
+        assertNotNull(attributes);
+        NameValuePair relayStateAttribute = null;
+        NameValuePair samlResponseAttribute = null;
+        for (NameValuePair attribute : attributes) {
+            if ("RelayState".equals(attribute.getName())) {
+                relayStateAttribute = attribute;
+                continue;
+            }
+            if ("SAMLResponse".equals(attribute.getName())) {
+                samlResponseAttribute = attribute;
+                continue;
+            }
+        }
+        assertNotNull(relayStateAttribute);
+        assertEquals("relay-state", relayStateAttribute.getValue());
+        assertNotNull("no SAMLResponse attribute", samlResponseAttribute);
+        String encodedSamlResponse = samlResponseAttribute.getValue();
+        assertNotNull(encodedSamlResponse);
+        String samlResponse = new String(Base64
+                .decodeBase64(encodedSamlResponse));
+        LOG.debug("SAML response: " + samlResponse);
+        File tmpFile = File.createTempFile("saml-response-", ".xml");
+        FileUtils.writeStringToFile(tmpFile, samlResponse);
+        LOG.debug("tmp file: " + tmpFile.getAbsolutePath());
+    }
 
-	private AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
-			throws IOException {
+    private KeyPair generateKeyPair() throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        SecureRandom random = new SecureRandom();
+        keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
+                RSAKeyGenParameterSpec.F4), random);
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        return keyPair;
+    }
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
-				.getEncoded());
-		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-				(ASN1Sequence) new ASN1InputStream(bais).readObject());
+    private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
+            throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
+                .getEncoded());
+        SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+                (ASN1Sequence) new ASN1InputStream(bais).readObject());
+        return new SubjectKeyIdentifier(info);
+    }
 
-		return new AuthorityKeyIdentifier(info);
-	}
+    private AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
+            throws IOException {
 
-	private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
-			String subjectDn, DateTime notBefore, DateTime notAfter)
-			throws Exception {
-		PublicKey subjectPublicKey = keyPair.getPublic();
-		PrivateKey issuerPrivateKey = keyPair.getPrivate();
-		String signatureAlgorithm = "SHA1WithRSAEncryption";
-		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
-		certificateGenerator.reset();
-		certificateGenerator.setPublicKey(subjectPublicKey);
-		certificateGenerator.setSignatureAlgorithm(signatureAlgorithm);
-		certificateGenerator.setNotBefore(notBefore.toDate());
-		certificateGenerator.setNotAfter(notAfter.toDate());
-		X509Principal issuerDN = new X509Principal(subjectDn);
-		certificateGenerator.setIssuerDN(issuerDN);
-		certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
-		certificateGenerator.setSerialNumber(new BigInteger(128,
-				new SecureRandom()));
+        ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
+                .getEncoded());
+        SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+                (ASN1Sequence) new ASN1InputStream(bais).readObject());
 
-		certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
-				false, createSubjectKeyId(subjectPublicKey));
-		PublicKey issuerPublicKey;
-		issuerPublicKey = subjectPublicKey;
-		certificateGenerator.addExtension(
-				X509Extensions.AuthorityKeyIdentifier, false,
-				createAuthorityKeyId(issuerPublicKey));
+        return new AuthorityKeyIdentifier(info);
+    }
 
-		certificateGenerator.addExtension(X509Extensions.BasicConstraints,
-				false, new BasicConstraints(true));
+    private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
+                                                          String subjectDn, DateTime notBefore, DateTime notAfter)
+            throws Exception {
+        PublicKey subjectPublicKey = keyPair.getPublic();
+        PrivateKey issuerPrivateKey = keyPair.getPrivate();
+        String signatureAlgorithm = "SHA1WithRSAEncryption";
+        X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+        certificateGenerator.reset();
+        certificateGenerator.setPublicKey(subjectPublicKey);
+        certificateGenerator.setSignatureAlgorithm(signatureAlgorithm);
+        certificateGenerator.setNotBefore(notBefore.toDate());
+        certificateGenerator.setNotAfter(notAfter.toDate());
+        X509Principal issuerDN = new X509Principal(subjectDn);
+        certificateGenerator.setIssuerDN(issuerDN);
+        certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
+        certificateGenerator.setSerialNumber(new BigInteger(128,
+                new SecureRandom()));
 
-		X509Certificate certificate;
-		certificate = certificateGenerator.generate(issuerPrivateKey);
+        certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
+                false, createSubjectKeyId(subjectPublicKey));
+        PublicKey issuerPublicKey;
+        issuerPublicKey = subjectPublicKey;
+        certificateGenerator.addExtension(
+                X509Extensions.AuthorityKeyIdentifier, false,
+                createAuthorityKeyId(issuerPublicKey));
 
-		/*
-		 * Next certificate factory trick is needed to make sure that the
-		 * certificate delivered to the caller is provided by the default
-		 * security provider instead of BouncyCastle. If we don't do this trick
-		 * we might run into trouble when trying to use the CertPath validator.
-		 */
-		CertificateFactory certificateFactory = CertificateFactory
-				.getInstance("X.509");
-		certificate = (X509Certificate) certificateFactory
-				.generateCertificate(new ByteArrayInputStream(certificate
-						.getEncoded()));
-		return certificate;
-	}
+        certificateGenerator.addExtension(X509Extensions.BasicConstraints,
+                false, new BasicConstraints(true));
+
+        X509Certificate certificate;
+        certificate = certificateGenerator.generate(issuerPrivateKey);
+
+        /*
+           * Next certificate factory trick is needed to make sure that the
+           * certificate delivered to the caller is provided by the default
+           * security provider instead of BouncyCastle. If we don't do this trick
+           * we might run into trouble when trying to use the CertPath validator.
+           */
+        CertificateFactory certificateFactory = CertificateFactory
+                .getInstance("X.509");
+        certificate = (X509Certificate) certificateFactory
+                .generateCertificate(new ByteArrayInputStream(certificate
+                        .getEncoded()));
+        return certificate;
+    }
 }

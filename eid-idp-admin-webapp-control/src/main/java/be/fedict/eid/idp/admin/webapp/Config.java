@@ -19,30 +19,49 @@
 package be.fedict.eid.idp.admin.webapp;
 
 import javax.ejb.Local;
+import javax.faces.model.SelectItem;
+import java.util.List;
 
 @Local
 public interface Config {
 
-	/*
-	 * Accessors.
-	 */
-	String getXkmsUrl();
+    /*
+     * Accessors.
+     */
+    String getXkmsUrl();
 
-	void setXkmsUrl(String xkmsUrl);
+    void setXkmsUrl(String xkmsUrl);
 
-	String getHmacSecret();
+    String getHmacSecret();
 
-	void setHmacSecret(String hmacSecret);
+    void setHmacSecret(String hmacSecret);
 
-	/*
-	 * Actions.
-	 */
-	String save();
+    String getKeyStoreType();
 
-	/*
-	 * Lifecycle.
-	 */
-	void destroy();
+    void setKeyStoreType(String keyStoreType);
 
-	void postConstruct();
+    String getKeyStorePath();
+
+    void setKeyStorePath(String keyStorePath);
+
+    String getKeyStorePassword();
+
+    void setKeyStorePassword(String keyStorePassword);
+
+    /*
+     * Factories
+     */
+    List<SelectItem> keyStoreTypeFactory();
+
+    /*
+     * Actions.
+     */
+    String save();
+
+    /*
+     * Lifecycle.
+     */
+    void destroy();
+
+    void postConstruct();
 }

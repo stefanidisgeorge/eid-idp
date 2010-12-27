@@ -12,22 +12,17 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, see 
+ * License along with this software; if not, see
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model;
+package be.fedict.eid.idp.entity;
 
-import javax.ejb.Local;
+public class Constants {
 
-@Local
-public interface ConfigManager {
+    public static final String DATABASE_TABLE_PREFIX = "idp_";
 
-	String getXkmsUrl();
-
-	void setXkmsUrl(String xkmsUrl);
-
-	String getHmacSecret();
-
-	void setHmacSecret(String hmacSecret);
+    private Constants() {
+        super();
+    }
 }
