@@ -103,7 +103,9 @@
                         </h:inputText>
 
                     </h:panelGrid>
-                    <h:commandButton value="Save" action="#{idpConfig.save}"/>
+                    <h:commandButton id="keystore_save" value="Save"
+                                     action="#{idpConfig.save}"/>
+                    <h:message for="keystore_save" styleClass="error"/>
                 </rich:tab>
 
             </rich:tabPanel>

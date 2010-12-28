@@ -1,26 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <faces-config xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
-	version="1.2">
-	<!-- Facelets configuration -->
-	<application>
-		<view-handler>com.sun.facelets.FaceletViewHandler</view-handler>
-	</application>
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+              version="1.2">
+    <!-- Facelets configuration -->
+    <application>
+        <view-handler>com.sun.facelets.FaceletViewHandler</view-handler>
+    </application>
 
-	<lifecycle>
-		<phase-listener>be.fedict.eid.idp.admin.webapp.CredentialsPhaseListener</phase-listener>
-	</lifecycle>
+    <lifecycle>
+        <phase-listener>
+            be.fedict.eid.idp.admin.webapp.CredentialsPhaseListener
+        </phase-listener>
+    </lifecycle>
 
-	<navigation-rule>
-		<from-view-id>/main.xhtml</from-view-id>
-		<navigation-case>
-			<from-outcome>register</from-outcome>
-			<to-view-id>/register.xhtml</to-view-id>
-		</navigation-case>
-		<navigation-case>
-			<from-outcome>login</from-outcome>
-			<to-view-id>/admin/main.xhtml</to-view-id>
-		</navigation-case>
-	</navigation-rule>
+    <navigation-rule>
+        <from-view-id>/main.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>register</from-outcome>
+            <to-view-id>/register.xhtml</to-view-id>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>login</from-outcome>
+            <to-view-id>/admin/main.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- Configuration page navigation rules -->
+    <navigation-rule>
+        <from-view-id>/admin/config.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/admin/config.seam</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
 </faces-config>

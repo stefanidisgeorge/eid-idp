@@ -21,6 +21,7 @@ package be.fedict.eid.idp.webapp;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.KeyStoreType;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import be.fedict.eid.idp.spi.protocol.EndpointType;
 import be.fedict.eid.idp.spi.protocol.EndpointsType;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
+import javax.ejb.EJBException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -51,14 +53,18 @@ public class IdentityProviderServletContextListener implements
     public void contextInitialized(ServletContextEvent event) {
         LOG.debug("contextInitialized");
 
-        initIdentity();
+        try {
+            initIdentity();
+        } catch (KeyStoreLoadException e) {
+            throw new EJBException(e);
+        }
 
         initProtocolServices(event);
 
         initIdentityProviderConfiguration(event);
     }
 
-    private void initIdentity() {
+    private void initIdentity() throws KeyStoreLoadException {
 
         if (identityService.isIdentityConfigured()) {
 

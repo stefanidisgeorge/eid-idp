@@ -22,11 +22,11 @@ import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.KeyStoreType;
+import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import org.jboss.ejb3.annotation.LocalBinding;
-import org.jboss.seam.annotations.Destroy;
-import org.jboss.seam.annotations.Factory;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.*;
+import org.jboss.seam.faces.FacesMessages;
+import org.jboss.seam.international.StatusMessage;
 import org.jboss.seam.log.Log;
 
 import javax.annotation.PostConstruct;
@@ -50,6 +50,9 @@ public class ConfigBean implements Config {
 
     @EJB
     private IdentityService identityService;
+
+    @In
+    FacesMessages facesMessages;
 
     private String xkmsUrl;
     private String xkmsTrustDomain;
@@ -115,37 +118,44 @@ public class ConfigBean implements Config {
     public String save() {
         this.log.debug("save");
 
-        // XKMS Config
-        this.configuration.setValue(ConfigProperty.XKMS_URL, this.xkmsUrl);
-        this.configuration.setValue(ConfigProperty.XKMS_TRUST_DOMAIN,
-                this.xkmsTrustDomain);
+        try {
+            // XKMS Config
+            this.configuration.setValue(ConfigProperty.XKMS_URL, this.xkmsUrl);
+            this.configuration.setValue(ConfigProperty.XKMS_TRUST_DOMAIN,
+                    this.xkmsTrustDomain);
 
-        // Pseudonym Config
-        this.configuration.setValue(ConfigProperty.HMAC_SECRET,
-                this.hmacSecret);
+            // Pseudonym Config
+            this.configuration.setValue(ConfigProperty.HMAC_SECRET,
+                    this.hmacSecret);
 
-        // Identity Config
-        this.configuration.setValue(ConfigProperty.KEY_STORE_TYPE,
-                KeyStoreType.valueOf(this.keyStoreType));
-        this.configuration.setValue(ConfigProperty.KEY_STORE_PATH,
-                this.keyStorePath);
-        this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET,
-                this.keyStorePassword);
-        this.configuration.setValue(ConfigProperty.KEY_ENTRY_SECRET,
-                this.keyEntryPassword);
-        this.configuration.setValue(ConfigProperty.KEY_ENTRY_ALIAS,
-                this.keyEntryAlias);
-        this.identityService.reloadIdentity();
+            // Identity Config
+            this.configuration.setValue(ConfigProperty.KEY_STORE_TYPE,
+                    KeyStoreType.valueOf(this.keyStoreType));
+            this.configuration.setValue(ConfigProperty.KEY_STORE_PATH,
+                    this.keyStorePath);
+            this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET,
+                    this.keyStorePassword);
+            this.configuration.setValue(ConfigProperty.KEY_ENTRY_SECRET,
+                    this.keyEntryPassword);
+            this.configuration.setValue(ConfigProperty.KEY_ENTRY_ALIAS,
+                    this.keyEntryAlias);
+            this.identityService.reloadIdentity();
 
-        // Proxy Config
-        this.configuration.setValue(ConfigProperty.HTTP_PROXY_ENABLED,
-                this.httpProxy);
-        this.configuration.setValue(ConfigProperty.HTTP_PROXY_HOST,
-                this.httpProxyHost);
-        this.configuration.setValue(ConfigProperty.HTTP_PROXY_PORT,
-                this.httpProxyPort);
+            // Proxy Config
+            this.configuration.setValue(ConfigProperty.HTTP_PROXY_ENABLED,
+                    this.httpProxy);
+            this.configuration.setValue(ConfigProperty.HTTP_PROXY_HOST,
+                    this.httpProxyHost);
+            this.configuration.setValue(ConfigProperty.HTTP_PROXY_PORT,
+                    this.httpProxyPort);
 
-        return null;
+            return "success";
+        } catch (KeyStoreLoadException e) {
+            this.facesMessages.addToControl("keystore_save",
+                    StatusMessage.Severity.ERROR, "Failed to load keystore", e
+                    .getMessage());
+            return null;
+        }
     }
 
     @Override
