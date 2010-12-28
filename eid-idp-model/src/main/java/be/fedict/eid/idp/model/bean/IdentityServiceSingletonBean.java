@@ -63,6 +63,10 @@ public class IdentityServiceSingletonBean {
                 ConfigProperty.KEY_STORE_PATH, String.class);
         String keyStoreSecret = this.configuration.getValue(
                 ConfigProperty.KEY_STORE_SECRET, String.class);
+        String keyEntrySecret = this.configuration.getValue(
+                ConfigProperty.KEY_ENTRY_SECRET, String.class);
+        String keyEntryAlias = this.configuration.getValue(
+                ConfigProperty.KEY_ENTRY_ALIAS, String.class);
 
         if (null == keyStoreType) {
             this.identity = null;
@@ -87,6 +91,7 @@ public class IdentityServiceSingletonBean {
         }
 
 
+        // load keystore
         KeyStore keyStore = KeyStore.getInstance(keyStoreType
                 .getJavaKeyStoreType());
         char[] password;
@@ -96,14 +101,42 @@ public class IdentityServiceSingletonBean {
             password = null;
         }
         keyStore.load(keyStoreInputStream, password);
+
+
+        // find entry alias
         Enumeration<String> aliases = keyStore.aliases();
         if (!aliases.hasMoreElements()) {
             throw new EJBException("no keystore aliases present");
         }
-        String alias = aliases.nextElement();
+
+        String alias;
+        if (null != keyEntryAlias && !keyEntryAlias.trim().isEmpty()) {
+            boolean found = false;
+            while (aliases.hasMoreElements()) {
+                if (aliases.nextElement().equals(keyEntryAlias)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new EJBException("no keystore entry with alias \"" + keyEntryAlias + "\"");
+            }
+            alias = keyEntryAlias;
+        } else {
+            alias = aliases.nextElement();
+        }
         LOG.debug("keystore alias: " + alias);
+
+        // get keystore entry
+        char[] entryPassword;
+        if (null != keyEntrySecret && !keyEntrySecret.isEmpty()) {
+            entryPassword = keyEntrySecret.toCharArray();
+        } else {
+            entryPassword = null;
+        }
+
         KeyStore.Entry entry = keyStore.getEntry(alias,
-                new KeyStore.PasswordProtection(password));
+                new KeyStore.PasswordProtection(entryPassword));
         if (!(entry instanceof PrivateKeyEntry)) {
             throw new EJBException("private key entry expected");
         }
@@ -118,13 +151,19 @@ public class IdentityServiceSingletonBean {
 
     public PrivateKeyEntry setIdentity(KeyStoreType keyStoreType,
                                        String keyStorePath,
-                                       String keyStoreSecret)
+                                       String keyStoreSecret,
+                                       String keyEntrySecret,
+                                       String keyEntryAlias)
             throws IOException, NoSuchAlgorithmException,
             UnrecoverableEntryException, KeyStoreException, CertificateException {
 
         this.configuration.setValue(ConfigProperty.KEY_STORE_TYPE, keyStoreType);
         this.configuration.setValue(ConfigProperty.KEY_STORE_PATH, keyStorePath);
         this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET, keyStoreSecret);
+        this.configuration.setValue(ConfigProperty.KEY_ENTRY_SECRET, keyEntrySecret);
+        if (null != keyEntryAlias) {
+            this.configuration.setValue(ConfigProperty.KEY_ENTRY_ALIAS, keyEntryAlias);
+        }
 
         reloadIdentity();
 

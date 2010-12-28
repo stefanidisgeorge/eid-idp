@@ -95,11 +95,13 @@ public class IdentityServiceBean implements IdentityService {
      */
     public KeyStore.PrivateKeyEntry setIdentity(KeyStoreType keyStoreType,
                                                 String keyStorePath,
-                                                String keyStoreSecret) {
+                                                String keyStoreSecret,
+                                                String keyEntrySecret,
+                                                String keyEntryAlias) {
 
         try {
             return this.identityServiceSingletonBean.setIdentity(keyStoreType,
-                    keyStorePath, keyStoreSecret);
+                    keyStorePath, keyStoreSecret, keyEntrySecret, keyEntryAlias);
         } catch (Exception e) {
             throw new EJBException("could not set the identity: "
                     + e.getMessage(), e);

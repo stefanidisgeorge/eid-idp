@@ -52,7 +52,7 @@
 
                 <rich:tab label="IdP Identity">
                     <h:panelGrid columns="2">
-                        <h:outputLabel value="Keystore Type"
+                        <h:outputLabel value="Keystore Type (*)"
                                        for="keystore_type"/>
                         <s:decorate>
                             <h:selectOneMenu id="keystore_type"
@@ -64,7 +64,7 @@
                             </h:selectOneMenu>
                         </s:decorate>
                         <h:outputLabel
-                                value="Keystore Path"
+                                value="Keystore Path (*)"
                                 for="keystore_path"/>
                         <s:decorate>
                             <h:inputText id="keystore_path"
@@ -75,7 +75,7 @@
                         </s:decorate>
 
                         <h:outputLabel
-                                value="Keystore Password"
+                                value="Keystore Password (*)"
                                 for="keystore_pw"/>
                         <s:decorate>
                             <h:inputText id="keystore_pw"
@@ -84,6 +84,23 @@
                             </h:inputText>
                             <h:message for="keystore_pw" styleClass="error"/>
                         </s:decorate>
+
+                        <h:outputLabel
+                                value="Key Entry Password (*)"
+                                for="keyentry_pw"/>
+                        <s:decorate>
+                            <h:inputText id="keyentry_pw"
+                                         value="#{idpConfig.keyEntryPassword}"
+                                         required="true">
+                            </h:inputText>
+                        </s:decorate>
+
+                        <h:outputLabel
+                                value="Key Entry Alias"
+                                for="keyentry_alias"/>
+                        <h:inputText id="keyentry_alias"
+                                     value="#{idpConfig.keyEntryAlias}">
+                        </h:inputText>
 
                     </h:panelGrid>
                     <h:commandButton value="Save" action="#{idpConfig.save}"/>

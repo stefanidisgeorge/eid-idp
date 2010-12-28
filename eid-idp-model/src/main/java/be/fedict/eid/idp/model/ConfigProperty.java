@@ -38,7 +38,9 @@ public enum ConfigProperty {
     ACTIVE_IDENTITY("active-identity", String.class),
     KEY_STORE_TYPE("key-store-type", KeyStoreType.class),
     KEY_STORE_PATH("key-store-path", String.class),
-    KEY_STORE_SECRET("key-store-secret", String.class);
+    KEY_STORE_SECRET("key-store-secret", String.class),
+    KEY_ENTRY_SECRET("key-entry-secret", String.class),
+    KEY_ENTRY_ALIAS("key-entry-alias", String.class);
 
     private final String name;
 
