@@ -5,30 +5,6 @@
          version="2.5">
     <display-name>eID IdP SP</display-name>
 
-    <!-- Simple Identification Protocol -->
-    <servlet>
-        <servlet-name>SimpleProtocolLandingServlet</servlet-name>
-        <servlet-class>
-            be.fedict.eid.idp.sp.protocol.simple.SimpleProtocolLandingServlet
-        </servlet-class>
-        <init-param>
-            <param-name>RedirectPage</param-name>
-            <param-value>/simple-result.jsp</param-value>
-        </init-param>
-        <init-param>
-            <param-name>NameSessionAttribute</param-name>
-            <param-value>Name</param-value>
-        </init-param>
-        <init-param>
-            <param-name>FirstNameSessionAttribute</param-name>
-            <param-value>FirstName</param-value>
-        </init-param>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>SimpleProtocolLandingServlet</servlet-name>
-        <url-pattern>/simple-landing</url-pattern>
-    </servlet-mapping>
-
     <!-- SAML2 Authentication Protocol -->
     <servlet>
         <servlet-name>SAML2AuthenticationRequestServlet</servlet-name>

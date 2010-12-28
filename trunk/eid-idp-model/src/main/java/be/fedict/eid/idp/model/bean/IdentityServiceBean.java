@@ -52,7 +52,7 @@ public class IdentityServiceBean implements IdentityService {
 
         String secretValue =
                 this.configuration.getValue(ConfigProperty.HMAC_SECRET, String.class);
-        if (null == secretValue) {
+        if (null == secretValue || secretValue.trim().isEmpty()) {
             return null;
         }
         try {

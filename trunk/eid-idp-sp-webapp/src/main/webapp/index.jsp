@@ -9,12 +9,6 @@
 identification/authentication protocols towards the eID IdP.</p>
 <ul>
 	<li><a
-		href="https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/simple?Target=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/simple-landing">Simple
-	Identification Protocol</a></li>
-	<li><a
-		href="https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/simple?TargetFoobar=foobar">Simple
-	Identification Protocol with invalid parameter</a></li>
-	<li><a
 		href="https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/foobar">Unsupported
 	Protocol</a></li>
 	<li><a

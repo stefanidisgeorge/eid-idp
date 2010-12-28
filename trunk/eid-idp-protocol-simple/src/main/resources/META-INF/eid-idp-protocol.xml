@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<IdentityProviderProtocol xmlns="urn:be:fedict:eid:idp:spi:protocol">
-	<Name>Simple Protocol Service</Name>
-	<Description>This eID IdP Protocol Service provides a simple lightweight HTTP based protocol for eID identification purposes.</Description>
-	<ProtocolService>be.fedict.eid.idp.protocol.simple.SimpleProtocolService</ProtocolService>
-	<ContextPath>/simple</ContextPath>
-</IdentityProviderProtocol>
