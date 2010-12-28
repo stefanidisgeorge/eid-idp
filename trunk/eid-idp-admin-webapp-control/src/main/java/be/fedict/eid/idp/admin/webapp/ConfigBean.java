@@ -59,6 +59,8 @@ public class ConfigBean implements Config {
     private String keyStoreType;
     private String keyStorePath;
     private String keyStorePassword;
+    private String keyEntryPassword;
+    private String keyEntryAlias;
 
     private Boolean httpProxy;
     private String httpProxyHost;
@@ -70,14 +72,17 @@ public class ConfigBean implements Config {
     public void postConstruct() {
         this.log.debug("postConstruct");
 
+        // XKMS Config
         this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
                 String.class);
         this.xkmsTrustDomain = this.configuration.getValue(ConfigProperty.XKMS_TRUST_DOMAIN,
                 String.class);
 
+        // Pseudonym Config
         this.hmacSecret = this.configuration.getValue(ConfigProperty.HMAC_SECRET,
                 String.class);
 
+        // Identity Config
         this.keyStoreType =
                 this.configuration.getValue(ConfigProperty.KEY_STORE_TYPE,
                         KeyStoreType.class).name();
@@ -85,7 +90,12 @@ public class ConfigBean implements Config {
                 this.configuration.getValue(ConfigProperty.KEY_STORE_PATH, String.class);
         this.keyStorePassword =
                 this.configuration.getValue(ConfigProperty.KEY_STORE_SECRET, String.class);
+        this.keyEntryPassword =
+                this.configuration.getValue(ConfigProperty.KEY_ENTRY_SECRET, String.class);
+        this.keyEntryAlias =
+                this.configuration.getValue(ConfigProperty.KEY_ENTRY_ALIAS, String.class);
 
+        // Network Config
         this.httpProxy = this.configuration.getValue(
                 ConfigProperty.HTTP_PROXY_ENABLED, Boolean.class);
         this.httpProxyHost = this.configuration.getValue(
@@ -121,6 +131,10 @@ public class ConfigBean implements Config {
                 this.keyStorePath);
         this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET,
                 this.keyStorePassword);
+        this.configuration.setValue(ConfigProperty.KEY_ENTRY_SECRET,
+                this.keyEntryPassword);
+        this.configuration.setValue(ConfigProperty.KEY_ENTRY_ALIAS,
+                this.keyEntryAlias);
         this.identityService.reloadIdentity();
 
         // Proxy Config
@@ -187,7 +201,7 @@ public class ConfigBean implements Config {
 
     @Override
     public String getKeyStorePath() {
-        return keyStorePath;
+        return this.keyStorePath;
     }
 
     @Override
@@ -197,12 +211,32 @@ public class ConfigBean implements Config {
 
     @Override
     public String getKeyStorePassword() {
-        return keyStorePassword;
+        return this.keyStorePassword;
     }
 
     @Override
     public void setKeyStorePassword(String keyStorePassword) {
         this.keyStorePassword = keyStorePassword;
+    }
+
+    @Override
+    public String getKeyEntryPassword() {
+        return this.keyEntryPassword;
+    }
+
+    @Override
+    public void setKeyEntryPassword(String keyEntryPassword) {
+        this.keyEntryPassword = keyEntryPassword;
+    }
+
+    @Override
+    public String getKeyEntryAlias() {
+        return this.keyEntryAlias;
+    }
+
+    @Override
+    public void setKeyEntryAlias(String keyEntryAlias) {
+        this.keyEntryAlias = keyEntryAlias;
     }
 
     @Override

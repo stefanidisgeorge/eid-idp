@@ -33,7 +33,9 @@ public interface IdentityService extends IdentityProviderConfiguration {
 
     KeyStore.PrivateKeyEntry setIdentity(KeyStoreType keyStoreType,
                                          String keyStorePath,
-                                         String keyStoreSecret);
+                                         String keyStoreSecret,
+                                         String keyEntrySecret,
+                                         String keyEntryAlias);
 
     /**
      * @return if the IdP's identity is configured or not.

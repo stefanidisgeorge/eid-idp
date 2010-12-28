@@ -52,6 +52,14 @@ public interface Config {
 
     void setKeyStorePassword(String keyStorePassword);
 
+    String getKeyEntryPassword();
+
+    void setKeyEntryPassword(String keyEntryPassword);
+
+    String getKeyEntryAlias();
+
+    void setKeyEntryAlias(String keyEntryAlias);
+
     Boolean getHttpProxy();
 
     void setHttpProxy(Boolean httpProxy);

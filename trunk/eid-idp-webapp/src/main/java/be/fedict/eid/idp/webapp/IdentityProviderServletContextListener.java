@@ -70,7 +70,9 @@ public class IdentityProviderServletContextListener implements
             String jbossHome = System.getenv("JBOSS_HOME");
 
             identityService.setIdentity(KeyStoreType.PKCS12,
-                    jbossHome + "/keystores/idp-identity-keystore.p12", "secret");
+                    jbossHome + "/keystores/idp-identity-keystore.p12",
+                    "secret",
+                    "secret", null);
 
         }
 
