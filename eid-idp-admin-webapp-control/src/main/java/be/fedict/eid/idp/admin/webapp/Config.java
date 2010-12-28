@@ -32,6 +32,10 @@ public interface Config {
 
     void setXkmsUrl(String xkmsUrl);
 
+    String getXkmsTrustDomain();
+
+    void setXkmsTrustDomain(String xkmsTrustDomain);
+
     String getHmacSecret();
 
     void setHmacSecret(String hmacSecret);
@@ -48,9 +52,21 @@ public interface Config {
 
     void setKeyStorePassword(String keyStorePassword);
 
+    Boolean getHttpProxy();
+
+    void setHttpProxy(Boolean httpProxy);
+
+    String getHttpProxyHost();
+
+    void setHttpProxyHost(String httpProxyHost);
+
+    Integer getHttpProxyPort();
+
+    void setHttpProxyPort(Integer httpProxyPort);
+
     /*
-     * Factories
-     */
+    * Factories
+    */
     List<SelectItem> keyStoreTypeFactory();
 
     /*

@@ -58,6 +58,11 @@ public class AuthenticationServiceBean implements AuthenticationService {
             LOG.error("no XKMS URL configured!");
             return;
         }
+        String xkmsTrustDomain = this.configuration.getValue(ConfigProperty.XKMS_TRUST_DOMAIN,
+                String.class);
+        if (xkmsTrustDomain.trim().isEmpty()) {
+            xkmsTrustDomain = null;
+        }
 
         XKMS2Client xkms2Client = new XKMS2Client(xkmsUrl);
 
@@ -68,12 +73,17 @@ public class AuthenticationServiceBean implements AuthenticationService {
                     ConfigProperty.HTTP_PROXY_HOST, String.class);
             int httpProxyPort = this.configuration.getValue(
                     ConfigProperty.HTTP_PROXY_PORT, Integer.class);
+            LOG.debug("use proxy: " + httpProxyHost + ":" + httpProxyPort);
             xkms2Client.setProxy(httpProxyHost, httpProxyPort);
         }
 
         try {
             LOG.debug("validating certificate chain");
-            xkms2Client.validate(certificateChain);
+            if (null != xkmsTrustDomain) {
+                xkms2Client.validate(xkmsTrustDomain, certificateChain);
+            } else {
+                xkms2Client.validate(certificateChain);
+            }
         } catch (ValidationFailedException e) {
             LOG.warn("invalid certificate");
             throw new SecurityException("invalid certificate");
