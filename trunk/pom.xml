@@ -33,6 +33,7 @@
         <module>eid-idp-protocol-openid</module>
         <module>eid-idp-protocol-ws-federation</module>
         <module>eid-idp-entity</module>
+        <module>eid-idp-sql-ddl</module>
         <module>eid-idp-model</module>
         <module>eid-idp-webapp</module>
         <module>eid-idp-webapp-control</module>
@@ -63,7 +64,6 @@
                 </property>
             </activation>
             <modules>
-                <module>eid-idp-sql-ddl</module>
                 <module>eid-idp-keystore</module>
                 <module>eid-idp-admin-manual</module>
                 <module>eid-idp-mysql-distribution</module>
@@ -83,7 +83,6 @@
                 </property>
             </activation>
             <modules>
-                <module>eid-idp-sql-ddl</module>
                 <module>eid-idp-admin-manual</module>
                 <module>eid-idp-postgresql-distribution</module>
             </modules>
@@ -102,7 +101,6 @@
                 </property>
             </activation>
             <modules>
-                <module>eid-idp-sql-ddl</module>
                 <module>eid-idp-admin-manual</module>
                 <module>eid-idp-oracle-distribution</module>
             </modules>
@@ -111,6 +109,36 @@
                 </hibernate.dialect>
                 <hibernate.hbm2ddl.auto>validate</hibernate.hbm2ddl.auto>
             </properties>
+        </profile>
+        <profile>
+            <id>sdk</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>sdk</value>
+                </property>
+            </activation>
+            <modules>
+                <module>eid-idp-devel-guide</module>
+                <!--<module>eid-idp-sdk</module>-->
+            </modules>
+        </profile>
+        <profile>
+            <id>all</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>all</value>
+                </property>
+            </activation>
+            <modules>
+                <module>eid-idp-tests</module>
+                <module>eid-idp-keystore</module>
+                <module>eid-idp-admin-manual</module>
+                <module>eid-idp-mysql-distribution</module>
+                <module>eid-idp-devel-guide</module>
+                <!--<module>eid-idp-sdk</module>-->
+            </modules>
         </profile>
 
     </profiles>
