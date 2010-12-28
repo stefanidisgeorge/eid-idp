@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.model;
 
+import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 
 import javax.ejb.Local;
@@ -29,13 +30,13 @@ public interface IdentityService extends IdentityProviderConfiguration {
     /**
      * Reload the currently configured identity
      */
-    void reloadIdentity();
+    void reloadIdentity() throws KeyStoreLoadException;
 
     KeyStore.PrivateKeyEntry setIdentity(KeyStoreType keyStoreType,
                                          String keyStorePath,
                                          String keyStoreSecret,
                                          String keyEntrySecret,
-                                         String keyEntryAlias);
+                                         String keyEntryAlias) throws KeyStoreLoadException;
 
     /**
      * @return if the IdP's identity is configured or not.
