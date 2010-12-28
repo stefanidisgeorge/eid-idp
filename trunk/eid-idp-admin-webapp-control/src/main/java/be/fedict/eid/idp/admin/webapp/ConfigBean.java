@@ -20,6 +20,7 @@ package be.fedict.eid.idp.admin.webapp;
 
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
+import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.KeyStoreType;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.annotations.Destroy;
@@ -47,7 +48,11 @@ public class ConfigBean implements Config {
     @EJB
     private Configuration configuration;
 
+    @EJB
+    private IdentityService identityService;
+
     private String xkmsUrl;
+    private String xkmsTrustDomain;
 
     private String hmacSecret;
 
@@ -55,11 +60,21 @@ public class ConfigBean implements Config {
     private String keyStorePath;
     private String keyStorePassword;
 
+    private Boolean httpProxy;
+    private String httpProxyHost;
+    private Integer httpProxyPort;
+
+
+    @Override
     @PostConstruct
     public void postConstruct() {
         this.log.debug("postConstruct");
+
         this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
                 String.class);
+        this.xkmsTrustDomain = this.configuration.getValue(ConfigProperty.XKMS_TRUST_DOMAIN,
+                String.class);
+
         this.hmacSecret = this.configuration.getValue(ConfigProperty.HMAC_SECRET,
                 String.class);
 
@@ -70,34 +85,56 @@ public class ConfigBean implements Config {
                 this.configuration.getValue(ConfigProperty.KEY_STORE_PATH, String.class);
         this.keyStorePassword =
                 this.configuration.getValue(ConfigProperty.KEY_STORE_SECRET, String.class);
+
+        this.httpProxy = this.configuration.getValue(
+                ConfigProperty.HTTP_PROXY_ENABLED, Boolean.class);
+        this.httpProxyHost = this.configuration.getValue(
+                ConfigProperty.HTTP_PROXY_HOST, String.class);
+        this.httpProxyPort = this.configuration.getValue(
+                ConfigProperty.HTTP_PROXY_PORT, Integer.class);
     }
 
+    @Override
     @Remove
     @Destroy
     public void destroy() {
         this.log.debug("destroy");
     }
 
-    public String getXkmsUrl() {
-        return this.xkmsUrl;
-    }
-
+    @Override
     public String save() {
         this.log.debug("save");
-        this.configuration.setValue(ConfigProperty.XKMS_URL, this.xkmsUrl);
-        this.configuration.setValue(ConfigProperty.HMAC_SECRET, this.hmacSecret);
 
+        // XKMS Config
+        this.configuration.setValue(ConfigProperty.XKMS_URL, this.xkmsUrl);
+        this.configuration.setValue(ConfigProperty.XKMS_TRUST_DOMAIN,
+                this.xkmsTrustDomain);
+
+        // Pseudonym Config
+        this.configuration.setValue(ConfigProperty.HMAC_SECRET,
+                this.hmacSecret);
+
+        // Identity Config
         this.configuration.setValue(ConfigProperty.KEY_STORE_TYPE,
                 KeyStoreType.valueOf(this.keyStoreType));
-        this.configuration.setValue(ConfigProperty.KEY_STORE_PATH, this.keyStorePath);
-        this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET, this.keyStorePassword);
+        this.configuration.setValue(ConfigProperty.KEY_STORE_PATH,
+                this.keyStorePath);
+        this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET,
+                this.keyStorePassword);
+        this.identityService.reloadIdentity();
+
+        // Proxy Config
+        this.configuration.setValue(ConfigProperty.HTTP_PROXY_ENABLED,
+                this.httpProxy);
+        this.configuration.setValue(ConfigProperty.HTTP_PROXY_HOST,
+                this.httpProxyHost);
+        this.configuration.setValue(ConfigProperty.HTTP_PROXY_PORT,
+                this.httpProxyPort);
 
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     @Factory("keyStoreTypes")
     public List<SelectItem> keyStoreTypeFactory() {
 
@@ -108,40 +145,93 @@ public class ConfigBean implements Config {
         return keyStoreTypes;
     }
 
+    @Override
+    public String getXkmsUrl() {
+        return this.xkmsUrl;
+    }
 
+    @Override
     public void setXkmsUrl(String xkmsUrl) {
         this.xkmsUrl = xkmsUrl;
     }
 
+    @Override
+    public String getXkmsTrustDomain() {
+        return this.xkmsTrustDomain;
+    }
+
+    @Override
+    public void setXkmsTrustDomain(String xkmsTrustDomain) {
+        this.xkmsTrustDomain = xkmsTrustDomain;
+    }
+
+    @Override
     public String getHmacSecret() {
         return this.hmacSecret;
     }
 
+    @Override
     public void setHmacSecret(String hmacSecret) {
         this.hmacSecret = hmacSecret;
     }
 
+    @Override
     public String getKeyStoreType() {
         return keyStoreType;
     }
 
+    @Override
     public void setKeyStoreType(String keyStoreType) {
         this.keyStoreType = keyStoreType;
     }
 
+    @Override
     public String getKeyStorePath() {
         return keyStorePath;
     }
 
+    @Override
     public void setKeyStorePath(String keyStorePath) {
         this.keyStorePath = keyStorePath;
     }
 
+    @Override
     public String getKeyStorePassword() {
         return keyStorePassword;
     }
 
+    @Override
     public void setKeyStorePassword(String keyStorePassword) {
         this.keyStorePassword = keyStorePassword;
+    }
+
+    @Override
+    public Boolean getHttpProxy() {
+        return this.httpProxy;
+    }
+
+    @Override
+    public void setHttpProxy(Boolean httpProxy) {
+        this.httpProxy = httpProxy;
+    }
+
+    @Override
+    public String getHttpProxyHost() {
+        return this.httpProxyHost;
+    }
+
+    @Override
+    public void setHttpProxyHost(String httpProxyHost) {
+        this.httpProxyHost = httpProxyHost;
+    }
+
+    @Override
+    public Integer getHttpProxyPort() {
+        return this.httpProxyPort;
+    }
+
+    @Override
+    public void setHttpProxyPort(Integer httpProxyPort) {
+        this.httpProxyPort = httpProxyPort;
     }
 }

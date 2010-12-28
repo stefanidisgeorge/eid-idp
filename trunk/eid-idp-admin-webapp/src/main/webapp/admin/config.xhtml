@@ -13,10 +13,14 @@
         <h2>Configuration</h2>
         <h:form>
             <rich:tabPanel switchType="client">
+
                 <rich:tab label="PKI validation">
                     <h:panelGrid columns="2">
                         <h:outputText value="eID Trust Service XKMS2 URL:"/>
                         <h:inputText value="#{idpConfig.xkmsUrl}"/>
+
+                        <h:outputText value="eID Trust Service Trust Domain:"/>
+                        <h:inputText value="#{idpConfig.xkmsTrustDomain}"/>
                     </h:panelGrid>
                     <h:commandButton value="Save" action="#{idpConfig.save}"/>
                 </rich:tab>
@@ -28,6 +32,24 @@
                     </h:panelGrid>
                     <h:commandButton value="Save" action="#{idpConfig.save}"/>
                 </rich:tab>
+
+                <rich:tab label="Network">
+                    <h:panelGrid columns="2">
+                        <h:outputText value="HTTP Proxy"/>
+                        <h:selectBooleanCheckbox
+                                value="#{idpConfig.httpProxy}"/>
+
+                        <h:outputText value="HTTP Proxy Host: "/>
+                        <h:inputText value="#{idpConfig.httpProxyHost}"
+                                     size="30"/>
+
+                        <h:outputText value="HTTP Proxy Port: "/>
+                        <h:inputText value="#{idpConfig.httpProxyPort}"
+                                     size="10"/>
+                    </h:panelGrid>
+                    <h:commandButton value="Save" action="#{idpConfig.save}"/>
+                </rich:tab>
+
                 <rich:tab label="IdP Identity">
                     <h:panelGrid columns="2">
                         <h:outputLabel value="Keystore Type"
@@ -47,7 +69,7 @@
                         <s:decorate>
                             <h:inputText id="keystore_path"
                                          value="#{idpConfig.keyStorePath}"
-                                         required="true">
+                                         required="true" size="50">
                             </h:inputText>
                             <h:message for="keystore_path" styleClass="error"/>
                         </s:decorate>
@@ -66,6 +88,7 @@
                     </h:panelGrid>
                     <h:commandButton value="Save" action="#{idpConfig.save}"/>
                 </rich:tab>
+
             </rich:tabPanel>
         </h:form>
     </ui:define>
