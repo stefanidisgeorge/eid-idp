@@ -30,6 +30,11 @@ public class KeyStoreLoadException extends Exception {
         super(message);
     }
 
+    public KeyStoreLoadException(Throwable cause) {
+
+        super(cause);
+    }
+
     public KeyStoreLoadException(String message, Throwable cause) {
 
         super(message, cause);

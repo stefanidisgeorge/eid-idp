@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.webapp;
 
+import be.fedict.eid.idp.model.IdentityConfig;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.KeyStoreType;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
@@ -75,11 +76,12 @@ public class IdentityProviderServletContextListener implements
 
             String jbossHome = System.getenv("JBOSS_HOME");
 
-            identityService.setIdentity(KeyStoreType.PKCS12,
+            identityService.setIdentity(new IdentityConfig("default",
+                    KeyStoreType.PKCS12,
                     jbossHome + "/keystores/idp-identity-keystore.p12",
-                    "secret",
-                    "secret", null);
+                    "secret", "secret", null));
 
+            identityService.setActiveIdentity("default");
         }
 
     }
