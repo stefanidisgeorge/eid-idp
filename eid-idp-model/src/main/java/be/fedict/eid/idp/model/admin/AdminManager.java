@@ -18,21 +18,16 @@
 
 package be.fedict.eid.idp.model.admin;
 
-import java.security.cert.X509Certificate;
-
 import javax.ejb.Local;
+import java.security.cert.X509Certificate;
 
 @Local
 public interface AdminManager {
 
-	void register(X509Certificate certificate);
-
-	/**
-	 * Check whether the (already authenticated) admin identifier indeed belongs
-	 * to an admin.
-	 * 
-	 * @param adminId
-	 * @return
-	 */
-	boolean isAdmin(String adminId);
+    /**
+     * @param certificate certificate
+     * @return whether the (already authenticated) admin identifier indeed belongs
+     *         to an admin.
+     */
+    boolean isAdmin(X509Certificate certificate);
 }

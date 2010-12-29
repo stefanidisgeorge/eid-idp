@@ -18,50 +18,48 @@
 
 package be.fedict.eid.idp.model.admin;
 
-import java.security.cert.X509Certificate;
+import be.fedict.eid.idp.entity.AdministratorEntity;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
-import be.fedict.eid.idp.entity.AdministratorEntity;
-import be.fedict.eid.idp.entity.RegistrationEntity;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
 @Stateless
 public class AdminManagerBean implements AdminManager {
 
-	private static final Log LOG = LogFactory.getLog(AdminManagerBean.class);
+    private static final Log LOG = LogFactory.getLog(AdminManagerBean.class);
 
-	@PersistenceContext
-	private EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-	public void register(X509Certificate certificate) {
-		if (RegistrationEntity.isRegistered(certificate, this.entityManager)) {
-			LOG.debug("already registered: "
-					+ certificate.getSubjectX500Principal());
-			return;
-		}
+    public boolean isAdmin(X509Certificate certificate) {
 
-		if (false == AdministratorEntity.hasAdmins(this.entityManager)) {
-			LOG.debug("registering as administrator");
-			AdministratorEntity administrator = new AdministratorEntity(
-					certificate);
-			this.entityManager.persist(administrator);
-		} else {
-			RegistrationEntity registration = new RegistrationEntity(
-					certificate);
-			this.entityManager.persist(registration);
-			LOG.debug("certificate registered: "
-					+ certificate.getSubjectX500Principal());
-		}
-	}
+        String id = getId(certificate);
+        AdministratorEntity adminEntity = this.entityManager.find(
+                AdministratorEntity.class, id);
+        if (null != adminEntity) {
+            return true;
+        }
+        if (AdministratorEntity.hasAdmins(this.entityManager)) {
+            return false;
+        }
+        /*
+         * Else we bootstrap the admin.
+         */
+        String name = certificate.getSubjectX500Principal().toString();
+        adminEntity = new AdministratorEntity(id, name);
+        this.entityManager.persist(adminEntity);
+        return true;
+    }
 
-	public boolean isAdmin(String adminId) {
-		LOG.debug("checking admin privileges for: " + adminId);
-		AdministratorEntity administrator = this.entityManager.find(
-				AdministratorEntity.class, adminId);
-		return null != administrator;
-	}
+    private String getId(X509Certificate certificate) {
+        PublicKey publicKey = certificate.getPublicKey();
+        return DigestUtils.shaHex(publicKey.getEncoded());
+    }
+
 }

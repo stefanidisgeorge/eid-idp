@@ -18,35 +18,29 @@
 
 package be.fedict.eid.idp.entity;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-
-import static be.fedict.eid.idp.entity.AdministratorEntity.COUNT_QUERY;
 
 @Entity
-@Table(name = Constants.DATABASE_TABLE_PREFIX + "administrators")
-@NamedQueries(@NamedQuery(name = COUNT_QUERY, query = "SELECT COUNT(admin) FROM AdministratorEntity AS admin"))
+@Table(name = Constants.DATABASE_TABLE_PREFIX + "admin")
+@NamedQueries({@NamedQuery(name = AdministratorEntity.COUNT_ALL, query = "SELECT COUNT(*) FROM AdministratorEntity")})
 public class AdministratorEntity implements Serializable {
-
-    public static final String COUNT_QUERY = "AdministratorEntity.query.count";
 
     private static final long serialVersionUID = 1L;
 
+    public static final String COUNT_ALL = "idp.admin.count.all";
+
     private String id;
 
-    private String subject;
+    private String name;
+
+    public AdministratorEntity(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     public AdministratorEntity() {
         super();
-    }
-
-    public AdministratorEntity(X509Certificate certificate) {
-        this.id = getId(certificate);
-        this.subject = certificate.getSubjectX500Principal().toString();
     }
 
     @Id
@@ -59,30 +53,16 @@ public class AdministratorEntity implements Serializable {
     }
 
     @Column(nullable = false)
-    public String getSubject() {
-        return this.subject;
+    public String getName() {
+        return this.name;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    private static String getId(X509Certificate certificate) {
-        PublicKey publicKey = certificate.getPublicKey();
-        byte[] encodedPublicKey = publicKey.getEncoded();
-        return DigestUtils.sha256Hex(encodedPublicKey);
-    }
-
-    public static boolean isAdministrator(X509Certificate certificate,
-                                          EntityManager entityManager) {
-        String id = getId(certificate);
-        AdministratorEntity registration = entityManager.find(
-                AdministratorEntity.class, id);
-        return null != registration;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public static boolean hasAdmins(EntityManager entityManager) {
-        Query query = entityManager.createNamedQuery(COUNT_QUERY);
+        Query query = entityManager.createNamedQuery(COUNT_ALL);
         Long count = (Long) query.getSingleResult();
         return 0 != count;
     }
