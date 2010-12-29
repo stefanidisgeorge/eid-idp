@@ -23,12 +23,12 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "admin")
-@NamedQueries({@NamedQuery(name = AdministratorEntity.COUNT_ALL, query = "SELECT COUNT(*) FROM AdministratorEntity")})
+@NamedQueries({@NamedQuery(name = AdministratorEntity.LIST_ALL, query = "FROM AdministratorEntity")})
 public class AdministratorEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String COUNT_ALL = "idp.admin.count.all";
+    public static final String LIST_ALL = "idp.admin.list.all";
 
     private String id;
 
@@ -62,8 +62,7 @@ public class AdministratorEntity implements Serializable {
     }
 
     public static boolean hasAdmins(EntityManager entityManager) {
-        Query query = entityManager.createNamedQuery(COUNT_ALL);
-        Long count = (Long) query.getSingleResult();
-        return 0 != count;
+        Query query = entityManager.createNamedQuery(LIST_ALL);
+        return 0 != query.getResultList().size();
     }
 }
