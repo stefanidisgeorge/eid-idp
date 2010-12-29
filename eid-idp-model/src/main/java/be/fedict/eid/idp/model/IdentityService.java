@@ -32,11 +32,12 @@ public interface IdentityService extends IdentityProviderConfiguration {
      */
     void reloadIdentity() throws KeyStoreLoadException;
 
-    KeyStore.PrivateKeyEntry setIdentity(KeyStoreType keyStoreType,
-                                         String keyStorePath,
-                                         String keyStoreSecret,
-                                         String keyEntrySecret,
-                                         String keyEntryAlias) throws KeyStoreLoadException;
+    void setActiveIdentity(String name) throws KeyStoreLoadException;
+
+    KeyStore.PrivateKeyEntry setIdentity(IdentityConfig identityConfig)
+            throws KeyStoreLoadException;
+
+    IdentityConfig getIdentityConfig();
 
     /**
      * @return if the IdP's identity is configured or not.
@@ -47,4 +48,5 @@ public interface IdentityService extends IdentityProviderConfiguration {
      * @return digest of the active identity's certificate.
      */
     String getIdentityFingerprint();
+
 }

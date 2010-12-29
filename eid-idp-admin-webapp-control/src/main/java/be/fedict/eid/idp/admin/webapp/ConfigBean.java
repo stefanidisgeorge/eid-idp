@@ -18,10 +18,7 @@
 
 package be.fedict.eid.idp.admin.webapp;
 
-import be.fedict.eid.idp.model.ConfigProperty;
-import be.fedict.eid.idp.model.Configuration;
-import be.fedict.eid.idp.model.IdentityService;
-import be.fedict.eid.idp.model.KeyStoreType;
+import be.fedict.eid.idp.model.*;
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.annotations.*;
@@ -59,11 +56,7 @@ public class ConfigBean implements Config {
 
     private String hmacSecret;
 
-    private String keyStoreType;
-    private String keyStorePath;
-    private String keyStorePassword;
-    private String keyEntryPassword;
-    private String keyEntryAlias;
+    private IdentityConfig identityConfig;
 
     private Boolean httpProxy;
     private String httpProxyHost;
@@ -86,17 +79,7 @@ public class ConfigBean implements Config {
                 String.class);
 
         // Identity Config
-        this.keyStoreType =
-                this.configuration.getValue(ConfigProperty.KEY_STORE_TYPE,
-                        KeyStoreType.class).name();
-        this.keyStorePath =
-                this.configuration.getValue(ConfigProperty.KEY_STORE_PATH, String.class);
-        this.keyStorePassword =
-                this.configuration.getValue(ConfigProperty.KEY_STORE_SECRET, String.class);
-        this.keyEntryPassword =
-                this.configuration.getValue(ConfigProperty.KEY_ENTRY_SECRET, String.class);
-        this.keyEntryAlias =
-                this.configuration.getValue(ConfigProperty.KEY_ENTRY_ALIAS, String.class);
+        this.identityConfig = this.identityService.getIdentityConfig();
 
         // Network Config
         this.httpProxy = this.configuration.getValue(
@@ -129,16 +112,7 @@ public class ConfigBean implements Config {
                     this.hmacSecret);
 
             // Identity Config
-            this.configuration.setValue(ConfigProperty.KEY_STORE_TYPE,
-                    KeyStoreType.valueOf(this.keyStoreType));
-            this.configuration.setValue(ConfigProperty.KEY_STORE_PATH,
-                    this.keyStorePath);
-            this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET,
-                    this.keyStorePassword);
-            this.configuration.setValue(ConfigProperty.KEY_ENTRY_SECRET,
-                    this.keyEntryPassword);
-            this.configuration.setValue(ConfigProperty.KEY_ENTRY_ALIAS,
-                    this.keyEntryAlias);
+            this.identityService.setIdentity(this.identityConfig);
             this.identityService.reloadIdentity();
 
             // Proxy Config
@@ -201,52 +175,52 @@ public class ConfigBean implements Config {
 
     @Override
     public String getKeyStoreType() {
-        return keyStoreType;
+        return identityConfig.getKeyStoreType().name();
     }
 
     @Override
     public void setKeyStoreType(String keyStoreType) {
-        this.keyStoreType = keyStoreType;
+        this.identityConfig.setKeyStoreType(KeyStoreType.valueOf(keyStoreType));
     }
 
     @Override
     public String getKeyStorePath() {
-        return this.keyStorePath;
+        return this.identityConfig.getKeyStorePath();
     }
 
     @Override
     public void setKeyStorePath(String keyStorePath) {
-        this.keyStorePath = keyStorePath;
+        this.identityConfig.setKeyStorePath(keyStorePath);
     }
 
     @Override
     public String getKeyStorePassword() {
-        return this.keyStorePassword;
+        return this.identityConfig.getKeyStorePassword();
     }
 
     @Override
     public void setKeyStorePassword(String keyStorePassword) {
-        this.keyStorePassword = keyStorePassword;
+        this.identityConfig.setKeyStorePassword(keyStorePassword);
     }
 
     @Override
     public String getKeyEntryPassword() {
-        return this.keyEntryPassword;
+        return this.identityConfig.getKeyEntryPassword();
     }
 
     @Override
     public void setKeyEntryPassword(String keyEntryPassword) {
-        this.keyEntryPassword = keyEntryPassword;
+        this.identityConfig.setKeyEntryPassword(keyEntryPassword);
     }
 
     @Override
     public String getKeyEntryAlias() {
-        return this.keyEntryAlias;
+        return this.identityConfig.getKeyEntryAlias();
     }
 
     @Override
     public void setKeyEntryAlias(String keyEntryAlias) {
-        this.keyEntryAlias = keyEntryAlias;
+        this.identityConfig.setKeyEntryAlias(keyEntryAlias);
     }
 
     @Override

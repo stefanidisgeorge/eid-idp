@@ -23,7 +23,11 @@ import javax.ejb.Local;
 @Local
 public interface Configuration {
 
+    void setValue(ConfigProperty configProperty, String index, Object value);
+
     void setValue(ConfigProperty configProperty, Object value);
+
+    <T> T getValue(ConfigProperty configProperty, String index, Class<T> type);
 
     <T> T getValue(ConfigProperty configProperty, Class<T> type);
 }

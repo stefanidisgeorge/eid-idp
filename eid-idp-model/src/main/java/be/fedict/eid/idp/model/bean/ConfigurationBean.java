@@ -32,7 +32,20 @@ public class ConfigurationBean implements Configuration {
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * {@inheritDoc}
+     */
     public void setValue(ConfigProperty configProperty, Object value) {
+
+        setValue(configProperty, null, value);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setValue(ConfigProperty configProperty, String index, Object value) {
+
         String propertyValue;
         if (null != value) {
             Class<?> expectedType = configProperty.getType();
@@ -51,25 +64,42 @@ public class ConfigurationBean implements Configuration {
         } else {
             propertyValue = null;
         }
+
+        String propertyName = getPropertyName(configProperty, index);
         ConfigPropertyEntity configPropertyEntity = this.entityManager.find(
-                ConfigPropertyEntity.class, configProperty.getName());
+                ConfigPropertyEntity.class, propertyName);
         if (null == configPropertyEntity) {
             configPropertyEntity = new ConfigPropertyEntity(
-                    configProperty.getName(), propertyValue);
+                    propertyName, propertyValue);
             this.entityManager.persist(configPropertyEntity);
         } else {
             configPropertyEntity.setValue(propertyValue);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings({"unchecked", "static-access"})
     public <T> T getValue(ConfigProperty configProperty, Class<T> type) {
+        return getValue(configProperty, null, type);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings({"unchecked", "static-access"})
+    public <T> T getValue(ConfigProperty configProperty, String index, Class<T> type) {
+
         if (!type.equals(configProperty.getType())) {
             throw new IllegalArgumentException("incorrect type: "
                     + type.getName());
         }
+
+        String propertyName = getPropertyName(configProperty, index);
+
         ConfigPropertyEntity configPropertyEntity = this.entityManager.find(
-                ConfigPropertyEntity.class, configProperty.getName());
+                ConfigPropertyEntity.class, propertyName);
         if (null == configPropertyEntity) {
             return null;
         }
@@ -94,5 +124,14 @@ public class ConfigurationBean implements Configuration {
         }
         throw new RuntimeException("unsupported type: "
                 + configProperty.getType().getName());
+    }
+
+    private String getPropertyName(ConfigProperty configProperty, String index) {
+
+        String propertyName = configProperty.getName();
+        if (null != index) {
+            propertyName += '-' + index;
+        }
+        return propertyName;
     }
 }

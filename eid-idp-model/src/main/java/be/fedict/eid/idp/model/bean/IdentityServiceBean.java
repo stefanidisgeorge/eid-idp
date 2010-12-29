@@ -20,8 +20,8 @@ package be.fedict.eid.idp.model.bean;
 
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
+import be.fedict.eid.idp.model.IdentityConfig;
 import be.fedict.eid.idp.model.IdentityService;
-import be.fedict.eid.idp.model.KeyStoreType;
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -67,12 +67,16 @@ public class IdentityServiceBean implements IdentityService {
      * {@inheritDoc}
      */
     public void reloadIdentity() throws KeyStoreLoadException {
-        try {
-            this.identityServiceSingletonBean.reloadIdentity();
-        } catch (Exception e) {
-            throw new KeyStoreLoadException("could not reload the identity: "
-                    + e.getMessage(), e);
-        }
+
+        this.identityServiceSingletonBean.reloadIdentity();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setActiveIdentity(String name) throws KeyStoreLoadException {
+
+        this.identityServiceSingletonBean.setActiveIdentity(name);
     }
 
     /**
@@ -93,19 +97,17 @@ public class IdentityServiceBean implements IdentityService {
     /**
      * {@inheritDoc}
      */
-    public KeyStore.PrivateKeyEntry setIdentity(KeyStoreType keyStoreType,
-                                                String keyStorePath,
-                                                String keyStoreSecret,
-                                                String keyEntrySecret,
-                                                String keyEntryAlias) throws KeyStoreLoadException {
+    public KeyStore.PrivateKeyEntry setIdentity(IdentityConfig identityConfig) throws KeyStoreLoadException {
 
-        try {
-            return this.identityServiceSingletonBean.setIdentity(keyStoreType,
-                    keyStorePath, keyStoreSecret, keyEntrySecret, keyEntryAlias);
-        } catch (Exception e) {
-            throw new KeyStoreLoadException("could not set the identity: "
-                    + e.getMessage(), e);
-        }
+        return this.identityServiceSingletonBean.setIdentity(identityConfig);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public IdentityConfig getIdentityConfig() {
+
+        return this.identityServiceSingletonBean.getIdentityConfig();
     }
 
     /**
