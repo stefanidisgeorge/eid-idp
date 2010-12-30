@@ -25,6 +25,8 @@ import be.fedict.eid.idp.model.Configuration;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.LinkedList;
+import java.util.List;
 
 @Stateless
 public class ConfigurationBean implements Configuration {
@@ -80,6 +82,27 @@ public class ConfigurationBean implements Configuration {
     /**
      * {@inheritDoc}
      */
+    public void removeValue(ConfigProperty configProperty) {
+
+        removeValue(configProperty, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removeValue(ConfigProperty configProperty, String index) {
+
+        String propertyName = getPropertyName(configProperty, index);
+        ConfigPropertyEntity configPropertyEntity = this.entityManager.find(
+                ConfigPropertyEntity.class, propertyName);
+        if (null != configPropertyEntity) {
+            this.entityManager.remove(configPropertyEntity);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings({"unchecked", "static-access"})
     public <T> T getValue(ConfigProperty configProperty, Class<T> type) {
         return getValue(configProperty, null, type);
@@ -124,6 +147,26 @@ public class ConfigurationBean implements Configuration {
         }
         throw new RuntimeException("unsupported type: "
                 + configProperty.getType().getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getIndexes(ConfigProperty configProperty) {
+
+        List<ConfigPropertyEntity> configs =
+                ConfigPropertyEntity.listConfigsWhereNameLike(this.entityManager,
+                        configProperty.getName());
+        List<String> indexes = new LinkedList<String>();
+
+        String prefix = configProperty.getName() + '-';
+        for (ConfigPropertyEntity config : configs) {
+            if (config.getName().contains(prefix)) {
+                indexes.add(config.getName().substring(config.getName().
+                        indexOf(prefix) + prefix.length()));
+            }
+        }
+        return indexes;
     }
 
     private String getPropertyName(ConfigProperty configProperty, String index) {

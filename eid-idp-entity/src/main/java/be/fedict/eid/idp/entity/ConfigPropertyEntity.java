@@ -18,16 +18,19 @@
 
 package be.fedict.eid.idp.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "configuration")
+@NamedQueries(@NamedQuery(name = ConfigPropertyEntity.LIST_INDEXES,
+        query = "FROM ConfigPropertyEntity WHERE name LIKE :name"))
 public class ConfigPropertyEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public static final String LIST_INDEXES = "idp.config.list.idx";
 
     private String name;
 
@@ -57,6 +60,14 @@ public class ConfigPropertyEntity implements Serializable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<ConfigPropertyEntity> listConfigsWhereNameLike(
+            EntityManager entityManager, String name) {
+
+        return entityManager.createNamedQuery(ConfigPropertyEntity.LIST_INDEXES)
+                .setParameter("name", "%" + name + "%").getResultList();
     }
 
 }

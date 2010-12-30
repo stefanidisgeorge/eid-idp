@@ -38,6 +38,7 @@ import java.security.*;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
+import java.util.List;
 
 @Singleton
 @Startup
@@ -57,6 +58,14 @@ public class IdentityServiceSingletonBean {
     public boolean isIdentityConfigured() {
         return null != this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
                 String.class);
+    }
+
+    /**
+     * @return list of all identity configurations's names
+     */
+    public List<String> getIdentities() {
+
+        return this.configuration.getIndexes(ConfigProperty.KEY_STORE_TYPE);
     }
 
     /**
@@ -87,15 +96,7 @@ public class IdentityServiceSingletonBean {
      */
     public void reloadIdentity() throws KeyStoreLoadException {
 
-        String activeIdentity =
-                this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
-                        String.class);
-
-        if (null == activeIdentity) {
-            throw new KeyStoreLoadException("No active identity set!");
-        }
-
-        this.identity = loadIdentity(activeIdentity);
+        this.identity = loadIdentity(getActiveIdentityName());
         LOG.debug("private key entry reloaded");
     }
 
@@ -223,14 +224,7 @@ public class IdentityServiceSingletonBean {
      */
     public IdentityConfig getIdentityConfig() {
 
-        String activeIdentity =
-                this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
-                        String.class);
-
-        if (null == activeIdentity) {
-            throw new EJBException("No active identity set!");
-        }
-
+        String activeIdentity = getActiveIdentityName();
         IdentityConfig identityConfig = findIdentityConfig(activeIdentity);
         if (null == identityConfig) {
             throw new EJBException("No active identity config found!");
@@ -258,8 +252,24 @@ public class IdentityServiceSingletonBean {
         String keyEntryAlias = this.configuration.getValue(
                 ConfigProperty.KEY_ENTRY_ALIAS, name, String.class);
 
-        return new IdentityConfig(name, keyStoreType, keyStorePath,
-                keyStoreSecret, keyEntrySecret, keyEntryAlias);
+        IdentityConfig identityConfig = new IdentityConfig(name, keyStoreType,
+                keyStorePath, keyStoreSecret, keyEntrySecret, keyEntryAlias);
+
+        identityConfig.setActive(identityConfig.getName().equals(getActiveIdentityName()));
+
+        return identityConfig;
+    }
+
+    private String getActiveIdentityName() {
+
+        String activeIdentity =
+                this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
+                        String.class);
+
+        if (null == activeIdentity) {
+            throw new EJBException("No active identity set!");
+        }
+        return activeIdentity;
     }
 
     /**
@@ -271,6 +281,8 @@ public class IdentityServiceSingletonBean {
      */
     public PrivateKeyEntry setIdentity(IdentityConfig identityConfig)
             throws KeyStoreLoadException {
+
+        LOG.debug("set identity: " + identityConfig.getName());
 
         this.configuration.setValue(ConfigProperty.KEY_STORE_TYPE,
                 identityConfig.getName(), identityConfig.getKeyStoreType());
@@ -286,5 +298,21 @@ public class IdentityServiceSingletonBean {
         }
 
         return loadIdentity(identityConfig.getName());
+    }
+
+    /**
+     * Remove identity configuration
+     *
+     * @param name name of identity config to remove
+     */
+    public void removeIdentityConfig(String name) {
+
+        LOG.debug("remove identity: " + name);
+
+        this.configuration.removeValue(ConfigProperty.KEY_STORE_TYPE, name);
+        this.configuration.removeValue(ConfigProperty.KEY_STORE_PATH, name);
+        this.configuration.removeValue(ConfigProperty.KEY_STORE_SECRET, name);
+        this.configuration.removeValue(ConfigProperty.KEY_ENTRY_SECRET, name);
+        this.configuration.removeValue(ConfigProperty.KEY_ENTRY_ALIAS, name);
     }
 }

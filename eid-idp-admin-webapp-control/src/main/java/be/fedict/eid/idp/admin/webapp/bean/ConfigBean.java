@@ -16,14 +16,15 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.admin.webapp;
+package be.fedict.eid.idp.admin.webapp.bean;
 
-import be.fedict.eid.idp.model.*;
-import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
+import be.fedict.eid.idp.admin.webapp.Config;
+import be.fedict.eid.idp.model.ConfigProperty;
+import be.fedict.eid.idp.model.Configuration;
+import be.fedict.eid.idp.model.KeyStoreType;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.international.StatusMessage;
 import org.jboss.seam.log.Log;
 
 import javax.annotation.PostConstruct;
@@ -45,9 +46,6 @@ public class ConfigBean implements Config {
     @EJB
     private Configuration configuration;
 
-    @EJB
-    private IdentityService identityService;
-
     @In
     FacesMessages facesMessages;
 
@@ -55,8 +53,6 @@ public class ConfigBean implements Config {
     private String xkmsTrustDomain;
 
     private String hmacSecret;
-
-    private IdentityConfig identityConfig;
 
     private Boolean httpProxy;
     private String httpProxyHost;
@@ -66,8 +62,6 @@ public class ConfigBean implements Config {
     @Override
     @PostConstruct
     public void postConstruct() {
-        this.log.debug("postConstruct");
-
         // XKMS Config
         this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
                 String.class);
@@ -77,9 +71,6 @@ public class ConfigBean implements Config {
         // Pseudonym Config
         this.hmacSecret = this.configuration.getValue(ConfigProperty.HMAC_SECRET,
                 String.class);
-
-        // Identity Config
-        this.identityConfig = this.identityService.getIdentityConfig();
 
         // Network Config
         this.httpProxy = this.configuration.getValue(
@@ -94,42 +85,30 @@ public class ConfigBean implements Config {
     @Remove
     @Destroy
     public void destroy() {
-        this.log.debug("destroy");
     }
 
     @Override
     public String save() {
         this.log.debug("save");
 
-        try {
-            // XKMS Config
-            this.configuration.setValue(ConfigProperty.XKMS_URL, this.xkmsUrl);
-            this.configuration.setValue(ConfigProperty.XKMS_TRUST_DOMAIN,
-                    this.xkmsTrustDomain);
+        // XKMS Config
+        this.configuration.setValue(ConfigProperty.XKMS_URL, this.xkmsUrl);
+        this.configuration.setValue(ConfigProperty.XKMS_TRUST_DOMAIN,
+                this.xkmsTrustDomain);
 
-            // Pseudonym Config
-            this.configuration.setValue(ConfigProperty.HMAC_SECRET,
-                    this.hmacSecret);
+        // Pseudonym Config
+        this.configuration.setValue(ConfigProperty.HMAC_SECRET,
+                this.hmacSecret);
 
-            // Identity Config
-            this.identityService.setIdentity(this.identityConfig);
-            this.identityService.reloadIdentity();
+        // Proxy Config
+        this.configuration.setValue(ConfigProperty.HTTP_PROXY_ENABLED,
+                this.httpProxy);
+        this.configuration.setValue(ConfigProperty.HTTP_PROXY_HOST,
+                this.httpProxyHost);
+        this.configuration.setValue(ConfigProperty.HTTP_PROXY_PORT,
+                this.httpProxyPort);
 
-            // Proxy Config
-            this.configuration.setValue(ConfigProperty.HTTP_PROXY_ENABLED,
-                    this.httpProxy);
-            this.configuration.setValue(ConfigProperty.HTTP_PROXY_HOST,
-                    this.httpProxyHost);
-            this.configuration.setValue(ConfigProperty.HTTP_PROXY_PORT,
-                    this.httpProxyPort);
-
-            return "success";
-        } catch (KeyStoreLoadException e) {
-            this.facesMessages.addToControl("keystore_save",
-                    StatusMessage.Severity.ERROR, "Failed to load keystore", e
-                    .getMessage());
-            return null;
-        }
+        return "success";
     }
 
     @Override
@@ -171,56 +150,6 @@ public class ConfigBean implements Config {
     @Override
     public void setHmacSecret(String hmacSecret) {
         this.hmacSecret = hmacSecret;
-    }
-
-    @Override
-    public String getKeyStoreType() {
-        return identityConfig.getKeyStoreType().name();
-    }
-
-    @Override
-    public void setKeyStoreType(String keyStoreType) {
-        this.identityConfig.setKeyStoreType(KeyStoreType.valueOf(keyStoreType));
-    }
-
-    @Override
-    public String getKeyStorePath() {
-        return this.identityConfig.getKeyStorePath();
-    }
-
-    @Override
-    public void setKeyStorePath(String keyStorePath) {
-        this.identityConfig.setKeyStorePath(keyStorePath);
-    }
-
-    @Override
-    public String getKeyStorePassword() {
-        return this.identityConfig.getKeyStorePassword();
-    }
-
-    @Override
-    public void setKeyStorePassword(String keyStorePassword) {
-        this.identityConfig.setKeyStorePassword(keyStorePassword);
-    }
-
-    @Override
-    public String getKeyEntryPassword() {
-        return this.identityConfig.getKeyEntryPassword();
-    }
-
-    @Override
-    public void setKeyEntryPassword(String keyEntryPassword) {
-        this.identityConfig.setKeyEntryPassword(keyEntryPassword);
-    }
-
-    @Override
-    public String getKeyEntryAlias() {
-        return this.identityConfig.getKeyEntryAlias();
-    }
-
-    @Override
-    public void setKeyEntryAlias(String keyEntryAlias) {
-        this.identityConfig.setKeyEntryAlias(keyEntryAlias);
     }
 
     @Override

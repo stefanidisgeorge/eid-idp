@@ -23,49 +23,57 @@ import javax.faces.model.SelectItem;
 import java.util.List;
 
 @Local
-public interface Config {
+public interface Identity {
 
     /*
      * Accessors.
      */
-    String getXkmsUrl();
+    String getIdentityLabel();
 
-    void setXkmsUrl(String xkmsUrl);
+    String getName();
 
-    String getXkmsTrustDomain();
+    void setName(String name);
 
-    void setXkmsTrustDomain(String xkmsTrustDomain);
+    Boolean isNameReadOnly();
 
-    String getHmacSecret();
+    String getKeyStoreType();
 
-    void setHmacSecret(String hmacSecret);
+    void setKeyStoreType(String keyStoreType);
 
-    Boolean getHttpProxy();
+    String getKeyStorePath();
 
-    void setHttpProxy(Boolean httpProxy);
+    void setKeyStorePath(String keyStorePath);
 
-    String getHttpProxyHost();
+    String getKeyStorePassword();
 
-    void setHttpProxyHost(String httpProxyHost);
+    void setKeyStorePassword(String keyStorePassword);
 
-    Integer getHttpProxyPort();
+    String getKeyEntryPassword();
 
-    void setHttpProxyPort(Integer httpProxyPort);
+    void setKeyEntryPassword(String keyEntryPassword);
+
+    String getKeyEntryAlias();
+
+    void setKeyEntryAlias(String keyEntryAlias);
 
     /*
     * Factories
     */
-    List<SelectItem> keyStoreTypeFactory();
+    List<SelectItem> getIdentityNames();
 
     /*
     * Actions.
     */
     String save();
 
+    String activate();
+
+    String remove();
+
     /*
      * Lifecycle.
      */
     void destroy();
 
-    void postConstruct();
+    void create();
 }

@@ -16,8 +16,9 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.admin.webapp;
+package be.fedict.eid.idp.admin.webapp.bean;
 
+import be.fedict.eid.idp.admin.webapp.Authenticator;
 import be.fedict.eid.idp.model.admin.AdminManager;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
