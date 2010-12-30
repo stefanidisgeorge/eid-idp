@@ -9,6 +9,14 @@ public class IdentityConfig {
     private String keyEntryPassword;
     private String keyEntryAlias;
 
+    private boolean active = false;
+
+    public IdentityConfig(String name) {
+
+        this.name = name;
+        this.keyStoreType = KeyStoreType.PKCS12;
+    }
+
     public IdentityConfig(String name, KeyStoreType keyStoreType, String keyStorePath,
                           String keyStorePassword, String keyEntryPassword,
                           String keyEntryAlias) {
@@ -67,5 +75,13 @@ public class IdentityConfig {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

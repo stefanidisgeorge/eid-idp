@@ -23,6 +23,7 @@ import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 
 import javax.ejb.Local;
 import java.security.KeyStore;
+import java.util.List;
 
 @Local
 public interface IdentityService extends IdentityProviderConfiguration {
@@ -38,6 +39,12 @@ public interface IdentityService extends IdentityProviderConfiguration {
             throws KeyStoreLoadException;
 
     IdentityConfig getIdentityConfig();
+
+    IdentityConfig findIdentityConfig(String name);
+
+    void removeIdentityConfig(String name);
+
+    List<String> getIdentities();
 
     /**
      * @return if the IdP's identity is configured or not.

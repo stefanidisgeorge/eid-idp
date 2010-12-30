@@ -90,6 +90,14 @@ public class IdentityServiceBean implements IdentityService {
     /**
      * {@inheritDoc}
      */
+    public List<String> getIdentities() {
+
+        return this.identityServiceSingletonBean.getIdentities();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public KeyStore.PrivateKeyEntry getIdentity() {
         return this.identityServiceSingletonBean.getIdentity();
     }
@@ -97,7 +105,8 @@ public class IdentityServiceBean implements IdentityService {
     /**
      * {@inheritDoc}
      */
-    public KeyStore.PrivateKeyEntry setIdentity(IdentityConfig identityConfig) throws KeyStoreLoadException {
+    public KeyStore.PrivateKeyEntry setIdentity(IdentityConfig identityConfig)
+            throws KeyStoreLoadException {
 
         return this.identityServiceSingletonBean.setIdentity(identityConfig);
     }
@@ -108,6 +117,22 @@ public class IdentityServiceBean implements IdentityService {
     public IdentityConfig getIdentityConfig() {
 
         return this.identityServiceSingletonBean.getIdentityConfig();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public IdentityConfig findIdentityConfig(String name) {
+
+        return this.identityServiceSingletonBean.findIdentityConfig(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removeIdentityConfig(String name) {
+
+        this.identityServiceSingletonBean.removeIdentityConfig(name);
     }
 
     /**

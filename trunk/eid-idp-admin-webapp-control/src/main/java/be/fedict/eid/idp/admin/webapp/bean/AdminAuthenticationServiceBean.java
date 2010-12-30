@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.admin.webapp;
+package be.fedict.eid.idp.admin.webapp.bean;
 
 import java.security.cert.X509Certificate;
 import java.util.List;

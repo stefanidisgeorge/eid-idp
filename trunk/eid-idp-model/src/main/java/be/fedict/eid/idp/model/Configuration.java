@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.model;
 
 import javax.ejb.Local;
+import java.util.List;
 
 @Local
 public interface Configuration {
@@ -30,4 +31,10 @@ public interface Configuration {
     <T> T getValue(ConfigProperty configProperty, String index, Class<T> type);
 
     <T> T getValue(ConfigProperty configProperty, Class<T> type);
+
+    void removeValue(ConfigProperty configProperty, String index);
+
+    void removeValue(ConfigProperty configProperty);
+
+    List<String> getIndexes(ConfigProperty configProperty);
 }

@@ -11,7 +11,9 @@
     <ui:param name="activeMenu" value="config"/>
     <ui:define name="body">
         <h2>Configuration</h2>
+
         <h:form>
+
             <rich:tabPanel switchType="client">
 
                 <rich:tab label="PKI validation">
@@ -50,66 +52,10 @@
                     <h:commandButton value="Save" action="#{idpConfig.save}"/>
                 </rich:tab>
 
-                <rich:tab label="IdP Identity">
-                    <h:panelGrid columns="2">
-                        <h:outputLabel value="Keystore Type (*)"
-                                       for="keystore_type"/>
-                        <s:decorate>
-                            <h:selectOneMenu id="keystore_type"
-                                             value="#{idpConfig.keyStoreType}"
-                                             required="true">
-                                <f:selectItems value="#{keyStoreTypes}"/>
-                                <h:message for="keystore_type"
-                                           styleClass="error"/>
-                            </h:selectOneMenu>
-                        </s:decorate>
-                        <h:outputLabel
-                                value="Keystore Path (*)"
-                                for="keystore_path"/>
-                        <s:decorate>
-                            <h:inputText id="keystore_path"
-                                         value="#{idpConfig.keyStorePath}"
-                                         required="true" size="50">
-                            </h:inputText>
-                            <h:message for="keystore_path" styleClass="error"/>
-                        </s:decorate>
-
-                        <h:outputLabel
-                                value="Keystore Password (*)"
-                                for="keystore_pw"/>
-                        <s:decorate>
-                            <h:inputText id="keystore_pw"
-                                         value="#{idpConfig.keyStorePassword}"
-                                         required="true">
-                            </h:inputText>
-                            <h:message for="keystore_pw" styleClass="error"/>
-                        </s:decorate>
-
-                        <h:outputLabel
-                                value="Key Entry Password (*)"
-                                for="keyentry_pw"/>
-                        <s:decorate>
-                            <h:inputText id="keyentry_pw"
-                                         value="#{idpConfig.keyEntryPassword}"
-                                         required="true">
-                            </h:inputText>
-                        </s:decorate>
-
-                        <h:outputLabel
-                                value="Key Entry Alias"
-                                for="keyentry_alias"/>
-                        <h:inputText id="keyentry_alias"
-                                     value="#{idpConfig.keyEntryAlias}">
-                        </h:inputText>
-
-                    </h:panelGrid>
-                    <h:commandButton id="keystore_save" value="Save"
-                                     action="#{idpConfig.save}"/>
-                    <h:message for="keystore_save" styleClass="error"/>
-                </rich:tab>
-
             </rich:tabPanel>
+
         </h:form>
+
     </ui:define>
 </ui:composition>
 </body>
