@@ -69,8 +69,8 @@
             <artifactId>jsf-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>persistence-api</artifactId>
+            <groupId>org.jboss.spec.javax.ejb</groupId>
+            <artifactId>jboss-ejb-api_3.1_spec</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
