@@ -255,21 +255,28 @@ public class IdentityServiceSingletonBean {
         IdentityConfig identityConfig = new IdentityConfig(name, keyStoreType,
                 keyStorePath, keyStoreSecret, keyEntrySecret, keyEntryAlias);
 
-        identityConfig.setActive(identityConfig.getName().equals(getActiveIdentityName()));
+        String activeIdentity = findActiveIdentityName();
+        if (null != activeIdentity) {
+            identityConfig.setActive(identityConfig.getName().equals(activeIdentity));
+        }
 
         return identityConfig;
     }
 
     private String getActiveIdentityName() {
 
-        String activeIdentity =
-                this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
-                        String.class);
+        String activeIdentity = findActiveIdentityName();
 
         if (null == activeIdentity) {
             throw new EJBException("No active identity set!");
         }
         return activeIdentity;
+    }
+
+    private String findActiveIdentityName() {
+
+        return this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
+                String.class);
     }
 
     /**

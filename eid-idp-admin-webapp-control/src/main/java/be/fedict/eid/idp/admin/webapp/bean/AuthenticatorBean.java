@@ -54,9 +54,8 @@ public class AuthenticatorBean implements Authenticator {
     @Override
     public boolean authenticate() {
 
-        LOG.debug("authenticate: " + this.credentials.getUsername());
-        if (this.adminManager
-                .isAdmin(this.authenticatedCertificate)) {
+        LOG.debug("authenticate: ");
+        if (this.adminManager.isAdmin(this.authenticatedCertificate)) {
             this.identity.addRole("admin");
         }
         return true;

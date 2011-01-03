@@ -16,28 +16,35 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model.admin;
-
-import be.fedict.eid.idp.entity.AdministratorEntity;
-import be.fedict.eid.idp.model.exception.RemoveLastAdminException;
+package be.fedict.eid.idp.admin.webapp;
 
 import javax.ejb.Local;
-import java.security.cert.X509Certificate;
-import java.util.List;
 
 @Local
-public interface AdminManager {
+public interface Admin {
 
-    /**
-     * @param certificate certificate
-     * @return whether the (already authenticated) admin identifier indeed belongs
-     *         to an admin.
+    /*
+     * Accessors.
      */
-    boolean isAdmin(X509Certificate certificate);
 
-    List<AdministratorEntity> listAdmins();
+    /*
+    * Factories
+    */
+    void adminListFactory();
 
-    void register(AdministratorEntity admin);
+    /*
+    * Actions.
+    */
+    String registerPending();
 
-    void remove(AdministratorEntity admin) throws RemoveLastAdminException;
+    void select();
+
+    String remove();
+
+    /*
+    * Lifecycle.
+    */
+    void destroy();
+
+    void postConstruct();
 }
