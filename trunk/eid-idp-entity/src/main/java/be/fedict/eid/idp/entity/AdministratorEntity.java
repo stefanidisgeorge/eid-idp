@@ -20,10 +20,11 @@ package be.fedict.eid.idp.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "admin")
-@NamedQueries({@NamedQuery(name = AdministratorEntity.LIST_ALL, query = "FROM AdministratorEntity")})
+@NamedQueries({@NamedQuery(name = AdministratorEntity.LIST_ALL, query = "FROM AdministratorEntity ")})
 public class AdministratorEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -34,9 +35,17 @@ public class AdministratorEntity implements Serializable {
 
     private String name;
 
+    private boolean pending;
+
     public AdministratorEntity(String id, String name) {
+
+        this(id, name, false);
+    }
+
+    public AdministratorEntity(String id, String name, boolean pending) {
         this.id = id;
         this.name = name;
+        this.pending = pending;
     }
 
     public AdministratorEntity() {
@@ -61,8 +70,23 @@ public class AdministratorEntity implements Serializable {
         this.name = name;
     }
 
+    public boolean isPending() {
+        return this.pending;
+    }
+
+    public void setPending(boolean pending) {
+        this.pending = pending;
+    }
+
     public static boolean hasAdmins(EntityManager entityManager) {
         Query query = entityManager.createNamedQuery(LIST_ALL);
         return 0 != query.getResultList().size();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<AdministratorEntity> listAdmins(EntityManager entityManager) {
+
+        Query query = entityManager.createNamedQuery(LIST_ALL);
+        return query.getResultList();
     }
 }

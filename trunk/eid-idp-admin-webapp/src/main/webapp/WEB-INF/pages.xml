@@ -19,7 +19,7 @@
     </exception>
 
     <exception class="org.jboss.seam.security.AuthorizationException">
-        <redirect view-id="/error.xhtml">
+        <redirect view-id="/registration.xhtml">
             <message>You do not have the necessary security privileges to
                 perform this action.
             </message>
