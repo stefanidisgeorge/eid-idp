@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+    <display-name>eID IdP SP</display-name>
+
+    <!-- SAML2 Authentication Protocol -->
+    <servlet>
+        <servlet-name>SAML2AuthenticationRequestServlet</servlet-name>
+        <servlet-class>
+            be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet
+        </servlet-class>
+        <init-param>
+            <param-name>ParametersFromRequest</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SAML2AuthenticationRequestServlet</servlet-name>
+        <url-pattern>/saml-request</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
+        <servlet-class>
+            be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseServlet
+        </servlet-class>
+        <init-param>
+            <param-name>IdentifierSessionAttribute</param-name>
+            <param-value>Identifier</param-value>
+        </init-param>
+        <init-param>
+            <param-name>RedirectPage</param-name>
+            <param-value>/authn-result.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>NameSessionAttribute</param-name>
+            <param-value>Name</param-value>
+        </init-param>
+        <init-param>
+            <param-name>FirstNameSessionAttribute</param-name>
+            <param-value>FirstName</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
+        <url-pattern>/saml2-landing</url-pattern>
+    </servlet-mapping>
+
+    <!-- OpenID Authentication Protocol -->
+    <servlet>
+        <servlet-name>OpenIDAuthenticationRequestServlet</servlet-name>
+        <servlet-class>
+            be.fedict.eid.idp.sp.protocol.openid.AuthenticationRequestServlet
+        </servlet-class>
+        <init-param>
+            <param-name>ParametersFromRequest</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>TrustServer</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OpenIDAuthenticationRequestServlet</servlet-name>
+        <url-pattern>/openid-request</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>OpenIDAuthenticationResponseServlet</servlet-name>
+        <servlet-class>
+            be.fedict.eid.idp.sp.protocol.openid.AuthenticationResponseServlet
+        </servlet-class>
+        <init-param>
+            <param-name>IdentifierSessionAttribute</param-name>
+            <param-value>Identifier</param-value>
+        </init-param>
+        <init-param>
+            <param-name>RedirectPage</param-name>
+            <param-value>/openid-result.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>NameSessionAttribute</param-name>
+            <param-value>Name</param-value>
+        </init-param>
+        <init-param>
+            <param-name>FirstNameSessionAttribute</param-name>
+            <param-value>FirstName</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OpenIDAuthenticationResponseServlet</servlet-name>
+        <url-pattern>/openid-landing</url-pattern>
+    </servlet-mapping>
+</web-app>

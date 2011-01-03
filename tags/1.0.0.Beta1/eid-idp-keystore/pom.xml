@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>be.fedict</groupId>
+        <artifactId>eid-idp</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <name>FedICT eID Identity Provider Keystore</name>
+    <description>Default Keystore for eID Identity Provider</description>
+    <groupId>be.fedict.eid-idp</groupId>
+    <artifactId>eid-idp-keystore</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>keytool-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>clean</goal>
+                            <goal>genkey</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <keystore>
+                        ${project.build.directory}/classes/idp-identity-keystore.p12
+                    </keystore>
+                    <dname>
+                        <![CDATA[CN=localhost, OU=eID IdP Identity, L=Brussels, ST=Brussels, O=FedICT, C=BE]]></dname>
+                    <keypass>secret</keypass>
+                    <storepass>secret</storepass>
+                    <validity>365</validity>
+                    <keyalg>RSA</keyalg>
+                    <storetype>PKCS12</storetype>
+                    <verbose>true</verbose>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

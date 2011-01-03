@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IdentityProviderProtocol xmlns="urn:be:fedict:eid:idp:spi:protocol">
+	<Name>OpenID Protocol Service</Name>
+	<Description>This eID IdP Protocol Service provides an OpenID protocol for eID authentication and identification purposes.</Description>
+	<ProtocolService>be.fedict.eid.idp.protocol.openid.OpenIDProtocolService</ProtocolService>
+	<ContextPath>/openid</ContextPath>
+	<Endpoints>
+		<Endpoint>
+			<ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServlet</ServletClass>
+			<ContextPath>/openid-identity</ContextPath>
+		</Endpoint>
+		<Endpoint>
+			<ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServlet</ServletClass>
+			<ContextPath>/openid-identity/xrds</ContextPath>
+		</Endpoint>
+	</Endpoints>
+</IdentityProviderProtocol>
