@@ -256,18 +256,10 @@
                         </listitem>
                         <listitem>
                             <para>
-                                <code>NameSessionAttribute</code>
-                                HTTP Session attribute on which the returned
-                                subject's name will be pushed after a
-                                successfull authentication.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                <code>FirstNameSessionAttribute</code>
-                                HTTP Session attribute on which the returned
-                                subject's first name will be pushed after a
-                                successfull authentication.
+                                <code>AttributeMapSessionAttribute</code>
+                                HTTP Session attribute on which a Map
+                                containing the returned attributes will be
+                                pushed after a successfull authentiaction.
                             </para>
                         </listitem>
                         <listitem>
