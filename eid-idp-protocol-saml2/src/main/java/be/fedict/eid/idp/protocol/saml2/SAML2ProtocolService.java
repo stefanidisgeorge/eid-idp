@@ -41,6 +41,7 @@ import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.schema.XSDateTime;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.x509.BasicX509Credential;
 
@@ -51,6 +52,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -145,6 +147,8 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
 
     private XMLObjectBuilder<XSString> stringBuilder;
 
+    private XMLObjectBuilder<XSDateTime> dateBuilder;
+
     @SuppressWarnings("unchecked")
     public void init(ServletContext servletContext,
                      IdentityProviderConfiguration configuration) {
@@ -191,6 +195,7 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
         this.attributeBuilder = (SAMLObjectBuilder<Attribute>) builderFactory
                 .getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
         this.stringBuilder = builderFactory.getBuilder(XSString.TYPE_NAME);
+        this.dateBuilder = builderFactory.getBuilder(XSDateTime.TYPE_NAME);
     }
 
     public IdentityProviderFlow handleIncomingRequest(
@@ -227,8 +232,10 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
     }
 
     public ReturnResponse handleReturnResponse(HttpSession httpSession,
-                                               Identity identity, Address address, String authenticatedIdentifier,
-                                               HttpServletRequest request, HttpServletResponse response)
+                                               Identity identity, Address address,
+                                               String authenticatedIdentifier,
+                                               HttpServletRequest request,
+                                               HttpServletResponse response)
             throws Exception {
         LOG.debug("handle return response");
         LOG.debug("authenticated identifier: " + authenticatedIdentifier);
@@ -317,11 +324,17 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
                 .buildObject();
         attributeStatements.add(attributeStatement);
         addAttribute("urn:be:fedict:eid:idp:name", identity.getName(),
-                builderFactory, attributeStatement);
+                attributeStatement);
         addAttribute("urn:be:fedict:eid:idp:firstName",
-                identity.getFirstName(), builderFactory, attributeStatement);
+                identity.getFirstName(), attributeStatement);
         addAttribute("urn:be:fedict:eid:idp:gender", identity.getGender()
-                .name(), builderFactory, attributeStatement);
+                .name(), attributeStatement);
+        addAttribute("urn:be:fedict:eid:idp:dob", identity.getDateOfBirth(),
+                attributeStatement);
+        addAttribute("urn:be:fedict:eid:idp:nationality",
+                identity.getNationality(), attributeStatement);
+        addAttribute("urn:be:fedict:eid:idp:pob",
+                identity.getPlaceOfBirth(), attributeStatement);
 
         ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 
@@ -342,8 +355,7 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
         return returnResponse;
     }
 
-    private void addAttribute(String attributeName, String attributeValue,
-                              XMLObjectBuilderFactory builderFactory,
+    private void addAttribute(String attributeName, Object attributeValue,
                               AttributeStatement attributeStatement) {
         List<Attribute> attributes = attributeStatement.getAttributes();
 
@@ -352,9 +364,29 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
         attributes.add(nameAttribute);
 
         nameAttribute.setName(attributeName);
-        XSString nameAttributeValue = (XSString) stringBuilder.buildObject(
-                AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
-        nameAttributeValue.setValue(attributeValue);
-        nameAttribute.getAttributeValues().add(nameAttributeValue);
+
+        if (String.class.isAssignableFrom(attributeValue.getClass())) {
+
+            XSString nameAttributeValue = stringBuilder.buildObject(
+                    AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+            nameAttributeValue.setValue((String) attributeValue);
+            nameAttribute.getAttributeValues().add(nameAttributeValue);
+
+        } else if (GregorianCalendar.class.isAssignableFrom(attributeValue.getClass())) {
+
+            XSDateTime nameAttributeValue = dateBuilder.buildObject(
+                    AttributeValue.DEFAULT_ELEMENT_NAME, XSDateTime.TYPE_NAME);
+            nameAttributeValue.setValue(new DateTime(((GregorianCalendar) attributeValue).getTime()));
+            nameAttribute.getAttributeValues().add(nameAttributeValue);
+
+        } else if (Enum.class.isAssignableFrom(attributeValue.getClass())) {
+
+            XSString nameAttributeValue = stringBuilder.buildObject(
+                    AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+            nameAttributeValue.setValue(((Enum) attributeValue).name());
+            nameAttribute.getAttributeValues().add(nameAttributeValue);
+
+        }
+
     }
 }
