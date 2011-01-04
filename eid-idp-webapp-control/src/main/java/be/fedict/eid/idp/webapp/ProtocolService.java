@@ -24,12 +24,17 @@ import javax.ejb.Local;
 public interface ProtocolService {
 
     /*
-      * Factory.
-      */
+     * Factory.
+     */
     void initProtocolServices();
 
     /*
-      * Lifecycle.
-      */
+     * Lifecycle.
+     */
     void destroy();
+
+    /*
+     * Accessors
+     */
+    String getThumbprint();
 }
