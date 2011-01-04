@@ -58,7 +58,7 @@ public class AuthenticationServiceBean implements AuthenticationService {
             LOG.error("no XKMS URL configured!");
             return;
         }
-        String xkmsTrustDomain = this.configuration.getValue(ConfigProperty.XKMS_TRUST_DOMAIN,
+        String xkmsTrustDomain = this.configuration.getValue(ConfigProperty.XKMS_AUTH_TRUST_DOMAIN,
                 String.class);
         if (xkmsTrustDomain.trim().isEmpty()) {
             xkmsTrustDomain = null;
