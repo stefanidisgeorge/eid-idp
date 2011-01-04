@@ -67,8 +67,6 @@
                 <module>eid-idp-mysql-distribution</module>
             </modules>
             <properties>
-                <hibernate.dialect>org.hibernate.dialect.MySQLDialect
-                </hibernate.dialect>
                 <hibernate.hbm2ddl.auto>validate</hibernate.hbm2ddl.auto>
             </properties>
         </profile>
@@ -85,8 +83,6 @@
                 <module>eid-idp-postgresql-distribution</module>
             </modules>
             <properties>
-                <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect
-                </hibernate.dialect>
                 <hibernate.hbm2ddl.auto>validate</hibernate.hbm2ddl.auto>
             </properties>
         </profile>
@@ -103,8 +99,6 @@
                 <module>eid-idp-oracle-distribution</module>
             </modules>
             <properties>
-                <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect
-                </hibernate.dialect>
                 <hibernate.hbm2ddl.auto>validate</hibernate.hbm2ddl.auto>
             </properties>
         </profile>
@@ -199,8 +193,6 @@
         <eid-trust-service.version>1.0.0-SNAPSHOT</eid-trust-service.version>
         <!-- http://code.google.com/p/openid4java/issues/detail?id=114 -->
         <openid4java.version>0.9.6-SNAPSHOT</openid4java.version>
-        <hibernate.dialect>org.hibernate.dialect.HSQLDialect
-        </hibernate.dialect>
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
         <hibernate.jdbc.use_streams_for_binary>true
         </hibernate.jdbc.use_streams_for_binary>

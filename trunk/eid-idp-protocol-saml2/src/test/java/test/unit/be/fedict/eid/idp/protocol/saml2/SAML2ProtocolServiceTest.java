@@ -21,7 +21,8 @@ package test.unit.be.fedict.eid.idp.protocol.saml2;
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolService;
+import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
+import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceAuthIdent;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.NameValuePair;
 import be.fedict.eid.idp.spi.ReturnResponse;
@@ -177,7 +178,8 @@ public class SAML2ProtocolServiceTest {
     @Test
     public void testHandleIncomingRequest() throws Exception {
         // setup
-        SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
+        SAML2ProtocolServiceAuthIdent saml2ProtocolService =
+                new SAML2ProtocolServiceAuthIdent();
         HttpServletRequest mockHttpServletRequest = EasyMock
                 .createMock(HttpServletRequest.class);
 
@@ -198,11 +200,11 @@ public class SAML2ProtocolServiceTest {
         HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
         EasyMock.expect(mockHttpServletRequest.getSession()).andStubReturn(
                 mockHttpSession);
-        mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
+        mockHttpSession.setAttribute(AbstractSAML2ProtocolService.class.getName()
                 + ".TargetUrl", "http://sp.be/response");
-        mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
+        mockHttpSession.setAttribute(AbstractSAML2ProtocolService.class.getName()
                 + ".RelayState", null);
-        mockHttpSession.setAttribute(SAML2ProtocolService.class.getName()
+        mockHttpSession.setAttribute(AbstractSAML2ProtocolService.class.getName()
                 + ".InResponseTo", "a77a1c87-e590-47d7-a3e0-afea455ebc01");
 
         // prepare
@@ -219,14 +221,13 @@ public class SAML2ProtocolServiceTest {
     @Test
     public void testHandleReturnResponse() throws Exception {
         // setup
-        SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
+        SAML2ProtocolServiceAuthIdent saml2ProtocolService =
+                new SAML2ProtocolServiceAuthIdent();
 
-//        HttpSession httpSession;
         Address address = new Address();
         String userId = UUID.randomUUID().toString();
         String givenName = "test-given-name";
         String surName = "test-sur-name";
-//        HttpServletResponse response;
         Identity identity = new Identity();
         identity.name = surName;
         identity.firstName = givenName;
@@ -251,15 +252,15 @@ public class SAML2ProtocolServiceTest {
         EasyMock
                 .expect(
                         mockHttpSession
-                                .getAttribute(SAML2ProtocolService.TARGET_URL_SESSION_ATTRIBUTE))
+                                .getAttribute(AbstractSAML2ProtocolService.TARGET_URL_SESSION_ATTRIBUTE))
                 .andStubReturn("http://127.0.0.1");
         EasyMock
                 .expect(
                         mockHttpSession
-                                .getAttribute(SAML2ProtocolService.RELAY_STATE_SESSION_ATTRIBUTE))
+                                .getAttribute(AbstractSAML2ProtocolService.RELAY_STATE_SESSION_ATTRIBUTE))
                 .andStubReturn("relay-state");
         EasyMock.expect(
-                mockHttpSession.getAttribute(SAML2ProtocolService.class
+                mockHttpSession.getAttribute(AbstractSAML2ProtocolService.class
                         .getName()
                         + ".InResponseTo")).andStubReturn(
                 "a77a1c87-e590-47d7-a3e0-afea455ebc01");

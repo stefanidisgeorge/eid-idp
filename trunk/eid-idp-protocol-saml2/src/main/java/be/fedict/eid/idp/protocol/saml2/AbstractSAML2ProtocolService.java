@@ -61,22 +61,22 @@ import java.util.UUID;
  *
  * @author Frank Cornelis
  */
-public class SAML2ProtocolService implements IdentityProviderProtocolService {
+public abstract class AbstractSAML2ProtocolService implements IdentityProviderProtocolService {
 
     private static final Log LOG = LogFactory
-            .getLog(SAML2ProtocolService.class);
+            .getLog(AbstractSAML2ProtocolService.class);
 
     private IdentityProviderConfiguration configuration;
 
-    public static final String TARGET_URL_SESSION_ATTRIBUTE = SAML2ProtocolService.class
+    public static final String TARGET_URL_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
             .getName()
             + ".TargetUrl";
 
-    public static final String RELAY_STATE_SESSION_ATTRIBUTE = SAML2ProtocolService.class
+    public static final String RELAY_STATE_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
             .getName()
             + ".RelayState";
 
-    public static final String IN_RESPONSE_TO_SESSION_ATTRIBUTE = SAML2ProtocolService.class
+    public static final String IN_RESPONSE_TO_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
             .getName()
             + ".InResponseTo";
 
@@ -229,7 +229,8 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
         String inResponseTo = authnRequest.getID();
         setInResponseTo(inResponseTo, request);
 
-        return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
+        return getAuthenticationFlow();
+
     }
 
     @SuppressWarnings("unchecked")
@@ -326,18 +327,19 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
         AttributeStatement attributeStatement = attributeStatementBuilder
                 .buildObject();
         attributeStatements.add(attributeStatement);
-        addAttribute("urn:be:fedict:eid:idp:name", identity.getName(),
+        addAttribute("urn:be:fedict:eid:idp:name", surName, attributeStatement);
+        addAttribute("urn:be:fedict:eid:idp:firstName", givenName,
                 attributeStatement);
-        addAttribute("urn:be:fedict:eid:idp:firstName",
-                identity.getFirstName(), attributeStatement);
-        addAttribute("urn:be:fedict:eid:idp:gender", identity.getGender()
-                .name(), attributeStatement);
-        addAttribute("urn:be:fedict:eid:idp:dob", identity.getDateOfBirth(),
-                attributeStatement);
-        addAttribute("urn:be:fedict:eid:idp:nationality",
-                identity.getNationality(), attributeStatement);
-        addAttribute("urn:be:fedict:eid:idp:pob",
-                identity.getPlaceOfBirth(), attributeStatement);
+        if (null != identity) {
+            addAttribute("urn:be:fedict:eid:idp:gender", identity.getGender()
+                    .name(), attributeStatement);
+            addAttribute("urn:be:fedict:eid:idp:dob", identity.getDateOfBirth(),
+                    attributeStatement);
+            addAttribute("urn:be:fedict:eid:idp:nationality",
+                    identity.getNationality(), attributeStatement);
+            addAttribute("urn:be:fedict:eid:idp:pob",
+                    identity.getPlaceOfBirth(), attributeStatement);
+        }
 
         ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 
@@ -390,6 +392,7 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
             nameAttribute.getAttributeValues().add(nameAttributeValue);
 
         }
-
     }
+
+    protected abstract IdentityProviderFlow getAuthenticationFlow();
 }
