@@ -145,6 +145,15 @@
                     </container>
                 </configuration>
             </plugin>
+            <plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jboss-maven-plugin</artifactId>
+				<configuration>
+					<fileNames>
+						<fileName>${basedir}/target/${project.artifactId}-${project.version}.ear</fileName>
+					</fileNames>
+				</configuration>
+			</plugin>
         </plugins>
     </build>
     <dependencies>
