@@ -44,7 +44,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class AuthenticationResponseServletTest {
 
@@ -62,8 +62,9 @@ public class AuthenticationResponseServletTest {
                 AuthenticationResponseServlet.class, "/");
         servletHolder.setInitParameter("IdentifierSessionAttribute",
                 "identifier");
+        servletHolder.setInitParameter("AttributeMapSessionAttribute",
+                "attributeMap");
         servletHolder.setInitParameter("RedirectPage", "target-page");
-        servletHolder.setInitParameter("NameSessionAttribute", "name");
         this.servletTester.start();
         this.location = this.servletTester.createSocketConnector(true);
     }
@@ -98,6 +99,7 @@ public class AuthenticationResponseServletTest {
         doPostSamlResponseTest("/saml-response-signed.xml");
     }
 
+    @SuppressWarnings("unchecked")
     private void doPostSamlResponseTest(String samlResponseResourceName)
             throws IOException {
         // setup
@@ -143,7 +145,17 @@ public class AuthenticationResponseServletTest {
                 .getAttribute("identifier");
         assertEquals("authn-id", identifierValue);
 
-        String nameValue = (String) httpSession.getAttribute("name");
-        assertEquals("test-name", nameValue);
+        Map<String, Object> attributeMap =
+                (Map<String, Object>) httpSession.getAttribute("attributeMap");
+        assertNotNull(attributeMap);
+
+        assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:name"));
+        assertEquals("test-name", attributeMap.get("urn:be:fedict:eid:idp:name"));
+
+        assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:firstName"));
+        assertEquals("test-first-name", attributeMap.get("urn:be:fedict:eid:idp:firstName"));
+
+        assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:gender"));
+        assertEquals("MALE", attributeMap.get("urn:be:fedict:eid:idp:gender"));
     }
 }

@@ -203,7 +203,8 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
             throws Exception {
         LOG.debug("handling incoming request");
 
-        BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext = new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
+        BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
+                new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
         messageContext
                 .setInboundMessageTransport(new HttpServletRequestAdapter(
                         request));
@@ -231,14 +232,16 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
         return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
     }
 
+    @SuppressWarnings("unchecked")
     public ReturnResponse handleReturnResponse(HttpSession httpSession,
+                                               String userId,
+                                               String givenName, String surName,
                                                Identity identity, Address address,
-                                               String authenticatedIdentifier,
                                                HttpServletRequest request,
                                                HttpServletResponse response)
             throws Exception {
         LOG.debug("handle return response");
-        LOG.debug("authenticated identifier: " + authenticatedIdentifier);
+        LOG.debug("userId: " + userId);
         String targetUrl = getTargetUrl(httpSession);
         String relayState = getRelayState(httpSession);
         String inResponseTo = getInResponseTo(httpSession);
@@ -296,7 +299,7 @@ public class SAML2ProtocolService implements IdentityProviderProtocolService {
         assertion.setSubject(subject);
         NameID nameId = nameIdBuilder.buildObject();
         subject.setNameID(nameId);
-        nameId.setValue(authenticatedIdentifier);
+        nameId.setValue(userId);
         List<SubjectConfirmation> subjectConfirmations = subject
                 .getSubjectConfirmations();
         SubjectConfirmation subjectConfirmation = subjectConfirmationBuilder

@@ -7,9 +7,9 @@
 <body>
 <ui:composition template="/WEB-INF/template.xhtml">
 	<ui:define name="body">
-		<h2>eID Authenticated Identification</h2>
-		<p>The web application has requested an eID Authentication
-		operation combined with an eID Identification operation.</p>
+		<h2>eID Authentication</h2>
+		<p>The web application has requested an eID authentication
+		operation.</p>
 		<script src="https://www.java.com/js/deployJava.js"></script>
 		<script>
 	var attributes = {
@@ -20,7 +20,7 @@
 	};
 	var parameters = {
 		TargetPage :'protocol-exit',
-		AppletService :'applet-authentication-identification-service',
+		AppletService :'applet-authentication-service',
 		Language :'en',
 		NavigatorUserAgent : navigator.userAgent,
 		NavigatorAppName : navigator.appName,

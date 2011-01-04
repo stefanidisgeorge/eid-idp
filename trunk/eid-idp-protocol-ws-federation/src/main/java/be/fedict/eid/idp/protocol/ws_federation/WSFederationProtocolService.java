@@ -83,13 +83,11 @@ public class WSFederationProtocolService implements
     private static final Log LOG = LogFactory
             .getLog(WSFederationProtocolService.class);
 
-    public static final String WCTX_SESSION_ATTRIBUTE = WSFederationProtocolService.class
-            .getName()
-            + ".wctx";
+    public static final String WCTX_SESSION_ATTRIBUTE =
+            WSFederationProtocolService.class.getName() + ".wctx";
 
-    public static final String WTREALM_SESSION_ATTRIBUTE = WSFederationProtocolService.class
-            .getName()
-            + ".wtrealm";
+    public static final String WTREALM_SESSION_ATTRIBUTE =
+            WSFederationProtocolService.class.getName() + ".wtrealm";
 
     private IdentityProviderConfiguration configuration;
 
@@ -138,8 +136,11 @@ public class WSFederationProtocolService implements
 
     @Override
     public ReturnResponse handleReturnResponse(HttpSession httpSession,
-                                               Identity identity, Address address, String authenticatedIdentifier,
-                                               HttpServletRequest request, HttpServletResponse response)
+                                               String userId,
+                                               String givenName, String surName,
+                                               Identity identity, Address address,
+                                               HttpServletRequest request,
+                                               HttpServletResponse response)
             throws Exception {
         LOG.debug("handleReturnResponse");
         String wtrealm = retrieveWtrealm(httpSession);
@@ -147,14 +148,13 @@ public class WSFederationProtocolService implements
         returnResponse.addAttribute("wa", "wsignin1.0");
         String wctx = retrieveWctx(httpSession);
         returnResponse.addAttribute("wctx", wctx);
-        String wresult = getWResult(wctx, wtrealm, identity, address,
-                authenticatedIdentifier);
+        String wresult = getWResult(wctx, wtrealm, identity, address, userId);
         returnResponse.addAttribute("wresult", wresult);
         return returnResponse;
     }
 
     private String getWResult(String wctx, String wtrealm, Identity identity,
-                              Address address, String authenticatedIdentifier)
+                              Address address, String userId)
             throws JAXBException, DatatypeConfigurationException,
             ParserConfigurationException, TransformerException,
             NoSuchAlgorithmException, InvalidAlgorithmParameterException,
@@ -221,7 +221,7 @@ public class WSFederationProtocolService implements
         SubjectType subject = samlObjectFactory.createSubjectType();
         assertion.setSubject(subject);
         NameIDType nameId = samlObjectFactory.createNameIDType();
-        nameId.setValue(authenticatedIdentifier);
+        nameId.setValue(userId);
         subject.getContent().add(samlObjectFactory.createNameID(nameId));
 
         SubjectConfirmationType subjectConfirmation = samlObjectFactory
@@ -260,7 +260,7 @@ public class WSFederationProtocolService implements
                 samlObjectFactory, attributes);
 
         addAttribute(WSFederationConstants.PPID_CLAIM_TYPE_URI,
-                authenticatedIdentifier, samlObjectFactory, attributes);
+                userId, samlObjectFactory, attributes);
         addAttribute(WSFederationConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
                 address.getStreetAndNumber(), samlObjectFactory, attributes);
         addAttribute(WSFederationConstants.LOCALITY_CLAIM_TYPE_URI, address
