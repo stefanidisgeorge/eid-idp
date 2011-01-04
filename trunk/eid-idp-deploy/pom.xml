@@ -103,7 +103,7 @@
                         <webModule>
                             <groupId>be.fedict.eid-idp</groupId>
                             <artifactId>eid-idp-admin-webapp</artifactId>
-                            <contextRoot>/eid-idp-admin</contextRoot>
+                            <contextRoot>/eid-idp-admin-portal</contextRoot>
                         </webModule>
                         <jarModule>
                             <groupId>org.jboss.el</groupId>
@@ -145,15 +145,6 @@
                     </container>
                 </configuration>
             </plugin>
-            <plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jboss-maven-plugin</artifactId>
-				<configuration>
-					<fileNames>
-						<fileName>${basedir}/target/${project.artifactId}-${project.version}.ear</fileName>
-					</fileNames>
-				</configuration>
-			</plugin>
         </plugins>
     </build>
     <dependencies>
