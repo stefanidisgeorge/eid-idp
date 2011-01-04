@@ -1,1 +1,42 @@
-<?xml version="1.0" encoding="UTF-8"?><saml2p:Response xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol" ID="saml-response-a4a7b9be-b8b8-4067-99e0-15db8eb4198f" IssueInstant="2010-03-24T10:09:40.667Z" Version="2.0"><saml2p:Status><saml2p:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/></saml2p:Status><saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" ID="assertion-50e5a224-8fe4-4c57-b62c-73e310e638c6" IssueInstant="2010-03-24T10:09:40.667Z" Version="2.0"><saml2:Issuer>http://www.e-contract.be/</saml2:Issuer><saml2:Subject><saml2:NameID>authn-id</saml2:NameID></saml2:Subject><saml2:AuthnStatement AuthnInstant="2010-03-24T10:09:40.667Z"><saml2:AuthnContext/></saml2:AuthnStatement><saml2:AttributeStatement><saml2:Attribute Name="urn:be:fedict:eid:idp:name"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">test-name</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="urn:be:fedict:eid:idp:firstName"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">test-first-name</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="urn:be:fedict:eid:idp:gender"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">MALE</saml2:AttributeValue></saml2:Attribute></saml2:AttributeStatement></saml2:Assertion></saml2p:Response>
+<?xml version="1.0" encoding="UTF-8"?>
+<saml2p:Response xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
+                 ID="saml-response-a4a7b9be-b8b8-4067-99e0-15db8eb4198f"
+                 IssueInstant="2010-03-24T10:09:40.667Z" Version="2.0">
+    <saml2p:Status>
+        <saml2p:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
+    </saml2p:Status>
+    <saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
+                     ID="assertion-50e5a224-8fe4-4c57-b62c-73e310e638c6"
+                     IssueInstant="2010-03-24T10:09:40.667Z" Version="2.0">
+        <saml2:Issuer>http://www.e-contract.be/</saml2:Issuer>
+        <saml2:Subject>
+            <saml2:NameID>authn-id</saml2:NameID>
+        </saml2:Subject>
+        <saml2:AuthnStatement AuthnInstant="2010-03-24T10:09:40.667Z">
+            <saml2:AuthnContext/>
+        </saml2:AuthnStatement>
+        <saml2:AttributeStatement>
+            <saml2:Attribute Name="urn:be:fedict:eid:idp:name">
+                <saml2:AttributeValue
+                        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:type="xs:string">test-name
+                </saml2:AttributeValue>
+            </saml2:Attribute>
+            <saml2:Attribute Name="urn:be:fedict:eid:idp:firstName">
+                <saml2:AttributeValue
+                        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:type="xs:string">test-first-name
+                </saml2:AttributeValue>
+            </saml2:Attribute>
+            <saml2:Attribute Name="urn:be:fedict:eid:idp:gender">
+                <saml2:AttributeValue
+                        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:type="xs:string">MALE
+                </saml2:AttributeValue>
+            </saml2:Attribute>
+        </saml2:AttributeStatement>
+    </saml2:Assertion>
+</saml2p:Response>

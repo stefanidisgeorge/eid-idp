@@ -52,10 +52,10 @@ public class AuthenticationResponseServlet extends HttpServlet {
             .getLog(AuthenticationResponseServlet.class);
 
     private String identifierSessionAttribute;
+    private String attributeMapSessionAttribute;
 
     private String redirectPage;
 
-    private String attributeMapSessionAttribute;
 
     @Override
     public void init(ServletConfig config) throws ServletException {

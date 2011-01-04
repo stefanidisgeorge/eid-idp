@@ -73,14 +73,16 @@
             <artifactId>jboss-ejb-api_3.1_spec</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-annotations</artifactId>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
         </dependency>
         <!-- Needed for JBoss Seam
-        e.g. use of FacesMessages drags this dependecy in -->
+        e.g. use of FacesMessages drags this dependecy in
+         -->
         <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
+            <artifactId>hibernate-validator-legacy</artifactId>
+            <version>4.0.2.GA</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

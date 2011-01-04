@@ -11,12 +11,22 @@ identification/authentication protocols towards the eID IdP.</p>
 	<li><a
 		href="https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/foobar">Unsupported
 	Protocol</a></li>
+
 	<li><a
 		href="saml-request?IdPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/saml2&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/saml2-landing">SAML2
 	eID IdP Request</a></li>
+
 	<li><a
 		href="openid-request?UserIdentifier=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/endpoints/openid-identity&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/openid-landing">OpenID
-	eID IdP Request</a></li>
+	eID IdP Request: Identification</a></li>
+
+	<li><a
+		href="openid-request?UserIdentifier=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/endpoints/openid-auth&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/openid-landing">OpenID
+	eID IdP Request: Authentication</a></li>
+
+	<li><a
+		href="openid-request?UserIdentifier=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/endpoints/openid-auth-identity&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/openid-landing">OpenID
+	eID IdP Request: Authentication + Identification</a></li>
 </ul>
 </body>
 </html>

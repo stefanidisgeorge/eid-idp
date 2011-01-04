@@ -86,6 +86,7 @@ public class SAML2ProtocolServiceTest {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testOpenSaml2Spike() throws Exception {
         /*
@@ -97,16 +98,18 @@ public class SAML2ProtocolServiceTest {
                 .getBuilderFactory();
         assertNotNull(builderFactory);
 
-        SAMLObjectBuilder<AuthnRequest> requestBuilder = (SAMLObjectBuilder<AuthnRequest>) builderFactory
-                .getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
+        SAMLObjectBuilder<AuthnRequest> requestBuilder =
+                (SAMLObjectBuilder<AuthnRequest>) builderFactory
+                        .getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
         assertNotNull(requestBuilder);
         AuthnRequest samlMessage = requestBuilder.buildObject();
         samlMessage.setID(UUID.randomUUID().toString());
         samlMessage.setVersion(SAMLVersion.VERSION_20);
         samlMessage.setIssueInstant(new DateTime(0));
 
-        SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
-                .getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
+        SAMLObjectBuilder<Endpoint> endpointBuilder =
+                (SAMLObjectBuilder<Endpoint>) builderFactory
+                        .getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
         Endpoint samlEndpoint = endpointBuilder.buildObject();
         samlEndpoint.setLocation("http://idp.be");
         samlEndpoint.setResponseLocation("http://sp.be/response");
@@ -218,13 +221,15 @@ public class SAML2ProtocolServiceTest {
         // setup
         SAML2ProtocolService saml2ProtocolService = new SAML2ProtocolService();
 
-        HttpSession httpSession;
+//        HttpSession httpSession;
         Address address = new Address();
-        String authenticatedIdentifier = "authn-id";
-        HttpServletResponse response;
+        String userId = UUID.randomUUID().toString();
+        String givenName = "test-given-name";
+        String surName = "test-sur-name";
+//        HttpServletResponse response;
         Identity identity = new Identity();
-        identity.name = "test-name";
-        identity.firstName = "test-first-name";
+        identity.name = surName;
+        identity.firstName = givenName;
         identity.gender = Gender.MALE;
         HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
         HttpServletResponse mockHttpServletResponse = EasyMock
@@ -268,8 +273,9 @@ public class SAML2ProtocolServiceTest {
         // operate
         saml2ProtocolService.init(null, mockConfiguration);
         ReturnResponse returnResponse = saml2ProtocolService
-                .handleReturnResponse(mockHttpSession, identity, address,
-                        authenticatedIdentifier, null, mockHttpServletResponse);
+                .handleReturnResponse(mockHttpSession, userId, givenName,
+                        surName, identity, address, null,
+                        mockHttpServletResponse);
 
         // verify
         EasyMock.verify(mockHttpSession, mockConfiguration);
@@ -307,8 +313,7 @@ public class SAML2ProtocolServiceTest {
         SecureRandom random = new SecureRandom();
         keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
                 RSAKeyGenParameterSpec.F4), random);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        return keyPair;
+        return keyPairGenerator.generateKeyPair();
     }
 
     private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)

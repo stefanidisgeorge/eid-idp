@@ -70,10 +70,7 @@ import java.security.*;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -106,16 +103,18 @@ public class WSFederationProtocolServiceTest {
                 new KeyStore.PrivateKeyEntry(keyPair.getPrivate(), new java.security.cert.Certificate[]{certificate});
 
         HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
+        String userId = UUID.randomUUID().toString();
+        String givenName = "test-given-name";
+        String surName = "test-sur-name";
         Identity identity = new Identity();
-        identity.name = "test-name";
-        identity.firstName = "test-first-name";
+        identity.name = surName;
+        identity.firstName = givenName;
         identity.dateOfBirth = new GregorianCalendar();
         identity.gender = Gender.MALE;
         Address address = new Address();
         address.streetAndNumber = "test-street 1234";
         address.zip = "5678";
         address.municipality = "test-city";
-        String authenticatedIdentifier = "test-auth-identifier";
         HttpServletRequest mockRequest = EasyMock
                 .createMock(HttpServletRequest.class);
         HttpServletResponse mockResponse = EasyMock
@@ -144,7 +143,7 @@ public class WSFederationProtocolServiceTest {
         // operate
         testedInstance.init(null, mockIdentityProviderConfiguration);
         ReturnResponse result = testedInstance.handleReturnResponse(
-                mockHttpSession, identity, address, authenticatedIdentifier,
+                mockHttpSession, userId, givenName, surName, identity, address,
                 mockRequest, mockResponse);
 
         // verify

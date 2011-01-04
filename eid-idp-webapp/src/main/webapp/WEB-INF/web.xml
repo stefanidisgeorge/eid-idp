@@ -81,6 +81,10 @@
 			<param-name>IdentificationPage</param-name>
 			<param-value>/identification.seam</param-value>
 		</init-param>
+        <init-param>
+            <param-name>AuthenticationPage</param-name>
+            <param-value>/authentication.seam</param-value>
+        </init-param>
 		<init-param>
 			<param-name>AuthenticationWithIdentificationPage</param-name>
 			<param-value>/authentication-identification.seam</param-value>
@@ -138,6 +142,34 @@
 		<servlet-name>AppletIdentificationServiceServlet</servlet-name>
 		<url-pattern>/applet-identification-service</url-pattern>
 	</servlet-mapping>
+
+    <!-- eID Applet Authentication -->
+    <servlet>
+        <servlet-name>AppletAuthenticationServiceServlet</servlet-name>
+        <servlet-class>be.fedict.eid.applet.service.AppletServiceServlet
+        </servlet-class>
+        <init-param>
+            <param-name>AuthenticationService</param-name>
+            <param-value>be/fedict/eid/idp/AuthenticationServiceBean</param-value>
+        </init-param>
+        <init-param>
+            <param-name>PreLogoff</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>Logoff</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>IncludeCertificates</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AppletAuthenticationServiceServlet</servlet-name>
+        <url-pattern>/applet-authentication-service</url-pattern>
+    </servlet-mapping>
+
 
 	<!-- eID Applet Authentication with Identification -->
 	<servlet>
