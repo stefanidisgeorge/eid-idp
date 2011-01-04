@@ -348,11 +348,13 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         messageContext.setOutboundSAMLMessage(samlResponse);
         messageContext.setRelayState(relayState);
 
-        KeyStore.PrivateKeyEntry idpIdentity = this.configuration.getIdentity();
-        BasicX509Credential credential = new BasicX509Credential();
-        credential.setPrivateKey(idpIdentity.getPrivateKey());
-        credential.setEntityCertificate((X509Certificate) idpIdentity.getCertificate());
-        messageContext.setOutboundSAMLMessageSigningCredential(credential);
+        KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
+        if (null != idpIdentity) {
+            BasicX509Credential credential = new BasicX509Credential();
+            credential.setPrivateKey(idpIdentity.getPrivateKey());
+            credential.setEntityCertificate((X509Certificate) idpIdentity.getCertificate());
+            messageContext.setOutboundSAMLMessageSigningCredential(credential);
+        }
         OutTransport outTransport = new HTTPOutTransport(returnResponse);
         messageContext.setOutboundMessageTransport(outTransport);
 

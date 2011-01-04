@@ -96,7 +96,7 @@ public class IdentityServiceSingletonBean {
      */
     public void reloadIdentity() throws KeyStoreLoadException {
 
-        this.identity = loadIdentity(getActiveIdentityName());
+        this.identity = loadIdentity(findActiveIdentityName());
         LOG.debug("private key entry reloaded");
     }
 
@@ -212,22 +212,25 @@ public class IdentityServiceSingletonBean {
     }
 
     /**
-     * @return current identity's private key entry
+     * @return current identity's private key entry or <code>null</code> if none.
      */
-    public PrivateKeyEntry getIdentity() {
+    public PrivateKeyEntry findIdentity() {
 
         return this.identity;
     }
 
     /**
-     * @return current identity's configuration
+     * @return current identity's configuration or <codE>null</code> if none.
      */
-    public IdentityConfig getIdentityConfig() {
+    public IdentityConfig findIdentityConfig() {
 
-        String activeIdentity = getActiveIdentityName();
+        String activeIdentity = findActiveIdentityName();
+        if (null == activeIdentity) {
+            return null;
+        }
         IdentityConfig identityConfig = findIdentityConfig(activeIdentity);
         if (null == identityConfig) {
-            throw new EJBException("No active identity config found!");
+            throw new EJBException("Identity config " + activeIdentity + " not found!");
         }
         return identityConfig;
     }
@@ -261,16 +264,6 @@ public class IdentityServiceSingletonBean {
         }
 
         return identityConfig;
-    }
-
-    private String getActiveIdentityName() {
-
-        String activeIdentity = findActiveIdentityName();
-
-        if (null == activeIdentity) {
-            throw new EJBException("No active identity set!");
-        }
-        return activeIdentity;
     }
 
     private String findActiveIdentityName() {
@@ -315,6 +308,11 @@ public class IdentityServiceSingletonBean {
     public void removeIdentityConfig(String name) {
 
         LOG.debug("remove identity: " + name);
+
+        String activeIdentity = findActiveIdentityName();
+        if (null != activeIdentity && activeIdentity.equals(name)) {
+            this.configuration.removeValue(ConfigProperty.ACTIVE_IDENTITY);
+        }
 
         this.configuration.removeValue(ConfigProperty.KEY_STORE_TYPE, name);
         this.configuration.removeValue(ConfigProperty.KEY_STORE_PATH, name);

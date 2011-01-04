@@ -38,7 +38,7 @@ public interface IdentityService extends IdentityProviderConfiguration {
     KeyStore.PrivateKeyEntry setIdentity(IdentityConfig identityConfig)
             throws KeyStoreLoadException;
 
-    IdentityConfig getIdentityConfig();
+    IdentityConfig findIdentityConfig();
 
     IdentityConfig findIdentityConfig(String name);
 

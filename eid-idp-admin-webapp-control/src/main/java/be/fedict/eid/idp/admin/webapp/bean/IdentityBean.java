@@ -74,7 +74,10 @@ public class IdentityBean implements Identity {
                 this.identityConfig = new IdentityConfig(this.name);
             }
         } else {
-            this.identityConfig = this.identityService.getIdentityConfig();
+            this.identityConfig = this.identityService.findIdentityConfig();
+            if (null == this.identityConfig) {
+                this.identityConfig = new IdentityConfig("");
+            }
         }
         this.name = this.identityConfig.getName();
         this.identityNames = this.identityService.getIdentities();
@@ -128,16 +131,9 @@ public class IdentityBean implements Identity {
         this.log.debug("remove: " + this.name);
 
         // disallow removing currently active
-        if (this.identityConfig.isActive()) {
+        if (this.identityConfig.isActive() && this.identityNames.size() != 1) {
             this.facesMessages.add(StatusMessage.Severity.ERROR,
                     "Identity is currently active, cannot remove.");
-            return null;
-        }
-
-        // disallow removing only 1 identity configured
-        if (this.identityNames.size() == 1) {
-            this.facesMessages.add(StatusMessage.Severity.ERROR,
-                    "Cannot remove last identity.");
             return null;
         }
 
@@ -145,7 +141,10 @@ public class IdentityBean implements Identity {
         this.identityService.removeIdentityConfig(this.name);
 
         // load default config and list of identities
-        this.identityConfig = this.identityService.getIdentityConfig();
+        this.identityConfig = this.identityService.findIdentityConfig();
+        if (null == this.identityConfig) {
+            this.identityConfig = new IdentityConfig("");
+        }
         this.name = this.identityConfig.getName();
         this.identityNames = this.identityService.getIdentities();
         return "success";

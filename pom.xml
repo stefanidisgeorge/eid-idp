@@ -62,7 +62,6 @@
                 </property>
             </activation>
             <modules>
-                <module>eid-idp-keystore</module>
                 <module>eid-idp-admin-manual</module>
                 <module>eid-idp-mysql-distribution</module>
             </modules>
@@ -125,7 +124,6 @@
             </activation>
             <modules>
                 <module>eid-idp-tests</module>
-                <module>eid-idp-keystore</module>
                 <module>eid-idp-admin-manual</module>
                 <module>eid-idp-mysql-distribution</module>
                 <module>eid-idp-devel-guide</module>

@@ -18,11 +18,8 @@
 
 package be.fedict.eid.idp.webapp;
 
-import be.fedict.eid.idp.model.IdentityConfig;
 import be.fedict.eid.idp.model.IdentityService;
-import be.fedict.eid.idp.model.KeyStoreType;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
-import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import be.fedict.eid.idp.spi.protocol.EndpointType;
 import be.fedict.eid.idp.spi.protocol.EndpointsType;
@@ -31,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -54,36 +50,9 @@ public class IdentityProviderServletContextListener implements
     public void contextInitialized(ServletContextEvent event) {
         LOG.debug("contextInitialized");
 
-        try {
-            initIdentity();
-        } catch (KeyStoreLoadException e) {
-            throw new EJBException(e);
-        }
-
         initProtocolServices(event);
 
         initIdentityProviderConfiguration(event);
-    }
-
-    private void initIdentity() throws KeyStoreLoadException {
-
-        if (identityService.isIdentityConfigured()) {
-
-            LOG.debug("Reload configured identity.");
-            identityService.reloadIdentity();
-        } else {
-            LOG.warn("No IdP Identity configured, installing default.");
-
-            String jbossHome = System.getenv("JBOSS_HOME");
-
-            identityService.setIdentity(new IdentityConfig("default",
-                    KeyStoreType.PKCS12,
-                    jbossHome + "/keystores/idp-identity-keystore.p12",
-                    "secret", "secret", null));
-
-            identityService.setActiveIdentity("default");
-        }
-
     }
 
     private void initIdentityProviderConfiguration(ServletContextEvent event) {

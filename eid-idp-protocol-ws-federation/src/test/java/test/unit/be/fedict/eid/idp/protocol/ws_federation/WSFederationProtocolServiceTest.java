@@ -135,7 +135,7 @@ public class WSFederationProtocolServiceTest {
                         mockHttpSession
                                 .getAttribute(AbstractWSFederationProtocolService.WCTX_SESSION_ATTRIBUTE))
                 .andStubReturn("some-context-identifier");
-        EasyMock.expect(mockIdentityProviderConfiguration.getIdentity())
+        EasyMock.expect(mockIdentityProviderConfiguration.findIdentity())
                 .andStubReturn(idPIdentity);
 
         // prepare

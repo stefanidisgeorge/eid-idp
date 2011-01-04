@@ -214,7 +214,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 .newXMLGregorianCalendar(issueInstantCalendar));
         NameIDType issuer = samlObjectFactory.createNameIDType();
 
-        KeyStore.PrivateKeyEntry idPIdentity = this.configuration.getIdentity();
+        KeyStore.PrivateKeyEntry idPIdentity = this.configuration.findIdentity();
         issuer.setValue(((X509Certificate) idPIdentity.getCertificate()).getSubjectX500Principal().toString());
         assertion.setIssuer(issuer);
 
@@ -357,7 +357,7 @@ public abstract class AbstractWSFederationProtocolService implements
             throw new IllegalStateException("saml:Subject element not present");
         }
 
-        KeyStore.PrivateKeyEntry identity = this.configuration.getIdentity();
+        KeyStore.PrivateKeyEntry identity = this.configuration.findIdentity();
 
         XMLSignatureFactory signatureFactory = XMLSignatureFactory.getInstance(
                 "DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
