@@ -43,10 +43,6 @@
             <outputDirectory>sql</outputDirectory>
         </file>
         <file>
-            <source>target/files/idp-identity-keystore.p12</source>
-            <outputDirectory>jboss/keystores</outputDirectory>
-        </file>
-        <file>
             <source>target/files/eid-idp-admin-manual.pdf</source>
             <outputDirectory>manual</outputDirectory>
         </file>

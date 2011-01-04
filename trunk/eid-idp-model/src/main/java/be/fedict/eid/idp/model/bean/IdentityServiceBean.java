@@ -98,8 +98,8 @@ public class IdentityServiceBean implements IdentityService {
     /**
      * {@inheritDoc}
      */
-    public KeyStore.PrivateKeyEntry getIdentity() {
-        return this.identityServiceSingletonBean.getIdentity();
+    public KeyStore.PrivateKeyEntry findIdentity() {
+        return this.identityServiceSingletonBean.findIdentity();
     }
 
     /**
@@ -114,9 +114,9 @@ public class IdentityServiceBean implements IdentityService {
     /**
      * {@inheritDoc}
      */
-    public IdentityConfig getIdentityConfig() {
+    public IdentityConfig findIdentityConfig() {
 
-        return this.identityServiceSingletonBean.getIdentityConfig();
+        return this.identityServiceSingletonBean.findIdentityConfig();
     }
 
     /**
@@ -140,7 +140,7 @@ public class IdentityServiceBean implements IdentityService {
      */
     public List<X509Certificate> getIdentityCertificateChain() {
 
-        KeyStore.PrivateKeyEntry identity = getIdentity();
+        KeyStore.PrivateKeyEntry identity = findIdentity();
         List<X509Certificate> identityCertificateChain = new LinkedList<X509Certificate>();
         if (null == identity) {
             return identityCertificateChain;
@@ -159,7 +159,7 @@ public class IdentityServiceBean implements IdentityService {
      * {@inheritDoc}
      */
     public String getIdentityFingerprint() {
-        KeyStore.PrivateKeyEntry identity = getIdentity();
+        KeyStore.PrivateKeyEntry identity = findIdentity();
         if (null == identity) {
             return null;
         }

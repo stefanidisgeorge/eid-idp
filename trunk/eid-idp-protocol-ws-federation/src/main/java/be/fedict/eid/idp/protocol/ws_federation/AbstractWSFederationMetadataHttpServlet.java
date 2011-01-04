@@ -155,10 +155,12 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
         X509DataType x509Data = dsObjectFactory.createX509DataType();
         keyInfoObjects.add(dsObjectFactory.createX509Data(x509Data));
 
-        KeyStore.PrivateKeyEntry identity = configuration.getIdentity();
-        x509Data.getX509IssuerSerialOrX509SKIOrX509SubjectName().add(
-                dsObjectFactory.createX509DataTypeX509Certificate(identity.getCertificate()
-                        .getEncoded()));
+        KeyStore.PrivateKeyEntry identity = configuration.findIdentity();
+        if (null != identity) {
+            x509Data.getX509IssuerSerialOrX509SKIOrX509SubjectName().add(
+                    dsObjectFactory.createX509DataTypeX509Certificate(identity.getCertificate()
+                            .getEncoded()));
+        }
 
         ClaimTypesOfferedType claimTypesOffered = fedObjectFactory
                 .createClaimTypesOfferedType();
@@ -226,8 +228,10 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
         marshaller.marshal(objectFactory
                 .createEntityDescriptor(entityDescriptor), document);
 
-        signDocument(document, identity.getPrivateKey(),
-                (X509Certificate) identity.getCertificate(), id);
+        if (null != identity) {
+            signDocument(document, identity.getPrivateKey(),
+                    (X509Certificate) identity.getCertificate(), id);
+        }
 
         writeDocument(document, outputStream);
     }

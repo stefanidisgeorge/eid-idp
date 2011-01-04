@@ -96,7 +96,7 @@ public class WSFederationMetadataHttpServletTest {
 
         IdentityProviderConfiguration mockConfiguration = EasyMock
                 .createMock(IdentityProviderConfiguration.class);
-        EasyMock.expect(mockConfiguration.getIdentity()).andStubReturn(
+        EasyMock.expect(mockConfiguration.findIdentity()).andStubReturn(
                 identity);
         EasyMock.replay(mockConfiguration);
         servletTester.start();

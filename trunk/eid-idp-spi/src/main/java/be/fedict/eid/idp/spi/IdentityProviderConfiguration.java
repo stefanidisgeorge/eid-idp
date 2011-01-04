@@ -39,7 +39,7 @@ public interface IdentityProviderConfiguration {
     /**
      * @return the identity of this eID IdP system.
      */
-    KeyStore.PrivateKeyEntry getIdentity();
+    KeyStore.PrivateKeyEntry findIdentity();
 
     /**
      * @return certificate chain of the eID IdP identity.

@@ -265,7 +265,7 @@ public class SAML2ProtocolServiceTest {
                         + ".InResponseTo")).andStubReturn(
                 "a77a1c87-e590-47d7-a3e0-afea455ebc01");
 
-        EasyMock.expect(mockConfiguration.getIdentity()).andStubReturn(
+        EasyMock.expect(mockConfiguration.findIdentity()).andStubReturn(
                 idpIdentity);
 
         // prepare
