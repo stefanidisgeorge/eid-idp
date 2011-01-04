@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>be.fedict.eid-idp</groupId>
 			<artifactId>eid-idp-sp-protocol-openid</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
