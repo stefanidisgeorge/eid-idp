@@ -186,11 +186,24 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+	<repositories>
+		<repository>
+			<!-- required for jTrust, eID Applet, openid4java -->
+			<id>e-contract.be</id>
+			<url>http://www.e-contract.be/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
     <properties>
         <eid-applet.version>1.0.2-SNAPSHOT</eid-applet.version>
         <eid-trust-service.version>1.0.0-SNAPSHOT</eid-trust-service.version>
         <!-- http://code.google.com/p/openid4java/issues/detail?id=114 -->
-        <openid4java.version>0.9.6-SNAPSHOT</openid4java.version>
+        <openid4java.version>0.9.6-114-7</openid4java.version>
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
         <hibernate.jdbc.use_streams_for_binary>true
         </hibernate.jdbc.use_streams_for_binary>
