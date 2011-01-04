@@ -73,12 +73,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-public class WSFederationMetadataHttpServlet extends HttpServlet {
+public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
     private static final Log LOG = LogFactory
-            .getLog(WSFederationMetadataHttpServlet.class);
+            .getLog(AbstractWSFederationMetadataHttpServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -101,7 +101,6 @@ public class WSFederationMetadataHttpServlet extends HttpServlet {
                                IdentityProviderConfiguration configuration,
                                OutputStream outputStream) throws JAXBException, ServletException,
             ParserConfigurationException, CertificateEncodingException,
-            TransformerConfigurationException,
             TransformerFactoryConfigurationError, TransformerException,
             IOException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException, MarshalException,
@@ -112,13 +111,14 @@ public class WSFederationMetadataHttpServlet extends HttpServlet {
 
         String location = "https://" + request.getServerName() + ":"
                 + request.getServerPort() + request.getContextPath()
-                + "/protocol/ws-federation";
+                + "/protocol/" + getPath();
         LOG.debug("location: " + location);
         entityDescriptor.setEntityID(location);
         String id = "saml-metadata-" + UUID.randomUUID().toString();
         entityDescriptor.setID(id);
 
-        org.oasis_open.docs.wsfed.federation._200706.ObjectFactory fedObjectFactory = new org.oasis_open.docs.wsfed.federation._200706.ObjectFactory();
+        org.oasis_open.docs.wsfed.federation._200706.ObjectFactory fedObjectFactory =
+                new org.oasis_open.docs.wsfed.federation._200706.ObjectFactory();
         SecurityTokenServiceType securityTokenService = fedObjectFactory
                 .createSecurityTokenServiceType();
         List<RoleDescriptorType> roleDescriptors = entityDescriptor
@@ -164,7 +164,8 @@ public class WSFederationMetadataHttpServlet extends HttpServlet {
                 .createClaimTypesOfferedType();
         securityTokenService.setClaimTypesOffered(claimTypesOffered);
         List<ClaimType> claimTypes = claimTypesOffered.getClaimType();
-        org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory authObjectFactory = new org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory();
+        org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory authObjectFactory =
+                new org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory();
 
         addClaimType("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
                 "Name", "The name of the Subject.",
@@ -312,12 +313,13 @@ public class WSFederationMetadataHttpServlet extends HttpServlet {
 
     protected void writeDocument(Document document,
                                  OutputStream documentOutputStream)
-            throws TransformerConfigurationException,
-            TransformerFactoryConfigurationError, TransformerException,
+            throws TransformerFactoryConfigurationError, TransformerException,
             IOException {
         Result result = new StreamResult(documentOutputStream);
         Transformer xformer = TransformerFactory.newInstance().newTransformer();
         Source source = new DOMSource(document);
         xformer.transform(source, result);
     }
+
+    protected abstract String getPath();
 }
