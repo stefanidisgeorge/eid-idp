@@ -173,7 +173,7 @@
 			<para>
 				The eID Identity Provider Service Administrator Portal is available
 				at
-				<code>$EID_IDP_ADDRESS/eid-idp-admin/</code>
+				<code>$EID_IDP_ADDRESS/eid-idp-admin-portal/</code>
 				. After deployment of the eID Identity Provider Service you should
 				register an administrator by logging in into the admin portal. In
 				this admin portal you should at least configure the following under
