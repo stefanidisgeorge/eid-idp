@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.webapp;
 
+import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 import org.jboss.ejb3.annotation.LocalBinding;
@@ -47,6 +48,9 @@ public class ProtocolServiceBean implements ProtocolService {
     @EJB
     private ProtocolServiceManager protocolServiceManager;
 
+    @EJB
+    private IdentityService identityService;
+
     @Factory("idpProtocolServices")
     public void initProtocolServices() {
         this.log.debug("init idpProtocolServices");
@@ -58,5 +62,15 @@ public class ProtocolServiceBean implements ProtocolService {
     @Destroy
     public void destroy() {
         this.log.debug("destroy");
+    }
+
+    @Override
+    public String getThumbprint() {
+
+        String thumbprint = this.identityService.getIdentityFingerprint();
+        if (null == thumbprint) {
+            return "<No identity configured>";
+        }
+        return thumbprint;
     }
 }
