@@ -21,8 +21,11 @@
                         <h:outputText value="eID Trust Service XKMS2 URL:"/>
                         <h:inputText value="#{idpConfig.xkmsUrl}"/>
 
-                        <h:outputText value="eID Trust Service Trust Domain:"/>
-                        <h:inputText value="#{idpConfig.xkmsTrustDomain}"/>
+                        <h:outputText value="eID Trust Service Authentication Trust Domain:"/>
+                        <h:inputText value="#{idpConfig.xkmsAuthTrustDomain}"/>
+
+                        <h:outputText value="eID Trust Service Identification Trust Domain:"/>
+                        <h:inputText value="#{idpConfig.xkmsIdentTrustDomain}"/>
                     </h:panelGrid>
                     <h:commandButton value="Save" action="#{idpConfig.save}"/>
                 </rich:tab>

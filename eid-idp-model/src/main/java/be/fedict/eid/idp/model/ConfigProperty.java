@@ -27,7 +27,8 @@ package be.fedict.eid.idp.model;
 public enum ConfigProperty {
 
     XKMS_URL("xkms-url", String.class),
-    XKMS_TRUST_DOMAIN("xkms-trust-domain", String.class),
+    XKMS_AUTH_TRUST_DOMAIN("xkms-auth-trust-domain", String.class),
+    XKMS_IDENT_TRUST_DOMAIN("xkms-ident-trust-domain", String.class),
 
     HTTP_PROXY_ENABLED("http-proxy", Boolean.class),
     HTTP_PROXY_HOST("http-proxy-host", String.class),

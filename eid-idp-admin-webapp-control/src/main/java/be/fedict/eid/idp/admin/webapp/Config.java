@@ -32,9 +32,13 @@ public interface Config {
 
     void setXkmsUrl(String xkmsUrl);
 
-    String getXkmsTrustDomain();
+    String getXkmsAuthTrustDomain();
 
-    void setXkmsTrustDomain(String xkmsTrustDomain);
+    void setXkmsAuthTrustDomain(String xkmsAuthTrustDomain);
+
+    String getXkmsIdentTrustDomain();
+
+    void setXkmsIdentTrustDomain(String xkmsIdentTrustDomain);
 
     String getHmacSecret();
 

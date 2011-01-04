@@ -50,7 +50,8 @@ public class ConfigBean implements Config {
     FacesMessages facesMessages;
 
     private String xkmsUrl;
-    private String xkmsTrustDomain;
+    private String xkmsAuthTrustDomain;
+    private String xkmsIdentTrustDomain;
 
     private String hmacSecret;
 
@@ -65,8 +66,12 @@ public class ConfigBean implements Config {
         // XKMS Config
         this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
                 String.class);
-        this.xkmsTrustDomain = this.configuration.getValue(ConfigProperty.XKMS_TRUST_DOMAIN,
-                String.class);
+        this.xkmsAuthTrustDomain =
+                this.configuration.getValue(ConfigProperty.XKMS_AUTH_TRUST_DOMAIN,
+                        String.class);
+        this.xkmsIdentTrustDomain =
+                this.configuration.getValue(ConfigProperty.XKMS_IDENT_TRUST_DOMAIN,
+                        String.class);
 
         // Pseudonym Config
         this.hmacSecret = this.configuration.getValue(ConfigProperty.HMAC_SECRET,
@@ -93,8 +98,10 @@ public class ConfigBean implements Config {
 
         // XKMS Config
         this.configuration.setValue(ConfigProperty.XKMS_URL, this.xkmsUrl);
-        this.configuration.setValue(ConfigProperty.XKMS_TRUST_DOMAIN,
-                this.xkmsTrustDomain);
+        this.configuration.setValue(ConfigProperty.XKMS_AUTH_TRUST_DOMAIN,
+                this.xkmsAuthTrustDomain);
+        this.configuration.setValue(ConfigProperty.XKMS_IDENT_TRUST_DOMAIN,
+                this.xkmsIdentTrustDomain);
 
         // Pseudonym Config
         this.configuration.setValue(ConfigProperty.HMAC_SECRET,
@@ -133,13 +140,23 @@ public class ConfigBean implements Config {
     }
 
     @Override
-    public String getXkmsTrustDomain() {
-        return this.xkmsTrustDomain;
+    public String getXkmsAuthTrustDomain() {
+        return this.xkmsAuthTrustDomain;
     }
 
     @Override
-    public void setXkmsTrustDomain(String xkmsTrustDomain) {
-        this.xkmsTrustDomain = xkmsTrustDomain;
+    public void setXkmsAuthTrustDomain(String xkmsAuthTrustDomain) {
+        this.xkmsAuthTrustDomain = xkmsAuthTrustDomain;
+    }
+
+    @Override
+    public String getXkmsIdentTrustDomain() {
+        return this.xkmsIdentTrustDomain;
+    }
+
+    @Override
+    public void setXkmsIdentTrustDomain(String xkmsIdentTrustDomain) {
+        this.xkmsIdentTrustDomain = xkmsIdentTrustDomain;
     }
 
     @Override
