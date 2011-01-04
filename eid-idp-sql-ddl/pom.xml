@@ -93,7 +93,7 @@
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-entity</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
