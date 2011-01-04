@@ -41,7 +41,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>unpack-javadoc</id>
+                        <id>unpack-javadoc-openid</id>
                         <phase>package</phase>
                         <goals>
                             <goal>unpack</goal>
@@ -54,6 +54,20 @@
                                     </artifactId>
                                     <classifier>javadoc</classifier>
                                 </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/files/javadoc/openid
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-javadoc-saml2</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
                                 <artifactItem>
                                     <groupId>be.fedict.eid-idp</groupId>
                                     <artifactId>eid-idp-sp-protocol-saml2
@@ -62,7 +76,7 @@
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>
-                                ${project.build.directory}/files/javadoc
+                                ${project.build.directory}/files/javadoc/saml2
                             </outputDirectory>
                         </configuration>
                     </execution>
