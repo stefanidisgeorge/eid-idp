@@ -22,6 +22,6 @@ public class OpenIDIdentityHttpServletAuthIdent extends AbstractOpenIDIdentityHt
 
     @Override
     protected String getPath() {
-        return "openid-auth-identity";
+        return new OpenIDProtocolServiceAuthIdent().getPath();
     }
 }

@@ -19,7 +19,7 @@
 package test.unit.be.fedict.eid.idp.protocol.ws_federation;
 
 import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
-import be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServlet;
+import be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServletAuthIdent;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import org.apache.commons.httpclient.Header;
@@ -91,8 +91,8 @@ public class WSFederationMetadataHttpServletTest {
         ServletTester servletTester = new ServletTester();
         servletTester.setContextPath("/eid-idp");
         ServletHolder servletHolder = servletTester.addServlet(
-                WSFederationMetadataHttpServlet.class,
-                "/ws-federation-metadata");
+                WSFederationMetadataHttpServletAuthIdent.class,
+                "/ws-federation-auth-ident-metadata");
 
         IdentityProviderConfiguration mockConfiguration = EasyMock
                 .createMock(IdentityProviderConfiguration.class);
@@ -108,7 +108,7 @@ public class WSFederationMetadataHttpServletTest {
                         mockConfiguration);
 
         this.location = servletTester.createSocketConnector(true)
-                + "/eid-idp/ws-federation-metadata";
+                + "/eid-idp/ws-federation-auth-ident-metadata";
     }
 
     @Test

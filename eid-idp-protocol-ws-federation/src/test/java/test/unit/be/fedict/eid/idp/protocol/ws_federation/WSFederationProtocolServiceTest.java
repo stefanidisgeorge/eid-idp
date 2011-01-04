@@ -22,7 +22,8 @@ import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
-import be.fedict.eid.idp.protocol.ws_federation.WSFederationProtocolService;
+import be.fedict.eid.idp.protocol.ws_federation.AbstractWSFederationProtocolService;
+import be.fedict.eid.idp.protocol.ws_federation.WSFederationProtocolServiceAuthIdent;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.NameValuePair;
 import be.fedict.eid.idp.spi.ReturnResponse;
@@ -92,7 +93,8 @@ public class WSFederationProtocolServiceTest {
     @Test
     public void testhandleReturnResponse() throws Exception {
         // setup
-        WSFederationProtocolService testedInstance = new WSFederationProtocolService();
+        WSFederationProtocolServiceAuthIdent testedInstance =
+                new WSFederationProtocolServiceAuthIdent();
 
         KeyPair keyPair = generateKeyPair();
         DateTime notBefore = new DateTime();
@@ -126,12 +128,12 @@ public class WSFederationProtocolServiceTest {
         EasyMock
                 .expect(
                         mockHttpSession
-                                .getAttribute(WSFederationProtocolService.WTREALM_SESSION_ATTRIBUTE))
+                                .getAttribute(AbstractWSFederationProtocolService.WTREALM_SESSION_ATTRIBUTE))
                 .andStubReturn("http://return.to.here");
         EasyMock
                 .expect(
                         mockHttpSession
-                                .getAttribute(WSFederationProtocolService.WCTX_SESSION_ATTRIBUTE))
+                                .getAttribute(AbstractWSFederationProtocolService.WCTX_SESSION_ATTRIBUTE))
                 .andStubReturn("some-context-identifier");
         EasyMock.expect(mockIdentityProviderConfiguration.getIdentity())
                 .andStubReturn(idPIdentity);

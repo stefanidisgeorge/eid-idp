@@ -77,17 +77,17 @@ import java.util.*;
  *
  * @author Frank Cornelis
  */
-public class WSFederationProtocolService implements
+public abstract class AbstractWSFederationProtocolService implements
         IdentityProviderProtocolService {
 
     private static final Log LOG = LogFactory
-            .getLog(WSFederationProtocolService.class);
+            .getLog(AbstractWSFederationProtocolService.class);
 
     public static final String WCTX_SESSION_ATTRIBUTE =
-            WSFederationProtocolService.class.getName() + ".wctx";
+            AbstractWSFederationProtocolService.class.getName() + ".wctx";
 
     public static final String WTREALM_SESSION_ATTRIBUTE =
-            WSFederationProtocolService.class.getName() + ".wtrealm";
+            AbstractWSFederationProtocolService.class.getName() + ".wtrealm";
 
     private IdentityProviderConfiguration configuration;
 
@@ -131,7 +131,7 @@ public class WSFederationProtocolService implements
         String wctx = request.getParameter("wctx");
         LOG.debug("wctx: " + wctx);
         storeWCtx(wctx, request);
-        return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
+        return getAuthenticationFlow();
     }
 
     @Override
@@ -408,4 +408,6 @@ public class WSFederationProtocolService implements
         LOG.debug("init");
         this.configuration = configuration;
     }
+
+    protected abstract IdentityProviderFlow getAuthenticationFlow();
 }

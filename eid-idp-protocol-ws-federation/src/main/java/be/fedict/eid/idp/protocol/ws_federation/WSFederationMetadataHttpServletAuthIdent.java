@@ -16,12 +16,12 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.protocol.openid;
+package be.fedict.eid.idp.protocol.ws_federation;
 
-public class OpenIDIdentityHttpServletAuth extends AbstractOpenIDIdentityHttpServlet {
+public class WSFederationMetadataHttpServletAuthIdent extends AbstractWSFederationMetadataHttpServlet {
 
     @Override
     protected String getPath() {
-        return new OpenIDProtocolServiceAuth().getPath();
+        return "ws-federation-auth-ident";
     }
 }
