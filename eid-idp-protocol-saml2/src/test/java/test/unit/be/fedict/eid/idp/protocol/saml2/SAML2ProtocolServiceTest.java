@@ -71,6 +71,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -232,6 +233,9 @@ public class SAML2ProtocolServiceTest {
         identity.name = surName;
         identity.firstName = givenName;
         identity.gender = Gender.MALE;
+        identity.dateOfBirth = new GregorianCalendar();
+        identity.nationality = "BELG";
+        identity.placeOfBirth = "Gent";
         HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
         HttpServletResponse mockHttpServletResponse = EasyMock
                 .createMock(HttpServletResponse.class);

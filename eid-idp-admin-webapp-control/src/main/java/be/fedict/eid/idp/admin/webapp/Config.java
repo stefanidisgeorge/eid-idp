@@ -56,6 +56,10 @@ public interface Config {
 
     void setHttpProxyPort(Integer httpProxyPort);
 
+    String getSelectedTab();
+
+    void setSelectedTab(String selectedTab);
+
     /*
     * Factories
     */
@@ -64,7 +68,11 @@ public interface Config {
     /*
     * Actions.
     */
-    String save();
+    String saveXkms();
+
+    String savePseudonym();
+
+    String saveNetwork();
 
     /*
      * Lifecycle.

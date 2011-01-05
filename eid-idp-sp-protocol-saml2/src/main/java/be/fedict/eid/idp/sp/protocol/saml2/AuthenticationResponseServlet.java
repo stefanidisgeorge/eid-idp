@@ -20,6 +20,7 @@ package be.fedict.eid.idp.sp.protocol.saml2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTimeZone;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
@@ -157,7 +158,8 @@ public class AuthenticationResponseServlet extends HttpServlet {
 
                     XSDateTime attributeValue = (XSDateTime) attribute
                             .getAttributeValues().get(0);
-                    attributeMap.put(attributeName, attributeValue.getValue());
+                    attributeMap.put(attributeName,
+                            attributeValue.getValue().toDateTime(DateTimeZone.getDefault()));
 
                 }
             }

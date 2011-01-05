@@ -1,9 +1,14 @@
 package be.fedict.eid.idp.sp;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
 public class AttributeBean {
+
+    private static final Log LOG = LogFactory.getLog(AttributeBean.class);
 
     private HttpSession session;
 
@@ -16,7 +21,17 @@ public class AttributeBean {
     }
 
     public Map getAttributeMap() {
-        return (Map) session.getAttribute("AttributeMap");
+
+        Map<String, Object> attributeMap =
+                (Map<String, Object>) session.getAttribute("AttributeMap");
+
+        for (Map.Entry<String, Object> entry : attributeMap.entrySet()) {
+
+            LOG.debug("attribute: " + entry.getKey() + " value=" + entry.getValue());
+
+        }
+
+        return attributeMap;
     }
 
     public void setAttributeMap(Map value) {
