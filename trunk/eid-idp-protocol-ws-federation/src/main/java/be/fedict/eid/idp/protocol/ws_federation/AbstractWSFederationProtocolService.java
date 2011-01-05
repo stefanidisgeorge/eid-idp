@@ -20,10 +20,7 @@ package be.fedict.eid.idp.protocol.ws_federation;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import be.fedict.eid.idp.spi.*;
 import oasis.names.tc.saml._2_0.assertion.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -148,13 +145,18 @@ public abstract class AbstractWSFederationProtocolService implements
         returnResponse.addAttribute("wa", "wsignin1.0");
         String wctx = retrieveWctx(httpSession);
         returnResponse.addAttribute("wctx", wctx);
-        String wresult = getWResult(wctx, wtrealm, identity, address, userId);
+
+        String wresult = getWResult(wctx, wtrealm, userId, givenName, surName,
+                identity, address);
         returnResponse.addAttribute("wresult", wresult);
         return returnResponse;
     }
 
-    private String getWResult(String wctx, String wtrealm, Identity identity,
-                              Address address, String userId)
+    private String getWResult(String wctx, String wtrealm,
+                              String userId,
+                              String givenName, String surName,
+                              Identity identity,
+                              Address address)
             throws JAXBException, DatatypeConfigurationException,
             ParserConfigurationException, TransformerException,
             NoSuchAlgorithmException, InvalidAlgorithmParameterException,
@@ -238,47 +240,61 @@ public abstract class AbstractWSFederationProtocolService implements
         List<Object> attributes = attributeStatement
                 .getAttributeOrEncryptedAttribute();
 
-        addAttribute(WSFederationConstants.FIRST_NAME_CLAIM_TYPE_URI, identity
-                .getFirstName(), samlObjectFactory, attributes);
-        addAttribute(WSFederationConstants.LAST_NAME_CLAIM_TYPE_URI, identity
-                .getName(), samlObjectFactory, attributes);
+        addAttribute(AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI, givenName,
+                samlObjectFactory, attributes);
+        addAttribute(AttributeConstants.LAST_NAME_CLAIM_TYPE_URI, surName,
+                samlObjectFactory, attributes);
         addAttribute(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
-                identity.getFirstName() + " " + identity.getName(),
+                givenName + " " + surName,
                 samlObjectFactory, attributes);
-        addAttribute(WSFederationConstants.COUNTRY_CLAIM_TYPE_URI, "BE",
+        addAttribute(AttributeConstants.COUNTRY_CLAIM_TYPE_URI, "BE",
                 samlObjectFactory, attributes);
-        String genderValue;
-        switch (identity.getGender()) {
-            case MALE:
-                genderValue = "1";
-                break;
-            case FEMALE:
-                genderValue = "2";
-                break;
-            default:
-                genderValue = "0";
-                break;
+
+        if (null != identity) {
+            String genderValue;
+            switch (identity.getGender()) {
+                case MALE:
+                    genderValue = "1";
+                    break;
+                case FEMALE:
+                    genderValue = "2";
+                    break;
+                default:
+                    genderValue = "0";
+                    break;
+            }
+            addAttribute(AttributeConstants.GENDER_CLAIM_TYPE_URI, genderValue,
+                    samlObjectFactory, attributes);
+
+            addAttribute(AttributeConstants.PPID_CLAIM_TYPE_URI,
+                    userId, samlObjectFactory, attributes);
+
+            AttributeType dobAttribute = samlObjectFactory.createAttributeType();
+            attributes.add(dobAttribute);
+            dobAttribute
+                    .setName(AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI);
+            dobAttribute.getAttributeValue().add(
+                    datatypeFactory.newXMLGregorianCalendar(identity
+                            .getDateOfBirth()));
+
+            addAttribute(AttributeConstants.NATIONALITY_CLAIM_TYPE_URI,
+                    identity.getNationality(), samlObjectFactory, attributes);
+            addAttribute(AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI,
+                    identity.getPlaceOfBirth(), samlObjectFactory, attributes);
+
         }
-        addAttribute(WSFederationConstants.GENDER_CLAIM_TYPE_URI, genderValue,
-                samlObjectFactory, attributes);
 
-        addAttribute(WSFederationConstants.PPID_CLAIM_TYPE_URI,
-                userId, samlObjectFactory, attributes);
-        addAttribute(WSFederationConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
-                address.getStreetAndNumber(), samlObjectFactory, attributes);
-        addAttribute(WSFederationConstants.LOCALITY_CLAIM_TYPE_URI, address
-                .getMunicipality(), samlObjectFactory, attributes);
-        addAttribute(WSFederationConstants.POSTAL_CODE_CLAIM_TYPE_URI, address
-                .getZip(), samlObjectFactory, attributes);
+        if (null != address) {
 
-        AttributeType dobAttribute = samlObjectFactory.createAttributeType();
-        attributes.add(dobAttribute);
-        dobAttribute
-                .setName(WSFederationConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI);
-        dobAttribute.getAttributeValue().add(
-                datatypeFactory.newXMLGregorianCalendar(identity
-                        .getDateOfBirth()));
+            addAttribute(AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
+                    address.getStreetAndNumber(), samlObjectFactory, attributes);
+            addAttribute(AttributeConstants.LOCALITY_CLAIM_TYPE_URI, address
+                    .getMunicipality(), samlObjectFactory, attributes);
+            addAttribute(AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI, address
+                    .getZip(), samlObjectFactory, attributes);
+
+        }
 
         ConditionsType conditions = samlObjectFactory.createConditionsType();
         assertion.setConditions(conditions);

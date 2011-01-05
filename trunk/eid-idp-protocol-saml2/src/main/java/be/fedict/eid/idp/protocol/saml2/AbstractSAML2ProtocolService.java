@@ -20,10 +20,7 @@ package be.fedict.eid.idp.protocol.saml2;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -327,17 +324,44 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         AttributeStatement attributeStatement = attributeStatementBuilder
                 .buildObject();
         attributeStatements.add(attributeStatement);
-        addAttribute("urn:be:fedict:eid:idp:name", surName, attributeStatement);
-        addAttribute("urn:be:fedict:eid:idp:firstName", givenName,
+
+        addAttribute(AttributeConstants.LAST_NAME_CLAIM_TYPE_URI,
+                surName, attributeStatement);
+        addAttribute(AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI, givenName,
                 attributeStatement);
+
+        if (null != address) {
+
+            addAttribute(AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
+                    address.getStreetAndNumber(), attributeStatement);
+            addAttribute(AttributeConstants.LOCALITY_CLAIM_TYPE_URI,
+                    address.getMunicipality(), attributeStatement);
+            addAttribute(AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI,
+                    address.getZip(), attributeStatement);
+        }
+
         if (null != identity) {
-            addAttribute("urn:be:fedict:eid:idp:gender", identity.getGender()
-                    .name(), attributeStatement);
-            addAttribute("urn:be:fedict:eid:idp:dob", identity.getDateOfBirth(),
-                    attributeStatement);
-            addAttribute("urn:be:fedict:eid:idp:nationality",
+
+            String genderValue;
+            switch (identity.getGender()) {
+                case MALE:
+                    genderValue = "1";
+                    break;
+                case FEMALE:
+                    genderValue = "2";
+                    break;
+                default:
+                    genderValue = "0";
+                    break;
+            }
+
+            addAttribute(AttributeConstants.GENDER_CLAIM_TYPE_URI,
+                    genderValue, attributeStatement);
+            addAttribute(AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI,
+                    identity.getDateOfBirth(), attributeStatement);
+            addAttribute(AttributeConstants.NATIONALITY_CLAIM_TYPE_URI,
                     identity.getNationality(), attributeStatement);
-            addAttribute("urn:be:fedict:eid:idp:pob",
+            addAttribute(AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI,
                     identity.getPlaceOfBirth(), attributeStatement);
         }
 
