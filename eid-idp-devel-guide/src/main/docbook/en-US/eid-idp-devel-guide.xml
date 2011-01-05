@@ -6,7 +6,7 @@
     <articleinfo>
         <title>FedICT eID Identity Provider Developer's Guide</title>
         <subtitle>
-            Integrating the eID Identity Provder within your web applications.
+            Integrating your web applications with the eID Identity Provider.
         </subtitle>
         <copyright>
             <year>2009-2010</year>
@@ -66,9 +66,8 @@
             </itemizedlist>
         </para>
         <para>
-            The eID Identity Provider also supports different protocols.
-            The following sections will highlight the different supported
-            protocols.
+            The eID Identity Provider supports different protocols, as
+            highlighted in following sections.
         </para>
     </section>
     <section>
@@ -111,7 +110,7 @@
                 <para>
                     The FedICT eID Identity Provider Java SDK provides a servlet
                     which will generate and send out such a request.
-                    The servlet takes 2 servlet init parameters:
+                    The servlet takes following init parameters:
                     <itemizedlist>
                         <listitem>
                             <para>
@@ -165,8 +164,8 @@
         <section>
             <title>Authentication Response</title>
             <para>
-                The FedICT Identity Provider will return a SAML v2.0
-                authentication response Base64 encoded using an HTTP Post
+                The FedICT Identity Provider will return a (Base64 encoded)
+                SAML v2.0 authentication response using an HTTP Post
                 via the web browser of the client. The POST parameter used for
                 that is<emphasis>SAMLResponse</emphasis>.
             </para>
@@ -244,7 +243,7 @@
                 <para>
                     The FedICT eID Identity Provider Java SDK provides a servlet
                     which will handle the incoming SAML Authentication Response.
-                    The servlet takes following servlet init parameters:
+                    The servlet takes following init parameters:
                     <itemizedlist>
                         <listitem>
                             <para>
@@ -272,9 +271,9 @@
                     </itemizedlist>
                 </para>
                 <para>
-                    This servlet will later be extended for support of all
-                    attributes returned by the FedICT Identity Provider.
-                    Following is a snippet of the
+                    In a future release, this servlet will be extended to
+                    support all attributes returned by the FedICT Identity
+                    Provider. Following is a snippet of the
                     <code>web.xml</code>
                     for configuring the servlet.
                 </para>
@@ -495,7 +494,7 @@ openid.return_to:https://localhost:48745/consumer
                     servlet which will generate and send out such a request.
                     This servlet is also responsible for reading out the
                     YADIS document and setting up an association.
-                    The servlet takes following servlet init parameters:
+                    The servlet takes following init parameters:
                     <itemizedlist>
                         <listitem>
                             <para>
@@ -563,7 +562,7 @@ openid.return_to:https://localhost:48745/consumer
                     The FedICT eID Identity Provider Java SDK provides a
                     servlet which will handle the returned OpenID
                     authentication response.
-                    The servlet takes following servlet init parameters:
+                    The servlet takes following init parameters:
                     <itemizedlist>
                         <listitem>
                             <para>
@@ -786,6 +785,26 @@ openid.return_to:https://localhost:48745/consumer
                 It also contains the digital identity of the eID IdP and an
                 indication of the key used to sign the authentication response
                 tokens.
+            </para>
+        </section>
+        <section>
+            <title>
+                Authentication Request
+            </title>
+            <para>
+                Below is an example of the WS-Federation authentication request
+                parameters in the request string sent to the FedICT eID
+                Identity Provider.
+                <programlisting role="XML">
+                    <![CDATA[
+    wa=wsignin1.0
+    wtrealm=http://localhost:49267/EidIdpTest/
+    wctx=rm=0
+    id=passive
+    ru=/EidIdpTest/Default.aspx
+    wct=2011-01-05T08:14:31
+                    ]]>
+                </programlisting>
             </para>
         </section>
         <section>
