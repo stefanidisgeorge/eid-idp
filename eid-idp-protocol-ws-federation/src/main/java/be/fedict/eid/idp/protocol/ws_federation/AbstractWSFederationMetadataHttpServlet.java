@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.protocol.ws_federation;
 
+import be.fedict.eid.idp.spi.AttributeConstants;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import oasis.names.tc.saml._2_0.metadata.*;
@@ -172,43 +173,55 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
         addClaimType("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
                 "Name", "The name of the Subject.",
                 authObjectFactory, claimTypes);
-        addClaimType(WSFederationConstants.FIRST_NAME_CLAIM_TYPE_URI,
+        addClaimType(AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI,
                 "FirstName", "Preferred name or first name of a Subject.",
                 authObjectFactory, claimTypes);
-        addClaimType(WSFederationConstants.LAST_NAME_CLAIM_TYPE_URI,
+        addClaimType(AttributeConstants.LAST_NAME_CLAIM_TYPE_URI,
                 "LastName", "Surname or family name of a Subject.",
                 authObjectFactory, claimTypes);
-        addClaimType(WSFederationConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
+        addClaimType(AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
                 "StreetAddress",
                 "Street address component of a Subject's address information.",
                 authObjectFactory, claimTypes);
         addClaimType(
-                WSFederationConstants.LOCALITY_CLAIM_TYPE_URI,
+                AttributeConstants.LOCALITY_CLAIM_TYPE_URI,
                 "Locality",
                 "This attribute contains the name of a locality, such as a city, county or other geographic region.",
                 authObjectFactory, claimTypes);
         addClaimType(
-                WSFederationConstants.POSTAL_CODE_CLAIM_TYPE_URI,
+                AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI,
                 "PostalCode",
                 "The postal code attribute type specifies the postal code of the named object.",
                 authObjectFactory, claimTypes);
-        addClaimType(WSFederationConstants.COUNTRY_CLAIM_TYPE_URI, "Country",
+        addClaimType(AttributeConstants.COUNTRY_CLAIM_TYPE_URI, "Country",
                 "This attribute contains a two-letter ISO 3166 country code.",
                 authObjectFactory, claimTypes);
         addClaimType(
-                WSFederationConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI,
+                AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI,
                 "DateOfBirth",
                 "The date of birth of a Subject in a form allowed by the xs:date data type.",
                 authObjectFactory, claimTypes);
         addClaimType(
-                WSFederationConstants.GENDER_CLAIM_TYPE_URI,
+                AttributeConstants.GENDER_CLAIM_TYPE_URI,
                 "Gender",
                 "Gender of a Subject that can have any of these exact string values – '0' (meaning unspecified), '1' (meaning Male) or '2' (meaning Female). Using these values allows them to be language neutral.",
                 authObjectFactory, claimTypes);
         addClaimType(
-                WSFederationConstants.PPID_CLAIM_TYPE_URI,
+                AttributeConstants.PPID_CLAIM_TYPE_URI,
                 "PPID",
                 "A private personal identifier (PPID) that identifies the Subject to a Relying Party.",
+                authObjectFactory, claimTypes);
+
+        addClaimType(
+                AttributeConstants.NATIONALITY_CLAIM_TYPE_URI,
+                "Nationality",
+                "The nationality of the named object.",
+                authObjectFactory, claimTypes);
+
+        addClaimType(
+                AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI,
+                "PlaceOfBirth",
+                "The place of birth of the named object.",
                 authObjectFactory, claimTypes);
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
