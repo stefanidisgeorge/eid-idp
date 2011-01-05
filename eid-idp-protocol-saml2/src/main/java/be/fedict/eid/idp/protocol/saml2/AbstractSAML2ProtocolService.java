@@ -20,7 +20,11 @@ package be.fedict.eid.idp.protocol.saml2;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.spi.*;
+import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.ReturnResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -328,6 +332,10 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         addAttribute(AttributeConstants.LAST_NAME_CLAIM_TYPE_URI,
                 surName, attributeStatement);
         addAttribute(AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI, givenName,
+                attributeStatement);
+        addAttribute(AttributeConstants.NAME_CLAIM_TYPE_URI,
+                givenName + " " + surName, attributeStatement);
+        addAttribute(AttributeConstants.PPID_CLAIM_TYPE_URI, userId,
                 attributeStatement);
 
         if (null != address) {

@@ -1,5 +1,6 @@
 package be.fedict.eid.idp.sp;
 
+import be.fedict.eid.idp.common.AttributeConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -20,15 +21,14 @@ public class AttributeBean {
         this.session = session;
     }
 
+    @SuppressWarnings("unchecked")
     public Map getAttributeMap() {
 
         Map<String, Object> attributeMap =
                 (Map<String, Object>) session.getAttribute("AttributeMap");
 
         for (Map.Entry<String, Object> entry : attributeMap.entrySet()) {
-
             LOG.debug("attribute: " + entry.getKey() + " value=" + entry.getValue());
-
         }
 
         return attributeMap;

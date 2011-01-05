@@ -20,7 +20,11 @@ package be.fedict.eid.idp.protocol.ws_federation;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.spi.*;
+import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.ReturnResponse;
 import oasis.names.tc.saml._2_0.assertion.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -244,8 +248,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 samlObjectFactory, attributes);
         addAttribute(AttributeConstants.LAST_NAME_CLAIM_TYPE_URI, surName,
                 samlObjectFactory, attributes);
-        addAttribute(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+        addAttribute(AttributeConstants.NAME_CLAIM_TYPE_URI,
                 givenName + " " + surName,
                 samlObjectFactory, attributes);
         addAttribute(AttributeConstants.COUNTRY_CLAIM_TYPE_URI, "BE",

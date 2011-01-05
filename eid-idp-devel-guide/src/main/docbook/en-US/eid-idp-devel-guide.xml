@@ -271,9 +271,13 @@
                     </itemizedlist>
                 </para>
                 <para>
-                    In a future release, this servlet will be extended to
-                    support all attributes returned by the FedICT Identity
-                    Provider. Following is a snippet of the
+                    The default eID attributes can be queried from the map using
+                    the constants in helper class
+                    <code>be.fedict.eid.idp.common.AttributeConstants</code>.
+                    Beware that for the
+                    <emphasis>authentication-only</emphasis>
+                    flow not all of these attributes will be available.
+                    Following is a snippet of the
                     <code>web.xml</code>
                     for configuring the servlet.
                 </para>
@@ -294,12 +298,8 @@
             <param-value>/authn-result.jsp</param-value>
         </init-param>
         <init-param>
-            <param-name>NameSessionAttribute</param-name>
-            <param-value>Name</param-value>
-        </init-param>
-        <init-param>
-            <param-name>FirstNameSessionAttribute</param-name>
-            <param-value>FirstName</param-value>
+            <param-name>AttributeMapSessionAttribute</param-name>
+            <param-value>AttributeMap</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
