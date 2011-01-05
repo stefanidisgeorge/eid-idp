@@ -23,6 +23,7 @@ import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.KeyStoreType;
 import org.jboss.ejb3.annotation.LocalBinding;
+import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.Log;
@@ -48,6 +49,14 @@ public class ConfigBean implements Config {
 
     @In
     FacesMessages facesMessages;
+
+    @In(value = "selectedTab", required = false)
+    @Out(value = "selectedTab", required = false, scope = ScopeType.CONVERSATION)
+    private String selectedTab = null;
+
+    enum ConfigurationTab {
+        tab_xkms, tab_pseudonym, tab_network
+    }
 
     private String xkmsUrl;
     private String xkmsAuthTrustDomain;
@@ -93,8 +102,9 @@ public class ConfigBean implements Config {
     }
 
     @Override
-    public String save() {
-        this.log.debug("save");
+    public String saveXkms() {
+
+        this.log.debug("save xkms");
 
         // XKMS Config
         this.configuration.setValue(ConfigProperty.XKMS_URL, this.xkmsUrl);
@@ -103,9 +113,29 @@ public class ConfigBean implements Config {
         this.configuration.setValue(ConfigProperty.XKMS_IDENT_TRUST_DOMAIN,
                 this.xkmsIdentTrustDomain);
 
+        this.selectedTab = ConfigurationTab.tab_xkms.name();
+
+        return "success";
+    }
+
+    @Override
+    public String savePseudonym() {
+
+        this.log.debug("save pseudonym");
+
         // Pseudonym Config
         this.configuration.setValue(ConfigProperty.HMAC_SECRET,
                 this.hmacSecret);
+
+        this.selectedTab = ConfigurationTab.tab_pseudonym.name();
+
+        return "success";
+    }
+
+    @Override
+    public String saveNetwork() {
+
+        this.log.debug("save proxy");
 
         // Proxy Config
         this.configuration.setValue(ConfigProperty.HTTP_PROXY_ENABLED,
@@ -114,6 +144,8 @@ public class ConfigBean implements Config {
                 this.httpProxyHost);
         this.configuration.setValue(ConfigProperty.HTTP_PROXY_PORT,
                 this.httpProxyPort);
+
+        this.selectedTab = ConfigurationTab.tab_network.name();
 
         return "success";
     }
@@ -198,4 +230,15 @@ public class ConfigBean implements Config {
     public void setHttpProxyPort(Integer httpProxyPort) {
         this.httpProxyPort = httpProxyPort;
     }
+
+    @Override
+    public String getSelectedTab() {
+        return this.selectedTab;
+    }
+
+    @Override
+    public void setSelectedTab(String selectedTab) {
+        this.selectedTab = selectedTab;
+    }
+
 }
