@@ -18,7 +18,7 @@
 
 package be.fedict.eid.idp.protocol.ws_federation;
 
-import be.fedict.eid.idp.spi.AttributeConstants;
+import be.fedict.eid.idp.common.AttributeConstants;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import oasis.names.tc.saml._2_0.metadata.*;
@@ -170,7 +170,7 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
         org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory authObjectFactory =
                 new org.oasis_open.docs.wsfed.authorization._200706.ObjectFactory();
 
-        addClaimType("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+        addClaimType(AttributeConstants.NAME_CLAIM_TYPE_URI,
                 "Name", "The name of the Subject.",
                 authObjectFactory, claimTypes);
         addClaimType(AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI,
