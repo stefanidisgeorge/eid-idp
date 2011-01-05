@@ -215,7 +215,11 @@ public abstract class AbstractWSFederationProtocolService implements
         NameIDType issuer = samlObjectFactory.createNameIDType();
 
         KeyStore.PrivateKeyEntry idPIdentity = this.configuration.findIdentity();
-        issuer.setValue(((X509Certificate) idPIdentity.getCertificate()).getSubjectX500Principal().toString());
+        if (null != idPIdentity) {
+            issuer.setValue(((X509Certificate) idPIdentity.getCertificate()).getSubjectX500Principal().toString());
+        } else {
+            issuer.setValue("http://www.e-contract.be/"); // TODO
+        }
         assertion.setIssuer(issuer);
 
         SubjectType subject = samlObjectFactory.createSubjectType();
@@ -359,47 +363,49 @@ public abstract class AbstractWSFederationProtocolService implements
 
         KeyStore.PrivateKeyEntry identity = this.configuration.findIdentity();
 
-        XMLSignatureFactory signatureFactory = XMLSignatureFactory.getInstance(
-                "DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
+        if (null != identity) {
+            XMLSignatureFactory signatureFactory = XMLSignatureFactory.getInstance(
+                    "DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
 
-        XMLSignContext signContext = new DOMSignContext(identity.getPrivateKey(),
-                samlAssertionNode, samlSubjectNode);
-        signContext.putNamespacePrefix(
-                javax.xml.crypto.dsig.XMLSignature.XMLNS, "ds");
-        DigestMethod digestMethod = signatureFactory.newDigestMethod(
-                DigestMethod.SHA1, null);
+            XMLSignContext signContext = new DOMSignContext(identity.getPrivateKey(),
+                    samlAssertionNode, samlSubjectNode);
+            signContext.putNamespacePrefix(
+                    javax.xml.crypto.dsig.XMLSignature.XMLNS, "ds");
+            DigestMethod digestMethod = signatureFactory.newDigestMethod(
+                    DigestMethod.SHA1, null);
 
-        List<Transform> transforms = new LinkedList<Transform>();
-        transforms.add(signatureFactory.newTransform(Transform.ENVELOPED,
-                (TransformParameterSpec) null));
-        Transform exclusiveTransform = signatureFactory
-                .newTransform(CanonicalizationMethod.EXCLUSIVE,
-                        (TransformParameterSpec) null);
-        transforms.add(exclusiveTransform);
+            List<Transform> transforms = new LinkedList<Transform>();
+            transforms.add(signatureFactory.newTransform(Transform.ENVELOPED,
+                    (TransformParameterSpec) null));
+            Transform exclusiveTransform = signatureFactory
+                    .newTransform(CanonicalizationMethod.EXCLUSIVE,
+                            (TransformParameterSpec) null);
+            transforms.add(exclusiveTransform);
 
-        Reference reference = signatureFactory.newReference("#" + assertionId,
-                digestMethod, transforms, null, null);
+            Reference reference = signatureFactory.newReference("#" + assertionId,
+                    digestMethod, transforms, null, null);
 
-        SignatureMethod signatureMethod = signatureFactory.newSignatureMethod(
-                SignatureMethod.RSA_SHA1, null);
-        CanonicalizationMethod canonicalizationMethod = signatureFactory
-                .newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE,
-                        (C14NMethodParameterSpec) null);
-        SignedInfo signedInfo = signatureFactory.newSignedInfo(
-                canonicalizationMethod, signatureMethod, Collections
-                .singletonList(reference));
+            SignatureMethod signatureMethod = signatureFactory.newSignatureMethod(
+                    SignatureMethod.RSA_SHA1, null);
+            CanonicalizationMethod canonicalizationMethod = signatureFactory
+                    .newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE,
+                            (C14NMethodParameterSpec) null);
+            SignedInfo signedInfo = signatureFactory.newSignedInfo(
+                    canonicalizationMethod, signatureMethod, Collections
+                    .singletonList(reference));
 
-        List<Object> keyInfoContent = new LinkedList<Object>();
-        KeyInfoFactory keyInfoFactory = KeyInfoFactory.getInstance();
-        List<Object> x509DataObjects = new LinkedList<Object>();
-        x509DataObjects.add(identity.getCertificate());
-        X509Data x509Data = keyInfoFactory.newX509Data(x509DataObjects);
-        keyInfoContent.add(x509Data);
-        KeyInfo keyInfo = keyInfoFactory.newKeyInfo(keyInfoContent);
+            List<Object> keyInfoContent = new LinkedList<Object>();
+            KeyInfoFactory keyInfoFactory = KeyInfoFactory.getInstance();
+            List<Object> x509DataObjects = new LinkedList<Object>();
+            x509DataObjects.add(identity.getCertificate());
+            X509Data x509Data = keyInfoFactory.newX509Data(x509DataObjects);
+            keyInfoContent.add(x509Data);
+            KeyInfo keyInfo = keyInfoFactory.newKeyInfo(keyInfoContent);
 
-        javax.xml.crypto.dsig.XMLSignature xmlSignature = signatureFactory
-                .newXMLSignature(signedInfo, keyInfo);
-        xmlSignature.sign(signContext);
+            javax.xml.crypto.dsig.XMLSignature xmlSignature = signatureFactory
+                    .newXMLSignature(signedInfo, keyInfo);
+            xmlSignature.sign(signContext);
+        }
     }
 
     @Override
