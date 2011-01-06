@@ -21,7 +21,6 @@ package be.fedict.eid.idp.protocol.saml2;
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.common.AttributeConstants;
-import be.fedict.eid.idp.spi.IdpUtil;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,9 +39,11 @@ import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.x509.BasicX509Credential;
+import org.opensaml.xml.util.Base64;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -113,40 +114,24 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
     private XMLObjectBuilderFactory builderFactory;
 
     private SAMLObjectBuilder<Response> responseBuilder;
-
     private SAMLObjectBuilder<Status> statusBuilder;
-
     private SAMLObjectBuilder<StatusCode> statusCodeBuilder;
-
     private SAMLObjectBuilder<Assertion> assertionBuilder;
-
     private SAMLObjectBuilder<Issuer> issuerBuilder;
-
     private SAMLObjectBuilder<Conditions> conditionsBuilder;
-
     private SAMLObjectBuilder<AudienceRestriction> audienceRestrictionBuilder;
-
     private SAMLObjectBuilder<Audience> audienceBuilder;
-
     private SAMLObjectBuilder<Subject> subjectBuilder;
-
     private SAMLObjectBuilder<NameID> nameIdBuilder;
-
     private SAMLObjectBuilder<SubjectConfirmation> subjectConfirmationBuilder;
-
     private SAMLObjectBuilder<AuthnStatement> authnStatementBuilder;
-
     private SAMLObjectBuilder<SubjectConfirmationData> subjectConfirmationDataBuilder;
-
     private SAMLObjectBuilder<AuthnContext> authnContextBuilder;
-
     private SAMLObjectBuilder<AttributeStatement> attributeStatementBuilder;
-
     private SAMLObjectBuilder<Attribute> attributeBuilder;
-
     private XMLObjectBuilder<XSString> stringBuilder;
-
     private XMLObjectBuilder<XSDateTime> dateBuilder;
+    private XMLObjectBuilder<XSBase64Binary> base64BinaryBuilder;
 
     @SuppressWarnings("unchecked")
     public void init(ServletContext servletContext,
@@ -195,6 +180,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 .getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
         this.stringBuilder = builderFactory.getBuilder(XSString.TYPE_NAME);
         this.dateBuilder = builderFactory.getBuilder(XSDateTime.TYPE_NAME);
+        this.base64BinaryBuilder = builderFactory.getBuilder(XSBase64Binary.TYPE_NAME);
     }
 
     public IdentityProviderFlow handleIncomingRequest(
@@ -236,7 +222,9 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
     public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                String userId,
                                                String givenName, String surName,
-                                               Identity identity, Address address,
+                                               Identity identity,
+                                               Address address,
+                                               byte[] photo,
                                                HttpServletRequest request,
                                                HttpServletResponse response)
             throws Exception {
@@ -348,16 +336,20 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
         if (null != identity) {
 
-            String genderValue = IdpUtil.getGenderValue(identity);
-
             addAttribute(AttributeConstants.GENDER_CLAIM_TYPE_URI,
-                    genderValue, attributeStatement);
+                    IdpUtil.getGenderValue(identity), attributeStatement);
             addAttribute(AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI,
                     identity.getDateOfBirth(), attributeStatement);
             addAttribute(AttributeConstants.NATIONALITY_CLAIM_TYPE_URI,
                     identity.getNationality(), attributeStatement);
             addAttribute(AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI,
                     identity.getPlaceOfBirth(), attributeStatement);
+        }
+
+        if (null != photo) {
+
+            addAttribute(AttributeConstants.PHOTO_CLAIM_TYPE_URI,
+                    photo, attributeStatement);
         }
 
         ReturnResponse returnResponse = new ReturnResponse(targetUrl);
@@ -381,38 +373,50 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         return returnResponse;
     }
 
-    private void addAttribute(String attributeName, Object attributeValue,
+    private void addAttribute(String attributeName, String attributeValue,
                               AttributeStatement attributeStatement) {
+
         List<Attribute> attributes = attributeStatement.getAttributes();
 
-        Attribute nameAttribute = attributeBuilder.buildObject();
+        Attribute attribute = attributeBuilder.buildObject();
+        attribute.setName(attributeName);
+        attributes.add(attribute);
 
-        attributes.add(nameAttribute);
+        XSString xmlAttributeValue = stringBuilder.buildObject(
+                AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+        xmlAttributeValue.setValue(attributeValue);
+        attribute.getAttributeValues().add(xmlAttributeValue);
+    }
 
-        nameAttribute.setName(attributeName);
+    private void addAttribute(String attributeName,
+                              GregorianCalendar attributeValue,
+                              AttributeStatement attributeStatement) {
 
-        if (String.class.isAssignableFrom(attributeValue.getClass())) {
+        List<Attribute> attributes = attributeStatement.getAttributes();
 
-            XSString nameAttributeValue = stringBuilder.buildObject(
-                    AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
-            nameAttributeValue.setValue((String) attributeValue);
-            nameAttribute.getAttributeValues().add(nameAttributeValue);
+        Attribute attribute = attributeBuilder.buildObject();
+        attribute.setName(attributeName);
+        attributes.add(attribute);
 
-        } else if (GregorianCalendar.class.isAssignableFrom(attributeValue.getClass())) {
+        XSDateTime xmlAttributeValue = dateBuilder.buildObject(
+                AttributeValue.DEFAULT_ELEMENT_NAME, XSDateTime.TYPE_NAME);
+        xmlAttributeValue.setValue(new DateTime(attributeValue.getTime()));
+        attribute.getAttributeValues().add(xmlAttributeValue);
+    }
 
-            XSDateTime nameAttributeValue = dateBuilder.buildObject(
-                    AttributeValue.DEFAULT_ELEMENT_NAME, XSDateTime.TYPE_NAME);
-            nameAttributeValue.setValue(new DateTime(((GregorianCalendar) attributeValue).getTime()));
-            nameAttribute.getAttributeValues().add(nameAttributeValue);
+    private void addAttribute(String attributeName, byte[] attributeValue,
+                              AttributeStatement attributeStatement) {
 
-        } else if (Enum.class.isAssignableFrom(attributeValue.getClass())) {
+        List<Attribute> attributes = attributeStatement.getAttributes();
 
-            XSString nameAttributeValue = stringBuilder.buildObject(
-                    AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
-            nameAttributeValue.setValue(((Enum) attributeValue).name());
-            nameAttribute.getAttributeValues().add(nameAttributeValue);
+        Attribute attribute = attributeBuilder.buildObject();
+        attribute.setName(attributeName);
+        attributes.add(attribute);
 
-        }
+        XSBase64Binary xmlAttributeValue = base64BinaryBuilder.buildObject(
+                AttributeValue.DEFAULT_ELEMENT_NAME, XSBase64Binary.TYPE_NAME);
+        xmlAttributeValue.setValue(Base64.encodeBytes(attributeValue));
+        attribute.getAttributeValues().add(xmlAttributeValue);
     }
 
     protected abstract IdentityProviderFlow getAuthenticationFlow();

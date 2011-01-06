@@ -16,6 +16,7 @@
 
 <h1>Authentication Results</h1>
 <p>Results should be displayed here.</p>
+<img src="photo" />
 <table>
 	<tr>
 		<th>Identifier</th>

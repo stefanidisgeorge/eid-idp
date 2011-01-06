@@ -191,7 +191,9 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
     public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                String userId,
                                                String givenName, String surName,
-                                               Identity identity, Address address,
+                                               Identity identity,
+                                               Address address,
+                                               byte[] photo,
                                                HttpServletRequest request,
                                                HttpServletResponse response)
             throws Exception {

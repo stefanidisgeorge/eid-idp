@@ -98,6 +98,7 @@ public class ProtocolExitServlet extends HttpServlet {
                 .getAttribute(AuthenticationDataMessageHandler.AUTHENTICATED_USER_IDENTIFIER_SESSION_ATTRIBUTE);
         X509Certificate authnCertificate =
                 (X509Certificate) httpSession.getAttribute(IdentityDataMessageHandler.AUTHN_CERT_SESSION_ATTRIBUTE);
+        byte[] photo = (byte[]) httpSession.getAttribute(IdentityDataMessageHandler.PHOTO_SESSION_ATTRIBUTE);
 
         String userId;
         String givenName;
@@ -116,7 +117,7 @@ public class ProtocolExitServlet extends HttpServlet {
         ReturnResponse returnResponse;
         try {
             returnResponse = protocolService.handleReturnResponse(httpSession,
-                    userId, givenName, surName, identity, address,
+                    userId, givenName, surName, identity, address, photo,
                     request, response);
         } catch (Exception e) {
             LOG.error("protocol error: " + e.getMessage(), e);
