@@ -21,16 +21,13 @@ package be.fedict.eid.idp.protocol.ws_federation;
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.common.AttributeConstants;
-import be.fedict.eid.idp.spi.IdpUtil;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import be.fedict.eid.idp.spi.*;
 import oasis.names.tc.saml._2_0.assertion.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.utils.Constants;
 import org.apache.xpath.XPathAPI;
+import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.DateTime;
 import org.oasis_open.docs.ws_sx.ws_trust._200512.ObjectFactory;
 import org.oasis_open.docs.ws_sx.ws_trust._200512.RequestSecurityTokenResponseCollectionType;
@@ -141,7 +138,8 @@ public abstract class AbstractWSFederationProtocolService implements
                                                String userId,
                                                String givenName, String surName,
                                                Identity identity, Address address,
-                                               byte[] photo, HttpServletRequest request,
+                                               byte[] photo,
+                                               HttpServletRequest request,
                                                HttpServletResponse response)
             throws Exception {
         LOG.debug("handleReturnResponse");
@@ -152,7 +150,7 @@ public abstract class AbstractWSFederationProtocolService implements
         returnResponse.addAttribute("wctx", wctx);
 
         String wresult = getWResult(wctx, wtrealm, userId, givenName, surName,
-                identity, address);
+                identity, address, photo);
         returnResponse.addAttribute("wresult", wresult);
         return returnResponse;
     }
@@ -161,7 +159,8 @@ public abstract class AbstractWSFederationProtocolService implements
                               String userId,
                               String givenName, String surName,
                               Identity identity,
-                              Address address)
+                              Address address,
+                              byte[] photo)
             throws JAXBException, DatatypeConfigurationException,
             ParserConfigurationException, TransformerException,
             NoSuchAlgorithmException, InvalidAlgorithmParameterException,
@@ -288,6 +287,12 @@ public abstract class AbstractWSFederationProtocolService implements
                     .getMunicipality(), samlObjectFactory, attributes);
             addAttribute(AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI, address
                     .getZip(), samlObjectFactory, attributes);
+        }
+
+        if (null != photo) {
+
+            addAttribute(AttributeConstants.PHOTO_CLAIM_TYPE_URI,
+                    new String(Base64.encode(photo)), samlObjectFactory, attributes);
 
         }
 

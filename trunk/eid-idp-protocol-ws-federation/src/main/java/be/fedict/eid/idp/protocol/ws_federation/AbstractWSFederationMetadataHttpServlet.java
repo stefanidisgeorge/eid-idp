@@ -224,6 +224,12 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
                 "The place of birth of the named object.",
                 authObjectFactory, claimTypes);
 
+        addClaimType(
+                AttributeConstants.PHOTO_CLAIM_TYPE_URI,
+                "Photo",
+                "Base64 encoded photo of the named object.",
+                authObjectFactory, claimTypes);
+
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
                 .newInstance();
         documentBuilderFactory.setNamespaceAware(true);
