@@ -19,8 +19,10 @@
 package be.fedict.eid.idp.sp;
 
 import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.common.OpenIDAXConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.util.encoders.Base64;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
@@ -33,7 +35,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 
 public class PhotoServlet extends HttpServlet {

@@ -77,7 +77,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
-        LOG.debug("doGet");
+        LOG.debug("doGet: size=" + request.getQueryString().length());
         String openIdMode = request.getParameter("openid.mode");
         if ("id_res".equals(openIdMode)) {
             try {
