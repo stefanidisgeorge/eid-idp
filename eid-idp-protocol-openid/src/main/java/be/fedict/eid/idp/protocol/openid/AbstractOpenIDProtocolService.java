@@ -20,10 +20,8 @@ package be.fedict.eid.idp.protocol.openid;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import be.fedict.eid.idp.common.OpenIDAXConstants;
+import be.fedict.eid.idp.spi.*;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +47,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 
 /**
@@ -138,9 +137,8 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
         return getAuthenticationFlow();
     }
 
-    private static final String OPENID_PARAMETER_LIST_SESSION_ATTRIBUTE = AbstractOpenIDProtocolService.class
-            .getName()
-            + ".ParameterList";
+    private static final String OPENID_PARAMETER_LIST_SESSION_ATTRIBUTE =
+            AbstractOpenIDProtocolService.class.getName() + ".ParameterList";
 
     private void storeParameterList(ParameterList parameterList,
                                     HttpSession httpSession) {
@@ -243,37 +241,62 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
 
         if (message instanceof AuthSuccess) {
             AuthSuccess authSuccess = (AuthSuccess) message;
+
+
             if (authRequest.hasExtension(AxMessage.OPENID_NS_AX)) {
+
                 MessageExtension messageExtension = authRequest
                         .getExtension(AxMessage.OPENID_NS_AX);
+
                 if (messageExtension instanceof FetchRequest) {
                     FetchRequest fetchRequest = (FetchRequest) messageExtension;
+
                     Map<String, String> requiredAttributes = fetchRequest
                             .getAttributes(true);
+                    Map<String, String> optionalAttributes = fetchRequest
+                            .getAttributes(false);
+
                     FetchResponse fetchResponse = FetchResponse
                             .createFetchResponse();
+
+                    // required attributes
                     for (Map.Entry<String, String> requiredAttribute : requiredAttributes
                             .entrySet()) {
                         String alias = requiredAttribute.getKey();
                         String typeUri = requiredAttribute.getValue();
-                        LOG.debug("attribute alias: " + alias);
-                        LOG.debug("attribute typeUri: " + typeUri);
-                        if ("http://axschema.org/namePerson/first"
-                                .equals(typeUri)) {
-                            fetchResponse.addAttribute(alias, typeUri, givenName);
-                            continue;
-                        }
-                        if ("http://axschema.org/namePerson/last"
-                                .equals(typeUri)) {
-                            fetchResponse.addAttribute(alias, typeUri, surName);
-                            continue;
+
+                        LOG.debug("required attribute alias: " + alias);
+                        LOG.debug("required attribute typeUri: " + typeUri);
+
+                        String value = findAttribute(typeUri,
+                                givenName, surName, identity, address);
+                        if (null != value) {
+                            fetchResponse.addAttribute(alias, typeUri, value);
                         }
                     }
+
+                    // optional attributes
+                    for (Map.Entry<String, String> optionalAttribute : optionalAttributes
+                            .entrySet()) {
+                        String alias = optionalAttribute.getKey();
+                        String typeUri = optionalAttribute.getValue();
+
+                        LOG.debug("optional attribute alias: " + alias);
+                        LOG.debug("optional attribute typeUri: " + typeUri);
+
+                        String value = findAttribute(typeUri,
+                                givenName, surName, identity, address);
+                        if (null != value) {
+                            fetchResponse.addAttribute(alias, typeUri, value);
+                        }
+                    }
+
                     authSuccess.addExtension(fetchResponse);
                     authSuccess
                             .setSignExtensions(new String[]{AxMessage.OPENID_NS_AX});
                 }
             }
+
             PapeResponse papeResponse = PapeResponse.createPapeResponse();
             papeResponse
                     .setAuthPolicies(PapeResponse.PAPE_POLICY_MULTI_FACTOR_PHYSICAL);
@@ -287,6 +310,51 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
         String destinationUrl = message.getDestinationUrl(true);
         LOG.debug("destination URL: " + destinationUrl);
         response.sendRedirect(destinationUrl);
+        return null;
+    }
+
+    private String findAttribute(String typeUri,
+                                 String givenName, String surName,
+                                 Identity identity, Address address) {
+
+        if (typeUri.equals(OpenIDAXConstants.AX_FIRST_NAME_PERSON_TYPE)) {
+            return givenName;
+        } else if (typeUri.equals(OpenIDAXConstants.AX_LAST_NAME_PERSON_TYPE)) {
+            return surName;
+        } else if (typeUri.equals(OpenIDAXConstants.AX_NAME_PERSON_TYPE)) {
+            return givenName + " " + surName;
+        }
+
+        if (null == identity || null == address) {
+            return null;
+        }
+
+        if (typeUri.equals(OpenIDAXConstants.AX_BIRTHDATE_TYPE)) {
+            return new SimpleDateFormat("yyyy/MM/dd").format(identity.getDateOfBirth().getTime());
+
+        } else if (typeUri.equals(OpenIDAXConstants.AX_GENDER_TYPE)) {
+            return IdpUtil.getGenderValue(identity);
+
+        } else if (typeUri.equals(OpenIDAXConstants.AX_POSTAL_CODE_TYPE)) {
+            return address.getZip();
+
+        } else if (typeUri.equals(OpenIDAXConstants.AX_COUNTRY_TYPE)) {
+            return "BE";
+
+        } else if (typeUri.equals(OpenIDAXConstants.AX_POSTAL_ADDRESS_TYPE)) {
+            return address.getStreetAndNumber();
+
+        } else if (typeUri.equals(OpenIDAXConstants.AX_CITY_TYPE)) {
+            return address.getMunicipality();
+
+        } else if (typeUri.equals(OpenIDAXConstants.AX_NATIONALITY_TYPE)) {
+            return identity.getNationality();
+
+        } else if (typeUri.equals(OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE)) {
+            return identity.getPlaceOfBirth();
+
+        }
+
         return null;
     }
 

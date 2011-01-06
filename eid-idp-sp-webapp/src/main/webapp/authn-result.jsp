@@ -14,7 +14,7 @@
 
 <jsp:setProperty name="attributes" property="session" value="<%= request.getSession() %>"  />
 
-<h1>SAML2 Authentication Protocol Results</h1>
+<h1>Authentication Results</h1>
 <p>Results should be displayed here.</p>
 <table>
 	<tr>

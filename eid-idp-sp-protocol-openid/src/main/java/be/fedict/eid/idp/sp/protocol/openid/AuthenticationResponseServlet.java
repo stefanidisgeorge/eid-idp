@@ -40,6 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthenticationResponseServlet extends HttpServlet {
 
@@ -49,22 +51,17 @@ public class AuthenticationResponseServlet extends HttpServlet {
             .getLog(AuthenticationResponseServlet.class);
 
     private String identifierSessionAttribute;
+    private String attributeMapSessionAttribute;
 
     private String redirectPage;
-
-    private String nameSessionAttribute;
-
-    private String firstNameSessionAttribute;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         this.identifierSessionAttribute = getRequiredInitParameter(
                 "IdentifierSessionAttribute", config);
         this.redirectPage = getRequiredInitParameter("RedirectPage", config);
-        this.nameSessionAttribute = config
-                .getInitParameter("NameSessionAttribute");
-        this.firstNameSessionAttribute = config
-                .getInitParameter("FirstNameSessionAttribute");
+        this.attributeMapSessionAttribute = config
+                .getInitParameter("AttributeMapSessionAttribute");
     }
 
     private String getRequiredInitParameter(String parameterName,
@@ -91,6 +88,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void doIdRes(HttpServletRequest request,
                          HttpServletResponse response) throws MessageException,
             DiscoveryException, AssociationException, IOException {
@@ -121,19 +119,30 @@ public class AuthenticationResponseServlet extends HttpServlet {
             HttpSession httpSession = request.getSession();
             httpSession.setAttribute(this.identifierSessionAttribute, userId);
             Message authResponse = verificationResult.getAuthResponse();
+
             if (authResponse.hasExtension(AxMessage.OPENID_NS_AX)) {
+
                 MessageExtension messageExtension = authResponse
                         .getExtension(AxMessage.OPENID_NS_AX);
                 if (messageExtension instanceof FetchResponse) {
+
+                    Map<String, Object> attributeMap = new HashMap<String, Object>();
+
                     FetchResponse fetchResponse = (FetchResponse) messageExtension;
-                    String firstName = fetchResponse
-                            .getAttributeValueByTypeUri("http://axschema.org/namePerson/first");
-                    httpSession.setAttribute(this.firstNameSessionAttribute,
-                            firstName);
-                    String name = fetchResponse
-                            .getAttributeValueByTypeUri("http://axschema.org/namePerson/last");
-                    httpSession.setAttribute(this.nameSessionAttribute, name);
+
+                    Map<String, String> attributeTypes = fetchResponse.getAttributeTypes();
+                    for (Map.Entry<String, String> entry : attributeTypes.entrySet()) {
+                        attributeMap.put(entry.getValue(),
+                                fetchResponse.getAttributeValue(entry.getKey()));
+                    }
+
+                    if (null != this.attributeMapSessionAttribute) {
+                        httpSession.setAttribute(this.attributeMapSessionAttribute,
+                                attributeMap);
+                    }
+
                 }
+
             }
             response.sendRedirect(request.getContextPath() + this.redirectPage);
         } else {
