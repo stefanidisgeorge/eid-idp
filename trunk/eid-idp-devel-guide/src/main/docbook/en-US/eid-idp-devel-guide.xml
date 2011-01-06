@@ -574,18 +574,10 @@ openid.return_to:https://localhost:48745/consumer
                         </listitem>
                         <listitem>
                             <para>
-                                <code>NameSessionAttribute</code>
-                                HTTP Session attribute on which the returned
-                                subject's name will be pushed after a
-                                successfull authentication.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                <code>FirstNameSessionAttribute</code>
-                                HTTP Session attribute on which the returned
-                                subject's first name will be pushed after a
-                                successfull authentication.
+                                <code>AttributeMapSessionAttribute</code>
+                                HTTP Session attribute on which a Map
+                                containing the returned attributes will be
+                                pushed after a successfull authentiaction.
                             </para>
                         </listitem>
                         <listitem>
@@ -621,12 +613,8 @@ openid.return_to:https://localhost:48745/consumer
             <param-value>/openid-result.jsp</param-value>
         </init-param>
         <init-param>
-            <param-name>NameSessionAttribute</param-name>
-            <param-value>Name</param-value>
-        </init-param>
-        <init-param>
-            <param-name>FirstNameSessionAttribute</param-name>
-            <param-value>FirstName</param-value>
+            <param-name>AttributeMapSessionAttribute</param-name>
+            <param-value>AttributeMap</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
