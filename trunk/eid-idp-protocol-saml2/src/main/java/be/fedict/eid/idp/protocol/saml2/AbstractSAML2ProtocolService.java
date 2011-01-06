@@ -21,10 +21,8 @@ package be.fedict.eid.idp.protocol.saml2;
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.common.AttributeConstants;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import be.fedict.eid.idp.spi.IdpUtil;
+import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -350,18 +348,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
         if (null != identity) {
 
-            String genderValue;
-            switch (identity.getGender()) {
-                case MALE:
-                    genderValue = "1";
-                    break;
-                case FEMALE:
-                    genderValue = "2";
-                    break;
-                default:
-                    genderValue = "0";
-                    break;
-            }
+            String genderValue = IdpUtil.getGenderValue(identity);
 
             addAttribute(AttributeConstants.GENDER_CLAIM_TYPE_URI,
                     genderValue, attributeStatement);
