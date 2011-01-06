@@ -125,6 +125,7 @@
                 <module>eid-idp-tests</module>
                 <module>eid-idp-admin-manual</module>
                 <module>eid-idp-mysql-distribution</module>
+                <module>eid-idp-postgresql-distribution</module>
                 <module>eid-idp-oracle-distribution</module>
                 <module>eid-idp-devel-guide</module>
                 <module>eid-idp-sdk</module>
