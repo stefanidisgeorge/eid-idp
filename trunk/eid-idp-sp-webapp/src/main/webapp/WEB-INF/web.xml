@@ -5,6 +5,16 @@
          version="2.5">
     <display-name>eID IdP SP</display-name>
 
+    <!-- Photo servlet -->
+    <servlet>
+        <servlet-name>PhotoServlet</servlet-name>
+        <servlet-class>be.fedict.eid.idp.sp.PhotoServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PhotoServlet</servlet-name>
+        <url-pattern>/photo</url-pattern>
+    </servlet-mapping>
+
     <!-- SAML2 Authentication Protocol -->
     <servlet>
         <servlet-name>SAML2AuthenticationRequestServlet</servlet-name>

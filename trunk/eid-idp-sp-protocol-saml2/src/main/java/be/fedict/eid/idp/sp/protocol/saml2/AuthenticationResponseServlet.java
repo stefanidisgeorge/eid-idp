@@ -30,9 +30,11 @@ import org.opensaml.saml2.core.*;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.SecurityException;
+import org.opensaml.xml.util.Base64;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -161,6 +163,16 @@ public class AuthenticationResponseServlet extends HttpServlet {
                     attributeMap.put(attributeName,
                             attributeValue.getValue().toDateTime(DateTimeZone.getDefault()));
 
+                } else if (attribute.getAttributeValues().get(0) instanceof XSBase64Binary) {
+
+                    XSBase64Binary attributeValue = (XSBase64Binary) attribute
+                            .getAttributeValues().get(0);
+                    attributeMap.put(attributeName,
+                            Base64.decode(attributeValue.getValue()));
+
+                } else {
+                    throw new ServletException("Unsupported attribute of type: " +
+                            attribute.getAttributeValues().get(0).getClass().getName());
                 }
             }
 

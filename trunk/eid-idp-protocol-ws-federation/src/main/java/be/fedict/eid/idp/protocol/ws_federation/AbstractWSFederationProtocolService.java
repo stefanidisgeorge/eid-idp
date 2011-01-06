@@ -141,7 +141,7 @@ public abstract class AbstractWSFederationProtocolService implements
                                                String userId,
                                                String givenName, String surName,
                                                Identity identity, Address address,
-                                               HttpServletRequest request,
+                                               byte[] photo, HttpServletRequest request,
                                                HttpServletResponse response)
             throws Exception {
         LOG.debug("handleReturnResponse");

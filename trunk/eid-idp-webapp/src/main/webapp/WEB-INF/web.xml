@@ -133,6 +133,10 @@
 			<param-name>IncludeAddress</param-name>
 			<param-value>true</param-value>
 		</init-param>
+        <init-param>
+            <param-name>IncludePhoto</param-name>
+            <param-value>true</param-value>
+        </init-param>
 		<init-param>
 			<param-name>IdentityIntegrityService</param-name>
 			<param-value>be/fedict/eid/idp/IdentityIntegrityServiceBean</param-value>
@@ -187,6 +191,10 @@
 			<param-name>IncludeAddress</param-name>
 			<param-value>true</param-value>
 		</init-param>
+        <init-param>
+            <param-name>IncludePhoto</param-name>
+            <param-value>true</param-value>
+        </init-param>
 		<init-param>
 			<param-name>PreLogoff</param-name>
 			<param-value>true</param-value>

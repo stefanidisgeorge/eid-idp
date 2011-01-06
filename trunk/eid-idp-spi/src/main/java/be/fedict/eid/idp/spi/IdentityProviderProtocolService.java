@@ -70,18 +70,20 @@ public interface IdentityProviderProtocolService {
      *                    else <code>null</code>)
      * @param address     the eID address (in case of an eID identification operation,
      *                    else <code>null</code>)
+     * @param photo       the eID photo (in case of an eID identification operation,
+     *                    else <code>null</code>)
      * @param request     the HTTP request.
-     * @param response    the HTTP response.
-     * @return the response object in case a Browser POST should be constructed.
-     *         <code>null</code> in case this protocol service handles the
-     *         response generation itself.
+     * @param response    the HTTP response.   @return the response object in case a Browser POST should be constructed.
+     *                    <code>null</code> in case this protocol service handles the
+     *                    response generation itself.
      * @throws Exception in case this protocol service cannot construct the outgoing
      *                   response.
+     * @return response
      */
     ReturnResponse handleReturnResponse(HttpSession httpSession, String userId,
                                         String givenName, String surName,
                                         Identity identity, Address address,
-                                        HttpServletRequest request,
+                                        byte[] photo, HttpServletRequest request,
                                         HttpServletResponse response)
             throws Exception;
 }
