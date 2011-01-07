@@ -64,6 +64,8 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
 	private String spDestination;
 
+	private String spDestinationPage;
+
 	private boolean parametersFromRequest;
 
 	private String authenticationRequestService;
@@ -86,21 +88,16 @@ public class AuthenticationRequestServlet extends HttpServlet {
 						"need to provide either IdPDestination or AuthenticationRequestService init-params");
 			}
 
-			this.spDestination = getRequiredInitParameter("SPDestination",
-					config);
+			this.spDestination = config.getInitParameter("SPDestination");
+			this.spDestinationPage = config
+					.getInitParameter("SPDestinationPage");
+			if (null == this.spDestination && null == this.spDestinationPage) {
+				throw new ServletException(
+						"need to provide either SPDestination or SPDestinationPage init-param");
+			}
 		} else {
 			LOG.warn("ParametersFromRequest should not be used for production configurations");
 		}
-	}
-
-	private String getRequiredInitParameter(String parameterName,
-			ServletConfig config) throws ServletException {
-		String value = config.getInitParameter(parameterName);
-		if (null == value) {
-			throw new ServletException(parameterName
-					+ " init-param is required");
-		}
-		return value;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -119,7 +116,14 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			}
 			spDestination = request.getParameter("SPDestination");
 			if (null == spDestination) {
-				throw new ServletException("SPDestination parameter required");
+				if (null == request.getParameter("SPDestinationPage")) {
+					throw new ServletException(
+							"SPDestination or SPDestinationPage parameter required");
+				}
+				spDestination = request.getScheme() + "://"
+						+ request.getServerName() + ":"
+						+ request.getServerPort() + request.getContextPath()
+						+ request.getParameter("SPDestinationPage");
 			}
 		} else {
 			if (null != this.authenticationRequestService) {
@@ -137,8 +141,18 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			} else {
 				idpDestination = this.idpDestination;
 			}
-			spDestination = this.spDestination;
+
+			if (null != this.spDestination) {
+				spDestination = this.spDestination;
+			} else {
+				spDestination = request.getScheme() + "://"
+						+ request.getServerName() + ":"
+						+ request.getServerPort() + request.getContextPath()
+						+ this.spDestinationPage;
+			}
 		}
+		LOG.debug("IdP destination: " + idpDestination);
+		LOG.debug("SP destination: " + spDestination);
 
 		try {
 			DefaultBootstrap.bootstrap();
