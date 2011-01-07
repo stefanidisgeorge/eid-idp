@@ -12,17 +12,25 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, see 
+ * License along with this software; if not, see
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.spi;
+package be.fedict.eid.idp.common;
 
-/**
- * The possible internal flows provided by the eID IdP.
- *
- * @author Frank Cornelis
- */
-public enum IdentityProviderFlow {
-    IDENTIFICATION, AUTHENTICATION, AUTHENTICATION_WITH_IDENTIFICATION
+public enum SamlAuthenticationPolicy {
+
+    IDENTIFICATION("urn:be:fedict:eid:idp:Identification"),
+    AUTHENTICATION("urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI"),
+    AUTHENTICATION_WITH_IDENTIFICATION("urn:be:fedict:eid:idp:AuthenticationWithIdentification");
+
+    private final String uri;
+
+    SamlAuthenticationPolicy(String uri) {
+        this.uri = uri;
+    }
+
+    public String getUri() {
+        return this.uri;
+    }
 }

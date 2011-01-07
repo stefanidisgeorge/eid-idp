@@ -300,8 +300,23 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
             }
 
             PapeResponse papeResponse = PapeResponse.createPapeResponse();
-            papeResponse
-                    .setAuthPolicies(PapeResponse.PAPE_POLICY_MULTI_FACTOR_PHYSICAL);
+
+            switch (getAuthenticationFlow()) {
+
+                case IDENTIFICATION:
+                    papeResponse
+                            .setAuthPolicies(PapeResponse.PAPE_POLICY_PHISHING_RESISTANT);
+                    break;
+                case AUTHENTICATION:
+                    papeResponse
+                            .setAuthPolicies(PapeResponse.PAPE_POLICY_MULTI_FACTOR_PHYSICAL);
+                    break;
+                case AUTHENTICATION_WITH_IDENTIFICATION:
+                    papeResponse.addAuthPolicy(PapeResponse.PAPE_POLICY_PHISHING_RESISTANT);
+                    papeResponse.addAuthPolicy(PapeResponse.PAPE_POLICY_MULTI_FACTOR_PHYSICAL);
+                    break;
+            }
+
             authSuccess.addExtension(papeResponse);
             /*
                 * We manually sign the auth response as we also want to add our own

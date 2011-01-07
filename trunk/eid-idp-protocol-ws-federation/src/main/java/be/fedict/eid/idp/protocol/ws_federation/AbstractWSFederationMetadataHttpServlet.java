@@ -106,6 +106,7 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
             IOException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException, MarshalException,
             XMLSignatureException {
+
         ObjectFactory objectFactory = new ObjectFactory();
         EntityDescriptorType entityDescriptor = objectFactory
                 .createEntityDescriptorType();
@@ -120,6 +121,8 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
 
         org.oasis_open.docs.wsfed.federation._200706.ObjectFactory fedObjectFactory =
                 new org.oasis_open.docs.wsfed.federation._200706.ObjectFactory();
+
+
         SecurityTokenServiceType securityTokenService = fedObjectFactory
                 .createSecurityTokenServiceType();
         List<RoleDescriptorType> roleDescriptors = entityDescriptor
