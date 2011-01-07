@@ -27,6 +27,7 @@
         <module>eid-idp-common</module>
         <module>eid-idp-common-saml2</module>
         <module>eid-idp-spi</module>
+        <module>eid-idp-sp-protocol-saml2-spi</module>
         <module>eid-idp-sp-protocol-saml2</module>
         <module>eid-idp-protocol-saml2</module>
         <module>eid-idp-sp-protocol-openid</module>
