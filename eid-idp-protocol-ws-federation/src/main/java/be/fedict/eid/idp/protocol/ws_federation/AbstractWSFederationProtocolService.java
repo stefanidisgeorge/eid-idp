@@ -20,55 +20,28 @@ package be.fedict.eid.idp.protocol.ws_federation;
 
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.common.AttributeConstants;
-import be.fedict.eid.idp.spi.*;
-import oasis.names.tc.saml._2_0.assertion.*;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.ReturnResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xml.security.utils.Constants;
-import org.apache.xpath.XPathAPI;
-import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.DateTime;
-import org.oasis_open.docs.ws_sx.ws_trust._200512.ObjectFactory;
-import org.oasis_open.docs.ws_sx.ws_trust._200512.RequestSecurityTokenResponseCollectionType;
-import org.oasis_open.docs.ws_sx.ws_trust._200512.RequestSecurityTokenResponseType;
-import org.oasis_open.docs.ws_sx.ws_trust._200512.RequestedSecurityTokenType;
-import org.w3c.dom.Document;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.ws.wstrust.*;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.crypto.MarshalException;
-import javax.xml.crypto.dsig.*;
-import javax.xml.crypto.dsig.dom.DOMSignContext;
-import javax.xml.crypto.dsig.keyinfo.KeyInfo;
-import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
-import javax.xml.crypto.dsig.keyinfo.X509Data;
-import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
-import javax.xml.crypto.dsig.spec.TransformParameterSpec;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.TransformerException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.*;
 
 /**
  * WS-Federation Web (Passive) Requestors. We could use OpenAM (OpenSS0), but
@@ -161,268 +134,72 @@ public abstract class AbstractWSFederationProtocolService implements
                               Identity identity,
                               Address address,
                               byte[] photo)
-            throws JAXBException, DatatypeConfigurationException,
-            ParserConfigurationException, TransformerException,
-            NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            MarshalException, XMLSignatureException,
-            TransformerFactoryConfigurationError, IOException {
-        ObjectFactory trustObjectFactory = new ObjectFactory();
-        RequestSecurityTokenResponseCollectionType requestSecurityTokenResponseCollection = trustObjectFactory
-                .createRequestSecurityTokenResponseCollectionType();
+            throws TransformerException, IOException {
 
-        List<RequestSecurityTokenResponseType> requestSecurityTokenResponses = requestSecurityTokenResponseCollection
-                .getRequestSecurityTokenResponse();
-        RequestSecurityTokenResponseType requestSecurityTokenResponse = trustObjectFactory
-                .createRequestSecurityTokenResponseType();
-        requestSecurityTokenResponses.add(requestSecurityTokenResponse);
+        RequestSecurityTokenResponseCollection requestSecurityTokenResponseCollection =
+                Saml2Util.buildXMLObject(RequestSecurityTokenResponseCollection.class,
+                        RequestSecurityTokenResponseCollection.ELEMENT_NAME);
+
+        RequestSecurityTokenResponse requestSecurityTokenResponse =
+                Saml2Util.buildXMLObject(RequestSecurityTokenResponse.class,
+                        RequestSecurityTokenResponse.ELEMENT_NAME);
+        requestSecurityTokenResponseCollection.getRequestSecurityTokenResponses().
+                add(requestSecurityTokenResponse);
 
         if (null != wctx) {
             requestSecurityTokenResponse.setContext(wctx);
         }
 
-        List<Object> requestSecurityTokenResponseContent = requestSecurityTokenResponse
-                .getAny();
+        TokenType tokenType = Saml2Util.buildXMLObject(TokenType.class,
+                TokenType.ELEMENT_NAME);
+        tokenType.setValue("urn:oasis:names:tc:SAML:2.0:assertion");
 
-        requestSecurityTokenResponseContent.add(trustObjectFactory
-                .createTokenType("urn:oasis:names:tc:SAML:2.0:assertion"));
-        requestSecurityTokenResponseContent
-                .add(trustObjectFactory
-                        .createRequestType("http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue"));
-        requestSecurityTokenResponseContent
-                .add(trustObjectFactory
-                        .createKeyType("http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer"));
+        RequestType requestType = Saml2Util.buildXMLObject(RequestType.class,
+                RequestType.ELEMENT_NAME);
+        requestType.setValue("http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue");
 
-        RequestedSecurityTokenType requestedSecurityToken = trustObjectFactory
-                .createRequestedSecurityTokenType();
-        requestSecurityTokenResponseContent.add(trustObjectFactory
-                .createRequestedSecurityToken(requestedSecurityToken));
+        KeyType keyType = Saml2Util.buildXMLObject(KeyType.class,
+                KeyType.ELEMENT_NAME);
+        keyType.setValue("http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer");
 
-        oasis.names.tc.saml._2_0.assertion.ObjectFactory samlObjectFactory = new oasis.names.tc.saml._2_0.assertion.ObjectFactory();
-        AssertionType assertion = samlObjectFactory.createAssertionType();
-        requestedSecurityToken.setAny(samlObjectFactory
-                .createAssertion(assertion));
+        RequestedSecurityToken requestedSecurityToken =
+                Saml2Util.buildXMLObject(RequestedSecurityToken.class,
+                        RequestedSecurityToken.ELEMENT_NAME);
 
-        AttributeStatementType attributeStatement = samlObjectFactory
-                .createAttributeStatementType();
-        assertion.getStatementOrAuthnStatementOrAuthzDecisionStatement().add(
-                attributeStatement);
-        /*
-           * Maybe we should be using OpenSAML2 here instead of the JAXB binding?
-           */
-        assertion.setVersion("2.0");
-        String assertionId = "saml-" + UUID.randomUUID().toString();
-        assertion.setID(assertionId);
-        DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
+        requestSecurityTokenResponse.getUnknownXMLObjects().add(tokenType);
+        requestSecurityTokenResponse.getUnknownXMLObjects().add(requestType);
+        requestSecurityTokenResponse.getUnknownXMLObjects().add(keyType);
+        requestSecurityTokenResponse.getUnknownXMLObjects().add(requestedSecurityToken);
+
+
         DateTime issueInstantDateTime = new DateTime();
-        GregorianCalendar issueInstantCalendar = issueInstantDateTime
-                .toGregorianCalendar();
-        assertion.setIssueInstant(datatypeFactory
-                .newXMLGregorianCalendar(issueInstantCalendar));
-        NameIDType issuer = samlObjectFactory.createNameIDType();
+        Assertion assertion = Saml2Util.getAssertion(null, wtrealm,
+                issueInstantDateTime, getAuthenticationFlow(), userId,
+                givenName, surName, identity, address, photo);
 
-        KeyStore.PrivateKeyEntry idPIdentity = this.configuration.findIdentity();
-        if (null != idPIdentity) {
-            issuer.setValue(((X509Certificate) idPIdentity.getCertificate()).getSubjectX500Principal().toString());
+        requestedSecurityToken.setUnknownXMLObject(assertion);
+
+        KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
+
+        Element element;
+        if (null != idpIdentity) {
+
+            LOG.debug("sign assertion");
+            element = Saml2Util.signAsElement(requestSecurityTokenResponseCollection,
+                    assertion, (X509Certificate) idpIdentity.getCertificate(),
+                    idpIdentity.getPrivateKey());
         } else {
-            issuer.setValue("http://www.e-contract.be/"); // TODO
+
+            // TODO: explode here? will fail at RP for sure if not signed so ...
+            LOG.warn("assertion NOT signed!");
+            element = Saml2Util.marshall(requestSecurityTokenResponseCollection);
         }
-        assertion.setIssuer(issuer);
-
-        SubjectType subject = samlObjectFactory.createSubjectType();
-        assertion.setSubject(subject);
-        NameIDType nameId = samlObjectFactory.createNameIDType();
-        nameId.setValue(userId);
-        subject.getContent().add(samlObjectFactory.createNameID(nameId));
-
-        SubjectConfirmationType subjectConfirmation = samlObjectFactory
-                .createSubjectConfirmationType();
-        subject.getContent().add(
-                samlObjectFactory
-                        .createSubjectConfirmation(subjectConfirmation));
-        subjectConfirmation.setMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer");
-
-        List<Object> attributes = attributeStatement
-                .getAttributeOrEncryptedAttribute();
-
-        addAttribute(AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI, givenName,
-                samlObjectFactory, attributes);
-        addAttribute(AttributeConstants.LAST_NAME_CLAIM_TYPE_URI, surName,
-                samlObjectFactory, attributes);
-        addAttribute(AttributeConstants.NAME_CLAIM_TYPE_URI,
-                givenName + " " + surName,
-                samlObjectFactory, attributes);
-        addAttribute(AttributeConstants.COUNTRY_CLAIM_TYPE_URI, "BE",
-                samlObjectFactory, attributes);
-
-        if (null != identity) {
-
-            String genderValue = IdpUtil.getGenderValue(identity);
-
-            addAttribute(AttributeConstants.GENDER_CLAIM_TYPE_URI, genderValue,
-                    samlObjectFactory, attributes);
-
-            addAttribute(AttributeConstants.PPID_CLAIM_TYPE_URI,
-                    userId, samlObjectFactory, attributes);
-
-            AttributeType dobAttribute = samlObjectFactory.createAttributeType();
-            attributes.add(dobAttribute);
-            dobAttribute
-                    .setName(AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI);
-            dobAttribute.getAttributeValue().add(
-                    datatypeFactory.newXMLGregorianCalendar(identity
-                            .getDateOfBirth()));
-
-            addAttribute(AttributeConstants.NATIONALITY_CLAIM_TYPE_URI,
-                    identity.getNationality(), samlObjectFactory, attributes);
-            addAttribute(AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI,
-                    identity.getPlaceOfBirth(), samlObjectFactory, attributes);
-
-        }
-
-        if (null != address) {
-
-            addAttribute(AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
-                    address.getStreetAndNumber(), samlObjectFactory, attributes);
-            addAttribute(AttributeConstants.LOCALITY_CLAIM_TYPE_URI, address
-                    .getMunicipality(), samlObjectFactory, attributes);
-            addAttribute(AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI, address
-                    .getZip(), samlObjectFactory, attributes);
-        }
-
-        if (null != photo) {
-
-            addAttribute(AttributeConstants.PHOTO_CLAIM_TYPE_URI,
-                    new String(Base64.encode(photo)), samlObjectFactory, attributes);
-
-        }
-
-        ConditionsType conditions = samlObjectFactory.createConditionsType();
-        assertion.setConditions(conditions);
-        DateTime notBeforeDateTime = issueInstantDateTime;
-        DateTime notAfterDateTime = notBeforeDateTime.plusHours(1);
-        conditions.setNotBefore(datatypeFactory
-                .newXMLGregorianCalendar(notBeforeDateTime
-                        .toGregorianCalendar()));
-        conditions
-                .setNotOnOrAfter(datatypeFactory
-                        .newXMLGregorianCalendar(notAfterDateTime
-                                .toGregorianCalendar()));
-        List<ConditionAbstractType> conditionList = conditions
-                .getConditionOrAudienceRestrictionOrOneTimeUse();
-        AudienceRestrictionType audienceRestriction = samlObjectFactory
-                .createAudienceRestrictionType();
-        audienceRestriction.getAudience().add(wtrealm);
-        conditionList.add(audienceRestriction);
-
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
-                .newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder = documentBuilderFactory
-                .newDocumentBuilder();
-        Document document = documentBuilder.newDocument();
-
-        JAXBContext context = JAXBContext.newInstance(ObjectFactory.class,
-                oasis.names.tc.saml._2_0.assertion.ObjectFactory.class);
-        Marshaller marshaller = context.createMarshaller();
-        marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
-                new WSFederationNamespacePrefixMapper());
-        marshaller
-                .marshal(
-                        trustObjectFactory
-                                .createRequestSecurityTokenResponseCollection(requestSecurityTokenResponseCollection),
-                        document);
-
-        signDocument(document, assertionId);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        writeDocument(document, outputStream);
+        Saml2Util.writeDocument(element.getOwnerDocument(), outputStream);
         return new String(outputStream.toByteArray());
     }
 
-    private void addAttribute(String attributeUri, String attributeValue,
-                              oasis.names.tc.saml._2_0.assertion.ObjectFactory samlObjectFactory,
-                              List<Object> attributes) {
-        AttributeType attribute = samlObjectFactory.createAttributeType();
-        attributes.add(attribute);
-        attribute.setName(attributeUri);
-        attribute.getAttributeValue().add(attributeValue);
-    }
-
-    private void writeDocument(Document document,
-                               OutputStream documentOutputStream)
-            throws TransformerFactoryConfigurationError, TransformerException,
-            IOException {
-        Result result = new StreamResult(documentOutputStream);
-        Transformer xformer = TransformerFactory.newInstance().newTransformer();
-        Source source = new DOMSource(document);
-        xformer.transform(source, result);
-    }
-
-    private void signDocument(Document document, String assertionId)
-            throws TransformerException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException, MarshalException,
-            XMLSignatureException {
-        Element nsElement = document.createElement("ns");
-        nsElement.setAttributeNS(Constants.NamespaceSpecNS, "xmlns:saml",
-                "urn:oasis:names:tc:SAML:2.0:assertion");
-        Node samlAssertionNode = XPathAPI.selectSingleNode(document,
-                "//saml:Assertion", nsElement);
-        if (null == samlAssertionNode) {
-            throw new IllegalStateException(
-                    "saml:Assertion element not present");
-        }
-        Node samlSubjectNode = XPathAPI.selectSingleNode(samlAssertionNode,
-                "saml:Subject", nsElement);
-        if (null == samlSubjectNode) {
-            throw new IllegalStateException("saml:Subject element not present");
-        }
-
-        KeyStore.PrivateKeyEntry identity = this.configuration.findIdentity();
-
-        if (null != identity) {
-            XMLSignatureFactory signatureFactory = XMLSignatureFactory.getInstance(
-                    "DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
-
-            XMLSignContext signContext = new DOMSignContext(identity.getPrivateKey(),
-                    samlAssertionNode, samlSubjectNode);
-            signContext.putNamespacePrefix(
-                    javax.xml.crypto.dsig.XMLSignature.XMLNS, "ds");
-            DigestMethod digestMethod = signatureFactory.newDigestMethod(
-                    DigestMethod.SHA1, null);
-
-            List<Transform> transforms = new LinkedList<Transform>();
-            transforms.add(signatureFactory.newTransform(Transform.ENVELOPED,
-                    (TransformParameterSpec) null));
-            Transform exclusiveTransform = signatureFactory
-                    .newTransform(CanonicalizationMethod.EXCLUSIVE,
-                            (TransformParameterSpec) null);
-            transforms.add(exclusiveTransform);
-
-            Reference reference = signatureFactory.newReference("#" + assertionId,
-                    digestMethod, transforms, null, null);
-
-            SignatureMethod signatureMethod = signatureFactory.newSignatureMethod(
-                    SignatureMethod.RSA_SHA1, null);
-            CanonicalizationMethod canonicalizationMethod = signatureFactory
-                    .newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE,
-                            (C14NMethodParameterSpec) null);
-            SignedInfo signedInfo = signatureFactory.newSignedInfo(
-                    canonicalizationMethod, signatureMethod, Collections
-                    .singletonList(reference));
-
-            List<Object> keyInfoContent = new LinkedList<Object>();
-            KeyInfoFactory keyInfoFactory = KeyInfoFactory.getInstance();
-            List<Object> x509DataObjects = new LinkedList<Object>();
-            x509DataObjects.add(identity.getCertificate());
-            X509Data x509Data = keyInfoFactory.newX509Data(x509DataObjects);
-            keyInfoContent.add(x509Data);
-            KeyInfo keyInfo = keyInfoFactory.newKeyInfo(keyInfoContent);
-
-            javax.xml.crypto.dsig.XMLSignature xmlSignature = signatureFactory
-                    .newXMLSignature(signedInfo, keyInfo);
-            xmlSignature.sign(signContext);
-        }
-    }
 
     @Override
     public void init(ServletContext servletContext,

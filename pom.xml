@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>FedICT eID Identity Provider Project</name>
     <parent>
@@ -21,7 +24,8 @@
         </developerConnection>
     </scm>
     <modules>
-	<module>eid-idp-common</module>
+        <module>eid-idp-common</module>
+        <module>eid-idp-common-saml2</module>
         <module>eid-idp-spi</module>
         <module>eid-idp-sp-protocol-saml2</module>
         <module>eid-idp-protocol-saml2</module>
@@ -186,19 +190,32 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-	<repositories>
-		<repository>
-			<!-- required for jTrust, eID Applet, openid4java -->
-			<id>e-contract.be</id>
-			<url>http://www.e-contract.be/maven2/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <!-- required for eID Applet SQL DDL Plugin -->
+            <id>e-contract.be</id>
+            <url>http://www.e-contract.be/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+    <repositories>
+        <repository>
+            <!-- required for jTrust, eID Applet, openid4java -->
+            <id>e-contract.be</id>
+            <url>http://www.e-contract.be/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <properties>
         <eid-applet.version>1.0.2.Beta3</eid-applet.version>
         <eid-trust-service.version>1.0.0.RC4</eid-trust-service.version>
