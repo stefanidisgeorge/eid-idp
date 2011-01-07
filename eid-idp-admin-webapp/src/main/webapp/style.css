@@ -91,3 +91,7 @@ h3 {
     background:         pink;
     text-align:         center;
 }
+
+.rich-fileupload-list-overflow {
+    height:             50px !important;
+}

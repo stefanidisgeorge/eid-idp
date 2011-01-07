@@ -30,6 +30,8 @@ public interface IdentityService extends IdentityProviderConfiguration {
 
     /**
      * Reload the currently configured identity
+     *
+     * @throws KeyStoreLoadException failed to load keystore
      */
     void reloadIdentity() throws KeyStoreLoadException;
 

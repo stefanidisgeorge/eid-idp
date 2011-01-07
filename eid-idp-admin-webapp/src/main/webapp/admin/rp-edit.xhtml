@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+<body>
+<ui:composition template="/WEB-INF/template.xhtml">
+    <ui:param name="activeMenu" value="rps"/>
+    <ui:define name="body">
+
+        <h2>Relying Party: #{selectedRP.name}</h2>
+
+        <h:form>
+
+            <h:panelGrid id="panel" columns="2" border="0">
+
+                <h:outputLabel for="name" value="Name"/>
+                <s:decorate>
+                    <h:inputText id="name" value="#{selectedRP.name}"/>
+                    <h:message for="name" styleClass="error"/>
+                </s:decorate>
+
+                <h:outputLabel for="domain" value="Domain"/>
+                <s:decorate>
+                    <h:inputText id="domain" value="#{selectedRP.domain}"/>
+                    <h:message for="domain" styleClass="error"/>
+                </s:decorate>
+
+                <h:outputLabel value="Certificate Subject"/>
+                <h:outputLabel value="#{selectedRP.certificateSubject}"/>
+
+                <h:outputLabel for="upload" value="Certificate"/>
+                <rich:fileUpload fileUploadListener="#{idpRP.uploadListener}"
+                                 maxFilesQuantity="1" id="upload"
+                                 immediateUpload="true">
+                </rich:fileUpload>
+
+            </h:panelGrid>
+
+            <h:panelGrid id="panel2" columns="2" border="0">
+
+                <h:commandButton action="#{idpRP.save}"
+                                 id="save" value="Save"/>
+                <h:commandButton action="#{idpRP.back}" id="back" value="Back"
+                                 immediate="true"/>
+            </h:panelGrid>
+
+            <h:messages globalOnly="true" styleClass="error"/>
+
+        </h:form>
+
+        <p>
+            <rich:simpleTogglePanel switchType="client"
+                                    opened="false"
+                                    rendered="#{selectedRP.certificate != null}"
+                                    label="Certificate">
+                <h:outputText id="cert_view" styleClass="text block"
+                              value="#{selectedRP.certificate}"/>
+            </rich:simpleTogglePanel>
+        </p>
+
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>
