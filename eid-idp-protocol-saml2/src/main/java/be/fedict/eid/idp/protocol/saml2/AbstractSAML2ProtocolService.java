@@ -40,16 +40,20 @@ import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.xml.Configuration;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.security.x509.BasicX509Credential;
+import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -59,167 +63,177 @@ import java.util.UUID;
  */
 public abstract class AbstractSAML2ProtocolService implements IdentityProviderProtocolService {
 
-    private static final Log LOG = LogFactory
-            .getLog(AbstractSAML2ProtocolService.class);
+        private static final Log LOG = LogFactory
+                .getLog(AbstractSAML2ProtocolService.class);
 
-    private IdentityProviderConfiguration configuration;
+        private IdentityProviderConfiguration configuration;
 
-    public static final String TARGET_URL_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
-            .getName()
-            + ".TargetUrl";
+        public static final String TARGET_URL_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
+                .getName()
+                + ".TargetUrl";
 
-    public static final String RELAY_STATE_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
-            .getName()
-            + ".RelayState";
+        public static final String RELAY_STATE_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
+                .getName()
+                + ".RelayState";
 
-    public static final String IN_RESPONSE_TO_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
-            .getName()
-            + ".InResponseTo";
+        public static final String IN_RESPONSE_TO_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
+                .getName()
+                + ".InResponseTo";
 
-    private void setTargetUrl(String targetUrl, HttpServletRequest request) {
-        HttpSession httpSession = request.getSession();
-        httpSession.setAttribute(TARGET_URL_SESSION_ATTRIBUTE, targetUrl);
-    }
-
-    private String getTargetUrl(HttpSession httpSession) {
-        return (String) httpSession
-                .getAttribute(TARGET_URL_SESSION_ATTRIBUTE);
-    }
-
-    private void setInResponseTo(String inResponseTo, HttpServletRequest request) {
-        HttpSession httpSession = request.getSession();
-        httpSession
-                .setAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE, inResponseTo);
-    }
-
-    private String getInResponseTo(HttpSession httpSession) {
-        return (String) httpSession
-                .getAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE);
-    }
-
-    private void setRelayState(String relayState, HttpServletRequest request) {
-        HttpSession httpSession = request.getSession();
-        httpSession.setAttribute(RELAY_STATE_SESSION_ATTRIBUTE, relayState);
-    }
-
-    private String getRelayState(HttpSession httpSession) {
-        return (String) httpSession
-                .getAttribute(RELAY_STATE_SESSION_ATTRIBUTE);
-    }
-
-    @SuppressWarnings("unchecked")
-    public void init(ServletContext servletContext,
-                     IdentityProviderConfiguration configuration) {
-        LOG.debug("init");
-        this.configuration = configuration;
-
-        try {
-            DefaultBootstrap.bootstrap();
-        } catch (ConfigurationException e) {
-            throw new RuntimeException("OpenSAML configuration error: "
-                    + e.getMessage(), e);
-        }
-    }
-
-    public IdentityProviderFlow handleIncomingRequest(
-            HttpServletRequest request, HttpServletResponse response)
-            throws Exception {
-        LOG.debug("handling incoming request");
-
-        BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
-                new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
-        messageContext
-                .setInboundMessageTransport(new HttpServletRequestAdapter(
-                        request));
-
-        SAMLMessageDecoder decoder = new HTTPPostDecoder();
-        decoder.decode(messageContext);
-
-        SAMLObject samlObject = messageContext.getInboundSAMLMessage();
-        LOG.debug("SAML object class: " + samlObject.getClass().getName());
-        if (!(samlObject instanceof AuthnRequest)) {
-            throw new IllegalArgumentException(
-                    "expected a SAML2 AuthnRequest document");
-        }
-        AuthnRequest authnRequest = (AuthnRequest) samlObject;
-        String targetUrl = authnRequest.getAssertionConsumerServiceURL();
-        LOG.debug("target URL: " + targetUrl);
-        setTargetUrl(targetUrl, request);
-
-        String relayState = messageContext.getRelayState();
-        setRelayState(relayState, request);
-
-        String inResponseTo = authnRequest.getID();
-        setInResponseTo(inResponseTo, request);
-
-        return getAuthenticationFlow();
-
-    }
-
-    @SuppressWarnings("unchecked")
-    public ReturnResponse handleReturnResponse(HttpSession httpSession,
-                                               String userId,
-                                               String givenName, String surName,
-                                               Identity identity,
-                                               Address address,
-                                               byte[] photo,
-                                               HttpServletRequest request,
-                                               HttpServletResponse response)
-            throws Exception {
-        LOG.debug("handle return response");
-        LOG.debug("userId: " + userId);
-        String targetUrl = getTargetUrl(httpSession);
-        String relayState = getRelayState(httpSession);
-        String inResponseTo = getInResponseTo(httpSession);
-
-        try {
-            DefaultBootstrap.bootstrap();
-        } catch (ConfigurationException e) {
-            throw new ServletException("opensaml config error: "
-                    + e.getMessage(), e);
+        private void setTargetUrl(String targetUrl, HttpServletRequest request) {
+                HttpSession httpSession = request.getSession();
+                httpSession.setAttribute(TARGET_URL_SESSION_ATTRIBUTE, targetUrl);
         }
 
-        Response samlResponse = Saml2Util.buildXMLObject(Response.class,
-                Response.DEFAULT_ELEMENT_NAME);
-        DateTime issueInstant = new DateTime();
-        samlResponse.setIssueInstant(issueInstant);
-        samlResponse.setVersion(SAMLVersion.VERSION_20);
-        samlResponse.setDestination(targetUrl);
-        String samlResponseId = "saml-response-" + UUID.randomUUID().toString();
-        samlResponse.setID(samlResponseId);
-
-        Status status = Saml2Util.buildXMLObject(Status.class,
-                Status.DEFAULT_ELEMENT_NAME);
-        samlResponse.setStatus(status);
-        StatusCode statusCode = Saml2Util.buildXMLObject(StatusCode.class,
-                StatusCode.DEFAULT_ELEMENT_NAME);
-        status.setStatusCode(statusCode);
-        statusCode.setValue(StatusCode.SUCCESS_URI);
-
-        samlResponse.getAssertions().add(Saml2Util.getAssertion(inResponseTo,
-                targetUrl, issueInstant, getAuthenticationFlow(),
-                userId, givenName, surName, identity, address, photo));
-
-        ReturnResponse returnResponse = new ReturnResponse(targetUrl);
-
-        HTTPPostEncoder messageEncoder = new HTTPPostEncoder();
-        BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
-        messageContext.setOutboundSAMLMessage(samlResponse);
-        messageContext.setRelayState(relayState);
-
-        KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
-        if (null != idpIdentity) {
-            BasicX509Credential credential = new BasicX509Credential();
-            credential.setPrivateKey(idpIdentity.getPrivateKey());
-            credential.setEntityCertificate((X509Certificate) idpIdentity.getCertificate());
-            messageContext.setOutboundSAMLMessageSigningCredential(credential);
+        private String getTargetUrl(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(TARGET_URL_SESSION_ATTRIBUTE);
         }
-        OutTransport outTransport = new HTTPOutTransport(returnResponse);
-        messageContext.setOutboundMessageTransport(outTransport);
 
-        messageEncoder.encode(messageContext);
-        return returnResponse;
-    }
+        private void setInResponseTo(String inResponseTo, HttpServletRequest request) {
+                HttpSession httpSession = request.getSession();
+                httpSession
+                        .setAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE, inResponseTo);
+        }
 
-    protected abstract IdentityProviderFlow getAuthenticationFlow();
+        private String getInResponseTo(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE);
+        }
+
+        private void setRelayState(String relayState, HttpServletRequest request) {
+                HttpSession httpSession = request.getSession();
+                httpSession.setAttribute(RELAY_STATE_SESSION_ATTRIBUTE, relayState);
+        }
+
+        private String getRelayState(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(RELAY_STATE_SESSION_ATTRIBUTE);
+        }
+
+        @SuppressWarnings("unchecked")
+        public void init(ServletContext servletContext,
+                         IdentityProviderConfiguration configuration) {
+                LOG.debug("init");
+                this.configuration = configuration;
+
+                try {
+                        DefaultBootstrap.bootstrap();
+
+                } catch (ConfigurationException e) {
+                        throw new RuntimeException("OpenSAML configuration error: "
+                                + e.getMessage(), e);
+                }
+        }
+
+        public IdentityProviderFlow handleIncomingRequest(
+                HttpServletRequest request, HttpServletResponse response)
+                throws Exception {
+                LOG.debug("handling incoming request");
+
+                BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
+                        new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
+                messageContext
+                        .setInboundMessageTransport(new HttpServletRequestAdapter(
+                                request));
+
+                SAMLMessageDecoder decoder = new HTTPPostDecoder();
+                decoder.decode(messageContext);
+
+                SAMLObject samlObject = messageContext.getInboundSAMLMessage();
+                LOG.debug("SAML object class: " + samlObject.getClass().getName());
+                if (!(samlObject instanceof AuthnRequest)) {
+                        throw new IllegalArgumentException(
+                                "expected a SAML2 AuthnRequest document");
+                }
+                AuthnRequest authnRequest = (AuthnRequest) samlObject;
+                String targetUrl = authnRequest.getAssertionConsumerServiceURL();
+                LOG.debug("target URL: " + targetUrl);
+                setTargetUrl(targetUrl, request);
+
+                String relayState = messageContext.getRelayState();
+                setRelayState(relayState, request);
+
+                String inResponseTo = authnRequest.getID();
+                setInResponseTo(inResponseTo, request);
+
+                return getAuthenticationFlow();
+
+        }
+
+        @SuppressWarnings("unchecked")
+        public ReturnResponse handleReturnResponse(HttpSession httpSession,
+                                                   String userId,
+                                                   String givenName, String surName,
+                                                   Identity identity,
+                                                   Address address,
+                                                   byte[] photo,
+                                                   HttpServletRequest request,
+                                                   HttpServletResponse response)
+                throws Exception {
+                LOG.debug("handle return response");
+                LOG.debug("userId: " + userId);
+                String targetUrl = getTargetUrl(httpSession);
+                String relayState = getRelayState(httpSession);
+                String inResponseTo = getInResponseTo(httpSession);
+
+                Response samlResponse = Saml2Util.buildXMLObject(Response.class,
+                        Response.DEFAULT_ELEMENT_NAME);
+                DateTime issueInstant = new DateTime();
+                samlResponse.setIssueInstant(issueInstant);
+                samlResponse.setVersion(SAMLVersion.VERSION_20);
+                samlResponse.setDestination(targetUrl);
+                String samlResponseId = "saml-response-" + UUID.randomUUID().toString();
+                samlResponse.setID(samlResponseId);
+
+                Status status = Saml2Util.buildXMLObject(Status.class,
+                        Status.DEFAULT_ELEMENT_NAME);
+                samlResponse.setStatus(status);
+                StatusCode statusCode = Saml2Util.buildXMLObject(StatusCode.class,
+                        StatusCode.DEFAULT_ELEMENT_NAME);
+                status.setStatusCode(statusCode);
+                statusCode.setValue(StatusCode.SUCCESS_URI);
+
+                samlResponse.getAssertions().add(Saml2Util.getAssertion(inResponseTo,
+                        targetUrl, issueInstant, getAuthenticationFlow(),
+                        userId, givenName, surName, identity, address, photo));
+
+                ReturnResponse returnResponse = new ReturnResponse(targetUrl);
+
+                HTTPPostEncoder messageEncoder = new HTTPPostEncoder();
+                BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
+                messageContext.setOutboundSAMLMessage(samlResponse);
+                messageContext.setRelayState(relayState);
+
+                KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
+                if (null != idpIdentity) {
+
+                        List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+                        for (Certificate certificate : idpIdentity.getCertificateChain()) {
+                                certChain.add((X509Certificate) certificate);
+                        }
+                        LOG.debug("certChain size: " + certChain.size());
+
+
+                        BasicX509Credential credential = new BasicX509Credential();
+                        credential.setPrivateKey(idpIdentity.getPrivateKey());
+                        credential.setEntityCertificateChain(certChain);
+
+                        // set emit cert. chain to true
+                        X509KeyInfoGeneratorFactory factory =
+                                (X509KeyInfoGeneratorFactory) Configuration.getGlobalSecurityConfiguration().
+                                        getKeyInfoGeneratorManager().getDefaultManager().
+                                        getFactory(credential);
+                        factory.setEmitEntityCertificateChain(true);
+
+                        messageContext.setOutboundSAMLMessageSigningCredential(credential);
+                }
+                OutTransport outTransport = new HTTPOutTransport(returnResponse);
+                messageContext.setOutboundMessageTransport(outTransport);
+
+                messageEncoder.encode(messageContext);
+                return returnResponse;
+        }
+
+        protected abstract IdentityProviderFlow getAuthenticationFlow();
 }
