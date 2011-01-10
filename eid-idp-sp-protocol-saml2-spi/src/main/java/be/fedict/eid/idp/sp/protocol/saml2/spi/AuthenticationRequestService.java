@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.spi;
 
+import java.util.Map;
+
 /**
  * SPI for authentication request services. Using an authentication request
  * service allows for run-time configuration of the
@@ -34,4 +36,15 @@ public interface AuthenticationRequestService {
 	 * @return
 	 */
 	String getIdPDestination();
+
+	/**
+	 * Gives back the relay state to be used towards the eID IdP SAML2 protocol
+	 * entry point.
+	 * 
+	 * @param parameterMap
+	 *            the HTTP parameter map.
+	 * 
+	 * @return
+	 */
+	String getRelayState(Map<String, String[]> parameterMap);
 }

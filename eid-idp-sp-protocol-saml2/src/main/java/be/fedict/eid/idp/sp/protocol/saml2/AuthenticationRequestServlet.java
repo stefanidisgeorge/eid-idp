@@ -18,6 +18,18 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.UUID;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
@@ -42,16 +54,6 @@ import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.UUID;
 
 public class AuthenticationRequestServlet extends HttpServlet {
 
@@ -108,6 +110,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
 		String idpDestination;
 		String spDestination;
+		String relayState;
 		if (this.parametersFromRequest) {
 			LOG.warn("Retrieving parameters from the request. Only use for debugging!");
 			idpDestination = request.getParameter("IdPDestination");
@@ -125,6 +128,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 						+ request.getServerPort() + request.getContextPath()
 						+ request.getParameter("SPDestinationPage");
 			}
+			relayState = null;
 		} else {
 			if (null != this.authenticationRequestService) {
 				AuthenticationRequestService service;
@@ -138,8 +142,10 @@ public class AuthenticationRequestServlet extends HttpServlet {
 									+ e.getMessage(), e);
 				}
 				idpDestination = service.getIdPDestination();
+				relayState = service.getRelayState(request.getParameterMap());
 			} else {
 				idpDestination = this.idpDestination;
+				relayState = null;
 			}
 
 			if (null != this.spDestination) {
@@ -153,6 +159,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		}
 		LOG.debug("IdP destination: " + idpDestination);
 		LOG.debug("SP destination: " + spDestination);
+		LOG.debug("relay state: " + relayState);
 
 		try {
 			DefaultBootstrap.bootstrap();
@@ -194,6 +201,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		messageContext.setOutboundMessageTransport(outTransport);
 		messageContext.setPeerEntityEndpoint(samlEndpoint);
 		messageContext.setOutboundSAMLMessage(authnRequest);
+		messageContext.setRelayState(relayState);
 
 		VelocityEngine velocityEngine = new VelocityEngine();
 		velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
