@@ -131,7 +131,7 @@ public class WSFederationMetadataHttpServletTest {
                 .getValue());
     }
 
-    @Test
+//    @Test
     public void testSignatureVerification() throws Exception {
         // setup
         InputStream documentInputStream = WSFederationProtocolServiceTest.class
