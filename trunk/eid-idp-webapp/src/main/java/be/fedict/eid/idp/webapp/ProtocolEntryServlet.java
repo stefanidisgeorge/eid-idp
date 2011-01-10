@@ -117,8 +117,8 @@ public class ProtocolEntryServlet extends HttpServlet {
                 config, "AuthenticationWithIdentificationPage");
 
         /*
-           * Initialize the protocol services.
-           */
+         * Initialize the protocol services.
+         */
         ServletContext servletContext = config.getServletContext();
         if (null == findProtocolServices(servletContext)) {
             Map<String, IdentityProviderProtocolService> protocolServices = new HashMap<String, IdentityProviderProtocolService>();
