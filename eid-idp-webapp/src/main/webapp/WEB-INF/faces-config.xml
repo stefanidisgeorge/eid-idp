@@ -11,6 +11,7 @@
 
 	<lifecycle>
 		<phase-listener>be.fedict.eid.idp.webapp.CacheControlPhaseListener</phase-listener>
+        <phase-listener>be.fedict.eid.idp.webapp.SessionCleanupPhaseListener</phase-listener>
 	</lifecycle>
 
 </faces-config>

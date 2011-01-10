@@ -142,7 +142,13 @@ public class ProtocolExitServlet extends HttpServlet {
                     returnResponse.getAttributes());
             response.sendRedirect(request.getContextPath()
                     + this.protocolResponsePostPageInitParam);
+            return;
         }
+
+        /*
+        * Clean-up the session here as it is no longer used after this point.
+        */
+        httpSession.invalidate();
     }
 
     private static String getGivenName(X509Certificate authnCertificate) {
