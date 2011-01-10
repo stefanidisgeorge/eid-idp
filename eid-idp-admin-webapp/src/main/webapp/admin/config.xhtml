@@ -19,7 +19,7 @@
                 <rich:tab name="tab_xkms" label="PKI validation">
                     <h:panelGrid columns="2">
                         <h:outputText value="eID Trust Service XKMS2 URL:"/>
-                        <h:inputText value="#{idpConfig.xkmsUrl}" size="30"/>
+                        <h:inputText value="#{idpConfig.xkmsUrl}" size="50"/>
 
                         <h:outputText value="eID Trust Service Authentication Trust Domain:"/>
                         <h:inputText value="#{idpConfig.xkmsAuthTrustDomain}"/>
@@ -47,7 +47,7 @@
 
                         <h:outputText value="HTTP Proxy Host: "/>
                         <h:inputText value="#{idpConfig.httpProxyHost}"
-                                     size="30"/>
+                                     size="50"/>
 
                         <h:outputText value="HTTP Proxy Port: "/>
                         <h:inputText value="#{idpConfig.httpProxyPort}"
