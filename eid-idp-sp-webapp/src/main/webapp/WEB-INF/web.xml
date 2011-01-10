@@ -5,6 +5,10 @@
          version="2.5">
     <display-name>eID IdP SP</display-name>
 
+    <listener>
+        <listener-class>be.fedict.eid.idp.sp.StartupServletContextListener</listener-class>
+    </listener>
+
     <!-- Photo servlet -->
     <servlet>
         <servlet-name>PhotoServlet</servlet-name>
@@ -47,6 +51,10 @@
         <init-param>
             <param-name>AttributeMapSessionAttribute</param-name>
             <param-value>AttributeMap</param-value>
+        </init-param>
+        <init-param>
+            <param-name>AuthenticationResponseService</param-name>
+            <param-value>be/fedict/eid/idp/sp/AuthenticationResponseServiceBean</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
