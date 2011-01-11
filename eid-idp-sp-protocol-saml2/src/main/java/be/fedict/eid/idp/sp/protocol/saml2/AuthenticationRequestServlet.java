@@ -18,18 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.UUID;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
@@ -52,179 +41,196 @@ import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.security.x509.BasicX509Credential;
+import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 public class AuthenticationRequestServlet extends HttpServlet {
 
-	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-	private static final Log LOG = LogFactory
-			.getLog(AuthenticationRequestServlet.class);
+        private static final Log LOG = LogFactory
+                .getLog(AuthenticationRequestServlet.class);
 
-	private String idpDestination;
+        private String idpDestination;
 
-	private String spDestination;
+        private String spDestination;
 
-	private String spDestinationPage;
+        private String spDestinationPage;
 
-	private boolean parametersFromRequest;
+        private String authenticationRequestService;
 
-	private String authenticationRequestService;
+        @Override
+        public void init(ServletConfig config) throws ServletException {
+                this.idpDestination = config.getInitParameter("IdPDestination");
+                this.authenticationRequestService = config
+                        .getInitParameter("AuthenticationRequestService");
+                if (null == this.idpDestination
+                        && null == this.authenticationRequestService) {
+                        throw new ServletException(
+                                "need to provide either IdPDestination or " +
+                                        "AuthenticationRequestService init-params");
+                }
 
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-		String parametersFromRequest = config
-				.getInitParameter("ParametersFromRequest");
-		if (null != parametersFromRequest) {
-			this.parametersFromRequest = Boolean
-					.parseBoolean(parametersFromRequest);
-		}
-		if (!this.parametersFromRequest) {
-			this.idpDestination = config.getInitParameter("IdPDestination");
-			this.authenticationRequestService = config
-					.getInitParameter("AuthenticationRequestService");
-			if (null == this.idpDestination
-					&& null == this.authenticationRequestService) {
-				throw new ServletException(
-						"need to provide either IdPDestination or AuthenticationRequestService init-params");
-			}
+                this.spDestination = config.getInitParameter("SPDestination");
+                this.spDestinationPage = config
+                        .getInitParameter("SPDestinationPage");
+                if (null == this.spDestination && null == this.spDestinationPage) {
+                        throw new ServletException(
+                                "need to provide either SPDestination or " +
+                                        "SPDestinationPage init-param");
+                }
+        }
 
-			this.spDestination = config.getInitParameter("SPDestination");
-			this.spDestinationPage = config
-					.getInitParameter("SPDestinationPage");
-			if (null == this.spDestination && null == this.spDestinationPage) {
-				throw new ServletException(
-						"need to provide either SPDestination or SPDestinationPage init-param");
-			}
-		} else {
-			LOG.warn("ParametersFromRequest should not be used for production configurations");
-		}
-	}
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void doGet(HttpServletRequest request,
+                             HttpServletResponse response) throws ServletException, IOException {
+                LOG.debug("doGet");
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
-		LOG.debug("doGet");
+                String idpDestination;
+                String spDestination;
+                String relayState;
+                KeyStore.PrivateKeyEntry spIdentity = null;
 
-		String idpDestination;
-		String spDestination;
-		String relayState;
-		if (this.parametersFromRequest) {
-			LOG.warn("Retrieving parameters from the request. Only use for debugging!");
-			idpDestination = request.getParameter("IdPDestination");
-			if (null == idpDestination) {
-				throw new ServletException("IdPDestination parameter required");
-			}
-			spDestination = request.getParameter("SPDestination");
-			if (null == spDestination) {
-				if (null == request.getParameter("SPDestinationPage")) {
-					throw new ServletException(
-							"SPDestination or SPDestinationPage parameter required");
-				}
-				spDestination = request.getScheme() + "://"
-						+ request.getServerName() + ":"
-						+ request.getServerPort() + request.getContextPath()
-						+ request.getParameter("SPDestinationPage");
-			}
-			relayState = null;
-		} else {
-			if (null != this.authenticationRequestService) {
-				AuthenticationRequestService service;
-				try {
-					InitialContext initialContext = new InitialContext();
-					service = (AuthenticationRequestService) initialContext
-							.lookup(this.authenticationRequestService);
-				} catch (NamingException e) {
-					throw new ServletException(
-							"error locating AuthenticationRequestService: "
-									+ e.getMessage(), e);
-				}
-				idpDestination = service.getIdPDestination();
-				relayState = service.getRelayState(request.getParameterMap());
-			} else {
-				idpDestination = this.idpDestination;
-				relayState = null;
-			}
+                if (null != this.authenticationRequestService) {
+                        AuthenticationRequestService service;
+                        try {
+                                InitialContext initialContext = new InitialContext();
+                                service = (AuthenticationRequestService) initialContext
+                                        .lookup(this.authenticationRequestService);
+                        } catch (NamingException e) {
+                                throw new ServletException(
+                                        "error locating AuthenticationRequestService: "
+                                                + e.getMessage(), e);
+                        }
+                        idpDestination = service.getIdPDestination();
+                        relayState = service.getRelayState(request.getParameterMap());
+                        spIdentity = service.getSPIdentity();
+                } else {
+                        idpDestination = this.idpDestination;
+                        relayState = null;
+                }
 
-			if (null != this.spDestination) {
-				spDestination = this.spDestination;
-			} else {
-				spDestination = request.getScheme() + "://"
-						+ request.getServerName() + ":"
-						+ request.getServerPort() + request.getContextPath()
-						+ this.spDestinationPage;
-			}
-		}
-		LOG.debug("IdP destination: " + idpDestination);
-		LOG.debug("SP destination: " + spDestination);
-		LOG.debug("relay state: " + relayState);
+                if (null != this.spDestination) {
+                        spDestination = this.spDestination;
+                } else {
+                        spDestination = request.getScheme() + "://"
+                                + request.getServerName() + ":"
+                                + request.getServerPort() + request.getContextPath()
+                                + this.spDestinationPage;
+                }
 
-		try {
-			DefaultBootstrap.bootstrap();
-		} catch (ConfigurationException e) {
-			throw new ServletException("opensaml config error: "
-					+ e.getMessage(), e);
-		}
+                if (null == idpDestination) {
+                        throw new ServletException("No IdP Destination specified");
+                }
 
-		XMLObjectBuilderFactory builderFactory = Configuration
-				.getBuilderFactory();
+                LOG.debug("IdP destination: " + idpDestination);
+                LOG.debug("SP destination: " + spDestination);
+                LOG.debug("relay state: " + relayState);
+                LOG.debug("SP identity: " + spIdentity);
 
-		SAMLObjectBuilder<AuthnRequest> requestBuilder = (SAMLObjectBuilder<AuthnRequest>) builderFactory
-				.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
-		AuthnRequest authnRequest = requestBuilder.buildObject();
-		authnRequest.setID("authn-request-" + UUID.randomUUID().toString());
-		authnRequest.setVersion(SAMLVersion.VERSION_20);
-		authnRequest.setIssueInstant(new DateTime(0));
-		authnRequest.setDestination(idpDestination);
-		authnRequest.setAssertionConsumerServiceURL(spDestination);
-		authnRequest.setForceAuthn(true);
-		authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+                try {
+                        DefaultBootstrap.bootstrap();
+                } catch (ConfigurationException e) {
+                        throw new ServletException("opensaml config error: "
+                                + e.getMessage(), e);
+                }
 
-		SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory
-				.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
-		Issuer issuer = issuerBuilder.buildObject();
-		issuer.setValue(spDestination);
-		authnRequest.setIssuer(issuer);
+                XMLObjectBuilderFactory builderFactory = Configuration
+                        .getBuilderFactory();
 
-		SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
-				.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
-		Endpoint samlEndpoint = endpointBuilder.buildObject();
-		samlEndpoint.setLocation(idpDestination);
-		samlEndpoint.setResponseLocation(spDestination);
+                SAMLObjectBuilder<AuthnRequest> requestBuilder = (SAMLObjectBuilder<AuthnRequest>) builderFactory
+                        .getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
+                AuthnRequest authnRequest = requestBuilder.buildObject();
+                authnRequest.setID("authn-request-" + UUID.randomUUID().toString());
+                authnRequest.setVersion(SAMLVersion.VERSION_20);
+                authnRequest.setIssueInstant(new DateTime(0));
+                authnRequest.setDestination(idpDestination);
+                authnRequest.setAssertionConsumerServiceURL(spDestination);
+                authnRequest.setForceAuthn(true);
+                authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
 
-		OutTransport outTransport = new HttpServletResponseAdapter(response,
-				true);
+                SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory
+                        .getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
+                Issuer issuer = issuerBuilder.buildObject();
+                issuer.setValue(spDestination);
+                authnRequest.setIssuer(issuer);
 
-		BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
-		messageContext.setOutboundMessageTransport(outTransport);
-		messageContext.setPeerEntityEndpoint(samlEndpoint);
-		messageContext.setOutboundSAMLMessage(authnRequest);
-		messageContext.setRelayState(relayState);
+                SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
+                        .getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
+                Endpoint samlEndpoint = endpointBuilder.buildObject();
+                samlEndpoint.setLocation(idpDestination);
+                samlEndpoint.setResponseLocation(spDestination);
 
-		VelocityEngine velocityEngine = new VelocityEngine();
-		velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
-				"classpath");
-		velocityEngine
-				.setProperty("classpath.resource.loader.class",
-						"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-		velocityEngine.setProperty(
-				RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-				Log4JLogChute.class.getName());
-		try {
-			velocityEngine.init();
-		} catch (Exception e) {
-			throw new ServletException("velocity engine init error: "
-					+ e.getMessage(), e);
-		}
-		HTTPPostEncoder encoder = new HTTPPostEncoder(velocityEngine,
-				"/templates/saml2-post-binding.vm");
-		try {
-			encoder.encode(messageContext);
-		} catch (MessageEncodingException e) {
-			throw new ServletException(
-					"SAML encoding error: " + e.getMessage(), e);
-		}
-	}
+                OutTransport outTransport = new HttpServletResponseAdapter(response,
+                        true);
+
+                BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
+                messageContext.setOutboundMessageTransport(outTransport);
+                messageContext.setPeerEntityEndpoint(samlEndpoint);
+                messageContext.setOutboundSAMLMessage(authnRequest);
+                messageContext.setRelayState(relayState);
+
+                // sign request if a SP identity is specified
+                if (null != spIdentity) {
+
+                        List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+                        for (Certificate certificate : spIdentity.getCertificateChain()) {
+                                certChain.add((X509Certificate) certificate);
+                        }
+
+                        BasicX509Credential credential = new BasicX509Credential();
+                        credential.setPrivateKey(spIdentity.getPrivateKey());
+                        credential.setEntityCertificateChain(certChain);
+
+                        // set emit cert. chain to true
+                        X509KeyInfoGeneratorFactory factory =
+                                (X509KeyInfoGeneratorFactory) org.opensaml.xml.Configuration.getGlobalSecurityConfiguration().
+                                        getKeyInfoGeneratorManager().getDefaultManager().
+                                        getFactory(credential);
+                        factory.setEmitEntityCertificateChain(true);
+
+                        messageContext.setOutboundSAMLMessageSigningCredential(credential);
+                }
+
+
+                VelocityEngine velocityEngine = new VelocityEngine();
+                velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
+                        "classpath");
+                velocityEngine
+                        .setProperty("classpath.resource.loader.class",
+                                "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+                velocityEngine.setProperty(
+                        RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        Log4JLogChute.class.getName());
+                try {
+                        velocityEngine.init();
+                } catch (Exception e) {
+                        throw new ServletException("velocity engine init error: "
+                                + e.getMessage(), e);
+                }
+                HTTPPostEncoder encoder = new HTTPPostEncoder(velocityEngine,
+                        "/templates/saml2-post-binding.vm");
+                try {
+                        encoder.encode(messageContext);
+                } catch (MessageEncodingException e) {
+                        throw new ServletException(
+                                "SAML encoding error: " + e.getMessage(), e);
+                }
+        }
 }

@@ -1,4 +1,4 @@
-package be.fedict.eid.idp.sp;
+package be.fedict.eid.idp.sp.saml2;
 
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;

@@ -6,7 +6,8 @@
     <display-name>eID IdP SP</display-name>
 
     <listener>
-        <listener-class>be.fedict.eid.idp.sp.StartupServletContextListener</listener-class>
+        <listener-class>be.fedict.eid.idp.sp.StartupServletContextListener
+        </listener-class>
     </listener>
 
     <!-- Photo servlet -->
@@ -26,8 +27,14 @@
             be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet
         </servlet-class>
         <init-param>
-            <param-name>ParametersFromRequest</param-name>
-            <param-value>true</param-value>
+            <param-name>SPDestinationPage</param-name>
+            <param-value>/saml2-landing</param-value>
+        </init-param>
+        <init-param>
+            <param-name>AuthenticationRequestService</param-name>
+            <param-value>
+                be/fedict/eid/idp/sp/saml2/AuthenticationRequestServiceBean
+            </param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
@@ -54,7 +61,9 @@
         </init-param>
         <init-param>
             <param-name>AuthenticationResponseService</param-name>
-            <param-value>be/fedict/eid/idp/sp/AuthenticationResponseServiceBean</param-value>
+            <param-value>
+                be/fedict/eid/idp/sp/saml2/AuthenticationResponseServiceBean
+            </param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

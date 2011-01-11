@@ -12,15 +12,9 @@ identification/authentication protocols towards the eID IdP.</p>
 		href="https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/foobar">
 		Unsupported Protocol</a></li>
 
-	<li><a
-		href="saml-request?IdPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/saml2-ident&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/saml2-landing">
-		SAML2 eID IdP Request: Identification</a></li>
-	<li><a
-		href="saml-request?IdPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/saml2-auth&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/saml2-landing">
-		SAML2 eID IdP Request: Authentication</a></li>
-	<li><a
-		href="saml-request?IdPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/protocol/saml2-auth-ident&SPDestinationPage=/saml2-landing">
-		SAML2 eID IdP Request: Authentication + Identification (using SPDestinationPage)</a></li>
+    <li><a href="saml-request-ident.jsp">SAML2 eID IdP Request: Identification</a></li>
+    <li><a href="saml-request-auth.jsp">SAML2 eID IdP Request: Authentication</a></li>
+    <li><a href="saml-request-auth-ident.jsp">SAML2 eID IdP Request: Authentication + Identification</a></li>
 
 	<li><a
 		href="openid-request?UserIdentifier=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/endpoints/openid-identity&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/openid-landing">

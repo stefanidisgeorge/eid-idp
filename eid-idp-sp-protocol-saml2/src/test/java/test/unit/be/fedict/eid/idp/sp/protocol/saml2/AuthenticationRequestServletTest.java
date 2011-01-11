@@ -56,7 +56,8 @@ public class AuthenticationRequestServletTest {
 		this.servletTester = new ServletTester();
 		ServletHolder servletHolder = this.servletTester.addServlet(
 				AuthenticationRequestServlet.class, "/");
-		servletHolder.setInitParameter("ParametersFromRequest", "true");
+		servletHolder.setInitParameter("IdPDestination", "http://idp.be");
+                servletHolder.setInitParameter("SPDestination", "http://sp.be");
 		this.servletTester.start();
 		this.location = this.servletTester.createSocketConnector(true);
 	}
@@ -72,9 +73,6 @@ public class AuthenticationRequestServletTest {
 		LOG.debug("URL: " + this.location);
 		HttpClient httpClient = new HttpClient();
 		GetMethod getMethod = new GetMethod(this.location);
-		getMethod.setQueryString(new NameValuePair[] {
-				new NameValuePair("IdPDestination", "http://idp.be"),
-				new NameValuePair("SPDestination", "http://sp.be") });
 
 		// operate
 		int result = httpClient.executeMethod(getMethod);
