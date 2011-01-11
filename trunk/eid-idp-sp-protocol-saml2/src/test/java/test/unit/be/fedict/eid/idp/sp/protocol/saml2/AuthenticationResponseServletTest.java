@@ -48,114 +48,129 @@ import static org.junit.Assert.*;
 
 public class AuthenticationResponseServletTest {
 
-    private static final Log LOG = LogFactory
-            .getLog(AuthenticationResponseServletTest.class);
+        private static final Log LOG = LogFactory
+                .getLog(AuthenticationResponseServletTest.class);
 
-    private ServletTester servletTester;
+        private ServletTester servletTester;
 
-    private String location;
+        private String location;
+        private String targetLocation;
+        private String errorLocation;
 
-    @Before
-    public void setUp() throws Exception {
-        this.servletTester = new ServletTester();
-        ServletHolder servletHolder = this.servletTester.addServlet(
-                AuthenticationResponseServlet.class, "/");
-        servletHolder.setInitParameter("IdentifierSessionAttribute",
-                "identifier");
-        servletHolder.setInitParameter("AttributeMapSessionAttribute",
-                "attributeMap");
-        servletHolder.setInitParameter("RedirectPage", "target-page");
-        this.servletTester.start();
-        this.location = this.servletTester.createSocketConnector(true);
-    }
+        @Before
+        public void setUp() throws Exception {
+                this.servletTester = new ServletTester();
+                ServletHolder servletHolder = this.servletTester.addServlet(
+                        AuthenticationResponseServlet.class, "/response");
 
-    @After
-    public void tearDown() throws Exception {
-        this.servletTester.stop();
-    }
+                // required init params
+                servletHolder.setInitParameter(AuthenticationResponseServlet.
+                        IDENTIFIER_SESSION_ATTRIBUTE_INIT_PARAM, "identifier");
+                servletHolder.setInitParameter(AuthenticationResponseServlet.
+                        ATTRIBUTE_MAP_SESSION_ATTRIBUTE_INIT_PARAM,
+                        "attributeMap");
+                servletHolder.setInitParameter(AuthenticationResponseServlet.
+                        REDIRECT_PAGE_INIT_PARAM, "/target-page");
+                servletHolder.setInitParameter(AuthenticationResponseServlet.
+                        ERROR_PAGE_INIT_PARAM, "/error-page");
+                servletHolder.setInitParameter(AuthenticationResponseServlet.
+                        ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM, "ErrorMessage");
 
-    @Test
-    public void testDoGet() throws Exception {
-        // setup
-        LOG.debug("URL: " + this.location);
-        HttpClient httpClient = new HttpClient();
-        GetMethod getMethod = new GetMethod(this.location);
+                this.servletTester.start();
+                String context = this.servletTester.createSocketConnector(true);
+                this.location = context + "/response";
+                this.targetLocation = context + "/target-page";
+                this.errorLocation = context + "/error-page";
+        }
 
-        // operate
-        int result = httpClient.executeMethod(getMethod);
+        @After
+        public void tearDown() throws Exception {
+                this.servletTester.stop();
+        }
 
-        // verify
-        LOG.debug("result: " + result);
-        assertEquals(HttpServletResponse.SC_METHOD_NOT_ALLOWED, result);
-    }
+        @Test
+        public void testDoGet() throws Exception {
+                // setup
+                LOG.debug("URL: " + this.location);
+                HttpClient httpClient = new HttpClient();
+                GetMethod getMethod = new GetMethod(this.location);
 
-    @Test
-    public void testPostSamlResponse() throws Exception {
-        doPostSamlResponseTest("/saml-response.xml");
-    }
+                // operate
+                int result = httpClient.executeMethod(getMethod);
 
-    //@Test
-    public void testPostSignedSamlResponse() throws Exception {
-        doPostSamlResponseTest("/saml-response-signed.xml");
-    }
+                // verify
+                LOG.debug("result: " + result);
 
-    @SuppressWarnings("unchecked")
-    private void doPostSamlResponseTest(String samlResponseResourceName)
-            throws IOException {
-        // setup
-        InputStream samlResponseInputStream = AuthenticationResponseServletTest.class
-                .getResourceAsStream(samlResponseResourceName);
-        String samlResponse = IOUtils.toString(samlResponseInputStream);
-        String encodedSamlResponse = Base64.encodeBase64String(samlResponse
-                .getBytes());
+                assertEquals(HttpServletResponse.SC_NOT_FOUND, result);
+        }
 
-        LOG.debug("URL: " + this.location);
-        HttpClient httpClient = new HttpClient();
-        PostMethod postMethod = new PostMethod(this.location);
-        NameValuePair[] body = {new NameValuePair("SAMLResponse",
-                encodedSamlResponse)};
-        postMethod.setRequestBody(body);
+        @Test
+        public void testPostSamlResponse() throws Exception {
+                doPostSamlResponseTest("/saml-response.xml");
+        }
 
-        // operate
-        int resultStatusCode = httpClient.executeMethod(postMethod);
+        //@Test
+        public void testPostSignedSamlResponse() throws Exception {
+                doPostSamlResponseTest("/saml-response-signed.xml");
+        }
 
-        // verify
-        LOG.debug("result: " + resultStatusCode);
-        assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, resultStatusCode);
-        Header locationHeader = postMethod.getResponseHeader("Location");
-        String value = locationHeader.getValue();
-        assertEquals(this.location + "/target-page", value);
+        @SuppressWarnings("unchecked")
+        private void doPostSamlResponseTest(String samlResponseResourceName)
+                throws IOException {
+                // setup
+                InputStream samlResponseInputStream = AuthenticationResponseServletTest.class
+                        .getResourceAsStream(samlResponseResourceName);
+                String samlResponse = IOUtils.toString(samlResponseInputStream);
+                String encodedSamlResponse = Base64.encodeBase64String(samlResponse
+                        .getBytes());
 
-        SessionHandler sessionHandler = this.servletTester.getContext()
-                .getSessionHandler();
-        SessionManager sessionManager = sessionHandler.getSessionManager();
-        LOG.debug("session manager type: "
-                + sessionManager.getClass().getName());
-        HashSessionManager hashSessionManager = (HashSessionManager) sessionManager;
-        LOG.debug("# sessions: " + hashSessionManager.getSessions());
-        assertEquals(1, hashSessionManager.getSessions());
-        Map<String, HttpSession> sessionMap = hashSessionManager
-                .getSessionMap();
-        LOG.debug("session map: " + sessionMap);
-        Entry<String, HttpSession> sessionEntry = sessionMap.entrySet()
-                .iterator().next();
-        HttpSession httpSession = sessionEntry.getValue();
+                LOG.debug("URL: " + this.location);
+                HttpClient httpClient = new HttpClient();
+                PostMethod postMethod = new PostMethod(this.location);
+                NameValuePair[] body = {new NameValuePair("SAMLResponse",
+                        encodedSamlResponse)};
+                postMethod.setRequestBody(body);
 
-        String identifierValue = (String) httpSession
-                .getAttribute("identifier");
-        assertEquals("authn-id", identifierValue);
+                // operate
+                int resultStatusCode = httpClient.executeMethod(postMethod);
 
-        Map<String, Object> attributeMap =
-                (Map<String, Object>) httpSession.getAttribute("attributeMap");
-        assertNotNull(attributeMap);
+                // verify
+                LOG.debug("result: " + resultStatusCode);
+                assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, resultStatusCode);
+                Header locationHeader = postMethod.getResponseHeader("Location");
+                String value = locationHeader.getValue();
+                assertEquals(this.targetLocation, value);
 
-        assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:name"));
-        assertEquals("test-name", attributeMap.get("urn:be:fedict:eid:idp:name"));
+                SessionHandler sessionHandler = this.servletTester.getContext()
+                        .getSessionHandler();
+                SessionManager sessionManager = sessionHandler.getSessionManager();
+                LOG.debug("session manager type: "
+                        + sessionManager.getClass().getName());
+                HashSessionManager hashSessionManager = (HashSessionManager) sessionManager;
+                LOG.debug("# sessions: " + hashSessionManager.getSessions());
+                assertEquals(1, hashSessionManager.getSessions());
+                Map<String, HttpSession> sessionMap = hashSessionManager
+                        .getSessionMap();
+                LOG.debug("session map: " + sessionMap);
+                Entry<String, HttpSession> sessionEntry = sessionMap.entrySet()
+                        .iterator().next();
+                HttpSession httpSession = sessionEntry.getValue();
 
-        assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:firstName"));
-        assertEquals("test-first-name", attributeMap.get("urn:be:fedict:eid:idp:firstName"));
+                String identifierValue = (String) httpSession
+                        .getAttribute("identifier");
+                assertEquals("authn-id", identifierValue);
 
-        assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:gender"));
-        assertEquals("MALE", attributeMap.get("urn:be:fedict:eid:idp:gender"));
-    }
+                Map<String, Object> attributeMap =
+                        (Map<String, Object>) httpSession.getAttribute("attributeMap");
+                assertNotNull(attributeMap);
+
+                assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:name"));
+                assertEquals("test-name", attributeMap.get("urn:be:fedict:eid:idp:name"));
+
+                assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:firstName"));
+                assertEquals("test-first-name", attributeMap.get("urn:be:fedict:eid:idp:firstName"));
+
+                assertTrue(attributeMap.containsKey("urn:be:fedict:eid:idp:gender"));
+                assertEquals("MALE", attributeMap.get("urn:be:fedict:eid:idp:gender"));
+        }
 }

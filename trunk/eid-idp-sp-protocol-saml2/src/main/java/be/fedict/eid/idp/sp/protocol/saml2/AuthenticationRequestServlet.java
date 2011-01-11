@@ -198,7 +198,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                         credential.setPrivateKey(spIdentity.getPrivateKey());
                         credential.setEntityCertificateChain(certChain);
 
-                        // set emit cert. chain to true
+                        // enable adding the cert.chain as KeyInfo
                         X509KeyInfoGeneratorFactory factory =
                                 (X509KeyInfoGeneratorFactory) org.opensaml.xml.Configuration.getGlobalSecurityConfiguration().
                                         getKeyInfoGeneratorManager().getDefaultManager().
