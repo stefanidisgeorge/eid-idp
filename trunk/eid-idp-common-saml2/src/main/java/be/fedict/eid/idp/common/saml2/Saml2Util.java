@@ -31,6 +31,7 @@ import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.core.Issuer;
+import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.ws.wstrust.*;
 import org.opensaml.ws.wstrust.impl.*;
 import org.opensaml.xml.ConfigurationException;
@@ -46,10 +47,11 @@ import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
-import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
+import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.signature.*;
 import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
+import org.opensaml.xml.validation.ValidationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -350,7 +352,7 @@ public abstract class Saml2Util {
                         signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_DSA);
                 }
 
-                // add signature as keyinfo
+                // add certificate as keyinfo
                 KeyInfo keyInfo = buildXMLObject(KeyInfo.class, KeyInfo.DEFAULT_ELEMENT_NAME);
                 try {
                         KeyInfoHelper.addCertificate(keyInfo, certificate);
@@ -375,7 +377,6 @@ public abstract class Saml2Util {
                 }
                 return xmlElement;
         }
-
 
         public static Element marshall(XMLObject xmlObject) {
 

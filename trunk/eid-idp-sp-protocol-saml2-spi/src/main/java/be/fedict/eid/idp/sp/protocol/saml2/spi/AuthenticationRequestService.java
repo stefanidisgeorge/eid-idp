@@ -18,33 +18,40 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.spi;
 
+import java.security.KeyStore;
 import java.util.Map;
 
 /**
  * SPI for authentication request services. Using an authentication request
  * service allows for run-time configuration of the
  * AuthenticationRequestServlet.
- * 
+ *
  * @author Frank Cornelis.
- * 
  */
 public interface AuthenticationRequestService {
 
-	/**
-	 * Gives back the destination URL of the eID IdP SAML2 protocol entry point.
-	 * 
-	 * @return
-	 */
-	String getIdPDestination();
+        /**
+         * Gives back the destination URL of the eID IdP SAML2 protocol entry point.
+         *
+         * @return eID IdP SAML2 entry point
+         */
+        String getIdPDestination();
 
-	/**
-	 * Gives back the relay state to be used towards the eID IdP SAML2 protocol
-	 * entry point.
-	 * 
-	 * @param parameterMap
-	 *            the HTTP parameter map.
-	 * 
-	 * @return
-	 */
-	String getRelayState(Map<String, String[]> parameterMap);
+        /**
+         * Gives back the relay state to be used towards the eID IdP SAML2 protocol
+         * entry point.
+         *
+         * @param parameterMap the HTTP parameter map.
+         * @return relay state
+         */
+        String getRelayState(Map<String, String[]> parameterMap);
+
+        /**
+         * Gives back the optional Service Provider's identity to be used to
+         * sign outgoing SAML2 authentication requests.
+         *
+         * @return private key entry of the SP or <code>null</code> if no
+         *         signing is needed.
+         */
+        KeyStore.PrivateKeyEntry getSPIdentity();
 }

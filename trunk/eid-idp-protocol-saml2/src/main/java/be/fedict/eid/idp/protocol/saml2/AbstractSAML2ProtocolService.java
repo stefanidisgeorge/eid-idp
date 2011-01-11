@@ -50,10 +50,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -157,6 +153,8 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 String inResponseTo = authnRequest.getID();
                 setInResponseTo(inResponseTo, request);
 
+                LOG.debug("request: " + Saml2Util.domToString(Saml2Util.marshall(authnRequest).getOwnerDocument(), true));
+
                 return getAuthenticationFlow();
 
         }
@@ -208,16 +206,9 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
                 if (null != idpIdentity) {
 
-                        List<X509Certificate> certChain = new LinkedList<X509Certificate>();
-                        for (Certificate certificate : idpIdentity.getCertificateChain()) {
-                                certChain.add((X509Certificate) certificate);
-                        }
-                        LOG.debug("certChain size: " + certChain.size());
-
-
                         BasicX509Credential credential = new BasicX509Credential();
                         credential.setPrivateKey(idpIdentity.getPrivateKey());
-                        credential.setEntityCertificateChain(certChain);
+                        credential.setEntityCertificateChain(this.configuration.getIdentityCertificateChain());
 
                         // set emit cert. chain to true
                         X509KeyInfoGeneratorFactory factory =
