@@ -210,7 +210,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                         credential.setPrivateKey(idpIdentity.getPrivateKey());
                         credential.setEntityCertificateChain(this.configuration.getIdentityCertificateChain());
 
-                        // set emit cert. chain to true
+                        // enable adding the cert.chain as KeyInfo
                         X509KeyInfoGeneratorFactory factory =
                                 (X509KeyInfoGeneratorFactory) Configuration.getGlobalSecurityConfiguration().
                                         getKeyInfoGeneratorManager().getDefaultManager().

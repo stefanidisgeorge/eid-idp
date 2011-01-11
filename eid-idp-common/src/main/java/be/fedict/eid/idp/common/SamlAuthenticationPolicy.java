@@ -20,17 +20,28 @@ package be.fedict.eid.idp.common;
 
 public enum SamlAuthenticationPolicy {
 
-    IDENTIFICATION("urn:be:fedict:eid:idp:Identification"),
-    AUTHENTICATION("urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI"),
-    AUTHENTICATION_WITH_IDENTIFICATION("urn:be:fedict:eid:idp:AuthenticationWithIdentification");
+        IDENTIFICATION("urn:be:fedict:eid:idp:Identification"),
+        AUTHENTICATION("urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI"),
+        AUTHENTICATION_WITH_IDENTIFICATION("urn:be:fedict:eid:idp:AuthenticationWithIdentification");
 
-    private final String uri;
+        private final String uri;
 
-    SamlAuthenticationPolicy(String uri) {
-        this.uri = uri;
-    }
+        SamlAuthenticationPolicy(String uri) {
+                this.uri = uri;
+        }
 
-    public String getUri() {
-        return this.uri;
-    }
+        public String getUri() {
+                return this.uri;
+        }
+
+        public static SamlAuthenticationPolicy getAuthenticationPolicy(String uri) {
+
+                for (SamlAuthenticationPolicy authenticationPolicy : SamlAuthenticationPolicy.values()) {
+                        if (authenticationPolicy.getUri().equals(uri)) {
+                                return authenticationPolicy;
+                        }
+                }
+
+                throw new RuntimeException("Unknown authentication policy: " + uri);
+        }
 }

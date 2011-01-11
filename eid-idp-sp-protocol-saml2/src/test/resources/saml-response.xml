@@ -13,7 +13,11 @@
             <saml2:NameID>authn-id</saml2:NameID>
         </saml2:Subject>
         <saml2:AuthnStatement AuthnInstant="2010-03-24T10:09:40.667Z">
-            <saml2:AuthnContext/>
+            <saml2:AuthnContext>
+                <saml2:AuthnContextClassRef>
+                    urn:be:fedict:eid:idp:Identification
+                </saml2:AuthnContextClassRef>
+            </saml2:AuthnContext>
         </saml2:AuthnStatement>
         <saml2:AttributeStatement>
             <saml2:Attribute Name="urn:be:fedict:eid:idp:name">
