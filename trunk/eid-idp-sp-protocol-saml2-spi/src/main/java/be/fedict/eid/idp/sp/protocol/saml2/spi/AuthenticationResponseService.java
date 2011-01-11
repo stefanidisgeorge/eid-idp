@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.spi;
 
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -28,12 +30,14 @@ import java.util.List;
  */
 public interface AuthenticationResponseService {
 
-    /**
-     * Validation of the certificate chain in the SAML v2.0 response signature.
-     *
-     * @param certificateChain the service certificate chain
-     * @throws SecurityException in case the certificate is invalid/not accepted
-     */
-    void validateServiceCertificate(List<X509Certificate> certificateChain)
-            throws SecurityException;
+        /**
+         * Validation of the certificate chain in the SAML v2.0 response signature.
+         *
+         * @param authenticationPolicy SAML v2.0 authentication policy.
+         * @param certificateChain     the service certificate chain
+         * @throws SecurityException in case the certificate is invalid/not accepted
+         */
+        void validateServiceCertificate(SamlAuthenticationPolicy authenticationPolicy,
+                                        List<X509Certificate> certificateChain)
+                throws SecurityException;
 }

@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -110,7 +111,8 @@ public class AuthenticationResponseServlet extends HttpServlet {
                         throw new ServletException("OpenSAML configuration exception");
                 }
 
-                BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext = new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
+                BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
+                        new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
                 messageContext
                         .setInboundMessageTransport(new HttpServletRequestAdapter(
                                 request));
@@ -151,6 +153,25 @@ public class AuthenticationResponseServlet extends HttpServlet {
                         throw new ServletException("missing SAML authn statement");
                 }
 
+                // TODO: validate conditions, configurable timeframe?
+
+                AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
+                // TODO: validate AuthnInstant: authnStatement.getAuthnInstant()
+                AuthnContext authnContext = authnStatement.getAuthnContext();
+                if (null == authnContext) {
+                        throw new ServletException("missing SAML authn context");
+                }
+                AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
+                if (null == authnContextClassRef) {
+                        throw new ServletException("missing SAML authn context ref");
+                }
+
+                // get authentication policy
+                SamlAuthenticationPolicy authenticationPolicy =
+                        SamlAuthenticationPolicy.getAuthenticationPolicy(
+                                authnContextClassRef.getAuthnContextClassRef());
+
+
                 // Signature validation
                 try {
                         if (null != samlResponse.getSignature()) {
@@ -178,7 +199,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
                                                         .lookup(this.authenticationResponseService);
 
 
-                                                service.validateServiceCertificate(certChain);
+                                                service.validateServiceCertificate(authenticationPolicy, certChain);
 
                                         } catch (NamingException e) {
                                                 throw new ServletException(
