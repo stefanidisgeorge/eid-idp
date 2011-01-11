@@ -65,6 +65,14 @@
                 be/fedict/eid/idp/sp/saml2/AuthenticationResponseServiceBean
             </param-value>
         </init-param>
+        <init-param>
+            <param-name>ErrorPage</param-name>
+            <param-value>/error.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>ErrorMessageSessionAttribute</param-name>
+            <param-value>ErrorMessage</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
