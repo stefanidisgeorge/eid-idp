@@ -58,6 +58,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Processes the response of the SAML v2.0 protocol.
+ * <p/>
+ * <p>
+ * The following init-params are required:
+ * </p>
+ * <ul>
+ * <li><tt>IdentifierSessionAttribute</tt>: indicates the session attribute to
+ * store the returned subject identifier.</li>
+ * <li><tt>RedirectPage</tt>: indicates the page where to redirect after
+ * successfull authentication.</li>
+ * <li><tt>ErrorPage</tt>: indicates the page to be shown in case of errors.</li>
+ * <li><tt>ErrorMessageSessionAttribute</tt>: indicates which session attribute
+ * to use for reporting an error. This session attribute can be used on the
+ * error page.</li>
+ * </ul>
+ * <p/>
+ * <p>
+ * The following init-params are optional:
+ * </p>
+ * <ul>
+ * <li><tt>AttributeMapSessionAttribute</tt>: indicates the session attribute to
+ * store the map of optionally returned attributes.</li>
+ * <li><tt>RelayStateSessionAttribute</tt>: indicates the session attribute to
+ * store optionally returned relay state.</li>
+ * <li><tt>AuthenticationResponseService</tt>: indicates the JNDI location of
+ * the {@link AuthenticationResponseService} that can be used optionally for
+ * e.g. validation of the certificate chain in the response's signature.
+ * </ul>
+ */
 public class AuthenticationResponseServlet extends HttpServlet {
 
         private static final long serialVersionUID = 1L;
