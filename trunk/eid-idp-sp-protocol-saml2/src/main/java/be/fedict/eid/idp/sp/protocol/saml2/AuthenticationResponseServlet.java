@@ -65,6 +65,23 @@ public class AuthenticationResponseServlet extends HttpServlet {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationResponseServlet.class);
 
+        public static final String IDENTIFIER_SESSION_ATTRIBUTE_INIT_PARAM =
+                "IdentifierSessionAttribute";
+        public static final String REDIRECT_PAGE_INIT_PARAM =
+                "RedirectPage";
+
+        public static final String ATTRIBUTE_MAP_SESSION_ATTRIBUTE_INIT_PARAM =
+                "AttributeMapSessionAttribute";
+        public static final String RELAY_STATE_SESSION_ATTRIBUTE_INIT_PARAM =
+                "RelayStateSessionAttribute";
+        public static final String AUTHENTICATION_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM =
+                "AuthenticationResponseService";
+
+        public static final String ERROR_PAGE_INIT_PARAM = "ErrorPage";
+        public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM =
+                "ErrorMessageSessionAttribute";
+
+
         private String identifierSessionAttribute;
         private String attributeMapSessionAttribute;
 
@@ -73,17 +90,29 @@ public class AuthenticationResponseServlet extends HttpServlet {
 
         private String authenticationResponseService;
 
+        private String errorPage;
+        private String errorMessageSessionAttribute;
+
+
         @Override
         public void init(ServletConfig config) throws ServletException {
+
                 this.identifierSessionAttribute = getRequiredInitParameter(
-                        "IdentifierSessionAttribute", config);
-                this.redirectPage = getRequiredInitParameter("RedirectPage", config);
+                        IDENTIFIER_SESSION_ATTRIBUTE_INIT_PARAM, config);
+                this.redirectPage = getRequiredInitParameter(
+                        REDIRECT_PAGE_INIT_PARAM, config);
+
                 this.attributeMapSessionAttribute = config
-                        .getInitParameter("AttributeMapSessionAttribute");
+                        .getInitParameter(ATTRIBUTE_MAP_SESSION_ATTRIBUTE_INIT_PARAM);
                 this.relayStateSessionAttribute = config
-                        .getInitParameter("RelayStateSessionAttribute");
+                        .getInitParameter(RELAY_STATE_SESSION_ATTRIBUTE_INIT_PARAM);
                 this.authenticationResponseService = config
-                        .getInitParameter("AuthenticationResponseService");
+                        .getInitParameter(AUTHENTICATION_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM);
+
+                this.errorPage = getRequiredInitParameter(ERROR_PAGE_INIT_PARAM,
+                        config);
+                this.errorMessageSessionAttribute = getRequiredInitParameter(
+                        ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM, config);
         }
 
         private String getRequiredInitParameter(String parameterName,
@@ -94,6 +123,15 @@ public class AuthenticationResponseServlet extends HttpServlet {
                                 + " init-param is required");
                 }
                 return value;
+        }
+
+        @Override
+        protected void doGet(HttpServletRequest request,
+                             HttpServletResponse response)
+                throws ServletException, IOException {
+
+                showErrorPage("SAML2 response handler not available via GET", null,
+                        request, response);
         }
 
         @Override
@@ -108,7 +146,9 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 try {
                         DefaultBootstrap.bootstrap();
                 } catch (ConfigurationException e) {
-                        throw new ServletException("OpenSAML configuration exception");
+                        showErrorPage("OpenSAML configuration exception", e,
+                                request, response);
+                        return;
                 }
 
                 BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
@@ -121,17 +161,21 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 try {
                         decoder.decode(messageContext);
                 } catch (MessageDecodingException e) {
-                        throw new ServletException("OpenSAML message decoding error");
+                        showErrorPage("OpenSAML message decoding error", e,
+                                request, response);
+                        return;
                 } catch (SecurityException e) {
-                        LOG.error("OpenSAML security error: " + e.getMessage(), e);
-                        throw new ServletException("OpenSAML security error");
+                        showErrorPage("OpenSAML security error: " + e.getMessage(),
+                                e, request, response);
+                        return;
                 }
 
                 SAMLObject samlObject = messageContext.getInboundSAMLMessage();
                 LOG.debug("SAML object class: " + samlObject.getClass().getName());
                 if (!(samlObject instanceof Response)) {
-                        throw new IllegalArgumentException(
-                                "expected a SAML2 Response document");
+                        showErrorPage("expected a SAML2 Response document", null,
+                                request, response);
+                        return;
                 }
                 Response samlResponse = (Response) samlObject;
 
@@ -139,18 +183,24 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 StatusCode statusCode = status.getStatusCode();
                 String statusValue = statusCode.getValue();
                 if (!StatusCode.SUCCESS_URI.equals(statusValue)) {
-                        throw new ServletException("no successful SAML response");
+                        showErrorPage("no successful SAML response", null,
+                                request, response);
+                        return;
                 }
 
                 List<Assertion> assertions = samlResponse.getAssertions();
                 if (assertions.isEmpty()) {
-                        throw new ServletException("missing SAML assertions");
+                        showErrorPage("missing SAML assertions", null,
+                                request, response);
+                        return;
                 }
 
                 Assertion assertion = assertions.get(0);
                 List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
                 if (authnStatements.isEmpty()) {
-                        throw new ServletException("missing SAML authn statement");
+                        showErrorPage("missing SAML authn statement", null,
+                                request, response);
+                        return;
                 }
 
                 // TODO: validate conditions, configurable timeframe?
@@ -159,11 +209,15 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 // TODO: validate AuthnInstant: authnStatement.getAuthnInstant()
                 AuthnContext authnContext = authnStatement.getAuthnContext();
                 if (null == authnContext) {
-                        throw new ServletException("missing SAML authn context");
+                        showErrorPage("missing SAML authn context", null,
+                                request, response);
+                        return;
                 }
                 AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
                 if (null == authnContextClassRef) {
-                        throw new ServletException("missing SAML authn context ref");
+                        showErrorPage("missing SAML authn context ref", null,
+                                request, response);
+                        return;
                 }
 
                 // get authentication policy
@@ -187,7 +241,10 @@ public class AuthenticationResponseServlet extends HttpServlet {
                                         SignatureValidator sigValidator = new SignatureValidator(credential);
                                         sigValidator.validate(samlResponse.getSignature());
                                 } catch (ValidationException e) {
-                                        throw new RuntimeException(e);
+
+                                        showErrorPage("SAML response signature validation error: " + e.getMessage(),
+                                                e, request, response);
+                                        return;
                                 }
 
                                 // validation of the certificate chain in the SAML response's signature.
@@ -202,16 +259,18 @@ public class AuthenticationResponseServlet extends HttpServlet {
                                                 service.validateServiceCertificate(authenticationPolicy, certChain);
 
                                         } catch (NamingException e) {
-                                                throw new ServletException(
-                                                        "error locating AuthenticationResponseService: "
-                                                                + e.getMessage(), e);
+                                                showErrorPage("Error locating AuthenticationResponseService: "
+                                                        + e.getMessage(),
+                                                        e, request, response);
+                                                return;
                                         }
                                 }
                         }
                 } catch (CertificateException e) {
-                        throw new ServletException(
-                                "failed to get certificates from SAMl response's signature"
-                                        + e.getMessage(), e);
+                        showErrorPage("Failed to get certificates from SAML" +
+                                "response signature: " + e.getMessage(),
+                                e, request, response);
+                        return;
                 }
 
 
@@ -252,10 +311,11 @@ public class AuthenticationResponseServlet extends HttpServlet {
                                                 Base64.decode(attributeValue.getValue()));
 
                                 } else {
-                                        throw new ServletException(
-                                                "Unsupported attribute of type: "
-                                                        + attribute.getAttributeValues().get(0)
-                                                        .getClass().getName());
+                                        showErrorPage("Unsupported attribute of " +
+                                                "type: " + attribute.getAttributeValues().get(0)
+                                                .getClass().getName(),
+                                                null, request, response);
+                                        return;
                                 }
                         }
 
@@ -273,5 +333,19 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 }
 
                 response.sendRedirect(request.getContextPath() + this.redirectPage);
+        }
+
+        private void showErrorPage(String errorMessage, Throwable cause,
+                                   HttpServletRequest request, HttpServletResponse response)
+                throws IOException, ServletException {
+
+                if (null == cause) {
+                        LOG.error("Error: " + errorMessage);
+                } else {
+                        LOG.error("Error: " + errorMessage, cause);
+                }
+                request.getSession().setAttribute(
+                        this.errorMessageSessionAttribute, errorMessage);
+                response.sendRedirect(request.getContextPath() + this.errorPage);
         }
 }
