@@ -37,8 +37,8 @@ import java.io.IOException;
  * The following init-params are required:
  * </p>
  * <ul>
- * <li><tt>IdentifierSessionAttribute</tt>: indicates the session attribute to
- * store the returned subject identifier.</li>
+ * <li><tt>ResponseSessionAttribute</tt>: indicates the session attribute to
+ * store the returned {@link AuthenticationResponse} data object..</li>
  * <li><tt>RedirectPage</tt>: indicates the page where to redirect after
  * successfull authentication.</li>
  * <li><tt>ErrorPage</tt>: indicates the page to be shown in case of errors.</li>
@@ -51,10 +51,6 @@ import java.io.IOException;
  * The following init-params are optional:
  * </p>
  * <ul>
- * <li><tt>AttributeMapSessionAttribute</tt>: indicates the session attribute to
- * store the map of optionally returned attributes.</li>
- * <li><tt>RelayStateSessionAttribute</tt>: indicates the session attribute to
- * store optionally returned relay state.</li>
  * <li><tt>AuthenticationResponseService</tt>: indicates the JNDI location of
  * the {@link AuthenticationResponseService} that can be used optionally for
  * e.g. validation of the certificate chain in the response's signature.
@@ -67,48 +63,33 @@ public class AuthenticationResponseServlet extends HttpServlet {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationResponseServlet.class);
 
-        public static final String IDENTIFIER_SESSION_ATTRIBUTE_INIT_PARAM =
-                "IdentifierSessionAttribute";
+        public static final String RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM =
+                "ResponseSessionAttribute";
         public static final String REDIRECT_PAGE_INIT_PARAM =
                 "RedirectPage";
-
-        public static final String ATTRIBUTE_MAP_SESSION_ATTRIBUTE_INIT_PARAM =
-                "AttributeMapSessionAttribute";
-        public static final String RELAY_STATE_SESSION_ATTRIBUTE_INIT_PARAM =
-                "RelayStateSessionAttribute";
-        public static final String AUTHN_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM =
-                "AuthenticationResponseService";
-
         public static final String ERROR_PAGE_INIT_PARAM = "ErrorPage";
         public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM =
                 "ErrorMessageSessionAttribute";
 
+        public static final String AUTHN_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM =
+                "AuthenticationResponseService";
 
-        private String identifierSessionAttribute;
-        private String attributeMapSessionAttribute;
 
+        private String responseSessionAttribute;
         private String redirectPage;
-        private String relayStateSessionAttribute;
-
-        private AuthenticationResponseProcessor authenticationResponseProcessor;
-
         private String errorPage;
         private String errorMessageSessionAttribute;
+
+        private AuthenticationResponseProcessor authenticationResponseProcessor;
 
 
         @Override
         public void init(ServletConfig config) throws ServletException {
 
-                this.identifierSessionAttribute = getRequiredInitParameter(
-                        IDENTIFIER_SESSION_ATTRIBUTE_INIT_PARAM, config);
+                this.responseSessionAttribute = getRequiredInitParameter(
+                        RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM, config);
                 this.redirectPage = getRequiredInitParameter(
                         REDIRECT_PAGE_INIT_PARAM, config);
-
-                this.attributeMapSessionAttribute = config
-                        .getInitParameter(ATTRIBUTE_MAP_SESSION_ATTRIBUTE_INIT_PARAM);
-                this.relayStateSessionAttribute = config
-                        .getInitParameter(RELAY_STATE_SESSION_ATTRIBUTE_INIT_PARAM);
-
                 this.errorPage = getRequiredInitParameter(ERROR_PAGE_INIT_PARAM,
                         config);
                 this.errorMessageSessionAttribute = getRequiredInitParameter(
@@ -159,19 +140,8 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 }
 
                 // save response info to session
-                httpSession.setAttribute(this.identifierSessionAttribute,
-                        authenticationResponse.getIdentifier());
-
-                if (null != this.attributeMapSessionAttribute) {
-                        httpSession.setAttribute(this.attributeMapSessionAttribute,
-                                authenticationResponse.getAttributeMap());
-                }
-
-                if (null != this.relayStateSessionAttribute) {
-                        LOG.debug("relay state: " + authenticationResponse.getRelayState());
-                        httpSession.setAttribute(this.relayStateSessionAttribute,
-                                authenticationResponse.getRelayState());
-                }
+                httpSession.setAttribute(this.responseSessionAttribute,
+                        authenticationResponse);
 
                 // done, redirect
                 response.sendRedirect(request.getContextPath() + this.redirectPage);
@@ -193,8 +163,6 @@ public class AuthenticationResponseServlet extends HttpServlet {
 
         private void clearAllSessionAttribute(HttpSession httpSession) {
 
-                httpSession.removeAttribute(this.identifierSessionAttribute);
-                httpSession.removeAttribute(this.attributeMapSessionAttribute);
-                httpSession.removeAttribute(this.relayStateSessionAttribute);
+                httpSession.removeAttribute(this.responseSessionAttribute);
         }
 }

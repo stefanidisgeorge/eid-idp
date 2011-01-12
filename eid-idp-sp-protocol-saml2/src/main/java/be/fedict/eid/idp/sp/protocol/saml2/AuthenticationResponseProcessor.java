@@ -22,6 +22,7 @@ import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
@@ -88,6 +89,9 @@ public class AuthenticationResponseProcessor {
         public AuthenticationResponse process(HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
 
+                AuthenticationResponseService service =
+                        getAuthenticationResponseService();
+
                 try {
                         DefaultBootstrap.bootstrap();
                 } catch (ConfigurationException e) {
@@ -120,6 +124,7 @@ public class AuthenticationResponseProcessor {
                 }
                 Response samlResponse = (Response) samlObject;
 
+                // validate status
                 Status status = samlResponse.getStatus();
                 StatusCode statusCode = status.getStatusCode();
                 String statusValue = statusCode.getValue();
@@ -141,10 +146,35 @@ public class AuthenticationResponseProcessor {
                                 "missing SAML authn statement");
                 }
 
-                // TODO: validate conditions, configurable timeframe?
+                // validate assertion conditions
+                DateTime now = new DateTime();
+                Conditions conditions = assertion.getConditions();
+                DateTime notBefore = conditions.getNotBefore();
+                DateTime notOnOrAfter = conditions.getNotOnOrAfter();
 
+                LOG.debug("now: " + now.toString());
+                LOG.debug("notBefore: " + notBefore.toString());
+                LOG.debug("notOnOrAfter : " + notOnOrAfter.toString());
+
+                int maxOffset = 5;
+                if (null != service) {
+                        maxOffset = service.getMaximumTimeOffset();
+                }
+                if (now.isBefore(notBefore)) {
+                        // time skew
+                        if (now.plusMinutes(maxOffset).isBefore(notBefore) ||
+                                now.minusMinutes(maxOffset).isAfter(notOnOrAfter)) {
+                                throw new AuthenticationResponseProcessorException(
+                                        "SAML2 assertion validation: invalid SAML message timeframe");
+                        }
+                } else if (now.isBefore(notBefore) || now.isAfter(notOnOrAfter)) {
+                        throw new AuthenticationResponseProcessorException(
+                                "SAML2 assertion validation: invalid SAML message timeframe");
+                }
+
+                // validate authn statement
                 AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
-                // TODO: validate AuthnInstant: authnStatement.getAuthnInstant()
+                DateTime authenticationTime = authnStatement.getAuthnInstant();
                 AuthnContext authnContext = authnStatement.getAuthnContext();
                 if (null == authnContext) {
                         throw new AuthenticationResponseProcessorException(
@@ -164,7 +194,7 @@ public class AuthenticationResponseProcessor {
 
                 // Signature validation
                 if (null != samlResponse.getSignature()) {
-                        validateSignature(samlResponse.getSignature(),
+                        validateSignature(service, samlResponse.getSignature(),
                                 authenticationPolicy);
                 }
 
@@ -213,11 +243,13 @@ public class AuthenticationResponseProcessor {
                         }
                 }
 
-                return new AuthenticationResponse(identifier, attributeMap,
+                return new AuthenticationResponse(authenticationTime,
+                        identifier, authenticationPolicy, attributeMap,
                         relayState);
         }
 
-        private void validateSignature(Signature signature,
+        private void validateSignature(AuthenticationResponseService service,
+                                       Signature signature,
                                        SamlAuthenticationPolicy authenticationPolicy)
                 throws AuthenticationResponseProcessorException {
 
@@ -239,26 +271,33 @@ public class AuthenticationResponseProcessor {
                         }
 
                         // validation of the certificate chain in the SAML response's signature.
-                        if (null != this.authenticationResponseService) {
-                                AuthenticationResponseService service;
-                                try {
-                                        InitialContext initialContext = new InitialContext();
-                                        service = (AuthenticationResponseService) initialContext
-                                                .lookup(this.authenticationResponseService);
-
-                                        service.validateServiceCertificate(authenticationPolicy, certChain);
-
-                                } catch (NamingException e) {
-                                        throw new AuthenticationResponseProcessorException(
-                                                "Error locating AuthenticationResponseService: "
-                                                        + e.getMessage(), e);
-                                }
+                        if (null != service) {
+                                service.validateServiceCertificate(authenticationPolicy, certChain);
                         }
                 } catch (CertificateException e) {
                         throw new AuthenticationResponseProcessorException(
                                 "Failed to get certificates from SAML" +
                                         "response signature: " + e.getMessage(), e);
                 }
+        }
 
+
+        private AuthenticationResponseService getAuthenticationResponseService()
+                throws AuthenticationResponseProcessorException {
+
+                if (null == this.authenticationResponseService) {
+                        return null;
+                }
+
+                try {
+                        InitialContext initialContext = new InitialContext();
+                        return (AuthenticationResponseService) initialContext
+                                .lookup(this.authenticationResponseService);
+
+                } catch (NamingException e) {
+                        throw new AuthenticationResponseProcessorException(
+                                "Error locating AuthenticationResponseService: "
+                                        + e.getMessage(), e);
+                }
         }
 }

@@ -18,6 +18,9 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import org.joda.time.DateTime;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -26,14 +29,20 @@ import java.util.Map;
  */
 public class AuthenticationResponse implements Serializable {
 
+        private final DateTime authenticationTime;
         private final String identifier;
+        private final SamlAuthenticationPolicy authenticationPolicy;
         private final Map<String, Object> attributeMap;
         private final String relayState;
 
-        public AuthenticationResponse(String identifier,
+        public AuthenticationResponse(DateTime authenticationTime,
+                                      String identifier,
+                                      SamlAuthenticationPolicy authenticationPolicy,
                                       Map<String, Object> attributeMap,
                                       String relayState) {
+                this.authenticationTime = authenticationTime;
                 this.identifier = identifier;
+                this.authenticationPolicy = authenticationPolicy;
                 this.attributeMap = attributeMap;
                 this.relayState = relayState;
         }
@@ -48,5 +57,13 @@ public class AuthenticationResponse implements Serializable {
 
         public String getRelayState() {
                 return relayState;
+        }
+
+        public DateTime getAuthenticationTime() {
+                return authenticationTime;
+        }
+
+        public SamlAuthenticationPolicy getAuthenticationPolicy() {
+                return authenticationPolicy;
         }
 }
