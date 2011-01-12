@@ -14,20 +14,24 @@
 
         <h:form>
 
-            <rich:tabPanel switchType="client" selectedTab="#{idpConfig.selectedTab}">
+            <rich:tabPanel switchType="client"
+                           selectedTab="#{idpConfig.selectedTab}">
 
                 <rich:tab name="tab_xkms" label="PKI validation">
                     <h:panelGrid columns="2">
                         <h:outputText value="eID Trust Service XKMS2 URL:"/>
                         <h:inputText value="#{idpConfig.xkmsUrl}" size="50"/>
 
-                        <h:outputText value="eID Trust Service Authentication Trust Domain:"/>
+                        <h:outputText
+                                value="eID Trust Service Authentication Trust Domain:"/>
                         <h:inputText value="#{idpConfig.xkmsAuthTrustDomain}"/>
 
-                        <h:outputText value="eID Trust Service Identification Trust Domain:"/>
+                        <h:outputText
+                                value="eID Trust Service Identification Trust Domain:"/>
                         <h:inputText value="#{idpConfig.xkmsIdentTrustDomain}"/>
                     </h:panelGrid>
-                    <h:commandButton value="Save" action="#{idpConfig.saveXkms}"/>
+                    <h:commandButton value="Save"
+                                     action="#{idpConfig.saveXkms}"/>
                 </rich:tab>
 
                 <rich:tab name="tab_pseudonym" label="Pseudonyms">
@@ -36,7 +40,8 @@
                                 value="Default HMAC-SHA1 secret (hexadecimal):"/>
                         <h:inputText value="#{idpConfig.hmacSecret}"/>
                     </h:panelGrid>
-                    <h:commandButton value="Save" action="#{idpConfig.savePseudonym}"/>
+                    <h:commandButton value="Save"
+                                     action="#{idpConfig.savePseudonym}"/>
                 </rich:tab>
 
                 <rich:tab name="tab_network" label="Network">
@@ -53,7 +58,41 @@
                         <h:inputText value="#{idpConfig.httpProxyPort}"
                                      size="10"/>
                     </h:panelGrid>
-                    <h:commandButton value="Save" action="#{idpConfig.saveNetwork}"/>
+                    <h:commandButton value="Save"
+                                     action="#{idpConfig.saveNetwork}"/>
+                </rich:tab>
+
+                <rich:tab name="tab_applet" label="Applet">
+                    <h:panelGrid columns="2">
+
+                        <h:outputLabel value="Server Certificate Subject"/>
+                        <h:outputLabel
+                                value="#{idpConfig.appletConfig.serverCertificateSubject}"/>
+
+                        <h:outputLabel for="upload" value="Server Certificate"/>
+                        <rich:fileUpload
+                                fileUploadListener="#{idpConfig.uploadListener}"
+                                maxFilesQuantity="1" id="upload"
+                                immediateUpload="true">
+                        </rich:fileUpload>
+
+                    </h:panelGrid>
+                    <h:panelGrid columns="2">
+                        <h:commandButton value="Save"
+                                         action="#{idpConfig.saveApplet}"/>
+                        <h:commandButton value="Remove"
+                                         action="#{idpConfig.removeApplet}"/>
+                    </h:panelGrid>
+
+                    <p>
+                        <rich:simpleTogglePanel switchType="client"
+                                                opened="false"
+                                                rendered="#{idpConfig.appletConfig.serverCertificate != null}"
+                                                label="Server Certificate">
+                            <h:outputText id="cert_view" styleClass="text block"
+                                          value="#{idpConfig.appletConfig.serverCertificate}"/>
+                        </rich:simpleTogglePanel>
+                    </p>
                 </rich:tab>
 
             </rich:tabPanel>
