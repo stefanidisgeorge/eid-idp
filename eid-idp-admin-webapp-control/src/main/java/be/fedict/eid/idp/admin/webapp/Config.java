@@ -18,66 +18,83 @@
 
 package be.fedict.eid.idp.admin.webapp;
 
+import be.fedict.eid.idp.entity.AppletConfigEntity;
+import org.richfaces.event.UploadEvent;
+
 import javax.ejb.Local;
 import javax.faces.model.SelectItem;
+import java.io.IOException;
 import java.util.List;
 
 @Local
 public interface Config {
 
-    /*
-     * Accessors.
-     */
-    String getXkmsUrl();
+        /*
+        * Accessors.
+        */
+        String getXkmsUrl();
 
-    void setXkmsUrl(String xkmsUrl);
+        void setXkmsUrl(String xkmsUrl);
 
-    String getXkmsAuthTrustDomain();
+        String getXkmsAuthTrustDomain();
 
-    void setXkmsAuthTrustDomain(String xkmsAuthTrustDomain);
+        void setXkmsAuthTrustDomain(String xkmsAuthTrustDomain);
 
-    String getXkmsIdentTrustDomain();
+        String getXkmsIdentTrustDomain();
 
-    void setXkmsIdentTrustDomain(String xkmsIdentTrustDomain);
+        void setXkmsIdentTrustDomain(String xkmsIdentTrustDomain);
 
-    String getHmacSecret();
+        String getHmacSecret();
 
-    void setHmacSecret(String hmacSecret);
+        void setHmacSecret(String hmacSecret);
 
-    Boolean getHttpProxy();
+        Boolean getHttpProxy();
 
-    void setHttpProxy(Boolean httpProxy);
+        void setHttpProxy(Boolean httpProxy);
 
-    String getHttpProxyHost();
+        String getHttpProxyHost();
 
-    void setHttpProxyHost(String httpProxyHost);
+        void setHttpProxyHost(String httpProxyHost);
 
-    Integer getHttpProxyPort();
+        Integer getHttpProxyPort();
 
-    void setHttpProxyPort(Integer httpProxyPort);
+        void setHttpProxyPort(Integer httpProxyPort);
 
-    String getSelectedTab();
+        AppletConfigEntity getAppletConfig();
 
-    void setSelectedTab(String selectedTab);
+        void setAppletConfig(AppletConfigEntity appletConfig);
 
-    /*
-    * Factories
-    */
-    List<SelectItem> keyStoreTypeFactory();
+        String getSelectedTab();
 
-    /*
-    * Actions.
-    */
-    String saveXkms();
+        void setSelectedTab(String selectedTab);
 
-    String savePseudonym();
+        /*
+        * Listeners.
+        */
+        void uploadListener(UploadEvent event) throws IOException;
 
-    String saveNetwork();
+        /*
+        * Factories
+        */
+        List<SelectItem> keyStoreTypeFactory();
 
-    /*
-     * Lifecycle.
-     */
-    void destroy();
+        /*
+        * Actions.
+        */
+        String saveXkms();
 
-    void postConstruct();
+        String savePseudonym();
+
+        String saveNetwork();
+
+        String saveApplet();
+
+        String removeApplet();
+
+        /*
+        * Lifecycle.
+        */
+        void destroy();
+
+        void postConstruct();
 }

@@ -19,6 +19,7 @@
 package test.unit.be.fedict.eid.idp.entity;
 
 import be.fedict.eid.idp.entity.AdministratorEntity;
+import be.fedict.eid.idp.entity.AppletConfigEntity;
 import be.fedict.eid.idp.entity.ConfigPropertyEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 import org.apache.commons.logging.Log;
@@ -34,51 +35,52 @@ import javax.persistence.EntityTransaction;
 
 public class PersistenceTest {
 
-    private static final Log LOG = LogFactory.getLog(PersistenceTest.class);
+        private static final Log LOG = LogFactory.getLog(PersistenceTest.class);
 
-    private EntityManager entityManager;
+        private EntityManager entityManager;
 
-    @Before
-    public void setUp() throws Exception {
-        Class.forName("org.hsqldb.jdbcDriver");
-        Ejb3Configuration configuration = new Ejb3Configuration();
-        configuration.setProperty("hibernate.dialect",
-                "org.hibernate.dialect.HSQLDialect");
-        configuration.setProperty("hibernate.connection.driver_class",
-                "org.hsqldb.jdbcDriver");
-        configuration.setProperty("hibernate.connection.url",
-                "jdbc:hsqldb:mem:beta");
-        configuration.setProperty("hibernate.hbm2ddl.auto", "create");
+        @Before
+        public void setUp() throws Exception {
+                Class.forName("org.hsqldb.jdbcDriver");
+                Ejb3Configuration configuration = new Ejb3Configuration();
+                configuration.setProperty("hibernate.dialect",
+                        "org.hibernate.dialect.HSQLDialect");
+                configuration.setProperty("hibernate.connection.driver_class",
+                        "org.hsqldb.jdbcDriver");
+                configuration.setProperty("hibernate.connection.url",
+                        "jdbc:hsqldb:mem:beta");
+                configuration.setProperty("hibernate.hbm2ddl.auto", "create");
 
-        configuration.addAnnotatedClass(AdministratorEntity.class);
-        configuration.addAnnotatedClass(ConfigPropertyEntity.class);
-        configuration.addAnnotatedClass(RPEntity.class);
+                configuration.addAnnotatedClass(AdministratorEntity.class);
+                configuration.addAnnotatedClass(ConfigPropertyEntity.class);
+                configuration.addAnnotatedClass(RPEntity.class);
+                configuration.addAnnotatedClass(AppletConfigEntity.class);
 
-        EntityManagerFactory entityManagerFactory = configuration
-                .buildEntityManagerFactory();
+                EntityManagerFactory entityManagerFactory = configuration
+                        .buildEntityManagerFactory();
 
-        this.entityManager = entityManagerFactory.createEntityManager();
-        this.entityManager.getTransaction().begin();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        EntityTransaction entityTransaction = this.entityManager
-                .getTransaction();
-        LOG.debug("entity manager open: " + this.entityManager.isOpen());
-        LOG.debug("entity transaction active: " + entityTransaction.isActive());
-        if (entityTransaction.isActive()) {
-            if (entityTransaction.getRollbackOnly()) {
-                entityTransaction.rollback();
-            } else {
-                entityTransaction.commit();
-            }
+                this.entityManager = entityManagerFactory.createEntityManager();
+                this.entityManager.getTransaction().begin();
         }
-        this.entityManager.close();
-    }
 
-    @Test
-    public void testCorrectNamedQueries() throws Exception {
-        // empty
-    }
+        @After
+        public void tearDown() throws Exception {
+                EntityTransaction entityTransaction = this.entityManager
+                        .getTransaction();
+                LOG.debug("entity manager open: " + this.entityManager.isOpen());
+                LOG.debug("entity transaction active: " + entityTransaction.isActive());
+                if (entityTransaction.isActive()) {
+                        if (entityTransaction.getRollbackOnly()) {
+                                entityTransaction.rollback();
+                        } else {
+                                entityTransaction.commit();
+                        }
+                }
+                this.entityManager.close();
+        }
+
+        @Test
+        public void testCorrectNamedQueries() throws Exception {
+                // empty
+        }
 }

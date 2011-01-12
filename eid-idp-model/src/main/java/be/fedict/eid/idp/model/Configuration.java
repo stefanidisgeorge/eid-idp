@@ -18,23 +18,31 @@
 
 package be.fedict.eid.idp.model;
 
+import be.fedict.eid.idp.entity.AppletConfigEntity;
+
 import javax.ejb.Local;
 import java.util.List;
 
 @Local
 public interface Configuration {
 
-    void setValue(ConfigProperty configProperty, String index, Object value);
+        AppletConfigEntity getAppletConfig();
 
-    void setValue(ConfigProperty configProperty, Object value);
+        void setAppletConfig(AppletConfigEntity appletConfig);
 
-    <T> T getValue(ConfigProperty configProperty, String index, Class<T> type);
+        void removeAppletConfig(AppletConfigEntity appletConfig);
 
-    <T> T getValue(ConfigProperty configProperty, Class<T> type);
+        void setValue(ConfigProperty configProperty, String index, Object value);
 
-    void removeValue(ConfigProperty configProperty, String index);
+        void setValue(ConfigProperty configProperty, Object value);
 
-    void removeValue(ConfigProperty configProperty);
+        <T> T getValue(ConfigProperty configProperty, String index, Class<T> type);
 
-    List<String> getIndexes(ConfigProperty configProperty);
+        <T> T getValue(ConfigProperty configProperty, Class<T> type);
+
+        void removeValue(ConfigProperty configProperty, String index);
+
+        void removeValue(ConfigProperty configProperty);
+
+        List<String> getIndexes(ConfigProperty configProperty);
 }
