@@ -171,7 +171,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 LOG.debug("doPost");
 
                 HttpSession httpSession = request.getSession();
-                httpSession.removeAttribute(this.identifierSessionAttribute);
+                clearAllSessionAttribute(httpSession);
 
                 try {
                         DefaultBootstrap.bootstrap();
@@ -377,5 +377,12 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 request.getSession().setAttribute(
                         this.errorMessageSessionAttribute, errorMessage);
                 response.sendRedirect(request.getContextPath() + this.errorPage);
+        }
+
+        private void clearAllSessionAttribute(HttpSession httpSession) {
+
+                httpSession.removeAttribute(this.identifierSessionAttribute);
+                httpSession.removeAttribute(this.attributeMapSessionAttribute);
+                httpSession.removeAttribute(this.relayStateSessionAttribute);
         }
 }

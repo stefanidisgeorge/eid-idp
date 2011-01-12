@@ -16,12 +16,14 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model;
+package be.fedict.eid.idp.admin.webapp;
 
-public abstract class Constants {
 
-        public static final String IDP_JNDI_CONTEXT = "be/fedict/eid/idp/";
+import be.fedict.eid.idp.model.Constants;
 
-        public static final String IDP_FLOW_SESSION_ATTRIBUTE =
-                Constants.class.getName() + ".IdpFlow";
+public abstract class AdminConstants {
+
+        public static final String ADMIN_JNDI_CONTEXT =
+                Constants.IDP_JNDI_CONTEXT + "admin/webapp/";
+
 }

@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
 import be.fedict.eid.idp.admin.webapp.RP;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.RPService;
@@ -45,136 +46,136 @@ import java.util.List;
 
 @Stateful
 @Name("idpRP")
-@LocalBinding(jndiBinding = "fedict/eid/idp/admin/webapp/RPBean")
+@LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT + "RPBean")
 public class RPBean implements RP {
 
-    private static final String RP_LIST_NAME = "idpRPList";
-    private static final String SELECTED_RP = "selectedRP";
-    private static final String UPLOADED_CERTIFICATE = "uploadedCertificate";
+        private static final String RP_LIST_NAME = "idpRPList";
+        private static final String SELECTED_RP = "selectedRP";
+        private static final String UPLOADED_CERTIFICATE = "uploadedCertificate";
 
-    @Logger
-    private Log log;
+        @Logger
+        private Log log;
 
-    @EJB
-    private RPService rpService;
+        @EJB
+        private RPService rpService;
 
-    @In
-    FacesMessages facesMessages;
+        @In
+        FacesMessages facesMessages;
 
 
-    @SuppressWarnings("unused")
-    @DataModel(RP_LIST_NAME)
-    private List<RPEntity> rpList;
+        @SuppressWarnings("unused")
+        @DataModel(RP_LIST_NAME)
+        private List<RPEntity> rpList;
 
-    @DataModelSelection(RP_LIST_NAME)
-    @In(value = SELECTED_RP, required = false)
-    @Out(value = SELECTED_RP, required = false, scope = ScopeType.CONVERSATION)
-    private RPEntity selectedRP;
+        @DataModelSelection(RP_LIST_NAME)
+        @In(value = SELECTED_RP, required = false)
+        @Out(value = SELECTED_RP, required = false, scope = ScopeType.CONVERSATION)
+        private RPEntity selectedRP;
 
-    @In(value = UPLOADED_CERTIFICATE, required = false)
-    @Out(value = UPLOADED_CERTIFICATE, required = false, scope = ScopeType.CONVERSATION)
-    private byte[] certificateBytes;
+        @In(value = UPLOADED_CERTIFICATE, required = false)
+        @Out(value = UPLOADED_CERTIFICATE, required = false, scope = ScopeType.CONVERSATION)
+        private byte[] certificateBytes;
 
-    @Override
-    @PostConstruct
-    public void postConstruct() {
-    }
-
-    @Override
-    @Remove
-    @Destroy
-    public void destroy() {
-    }
-
-    @Override
-    @Factory(RP_LIST_NAME)
-    public void rpListFactory() {
-
-        this.rpList = this.rpService.listRPs();
-    }
-
-    @Override
-    @Begin(join = true)
-    public String add() {
-
-        this.log.debug("add RP");
-        this.selectedRP = new RPEntity();
-        return "modify";
-    }
-
-    @Override
-    @Begin(join = true)
-    public String modify() {
-
-        this.log.debug("modify RP: #0", this.selectedRP.getName());
-        return "modify";
-    }
-
-    @Override
-    @End
-    public String save() {
-
-        this.log.debug("save RP: #0", this.selectedRP.getName());
-        this.rpService.save(this.selectedRP);
-        rpListFactory();
-        return "success";
-    }
-
-    @Override
-    @Begin(join = true)
-    public void select() {
-
-        this.log.debug("selected RP: #0", this.selectedRP.getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @End
-    public String remove() {
-
-        this.log.debug("remove RP: #0", this.selectedRP.getName());
-        this.rpService.remove(this.selectedRP);
-        rpListFactory();
-        return "success";
-    }
-
-    @Override
-    @End
-    public String back() {
-        return "back";
-    }
-
-    @Override
-    @Begin(join = true)
-    public void uploadListener(UploadEvent event) throws IOException {
-        UploadItem item = event.getUploadItem();
-        this.log.debug(item.getContentType());
-        this.log.debug(item.getFileSize());
-        this.log.debug(item.getFileName());
-        if (null == item.getData()) {
-            // meaning createTempFiles is set to true in the SeamFilter
-            this.certificateBytes = FileUtils.readFileToByteArray(item
-                    .getFile());
-        } else {
-            this.certificateBytes = item.getData();
+        @Override
+        @PostConstruct
+        public void postConstruct() {
         }
 
-        try {
-            this.selectedRP.setCertificate(getCertificate(this.certificateBytes));
-        } catch (CertificateException e) {
-            this.facesMessages.addToControl("upload", "Invalid certificate");
+        @Override
+        @Remove
+        @Destroy
+        public void destroy() {
         }
-    }
 
-    private X509Certificate getCertificate(byte[] certificateBytes)
-            throws CertificateException {
+        @Override
+        @Factory(RP_LIST_NAME)
+        public void rpListFactory() {
 
-        CertificateFactory certificateFactory = CertificateFactory
-                .getInstance("X.509");
-        return (X509Certificate) certificateFactory
-                .generateCertificate(new ByteArrayInputStream(certificateBytes));
-    }
+                this.rpList = this.rpService.listRPs();
+        }
+
+        @Override
+        @Begin(join = true)
+        public String add() {
+
+                this.log.debug("add RP");
+                this.selectedRP = new RPEntity();
+                return "modify";
+        }
+
+        @Override
+        @Begin(join = true)
+        public String modify() {
+
+                this.log.debug("modify RP: #0", this.selectedRP.getName());
+                return "modify";
+        }
+
+        @Override
+        @End
+        public String save() {
+
+                this.log.debug("save RP: #0", this.selectedRP.getName());
+                this.rpService.save(this.selectedRP);
+                rpListFactory();
+                return "success";
+        }
+
+        @Override
+        @Begin(join = true)
+        public void select() {
+
+                this.log.debug("selected RP: #0", this.selectedRP.getName());
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        @End
+        public String remove() {
+
+                this.log.debug("remove RP: #0", this.selectedRP.getName());
+                this.rpService.remove(this.selectedRP);
+                rpListFactory();
+                return "success";
+        }
+
+        @Override
+        @End
+        public String back() {
+                return "back";
+        }
+
+        @Override
+        @Begin(join = true)
+        public void uploadListener(UploadEvent event) throws IOException {
+                UploadItem item = event.getUploadItem();
+                this.log.debug(item.getContentType());
+                this.log.debug(item.getFileSize());
+                this.log.debug(item.getFileName());
+                if (null == item.getData()) {
+                        // meaning createTempFiles is set to true in the SeamFilter
+                        this.certificateBytes = FileUtils.readFileToByteArray(item
+                                .getFile());
+                } else {
+                        this.certificateBytes = item.getData();
+                }
+
+                try {
+                        this.selectedRP.setCertificate(getCertificate(this.certificateBytes));
+                } catch (CertificateException e) {
+                        this.facesMessages.addToControl("upload", "Invalid certificate");
+                }
+        }
+
+        private X509Certificate getCertificate(byte[] certificateBytes)
+                throws CertificateException {
+
+                CertificateFactory certificateFactory = CertificateFactory
+                        .getInstance("X.509");
+                return (X509Certificate) certificateFactory
+                        .generateCertificate(new ByteArrayInputStream(certificateBytes));
+        }
 
 }

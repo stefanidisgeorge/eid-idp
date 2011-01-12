@@ -16,9 +16,10 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model;
+package be.fedict.eid.idp.model.applet;
 
 import be.fedict.eid.applet.service.spi.IdentityRequest;
+import be.fedict.eid.idp.model.Constants;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import org.jboss.ejb3.annotation.LocalBinding;
 
@@ -31,7 +32,7 @@ import javax.servlet.http.HttpSession;
 
 @Stateless
 @Local(be.fedict.eid.applet.service.spi.IdentityService.class)
-@LocalBinding(jndiBinding = "be/fedict/eid/idp/AppletIdentityServiceBean")
+@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "AppletIdentityServiceBean")
 public class AppletIdentityServiceBean implements be.fedict.eid.applet.service.spi.IdentityService {
 
         @Override
