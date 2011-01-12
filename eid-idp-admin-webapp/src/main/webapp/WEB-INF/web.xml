@@ -97,6 +97,15 @@
             </param-value>
         </init-param>
         <init-param>
+            <param-name>ChannelBindingService</param-name>
+            <param-value>be/fedict/eid/idp/ChannelBindingServiceBean
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>SessionIdChannelBinding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
             <param-name>PreLogoff</param-name>
             <param-value>true</param-value>
         </init-param>
