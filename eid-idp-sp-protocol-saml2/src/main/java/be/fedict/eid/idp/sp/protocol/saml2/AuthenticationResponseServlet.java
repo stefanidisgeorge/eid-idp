@@ -18,33 +18,10 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTimeZone;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
-import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
-import org.opensaml.saml2.core.*;
-import org.opensaml.security.SAMLSignatureProfileValidator;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.schema.XSBase64Binary;
-import org.opensaml.xml.schema.XSDateTime;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
-import org.opensaml.xml.security.x509.BasicX509Credential;
-import org.opensaml.xml.signature.SignatureValidator;
-import org.opensaml.xml.util.Base64;
-import org.opensaml.xml.validation.ValidationException;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -52,11 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Processes the response of the SAML v2.0 protocol.
@@ -118,7 +90,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
         private String redirectPage;
         private String relayStateSessionAttribute;
 
-        private String authenticationResponseService;
+        private AuthenticationResponseProcessor authenticationResponseProcessor;
 
         private String errorPage;
         private String errorMessageSessionAttribute;
@@ -136,13 +108,15 @@ public class AuthenticationResponseServlet extends HttpServlet {
                         .getInitParameter(ATTRIBUTE_MAP_SESSION_ATTRIBUTE_INIT_PARAM);
                 this.relayStateSessionAttribute = config
                         .getInitParameter(RELAY_STATE_SESSION_ATTRIBUTE_INIT_PARAM);
-                this.authenticationResponseService = config
-                        .getInitParameter(AUTHENTICATION_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM);
 
                 this.errorPage = getRequiredInitParameter(ERROR_PAGE_INIT_PARAM,
                         config);
                 this.errorMessageSessionAttribute = getRequiredInitParameter(
                         ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM, config);
+
+                this.authenticationResponseProcessor =
+                        new AuthenticationResponseProcessor(config
+                                .getInitParameter(AUTHENTICATION_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM));
         }
 
         private String getRequiredInitParameter(String parameterName,
@@ -170,198 +144,36 @@ public class AuthenticationResponseServlet extends HttpServlet {
                               HttpServletResponse response) throws ServletException, IOException {
                 LOG.debug("doPost");
 
+                // clear old session attributes
                 HttpSession httpSession = request.getSession();
                 clearAllSessionAttribute(httpSession);
 
+                // process response
+                AuthenticationResponse authenticationResponse;
                 try {
-                        DefaultBootstrap.bootstrap();
-                } catch (ConfigurationException e) {
-                        showErrorPage("OpenSAML configuration exception", e,
-                                request, response);
+                        authenticationResponse =
+                                this.authenticationResponseProcessor.process(request);
+                } catch (AuthenticationResponseProcessorException e) {
+                        showErrorPage(e.getMessage(), e, request, response);
                         return;
                 }
 
-                BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
-                        new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
-                messageContext
-                        .setInboundMessageTransport(new HttpServletRequestAdapter(
-                                request));
+                // save response info to session
+                httpSession.setAttribute(this.identifierSessionAttribute,
+                        authenticationResponse.getIdentifier());
 
-                SAMLMessageDecoder decoder = new HTTPPostDecoder();
-                try {
-                        decoder.decode(messageContext);
-                } catch (MessageDecodingException e) {
-                        showErrorPage("OpenSAML message decoding error", e,
-                                request, response);
-                        return;
-                } catch (SecurityException e) {
-                        showErrorPage("OpenSAML security error: " + e.getMessage(),
-                                e, request, response);
-                        return;
+                if (null != this.attributeMapSessionAttribute) {
+                        httpSession.setAttribute(this.attributeMapSessionAttribute,
+                                authenticationResponse.getAttributeMap());
                 }
 
-                SAMLObject samlObject = messageContext.getInboundSAMLMessage();
-                LOG.debug("SAML object class: " + samlObject.getClass().getName());
-                if (!(samlObject instanceof Response)) {
-                        showErrorPage("expected a SAML2 Response document", null,
-                                request, response);
-                        return;
-                }
-                Response samlResponse = (Response) samlObject;
-
-                Status status = samlResponse.getStatus();
-                StatusCode statusCode = status.getStatusCode();
-                String statusValue = statusCode.getValue();
-                if (!StatusCode.SUCCESS_URI.equals(statusValue)) {
-                        showErrorPage("no successful SAML response", null,
-                                request, response);
-                        return;
+                if (null != this.relayStateSessionAttribute) {
+                        LOG.debug("relay state: " + authenticationResponse.getRelayState());
+                        httpSession.setAttribute(this.relayStateSessionAttribute,
+                                authenticationResponse.getRelayState());
                 }
 
-                List<Assertion> assertions = samlResponse.getAssertions();
-                if (assertions.isEmpty()) {
-                        showErrorPage("missing SAML assertions", null,
-                                request, response);
-                        return;
-                }
-
-                Assertion assertion = assertions.get(0);
-                List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
-                if (authnStatements.isEmpty()) {
-                        showErrorPage("missing SAML authn statement", null,
-                                request, response);
-                        return;
-                }
-
-                // TODO: validate conditions, configurable timeframe?
-
-                AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
-                // TODO: validate AuthnInstant: authnStatement.getAuthnInstant()
-                AuthnContext authnContext = authnStatement.getAuthnContext();
-                if (null == authnContext) {
-                        showErrorPage("missing SAML authn context", null,
-                                request, response);
-                        return;
-                }
-                AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
-                if (null == authnContextClassRef) {
-                        showErrorPage("missing SAML authn context ref", null,
-                                request, response);
-                        return;
-                }
-
-                // get authentication policy
-                SamlAuthenticationPolicy authenticationPolicy =
-                        SamlAuthenticationPolicy.getAuthenticationPolicy(
-                                authnContextClassRef.getAuthnContextClassRef());
-
-
-                // Signature validation
-                try {
-                        if (null != samlResponse.getSignature()) {
-                                List<X509Certificate> certChain =
-                                        KeyInfoHelper.getCertificates(
-                                                samlResponse.getSignature().getKeyInfo());
-                                try {
-                                        SAMLSignatureProfileValidator pv =
-                                                new SAMLSignatureProfileValidator();
-                                        pv.validate(samlResponse.getSignature());
-                                        BasicX509Credential credential = new BasicX509Credential();
-                                        credential.setPublicKey(certChain.get(0).getPublicKey());
-                                        SignatureValidator sigValidator = new SignatureValidator(credential);
-                                        sigValidator.validate(samlResponse.getSignature());
-                                } catch (ValidationException e) {
-
-                                        showErrorPage("SAML response signature validation error: " + e.getMessage(),
-                                                e, request, response);
-                                        return;
-                                }
-
-                                // validation of the certificate chain in the SAML response's signature.
-                                if (null != this.authenticationResponseService) {
-                                        AuthenticationResponseService service;
-                                        try {
-                                                InitialContext initialContext = new InitialContext();
-                                                service = (AuthenticationResponseService) initialContext
-                                                        .lookup(this.authenticationResponseService);
-
-
-                                                service.validateServiceCertificate(authenticationPolicy, certChain);
-
-                                        } catch (NamingException e) {
-                                                showErrorPage("Error locating AuthenticationResponseService: "
-                                                        + e.getMessage(),
-                                                        e, request, response);
-                                                return;
-                                        }
-                                }
-                        }
-                } catch (CertificateException e) {
-                        showErrorPage("Failed to get certificates from SAML" +
-                                "response signature: " + e.getMessage(),
-                                e, request, response);
-                        return;
-                }
-
-
-                Subject subject = assertion.getSubject();
-                NameID nameId = subject.getNameID();
-                String identifier = nameId.getValue();
-                httpSession.setAttribute(this.identifierSessionAttribute, identifier);
-
-                List<AttributeStatement> attributeStatements = assertion
-                        .getAttributeStatements();
-                if (!attributeStatements.isEmpty()) {
-
-                        Map<String, Object> attributeMap = new HashMap<String, Object>();
-
-                        AttributeStatement attributeStatement = attributeStatements.get(0);
-                        List<Attribute> attributes = attributeStatement.getAttributes();
-                        for (Attribute attribute : attributes) {
-                                String attributeName = attribute.getName();
-
-                                if (attribute.getAttributeValues().get(0) instanceof XSString) {
-
-                                        XSString attributeValue = (XSString) attribute
-                                                .getAttributeValues().get(0);
-                                        attributeMap.put(attributeName, attributeValue.getValue());
-
-                                } else if (attribute.getAttributeValues().get(0) instanceof XSDateTime) {
-
-                                        XSDateTime attributeValue = (XSDateTime) attribute
-                                                .getAttributeValues().get(0);
-                                        attributeMap.put(attributeName, attributeValue.getValue()
-                                                .toDateTime(DateTimeZone.getDefault()));
-
-                                } else if (attribute.getAttributeValues().get(0) instanceof XSBase64Binary) {
-
-                                        XSBase64Binary attributeValue = (XSBase64Binary) attribute
-                                                .getAttributeValues().get(0);
-                                        attributeMap.put(attributeName,
-                                                Base64.decode(attributeValue.getValue()));
-
-                                } else {
-                                        showErrorPage("Unsupported attribute of " +
-                                                "type: " + attribute.getAttributeValues().get(0)
-                                                .getClass().getName(),
-                                                null, request, response);
-                                        return;
-                                }
-                        }
-
-                        if (null != this.attributeMapSessionAttribute) {
-                                httpSession.setAttribute(this.attributeMapSessionAttribute,
-                                        attributeMap);
-                        }
-
-                        if (null != this.relayStateSessionAttribute) {
-                                String relayState = request.getParameter("RelayState");
-                                LOG.debug("relay state: " + relayState);
-                                httpSession.setAttribute(this.relayStateSessionAttribute,
-                                        relayState);
-                        }
-                }
-
+                // done, redirect
                 response.sendRedirect(request.getContextPath() + this.redirectPage);
         }
 
