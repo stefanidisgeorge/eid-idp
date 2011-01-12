@@ -122,10 +122,30 @@
                         <listitem>
                             <para>
                                 <code>SPDestination</code>
+                                The absolute location of the Service Providers's
+                                SAML v2.0 landing servlet, which will handle the
+                                incoming authentication response.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>SPDestinationPage</code>
                                 The location of the Service Providers's SAML
-                                v2.0
-                                landing servlet, which will handle the incoming
-                                authentication response.
+                                v2.0 landing servlet, which will handle the
+                                incoming authentication response. Absolute path
+                                will be constructed automatically from the
+                                servlet's context.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>AuthenticationRequestService</code>
+                                Optional JNDI location of an implementation of
+                                the AuthenticationRequestService interface. This
+                                implementation can provide an optional SP
+                                identity used for signing the authentication
+                                request, optional relay state and the IdP
+                                destination.
                             </para>
                         </listitem>
                     </itemizedlist>
@@ -144,12 +164,14 @@
             be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet
         </servlet-class>
         <init-param>
-            <param-name>IdPDestination</param-name>
-            <param-value>https://eididp.host.be/eid-idp/protocol/saml2</param-value>
+            <param-name>SPDestinationPage</param-name>
+            <param-value>/saml2-landing</param-value>
         </init-param>
         <init-param>
-            <param-name>SPDestination</param-name>
-            <param-value>https://sp.host.be/eid-idp-sp/saml2-landing</param-value>
+            <param-name>AuthenticationRequestService</param-name>
+            <param-value>
+                be/fedict/eid/idp/sp/saml2/AuthenticationRequestServiceBean
+            </param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
@@ -159,6 +181,15 @@
 
                          ]]>
                 </programlisting>
+                <para>
+                    The
+                    <code>AuthenticationRequestUtil</code>
+                    class is available for integration outside a servlet context
+                    ( e.g. JSF lifecycle components). Note that it needs a
+                    <code>HttpServletResponse</code>
+                    for submitting the authentication request using Browser
+                    POST.
+                </para>
             </section>
         </section>
         <section>
@@ -263,9 +294,42 @@
                         </listitem>
                         <listitem>
                             <para>
+                                <code>RelayStateSessionAttribute</code>
+                                HTTP Session attribute on which the optional
+                                relay state returned with the authentication
+                                response will be pushed.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>AuthenticationResponseService</code>
+                                JNDI location of an implementation of the
+                                AuthenticationResponseService interface.
+                                Providing such an implementation allows for
+                                validation of the certificate chain in signature
+                                of the SAML v2.0 authentication response.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
                                 <code>RedirectPage</code>
                                 Page to redirect to after a successfull
                                 authentication.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>ErrorPage</code>
+                                Page to redirect to if something went wrong
+                                processing the authentication response.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>ErrorMessageSessionAttribute</code>
+                                HTTP Session attribute on which more info will
+                                be pushed if something went wrong processing the
+                                authentication response.
                             </para>
                         </listitem>
                     </itemizedlist>
@@ -301,6 +365,20 @@
             <param-name>AttributeMapSessionAttribute</param-name>
             <param-value>AttributeMap</param-value>
         </init-param>
+        <init-param>
+            <param-name>AuthenticationResponseService</param-name>
+            <param-value>
+                be/fedict/eid/idp/sp/saml2/AuthenticationResponseServiceBean
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>ErrorPage</param-name>
+            <param-value>/error.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>ErrorMessageSessionAttribute</param-name>
+            <param-value>ErrorMessage</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
@@ -309,6 +387,11 @@
 
                         ]]>
                 </programlisting>
+                <para>
+                    For processing the SAML v2.0 Authentication response outside
+                    a servlet context ( e.g. JSF lifecycle components ) one can
+                    use the<code>AuthenticationResponseProcessor</code>.
+                </para>
             </section>
         </section>
         <section>
