@@ -76,7 +76,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 "AttributeMapSessionAttribute";
         public static final String RELAY_STATE_SESSION_ATTRIBUTE_INIT_PARAM =
                 "RelayStateSessionAttribute";
-        public static final String AUTHENTICATION_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM =
+        public static final String AUTHN_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM =
                 "AuthenticationResponseService";
 
         public static final String ERROR_PAGE_INIT_PARAM = "ErrorPage";
@@ -116,7 +116,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
 
                 this.authenticationResponseProcessor =
                         new AuthenticationResponseProcessor(config
-                                .getInitParameter(AUTHENTICATION_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM));
+                                .getInitParameter(AUTHN_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM));
         }
 
         private String getRequiredInitParameter(String parameterName,
