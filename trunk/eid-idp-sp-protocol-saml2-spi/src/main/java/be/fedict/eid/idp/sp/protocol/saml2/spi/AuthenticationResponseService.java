@@ -40,4 +40,10 @@ public interface AuthenticationResponseService {
         void validateServiceCertificate(SamlAuthenticationPolicy authenticationPolicy,
                                         List<X509Certificate> certificateChain)
                 throws SecurityException;
+
+        /**
+         * @return the maximum offset allowed on the SAML v2.0 response's assertion
+         *         condition fields. Specified in minutes.
+         */
+        int getMaximumTimeOffset();
 }

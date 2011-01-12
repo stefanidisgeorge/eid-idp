@@ -21,4 +21,9 @@ public class AuthenticationResponseServiceBean implements AuthenticationResponse
                 LOG.debug("validate saml response policy=" + authenticationPolicy.getUri()
                         + " cert.chain.size=" + certificateChain.size());
         }
+
+        @Override
+        public int getMaximumTimeOffset() {
+                return 5;
+        }
 }

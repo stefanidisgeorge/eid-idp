@@ -12,6 +12,8 @@
         <saml2:Subject>
             <saml2:NameID>authn-id</saml2:NameID>
         </saml2:Subject>
+        <saml2:Conditions NotBefore="${NotBefore}"
+                          NotOnOrAfter="${NotOnOrAfter}"/>
         <saml2:AuthnStatement AuthnInstant="2010-03-24T10:09:40.667Z">
             <saml2:AuthnContext>
                 <saml2:AuthnContextClassRef>

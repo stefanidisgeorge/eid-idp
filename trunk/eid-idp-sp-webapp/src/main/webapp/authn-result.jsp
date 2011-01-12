@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <%@ page contentType="text/html; charset=UTF-8" %>
 
@@ -6,29 +7,33 @@
 
 <html>
 <head>
-<title>eID Identity Provider (IdP) - Test Service Provider (SP)</title>
+    <title>eID Identity Provider (IdP) - Test Service Provider (SP)</title>
 </head>
 <body>
 
-<jsp:useBean id="attributes" scope="request" class="be.fedict.eid.idp.sp.AttributeBean"/>
+    <jsp:useBean id="auth_response" scope="request"
+                 class="be.fedict.eid.idp.sp.ResponseBean"/>
 
-<jsp:setProperty name="attributes" property="session" value="<%= request.getSession() %>"  />
+    <jsp:setProperty name="auth_response" property="session"
+                     value="<%= request.getSession() %>"/>
 
-<h1>Authentication Results</h1>
-<p>Results should be displayed here.</p>
-<img src="photo" />
-<table>
-	<tr>
-		<th>Identifier</th>
-		<td><%=session.getAttribute("Identifier")%></td>
-	</tr>
-	<c:forEach var="entry" items="${attributes.attributeMap}">
-	    <tr>
-	        <th>${entry.key}</th>
-	        <td>${entry.value}</td>
-	    </tr>
-    </c:forEach>
-</table>
-<a href="index.jsp">Back</a>
+    <h1>Authentication Results</h1>
+    <p>Results should be displayed here.</p>
+
+    <p>Authentication Policy: ${auth_response.policy}</p>
+    <img src="photo"/>
+    <table>
+        <tr>
+            <th>Identifier</th>
+            <td>${auth_response.identifier}</td>
+        </tr>
+        <c:forEach var="entry" items="${auth_response.attributeMap}">
+            <tr>
+                <th>${entry.key}</th>
+                <td>${entry.value}</td>
+            </tr>
+        </c:forEach>
+    </table>
+    <a href="index.jsp">Back</a>
 </body>
 </html>
