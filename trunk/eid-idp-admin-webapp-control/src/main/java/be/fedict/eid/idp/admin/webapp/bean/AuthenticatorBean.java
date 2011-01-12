@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
 import be.fedict.eid.idp.admin.webapp.Authenticator;
 import be.fedict.eid.idp.model.admin.AdminManager;
 import org.apache.commons.logging.LogFactory;
@@ -34,30 +35,30 @@ import java.security.cert.X509Certificate;
 
 @Stateless
 @Name("idpAuthenticator")
-@LocalBinding(jndiBinding = "fedict/eid/idp/admin/webapp/AuthenticatorBean")
+@LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT + "AuthenticatorBean")
 public class AuthenticatorBean implements Authenticator {
 
-    private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(AuthenticatorBean.class);
+        private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(AuthenticatorBean.class);
 
-    @In
-    private Credentials credentials;
+        @In
+        private Credentials credentials;
 
-    @In
-    private Identity identity;
+        @In
+        private Identity identity;
 
-    @In(value = "eid.certs.authn", scope = ScopeType.SESSION)
-    private X509Certificate authenticatedCertificate;
+        @In(value = "eid.certs.authn", scope = ScopeType.SESSION)
+        private X509Certificate authenticatedCertificate;
 
-    @EJB
-    private AdminManager adminManager;
+        @EJB
+        private AdminManager adminManager;
 
-    @Override
-    public boolean authenticate() {
+        @Override
+        public boolean authenticate() {
 
-        LOG.debug("authenticate: ");
-        if (this.adminManager.isAdmin(this.authenticatedCertificate)) {
-            this.identity.addRole("admin");
+                LOG.debug("authenticate: ");
+                if (this.adminManager.isAdmin(this.authenticatedCertificate)) {
+                        this.identity.addRole("admin");
+                }
+                return true;
         }
-        return true;
-    }
 }

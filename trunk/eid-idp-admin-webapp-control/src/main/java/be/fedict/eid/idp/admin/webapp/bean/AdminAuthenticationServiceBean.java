@@ -18,37 +18,35 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
-import java.security.cert.X509Certificate;
-import java.util.List;
-
-import javax.ejb.Local;
-import javax.ejb.Stateless;
-
+import be.fedict.eid.applet.service.spi.AuthenticationService;
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
 
-import be.fedict.eid.applet.service.spi.AuthenticationService;
+import javax.ejb.Local;
+import javax.ejb.Stateless;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * eID Applet Service Authentication Service implementation for the admin
  * portal.
- * 
+ *
  * @author Frank Cornelis
- * 
  */
 @Stateless
 @Local(AuthenticationService.class)
-@LocalBinding(jndiBinding = "be/fedict/eid/idp/admin/webapp/AuthenticationServiceBean")
+@LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT + "AuthenticationServiceBean")
 public class AdminAuthenticationServiceBean implements AuthenticationService {
 
-	private static final Log LOG = LogFactory
-			.getLog(AdminAuthenticationServiceBean.class);
+        private static final Log LOG = LogFactory
+                .getLog(AdminAuthenticationServiceBean.class);
 
-	public void validateCertificateChain(List<X509Certificate> certificateChain)
-			throws SecurityException {
-		LOG.debug("validate certificate: "
-				+ certificateChain.get(0).getSubjectX500Principal());
-		// nothing to do here as we accept all certificates
-	}
+        public void validateCertificateChain(List<X509Certificate> certificateChain)
+                throws SecurityException {
+                LOG.debug("validate certificate: "
+                        + certificateChain.get(0).getSubjectX500Principal());
+                // nothing to do here as we accept all certificates
+        }
 }

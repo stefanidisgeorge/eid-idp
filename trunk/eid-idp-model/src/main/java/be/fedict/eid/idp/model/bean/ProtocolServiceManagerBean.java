@@ -16,8 +16,9 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model;
+package be.fedict.eid.idp.model.bean;
 
+import be.fedict.eid.idp.model.ProtocolServiceManager;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolsType;

@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.webapp;
 
+import be.fedict.eid.idp.model.Constants;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
@@ -36,41 +37,41 @@ import java.util.List;
 
 @Stateful
 @Name("idpProtocolService")
-@LocalBinding(jndiBinding = "fedict/eid/idp/webapp/ProtocolServiceBean")
+@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "webapp/ProtocolServiceBean")
 public class ProtocolServiceBean implements ProtocolService {
 
-    @Logger
-    private Log log;
+        @Logger
+        private Log log;
 
-    @DataModel
-    private List<IdentityProviderProtocolType> idpProtocolServices;
+        @DataModel
+        private List<IdentityProviderProtocolType> idpProtocolServices;
 
-    @EJB
-    private ProtocolServiceManager protocolServiceManager;
+        @EJB
+        private ProtocolServiceManager protocolServiceManager;
 
-    @EJB
-    private IdentityService identityService;
+        @EJB
+        private IdentityService identityService;
 
-    @Factory("idpProtocolServices")
-    public void initProtocolServices() {
-        this.log.debug("init idpProtocolServices");
-        this.idpProtocolServices = this.protocolServiceManager
-                .getProtocolServices();
-    }
-
-    @Remove
-    @Destroy
-    public void destroy() {
-        this.log.debug("destroy");
-    }
-
-    @Override
-    public String getThumbprint() {
-
-        String thumbprint = this.identityService.getIdentityFingerprint();
-        if (null == thumbprint) {
-            return "<No identity configured>";
+        @Factory("idpProtocolServices")
+        public void initProtocolServices() {
+                this.log.debug("init idpProtocolServices");
+                this.idpProtocolServices = this.protocolServiceManager
+                        .getProtocolServices();
         }
-        return thumbprint;
-    }
+
+        @Remove
+        @Destroy
+        public void destroy() {
+                this.log.debug("destroy");
+        }
+
+        @Override
+        public String getThumbprint() {
+
+                String thumbprint = this.identityService.getIdentityFingerprint();
+                if (null == thumbprint) {
+                        return "<No identity configured>";
+                }
+                return thumbprint;
+        }
 }

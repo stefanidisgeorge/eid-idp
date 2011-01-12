@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
 import be.fedict.eid.idp.admin.webapp.Config;
 import be.fedict.eid.idp.entity.AppletConfigEntity;
 import be.fedict.eid.idp.model.ConfigProperty;
@@ -47,7 +48,7 @@ import java.util.List;
 
 @Stateful
 @Name("idpConfig")
-@LocalBinding(jndiBinding = "fedict/eid/idp/admin/webapp/ConfigBean")
+@LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT + "ConfigBean")
 public class ConfigBean implements Config {
 
         @Logger
