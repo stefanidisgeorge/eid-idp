@@ -49,16 +49,6 @@
                         </li>
                     </s:div>
                     <s:div rendered="#{s:hasRole('admin')}">
-                        <li id="menu_item_rps"><a
-                                href="#{facesContext.externalContext.requestContextPath}/admin/rps.seam">Relying Parties</a>
-                        </li>
-                    </s:div>
-                    <s:div rendered="#{s:hasRole('admin')}">
-                        <li id="menu_item_admins"><a
-                                href="#{facesContext.externalContext.requestContextPath}/admin/admins.seam">Admins</a>
-                        </li>
-                    </s:div>
-                    <s:div rendered="#{s:hasRole('admin')}">
                         <li id="menu_item_config"><a
                                 href="#{facesContext.externalContext.requestContextPath}/admin/config.seam">Config</a>
                         </li>
@@ -66,6 +56,16 @@
                     <s:div rendered="#{s:hasRole('admin')}">
                         <li id="menu_item_identity"><a
                                 href="#{facesContext.externalContext.requestContextPath}/admin/identity.seam">Identity</a>
+                        </li>
+                    </s:div>
+                    <s:div rendered="#{s:hasRole('admin')}">
+                        <li id="menu_item_rps"><a
+                                href="#{facesContext.externalContext.requestContextPath}/admin/rps.seam">Relying Parties</a>
+                        </li>
+                    </s:div>
+                    <s:div rendered="#{s:hasRole('admin')}">
+                        <li id="menu_item_admins"><a
+                                href="#{facesContext.externalContext.requestContextPath}/admin/admins.seam">Admins</a>
                         </li>
                     </s:div>
 
