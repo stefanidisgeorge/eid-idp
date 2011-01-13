@@ -259,7 +259,7 @@ public class AuthenticationResponseProcessor {
                         if (null != service) {
                                 service.validateServiceCertificate(authenticationPolicy, certChain);
                         }
-                } catch (CertificateException e) {
+                } catch (Exception e) {
                         throw new AuthenticationResponseProcessorException(
                                 "Failed to get certificates from SAML" +
                                         "response signature: " + e.getMessage(), e);
