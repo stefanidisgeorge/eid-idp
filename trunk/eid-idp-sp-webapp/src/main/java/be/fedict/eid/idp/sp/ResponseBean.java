@@ -19,11 +19,13 @@
 package be.fedict.eid.idp.sp;
 
 import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.sp.protocol.openid.OpenIDAuthenticationResponse;
 import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.Map;
 
 public class ResponseBean {
@@ -45,32 +47,41 @@ public class ResponseBean {
                 this.session = session;
 
                 if (null != session.getAttribute("Response")) {
-                        // saml2
-                        AuthenticationResponse response =
-                                (AuthenticationResponse) session.getAttribute("Response");
-                        this.identifier = response.getIdentifier();
-                        this.attributeMap = response.getAttributeMap();
-                        this.policy = response.getAuthenticationPolicy().getUri();
-                } else {
-                        this.identifier = (String) session.getAttribute("Identifier");
-                        this.attributeMap = (Map<String, Object>) session.getAttribute("AttributeMap");
-                        this.policy = "TBD for OpenID";
+
+                        Object responseObject = session.getAttribute("Response");
+                        if (responseObject instanceof AuthenticationResponse) {
+                                // saml2
+                                AuthenticationResponse response =
+                                        (AuthenticationResponse) responseObject;
+                                this.identifier = response.getIdentifier();
+                                this.attributeMap = response.getAttributeMap();
+                                this.policy = response.getAuthenticationPolicy().getUri();
+                        } else {
+                                // openid
+                                OpenIDAuthenticationResponse response =
+                                        (OpenIDAuthenticationResponse) responseObject;
+                                this.identifier = response.getIdentifier();
+                                this.attributeMap = response.getAttributeMap();
+                                this.policy = Arrays.toString(response.getAuthenticationPolicies().toArray());
+                        }
+
+                        for (Map.Entry<String, Object> entry : this.attributeMap.entrySet()) {
+                                LOG.debug("attribute: " + entry.getKey() + " value=" + entry.getValue());
+                        }
+
+                        // get photo
+                        if (this.attributeMap.containsKey(AttributeConstants.PHOTO_CLAIM_TYPE_URI)) {
+                                byte[] photoData = (byte[]) this.attributeMap
+                                        .get(AttributeConstants.PHOTO_CLAIM_TYPE_URI);
+                                this.session.setAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE,
+                                        photoData);
+                        } else {
+                                this.session.removeAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE);
+                        }
                 }
                 cleanupSession();
 
-                for (Map.Entry<String, Object> entry : this.attributeMap.entrySet()) {
-                        LOG.debug("attribute: " + entry.getKey() + " value=" + entry.getValue());
-                }
 
-                // get photo
-                if (this.attributeMap.containsKey(AttributeConstants.PHOTO_CLAIM_TYPE_URI)) {
-                        byte[] photoData = (byte[]) this.attributeMap
-                                .get(AttributeConstants.PHOTO_CLAIM_TYPE_URI);
-                        this.session.setAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE,
-                                photoData);
-                } else {
-                        this.session.removeAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE);
-                }
         }
 
         public Map getAttributeMap() {
