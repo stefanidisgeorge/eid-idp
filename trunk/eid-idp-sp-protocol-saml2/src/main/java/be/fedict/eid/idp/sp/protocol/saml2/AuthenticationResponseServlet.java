@@ -121,7 +121,6 @@ public class AuthenticationResponseServlet extends HttpServlet {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         protected void doPost(HttpServletRequest request,
                               HttpServletResponse response) throws ServletException, IOException {
                 LOG.debug("doPost");
