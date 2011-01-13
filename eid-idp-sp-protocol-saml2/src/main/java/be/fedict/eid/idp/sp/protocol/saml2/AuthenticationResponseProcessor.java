@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.sp.protocol.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,8 +45,6 @@ import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.validation.ValidationException;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -63,34 +62,18 @@ public class AuthenticationResponseProcessor {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationResponseProcessor.class);
 
-        private final String authenticationResponseService;
-
-        /**
-         * Main Constructor.
-         *
-         * @param authenticationResponseService optional JNDI location of an
-         *                                      implementation of
-         *                                      {@link AuthenticationResponseService}.
-         */
-        public AuthenticationResponseProcessor(String authenticationResponseService) {
-
-                this.authenticationResponseService = authenticationResponseService;
-
-        }
-
         /**
          * Process the incoming SAML v2.0 response.
          *
+         * @param service optional authentication response service
          * @param request the HTTP servlet request that holds the SAML2 response.
          * @return the SAML2 {@link AuthenticationResponse}
          * @throws AuthenticationResponseProcessorException
          *          case something went wrong
          */
-        public AuthenticationResponse process(HttpServletRequest request)
+        public AuthenticationResponse process(AuthenticationResponseService service,
+                                              HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
-
-                AuthenticationResponseService service =
-                        getAuthenticationResponseService();
 
                 try {
                         DefaultBootstrap.bootstrap();
@@ -280,26 +263,6 @@ public class AuthenticationResponseProcessor {
                         throw new AuthenticationResponseProcessorException(
                                 "Failed to get certificates from SAML" +
                                         "response signature: " + e.getMessage(), e);
-                }
-        }
-
-
-        private AuthenticationResponseService getAuthenticationResponseService()
-                throws AuthenticationResponseProcessorException {
-
-                if (null == this.authenticationResponseService) {
-                        return null;
-                }
-
-                try {
-                        InitialContext initialContext = new InitialContext();
-                        return (AuthenticationResponseService) initialContext
-                                .lookup(this.authenticationResponseService);
-
-                } catch (NamingException e) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Error locating AuthenticationResponseService: "
-                                        + e.getMessage(), e);
                 }
         }
 }

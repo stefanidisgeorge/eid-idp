@@ -56,9 +56,9 @@
             <param-value>/authn-result.jsp</param-value>
         </init-param>
         <init-param>
-            <param-name>AuthenticationResponseService</param-name>
+            <param-name>AuthenticationResponseServiceClass</param-name>
             <param-value>
-                be/fedict/eid/idp/sp/saml2/AuthenticationResponseServiceBean
+                be.fedict.eid.idp.sp.saml2.AuthenticationResponseServiceBean
             </param-value>
         </init-param>
         <init-param>
