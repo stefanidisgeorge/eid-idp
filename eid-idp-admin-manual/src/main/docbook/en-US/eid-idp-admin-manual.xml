@@ -225,13 +225,36 @@
                     </listitem>
                     <listitem>
                         <para>
-                            eID Trust Service Identification Trust Domain
-                            For example:
+                            eID Trust Service Identification (National Registry)
+                            Trust Domain. For example:
                             <code>BE-NAT-REG</code>
                         </para>
                     </listitem>
                 </itemizedlist>
             </para>
+            <section>
+                <title>eID IdP Service Identity</title>
+                <para>
+                    The eID IdP should have a service identity configured.
+                    This identity will be used to sign outgoing SAML v2.0
+                    responses and the SAML v2.0 assertions embedded in the
+                    WS-Federation Security Token. This is important to provide
+                    integrity of the assertion/response and authentication of
+                    the asserting party being the eID IdP to the SAML Relying
+                    Party.
+                </para>
+            </section>
+            <section>
+                <title>eID IdP SSL Certificate</title>
+                <para>
+                    Without configuration of the eID IdP SSL Certificate,
+                    authentications performed by the eID Applet will be subject
+                    to man-in-the-middle attacks. The TLS server certificate is
+                    be digested and used in the authentication signature but
+                    without specifying the SSL certificate no verification can
+                    be done.
+                </para>
+            </section>
         </section>
         <section>
             <title>eID IdP Core</title>
