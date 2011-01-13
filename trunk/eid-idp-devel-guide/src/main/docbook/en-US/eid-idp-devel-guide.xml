@@ -198,7 +198,7 @@
                 The FedICT Identity Provider will return a (Base64 encoded)
                 SAML v2.0 authentication response using an HTTP Post
                 via the web browser of the client. The POST parameter used for
-                that is<emphasis>SAMLResponse</emphasis>.
+                that is <emphasis>SAMLResponse</emphasis>.
             </para>
             <para>
                 Following is an example of such a SAML v2.0 authentication
