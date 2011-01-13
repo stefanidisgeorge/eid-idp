@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,15 +73,12 @@ public class AuthenticationResponseServlet extends HttpServlet {
         public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM =
                 "ErrorMessageSessionAttribute";
 
-        public static final String AUTHN_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM =
-                "AuthenticationResponseService";
-
-
         private String responseSessionAttribute;
         private String redirectPage;
         private String errorPage;
         private String errorMessageSessionAttribute;
 
+        private ServiceLocator<AuthenticationResponseService> authenticationResponseServiceServiceLocator;
         private AuthenticationResponseProcessor authenticationResponseProcessor;
 
 
@@ -96,9 +94,11 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 this.errorMessageSessionAttribute = config.getInitParameter(
                         ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM);
 
-                this.authenticationResponseProcessor =
-                        new AuthenticationResponseProcessor(config
-                                .getInitParameter(AUTHN_RESPONSE_SERVICE_SESSION_ATTRIBUTE_INIT_PARAM));
+                this.authenticationResponseServiceServiceLocator = new
+                        ServiceLocator<AuthenticationResponseService>
+                        ("AuthenticationResponseService", config);
+
+                this.authenticationResponseProcessor = new AuthenticationResponseProcessor();
         }
 
         private String getRequiredInitParameter(String parameterName,
@@ -134,7 +134,9 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 AuthenticationResponse authenticationResponse;
                 try {
                         authenticationResponse =
-                                this.authenticationResponseProcessor.process(request);
+                                this.authenticationResponseProcessor.process(
+                                        this.authenticationResponseServiceServiceLocator.locateService(),
+                                        request);
                 } catch (AuthenticationResponseProcessorException e) {
                         showErrorPage(e.getMessage(), e, request, response);
                         return;

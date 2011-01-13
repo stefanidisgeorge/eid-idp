@@ -22,8 +22,6 @@ import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -67,18 +65,19 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         private String spDestinationPage;
 
-        private String authenticationRequestService;
+        private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;
 
         @Override
         public void init(ServletConfig config) throws ServletException {
                 this.idpDestination = config.getInitParameter("IdPDestination");
-                this.authenticationRequestService = config
-                        .getInitParameter("AuthenticationRequestService");
+                this.authenticationRequestServiceLocator = new
+                        ServiceLocator<AuthenticationRequestService>
+                        ("AuthenticationRequestService", config);
                 if (null == this.idpDestination
-                        && null == this.authenticationRequestService) {
+                        && null == this.authenticationRequestServiceLocator.locateService()) {
                         throw new ServletException(
                                 "need to provide either IdPDestination or " +
-                                        "AuthenticationRequestService init-params");
+                                        "AuthenticationRequestService(Class) init-params");
                 }
 
                 this.spDestination = config.getInitParameter("SPDestination");
@@ -102,17 +101,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 String relayState;
                 KeyStore.PrivateKeyEntry spIdentity = null;
 
-                if (null != this.authenticationRequestService) {
-                        AuthenticationRequestService service;
-                        try {
-                                InitialContext initialContext = new InitialContext();
-                                service = (AuthenticationRequestService) initialContext
-                                        .lookup(this.authenticationRequestService);
-                        } catch (NamingException e) {
-                                throw new ServletException(
-                                        "error locating AuthenticationRequestService: "
-                                                + e.getMessage(), e);
-                        }
+                AuthenticationRequestService service =
+                        this.authenticationRequestServiceLocator.locateService();
+                if (null != service) {
                         idpDestination = service.getIdPDestination();
                         relayState = service.getRelayState(request.getParameterMap());
                         spIdentity = service.getSPIdentity();

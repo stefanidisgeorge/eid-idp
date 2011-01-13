@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.sp.protocol.saml2;
+package be.fedict.eid.idp.sp.protocol.saml2.spi;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import org.joda.time.DateTime;
