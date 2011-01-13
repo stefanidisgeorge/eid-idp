@@ -632,18 +632,13 @@ openid.return_to:https://localhost:48745/consumer
                     <itemizedlist>
                         <listitem>
                             <para>
-                                <code>IdentifierSessionAttribute</code>
-                                HTTP Session attribute on which the returned
-                                subject identifier will be pushed after a
-                                successfull authentication.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                <code>AttributeMapSessionAttribute</code>
-                                HTTP Session attribute on which a Map
-                                containing the returned attributes will be
-                                pushed after a successfull authentiaction.
+                                <code>ResponseSessionAttribute</code>
+                                HTTP Session attribute on which a returned
+                                OpenIDAuthenticationResponse object will be
+                                pushed after a successfull authentication. This
+                                object contains the user identifier,
+                                authentication time, map of returned attributes
+                                and authentication policies.
                             </para>
                         </listitem>
                         <listitem>
@@ -671,16 +666,12 @@ openid.return_to:https://localhost:48745/consumer
             be.fedict.eid.idp.sp.protocol.openid.AuthenticationResponseServlet
         </servlet-class>
         <init-param>
-            <param-name>IdentifierSessionAttribute</param-name>
-            <param-value>Identifier</param-value>
+            <param-name>ResponseSessionAttribute</param-name>
+            <param-value>Response</param-value>
         </init-param>
         <init-param>
             <param-name>RedirectPage</param-name>
             <param-value>/openid-result.jsp</param-value>
-        </init-param>
-        <init-param>
-            <param-name>AttributeMapSessionAttribute</param-name>
-            <param-value>AttributeMap</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
