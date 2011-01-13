@@ -18,7 +18,6 @@
                      value="<%= request.getSession() %>"/>
 
     <h1>Authentication Results</h1>
-    <p>Results should be displayed here.</p>
 
     <p>Authentication Policy: ${auth_response.policy}</p>
     <img src="photo"/>
