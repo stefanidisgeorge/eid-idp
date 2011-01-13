@@ -41,10 +41,6 @@ import java.io.IOException;
  * store the returned {@link AuthenticationResponse} data object..</li>
  * <li><tt>RedirectPage</tt>: indicates the page where to redirect after
  * successfull authentication.</li>
- * <li><tt>ErrorPage</tt>: indicates the page to be shown in case of errors.</li>
- * <li><tt>ErrorMessageSessionAttribute</tt>: indicates which session attribute
- * to use for reporting an error. This session attribute can be used on the
- * error page.</li>
  * </ul>
  * <p/>
  * <p>
@@ -53,7 +49,11 @@ import java.io.IOException;
  * <ul>
  * <li><tt>AuthenticationResponseService</tt>: indicates the JNDI location of
  * the {@link AuthenticationResponseService} that can be used optionally for
- * e.g. validation of the certificate chain in the response's signature.
+ * e.g. validation of the certificate chain in the response's signature.</li>
+ * <li><tt>ErrorPage</tt>: indicates the page to be shown in case of errors.</li>
+ * <li><tt>ErrorMessageSessionAttribute</tt>: indicates which session attribute
+ * to use for reporting an error. This session attribute can be used on the
+ * error page.</li>
  * </ul>
  */
 public class AuthenticationResponseServlet extends HttpServlet {
@@ -67,6 +67,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 "ResponseSessionAttribute";
         public static final String REDIRECT_PAGE_INIT_PARAM =
                 "RedirectPage";
+
         public static final String ERROR_PAGE_INIT_PARAM = "ErrorPage";
         public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM =
                 "ErrorMessageSessionAttribute";
@@ -90,10 +91,10 @@ public class AuthenticationResponseServlet extends HttpServlet {
                         RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM, config);
                 this.redirectPage = getRequiredInitParameter(
                         REDIRECT_PAGE_INIT_PARAM, config);
-                this.errorPage = getRequiredInitParameter(ERROR_PAGE_INIT_PARAM,
-                        config);
-                this.errorMessageSessionAttribute = getRequiredInitParameter(
-                        ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM, config);
+
+                this.errorPage = config.getInitParameter(ERROR_PAGE_INIT_PARAM);
+                this.errorMessageSessionAttribute = config.getInitParameter(
+                        ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM);
 
                 this.authenticationResponseProcessor =
                         new AuthenticationResponseProcessor(config
@@ -156,9 +157,15 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 } else {
                         LOG.error("Error: " + errorMessage, cause);
                 }
-                request.getSession().setAttribute(
-                        this.errorMessageSessionAttribute, errorMessage);
-                response.sendRedirect(request.getContextPath() + this.errorPage);
+                if (null != this.errorMessageSessionAttribute) {
+                        request.getSession().setAttribute(
+                                this.errorMessageSessionAttribute, errorMessage);
+                }
+                if (null != this.errorPage) {
+                        response.sendRedirect(request.getContextPath() + this.errorPage);
+                } else {
+                        throw new ServletException(errorMessage, cause);
+                }
         }
 
         private void clearAllSessionAttribute(HttpSession httpSession) {

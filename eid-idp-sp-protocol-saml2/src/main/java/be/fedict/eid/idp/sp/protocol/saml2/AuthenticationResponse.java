@@ -29,6 +29,8 @@ import java.util.Map;
  */
 public class AuthenticationResponse implements Serializable {
 
+        private static final long serialVersionUID = 1L;
+
         private final DateTime authenticationTime;
         private final String identifier;
         private final SamlAuthenticationPolicy authenticationPolicy;
