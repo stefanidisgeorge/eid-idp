@@ -75,7 +75,6 @@
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-common</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

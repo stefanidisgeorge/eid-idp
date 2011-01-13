@@ -101,16 +101,12 @@
             be.fedict.eid.idp.sp.protocol.openid.AuthenticationResponseServlet
         </servlet-class>
         <init-param>
-            <param-name>IdentifierSessionAttribute</param-name>
-            <param-value>Identifier</param-value>
+            <param-name>ResponseSessionAttribute</param-name>
+            <param-value>Response</param-value>
         </init-param>
         <init-param>
             <param-name>RedirectPage</param-name>
             <param-value>/authn-result.jsp</param-value>
-        </init-param>
-        <init-param>
-            <param-name>AttributeMapSessionAttribute</param-name>
-            <param-value>AttributeMap</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
