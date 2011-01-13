@@ -278,26 +278,13 @@
                     <itemizedlist>
                         <listitem>
                             <para>
-                                <code>IdentifierSessionAttribute</code>
-                                HTTP Session attribute on which the returned
-                                subject identifier will be pushed after a
-                                successfull authentication.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                <code>AttributeMapSessionAttribute</code>
-                                HTTP Session attribute on which a Map
-                                containing the returned attributes will be
-                                pushed after a successfull authentiaction.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                <code>RelayStateSessionAttribute</code>
-                                HTTP Session attribute on which the optional
-                                relay state returned with the authentication
-                                response will be pushed.
+                                <code>ResponseSessionAttribute</code>
+                                HTTP Session attribute on which a returned
+                                AuthenticationResponse object will be pushed
+                                after a successfull authentication. This object
+                                contains the user identifier, authentication
+                                time, map of returned attributes, authentication
+                                policy and relay state.
                             </para>
                         </listitem>
                         <listitem>
@@ -354,16 +341,12 @@
             be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseServlet
         </servlet-class>
         <init-param>
-            <param-name>IdentifierSessionAttribute</param-name>
-            <param-value>Identifier</param-value>
+            <param-name>ResponseSessionAttribute</param-name>
+            <param-value>Response</param-value>
         </init-param>
         <init-param>
             <param-name>RedirectPage</param-name>
             <param-value>/authn-result.jsp</param-value>
-        </init-param>
-        <init-param>
-            <param-name>AttributeMapSessionAttribute</param-name>
-            <param-value>AttributeMap</param-value>
         </init-param>
         <init-param>
             <param-name>AuthenticationResponseService</param-name>
