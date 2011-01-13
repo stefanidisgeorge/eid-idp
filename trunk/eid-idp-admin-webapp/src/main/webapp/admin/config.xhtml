@@ -27,7 +27,7 @@
                         <h:inputText value="#{idpConfig.xkmsAuthTrustDomain}"/>
 
                         <h:outputText
-                                value="eID Trust Service Identification Trust Domain:"/>
+                                value="eID Trust Service Identification (National Registry) Trust Domain:"/>
                         <h:inputText value="#{idpConfig.xkmsIdentTrustDomain}"/>
                     </h:panelGrid>
                     <h:commandButton value="Save"
@@ -62,14 +62,14 @@
                                      action="#{idpConfig.saveNetwork}"/>
                 </rich:tab>
 
-                <rich:tab name="tab_applet" label="Applet">
+                <rich:tab name="tab_applet" label="eID Applet">
                     <h:panelGrid columns="2">
 
-                        <h:outputLabel value="Server Certificate Subject"/>
+                        <h:outputLabel value="SSL Server Certificate Subject"/>
                         <h:outputLabel
                                 value="#{idpConfig.appletConfig.serverCertificateSubject}"/>
 
-                        <h:outputLabel for="upload" value="Server Certificate"/>
+                        <h:outputLabel for="upload" value="SSL Server Certificate"/>
                         <rich:fileUpload
                                 fileUploadListener="#{idpConfig.uploadListener}"
                                 maxFilesQuantity="1" id="upload"
