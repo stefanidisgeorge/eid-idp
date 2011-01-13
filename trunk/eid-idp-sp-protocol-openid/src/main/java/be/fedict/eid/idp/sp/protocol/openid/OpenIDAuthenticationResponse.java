@@ -28,6 +28,8 @@ import java.util.Map;
  */
 public class OpenIDAuthenticationResponse implements Serializable {
 
+        private static final long serialVersionUID = 1L;
+
         private final Date authenticationTime;
         private final String identifier;
         private final List<String> authenticationPolicies;

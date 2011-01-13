@@ -160,16 +160,18 @@ public class AuthenticationResponseProcessor {
                 if (null != service) {
                         maxOffset = service.getMaximumTimeOffset();
                 }
-                if (now.isBefore(notBefore)) {
-                        // time skew
-                        if (now.plusMinutes(maxOffset).isBefore(notBefore) ||
-                                now.minusMinutes(maxOffset).isAfter(notOnOrAfter)) {
+                if (maxOffset >= 0) {
+                        if (now.isBefore(notBefore)) {
+                                // time skew
+                                if (now.plusMinutes(maxOffset).isBefore(notBefore) ||
+                                        now.minusMinutes(maxOffset).isAfter(notOnOrAfter)) {
+                                        throw new AuthenticationResponseProcessorException(
+                                                "SAML2 assertion validation: invalid SAML message timeframe");
+                                }
+                        } else if (now.isBefore(notBefore) || now.isAfter(notOnOrAfter)) {
                                 throw new AuthenticationResponseProcessorException(
                                         "SAML2 assertion validation: invalid SAML message timeframe");
                         }
-                } else if (now.isBefore(notBefore) || now.isAfter(notOnOrAfter)) {
-                        throw new AuthenticationResponseProcessorException(
-                                "SAML2 assertion validation: invalid SAML message timeframe");
                 }
 
                 // validate authn statement

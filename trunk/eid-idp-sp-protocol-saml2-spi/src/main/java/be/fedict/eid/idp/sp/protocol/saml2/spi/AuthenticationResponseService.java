@@ -43,7 +43,9 @@ public interface AuthenticationResponseService {
 
         /**
          * @return the maximum offset allowed on the SAML v2.0 response's assertion
-         *         condition fields. Specified in minutes.
+         *         condition fields. Specified in minutes. A negative value
+         *         results in skipping validation of the condition's time
+         *         fields.
          */
         int getMaximumTimeOffset();
 }

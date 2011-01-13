@@ -20,6 +20,8 @@ package be.fedict.eid.idp.sp.protocol.saml2;
 
 public class AuthenticationResponseProcessorException extends Exception {
 
+        private static final long serialVersionUID = 1L;
+
         public AuthenticationResponseProcessorException(String message,
                                                         Throwable cause) {
                 super(message, cause);

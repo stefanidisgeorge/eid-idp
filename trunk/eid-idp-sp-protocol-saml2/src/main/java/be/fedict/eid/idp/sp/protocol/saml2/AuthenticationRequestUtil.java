@@ -57,10 +57,14 @@ import java.util.UUID;
  *
  * @author Wim Vandenhaute
  */
-public abstract class AuthenticationRequestUtil {
+public class AuthenticationRequestUtil {
 
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationRequestUtil.class);
+
+        private AuthenticationRequestUtil() {
+                // empty
+        }
 
         /**
          * Generates a SAML v2.0 Authentication Request and performs a browser
