@@ -7,9 +7,8 @@
 <body>
 <ui:composition template="/WEB-INF/template.xhtml">
 	<ui:define name="body">
-		<h2>eID Authentication</h2>
-		<p>The web application has requested an eID authentication
-		operation.</p>
+		<h2>#{messages.authentication}</h2>
+		<p>#{messages.authenticationInfo}</p>
 		<script src="https://www.java.com/js/deployJava.js"></script>
 		<script>
 	var attributes = {

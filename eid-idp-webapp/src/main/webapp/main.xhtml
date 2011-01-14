@@ -7,18 +7,18 @@
 <body>
 <ui:composition template="/WEB-INF/template.xhtml">
 	<ui:define name="body">
-		<h2>Supported Protocol Services</h2>
+		<h2>#{messages.supportedProtocols}</h2>
 		<rich:dataTable value="#{idpProtocolServices}" var="row">
 			<rich:column>
-				<f:facet name="header">Name</f:facet>
+				<f:facet name="header">#{messages.name}</f:facet>
 				<h:outputText value="#{row.name}" />
 			</rich:column>
 			<rich:column>
-				<f:facet name="header">Context Path</f:facet>
+				<f:facet name="header">#{messages.contextPath}</f:facet>
 				<h:outputText value="#{row.contextPath}" />
 			</rich:column>
 		</rich:dataTable>
-		<p>Identity thumbprint: <h:outputText
+		<p>#{messages.identityThumbprint} :<h:outputText
 			value="#{idpProtocolService.thumbprint}" /></p>
 	</ui:define>
 </ui:composition>

@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <components xmlns="http://jboss.com/products/seam/components"
-	xmlns:core="http://jboss.com/products/seam/core" xmlns:security="http://jboss.com/products/seam/security"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://jboss.com/products/seam/core http://jboss.com/products/seam/core-2.1.xsd
+            xmlns:core="http://jboss.com/products/seam/core"
+            xmlns:international="http://jboss.com/products/seam/international"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://jboss.com/products/seam/core http://jboss.com/products/seam/core-2.1.xsd
         http://jboss.com/products/seam/components http://jboss.com/products/seam/components-2.1.xsd
-        http://jboss.com/products/seam/security http://jboss.com/products/seam/security-2.1.xsd">
-	<core:init jndi-pattern="be/fedict/eid/idp/webapp/#{ejbName}" />
+    http://jboss.com/products/seam/international http://jboss.com/products/seam/international-2.2.xsd">
+
+    <core:init jndi-pattern="be/fedict/eid/idp/webapp/#{ejbName}"/>
+
+    <international:locale-config
+            default-locale="en" supported-locales="en nl fr de"/>
+
 </components>
