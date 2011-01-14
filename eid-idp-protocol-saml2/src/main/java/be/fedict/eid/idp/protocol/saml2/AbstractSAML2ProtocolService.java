@@ -34,20 +34,13 @@ import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.Status;
-import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.security.SAMLSignatureProfileValidator;
+import org.opensaml.saml2.core.*;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
-import org.opensaml.xml.signature.SignatureValidator;
-import org.opensaml.xml.validation.ValidationException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -55,8 +48,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -165,28 +156,13 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 String inResponseTo = authnRequest.getID();
                 setInResponseTo(inResponseTo, request);
 
-                LOG.debug("request: " + Saml2Util.domToString(Saml2Util.marshall(authnRequest).getOwnerDocument(), true));
+                LOG.debug("request: " + Saml2Util.domToString(
+                        Saml2Util.marshall(authnRequest).getOwnerDocument(), true));
 
                 // Signature validation
                 if (null != authnRequest.getSignature()) {
-                        List<X509Certificate> certChain =
-                                KeyInfoHelper.getCertificates(
-                                        authnRequest.getSignature().getKeyInfo());
-                        try {
-                                SAMLSignatureProfileValidator pv =
-                                        new SAMLSignatureProfileValidator();
-                                pv.validate(authnRequest.getSignature());
-                                BasicX509Credential credential = new BasicX509Credential();
-                                credential.setPublicKey(certChain.get(0).getPublicKey());
-                                SignatureValidator sigValidator = new SignatureValidator(credential);
-                                sigValidator.validate(authnRequest.getSignature());
-                        } catch (ValidationException e) {
 
-                                throw new ServletException("SAML request " +
-                                        "signature validation error: " +
-                                        e.getMessage());
-
-                        }
+                        Saml2Util.validateSignature(authnRequest.getSignature());
                 }
 
                 return getAuthenticationFlow();
@@ -226,9 +202,18 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 status.setStatusCode(statusCode);
                 statusCode.setValue(StatusCode.SUCCESS_URI);
 
-                samlResponse.getAssertions().add(Saml2Util.getAssertion(inResponseTo,
+                // generate assertion
+                Assertion assertion = Saml2Util.getAssertion(inResponseTo,
                         targetUrl, issueInstant, getAuthenticationFlow(),
-                        userId, givenName, surName, identity, address, photo));
+                        userId, givenName, surName, identity, address, photo);
+
+                // sign assertion
+                KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
+                if (null != idpIdentity) {
+                        Saml2Util.sign(assertion, idpIdentity);
+                }
+
+                samlResponse.getAssertions().add(assertion);
 
                 ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 
@@ -237,7 +222,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 messageContext.setOutboundSAMLMessage(samlResponse);
                 messageContext.setRelayState(relayState);
 
-                KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
+                // sign response
                 if (null != idpIdentity) {
 
                         BasicX509Credential credential = new BasicX509Credential();
