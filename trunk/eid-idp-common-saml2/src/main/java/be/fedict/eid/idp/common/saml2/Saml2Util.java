@@ -63,10 +63,13 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -377,6 +380,93 @@ public abstract class Saml2Util {
                 }
                 return xmlElement;
         }
+
+        public static SignableSAMLObject sign(SignableSAMLObject signableSAMLObject,
+                                              KeyStore.PrivateKeyEntry privateKeyEntry) {
+
+                XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
+                SignatureBuilder signatureBuilder = (SignatureBuilder) builderFactory.getBuilder(Signature.DEFAULT_ELEMENT_NAME);
+                Signature signature = signatureBuilder.buildObject();
+                signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+
+                String algorithm = privateKeyEntry.getPrivateKey().getAlgorithm();
+                if ("RSA".equals(algorithm)) {
+                        signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA);
+                } else if ("DSA".equals(algorithm)) {
+                        signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_DSA);
+                }
+
+                List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+                for (java.security.cert.Certificate certificate : privateKeyEntry.getCertificateChain()) {
+                        certificateChain.add((X509Certificate) certificate);
+                }
+
+                // add certificate as keyinfo
+                KeyInfo keyInfo = buildXMLObject(KeyInfo.class, KeyInfo.DEFAULT_ELEMENT_NAME);
+                try {
+                        for (X509Certificate certificate : certificateChain) {
+                                KeyInfoHelper.addCertificate(keyInfo, certificate);
+                        }
+                } catch (CertificateEncodingException e) {
+                        throw new RuntimeException("opensaml2 certificate encoding error: " + e.getMessage(), e);
+                }
+                signature.setKeyInfo(keyInfo);
+
+                BasicX509Credential signingCredential = new BasicX509Credential();
+                signingCredential.setPrivateKey(privateKeyEntry.getPrivateKey());
+                signingCredential.setEntityCertificateChain(certificateChain);
+                signature.setSigningCredential(signingCredential);
+                signableSAMLObject.setSignature(signature);
+
+                // Marshall so it has an XML representation.
+                marshall(signableSAMLObject);
+
+                // Sign after marshaling so we can add a signature to the XML representation.
+                try {
+                        Signer.signObject(signature);
+                } catch (SignatureException e) {
+                        throw new RuntimeException("opensaml2 signing error: " + e.getMessage(), e);
+                }
+                return signableSAMLObject;
+        }
+
+        public static List<X509Certificate> validateSignature(Signature signature)
+                throws CertificateException, ValidationException {
+
+                List<X509Certificate> certChain =
+                        KeyInfoHelper.getCertificates(signature.getKeyInfo());
+
+                SAMLSignatureProfileValidator pv =
+                        new SAMLSignatureProfileValidator();
+                pv.validate(signature);
+                BasicX509Credential credential = new BasicX509Credential();
+                credential.setPublicKey(getEndCertificate(certChain).getPublicKey());
+                SignatureValidator sigValidator = new SignatureValidator(credential);
+                sigValidator.validate(signature);
+
+                return certChain;
+        }
+
+        private static X509Certificate getEndCertificate(List<X509Certificate> certChain) {
+
+                if (certChain.size() == 1) {
+                        return certChain.get(0);
+                }
+
+                if (isSelfSigned(certChain.get(0))) {
+                        return certChain.get(certChain.size() - 1);
+                } else {
+                        return certChain.get(0);
+                }
+
+        }
+
+        private static boolean isSelfSigned(X509Certificate certificate) {
+
+                return certificate.getIssuerX500Principal().equals(
+                        certificate.getSubjectX500Principal());
+        }
+
 
         public static Element marshall(XMLObject xmlObject) {
 

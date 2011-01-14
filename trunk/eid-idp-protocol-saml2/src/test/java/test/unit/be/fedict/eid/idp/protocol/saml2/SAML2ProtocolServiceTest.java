@@ -21,9 +21,11 @@ package test.unit.be.fedict.eid.idp.protocol.saml2;
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceAuthIdent;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import be.fedict.eid.idp.spi.NameValuePair;
 import be.fedict.eid.idp.spi.ReturnResponse;
 import org.apache.commons.codec.binary.Base64;
@@ -36,7 +38,10 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xpath.XPathAPI;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -50,6 +55,7 @@ import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.binding.encoding.HTTPPostEncoder;
+import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.Endpoint;
@@ -316,6 +322,47 @@ public class SAML2ProtocolServiceTest {
                 LOG.debug("tmp file: " + tmpFile.getAbsolutePath());
         }
 
+        @Test
+        public void testAssertionSigning() throws Exception {
+
+                // Setup
+                DateTime notBefore = new DateTime();
+                DateTime notAfter = notBefore.plusMonths(1);
+
+                KeyPair rootKeyPair = generateKeyPair();
+                X509Certificate rootCertificate = generateSelfSignedCertificate(
+                        rootKeyPair, "CN=TestRoot", notBefore, notAfter);
+
+                KeyPair endKeyPair = generateKeyPair();
+                X509Certificate endCertificate = generateCertificate(
+                        endKeyPair.getPublic(), "CN=Test", notBefore, notAfter,
+                        rootCertificate, rootKeyPair.getPrivate());
+
+                Certificate[] certChain = {endCertificate, rootCertificate};
+
+                KeyStore.PrivateKeyEntry idpIdentity =
+                        new KeyStore.PrivateKeyEntry(endKeyPair.getPrivate(),
+                                certChain);
+
+                // Operate: sign
+                Assertion assertion = Saml2Util.getAssertion("test-in-response-to",
+                        "test-audience", new DateTime(), IdentityProviderFlow.AUTHENTICATION,
+                        UUID.randomUUID().toString(), "Given-name", "Sur-name",
+                        null, null, null);
+                Assertion signedAssertion = (Assertion) Saml2Util.sign(assertion,
+                        idpIdentity);
+
+                // Verify
+                String result = Saml2Util.domToString(Saml2Util.marshall(signedAssertion), true);
+                LOG.debug("DOM signed assertion: " + result);
+                String result2 = Saml2Util.domToString(Saml2Util.marshall(assertion), true);
+                LOG.debug("signed assertion: " + result2);
+                assertEquals(result, result2);
+
+                // Operate: validate
+                Saml2Util.validateSignature(signedAssertion.getSignature());
+        }
+
         private KeyPair generateKeyPair() throws Exception {
                 KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
                 SecureRandom random = new SecureRandom();
@@ -347,41 +394,61 @@ public class SAML2ProtocolServiceTest {
         private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
                                                               String subjectDn, DateTime notBefore, DateTime notAfter)
                 throws Exception {
-                PublicKey subjectPublicKey = keyPair.getPublic();
-                PrivateKey issuerPrivateKey = keyPair.getPrivate();
-                String signatureAlgorithm = "SHA1WithRSAEncryption";
+
+                return generateCertificate(keyPair.getPublic(), subjectDn,
+                        notBefore, notAfter, null, keyPair.getPrivate());
+        }
+
+        private X509Certificate generateCertificate(PublicKey subjectPublicKey,
+                                                    String subjectDn,
+                                                    DateTime notBefore,
+                                                    DateTime notAfter,
+                                                    X509Certificate issuerCertificate,
+                                                    PrivateKey issuerPrivateKey)
+                throws Exception {
+
                 X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
                 certificateGenerator.reset();
                 certificateGenerator.setPublicKey(subjectPublicKey);
-                certificateGenerator.setSignatureAlgorithm(signatureAlgorithm);
+                certificateGenerator.setSignatureAlgorithm("SHA1WithRSAEncryption");
                 certificateGenerator.setNotBefore(notBefore.toDate());
                 certificateGenerator.setNotAfter(notAfter.toDate());
-                X509Principal issuerDN = new X509Principal(subjectDn);
+
+                X509Principal issuerDN;
+                if (null != issuerCertificate) {
+                        issuerDN = new X509Principal(issuerCertificate
+                                .getSubjectX500Principal().toString());
+                } else {
+                        issuerDN = new X509Principal(subjectDn);
+                }
                 certificateGenerator.setIssuerDN(issuerDN);
                 certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
                 certificateGenerator.setSerialNumber(new BigInteger(128,
                         new SecureRandom()));
 
-                certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
-                        false, createSubjectKeyId(subjectPublicKey));
+                certificateGenerator.addExtension(
+                        X509Extensions.SubjectKeyIdentifier, false,
+                        createSubjectKeyId(subjectPublicKey));
+
                 PublicKey issuerPublicKey;
-                issuerPublicKey = subjectPublicKey;
+                if (null != issuerCertificate) {
+                        issuerPublicKey = issuerCertificate.getPublicKey();
+                } else {
+                        issuerPublicKey = subjectPublicKey;
+                }
                 certificateGenerator.addExtension(
                         X509Extensions.AuthorityKeyIdentifier, false,
                         createAuthorityKeyId(issuerPublicKey));
-
-                certificateGenerator.addExtension(X509Extensions.BasicConstraints,
-                        false, new BasicConstraints(true));
 
                 X509Certificate certificate;
                 certificate = certificateGenerator.generate(issuerPrivateKey);
 
                 /*
-                * Next certificate factory trick is needed to make sure that the
-                * certificate delivered to the caller is provided by the default
-                * security provider instead of BouncyCastle. If we don't do this trick
-                * we might run into trouble when trying to use the CertPath validator.
-                */
+                 * Next certificate factory trick is needed to make sure that the
+                 * certificate delivered to the caller is provided by the default
+                 * security provider instead of BouncyCastle. If we don't do this trick
+                 * we might run into trouble when trying to use the CertPath validator.
+                 */
                 CertificateFactory certificateFactory = CertificateFactory
                         .getInstance("X.509");
                 certificate = (X509Certificate) certificateFactory
