@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IdentityProviderProtocols xmlns="urn:be:fedict:eid:idp:spi:protocol">
+    <IdentityProviderProtocol>
+        <Name>SAML2 Protocol Service Identification</Name>
+        <Description>This eID IdP Protocol Service provides a SAML2 Browser POST
+            Profile protocol for eID identification purposes.
+        </Description>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceIdent</ProtocolService>
+        <ContextPath>/saml2-ident</ContextPath>
+    </IdentityProviderProtocol>
+    <IdentityProviderProtocol>
+        <Name>SAML2 Protocol Service Authentication</Name>
+        <Description>This eID IdP Protocol Service provides a SAML2 Browser POST
+            Profile protocol for eID authentication purposes.
+        </Description>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceAuth</ProtocolService>
+        <ContextPath>/saml2-auth</ContextPath>
+    </IdentityProviderProtocol>
+    <IdentityProviderProtocol>
+        <Name>SAML2 Protocol Service Authentication and Identification</Name>
+        <Description>This eID IdP Protocol Service provides a SAML2 Browser POST
+            Profile protocol for eID authentication and identification purposes.
+        </Description>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceAuthIdent</ProtocolService>
+        <ContextPath>/saml2-auth-ident</ContextPath>
+    </IdentityProviderProtocol>
+</IdentityProviderProtocols>
