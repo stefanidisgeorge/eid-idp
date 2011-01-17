@@ -39,7 +39,7 @@
             the FedICT eID Trust Service for validation of the eID certificates.
         </para>
         <para>
-            The FedICT eID Identity Provider is NOT an IAM solution. Following
+            The FedICT eID Identity Provider is not a complete IAM solution. Following
             is out-of-scope:
             <itemizedlist>
                 <listitem>
