@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" Destination="http://127.0.0.1" ID="saml-response-81c73d55-fa37-44d8-81d1-88f13167bc58" IssueInstant="2010-07-29T09:35:08.142Z" Version="2.0"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+<ds:Reference URI="#saml-response-81c73d55-fa37-44d8-81d1-88f13167bc58">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"><ec:InclusiveNamespaces xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#" PrefixList="ds saml samlp xs"/></ds:Transform>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+<ds:DigestValue>CEXUj/PIqCLpB5shmcsWMGTPmWE=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+Mg0FJm8ubEjpoiGgU0t1jtKlhboSm1HVu6hvZdU1tk+x2ZEuoqnn8o/dMDhE2RBnDUqvZqmW+T9G
+gJ1yR2zDoRNpUlVp9nmobjRd0wQDRCflDhpHglgTnpthRG3HEtAc0TtuLQ72VQwRh4baozNWdciU
+CSBorryDYT2yhiNekhU=
+</ds:SignatureValue>
+<ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIB9DCCAV2gAwIBAgIRALq5aNirh1R4tzF1wDP4qDAwDQYJKoZIhvcNAQEFBQAwDzENMAsGA1UE
+AwwEVGVzdDAeFw0xMDA3MjkwOTM1MDZaFw0xMDA4MjkwOTM1MDZaMA8xDTALBgNVBAMMBFRlc3Qw
+gZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAJDxuu0ygK3SvUe5C4T/LTvk1KXzH4YsiwXmnQce
+KdEBQ1eetyJ5mrtnFXHBfxC7Isu9vvshl/2cXb2b5dhMudCoT1BriN5lS4jZjIbpMh3JwIJ2otIW
+ECKUVaT3ctgjCSY3LPvVOSSLXj0PYFm8ZBxxG7mH5vzAdG3pQlW6qV/7AgMBAAGjUDBOMB0GA1Ud
+DgQWBBRN3ERF+T3+fYue0aX7tFpQfxSfJjAfBgNVHSMEGDAWgBRN3ERF+T3+fYue0aX7tFpQfxSf
+JjAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4GBAArxAXZpS5FoZSsxVj9s0dAbxOZZThnn
+ZF5SJZDTLwInVQ2og76/DJlEGghR1HH5VqK3EqbTQoNHDhT9BVQqkLHj+kGCVgcrWe5CnHfaBXNZ
+WuVZoVfHf12BEZmz8r98Z19K8Emk6AfEgEnpgh4HRFxqy86DwMpaEqIX55XIxHdI</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/></samlp:Status><saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="assertion-0994aa80-12cf-4f32-8f6a-5e8f5b5098a0" IssueInstant="2010-07-29T09:35:08.142Z" Version="2.0"><saml:Issuer>http://www.e-contract.be/</saml:Issuer><saml:Subject><saml:NameID>authn-id</saml:NameID><saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><saml:SubjectConfirmationData InResponseTo="a77a1c87-e590-47d7-a3e0-afea455ebc01" NotBefore="2010-07-29T09:35:08.142Z" NotOnOrAfter="2010-07-29T09:40:08.142Z" Recipient="http://127.0.0.1"/></saml:SubjectConfirmation></saml:Subject><saml:Conditions NotBefore="2010-07-29T09:35:08.142Z" NotOnOrAfter="2010-07-29T09:40:08.142Z"><saml:AudienceRestriction><saml:Audience>http://127.0.0.1</saml:Audience></saml:AudienceRestriction></saml:Conditions><saml:AuthnStatement AuthnInstant="2010-07-29T09:35:08.142Z"><saml:AuthnContext/></saml:AuthnStatement><saml:AttributeStatement><saml:Attribute Name="urn:be:fedict:eid:idp:name"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">test-name</saml:AttributeValue></saml:Attribute><saml:Attribute Name="urn:be:fedict:eid:idp:firstName"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">test-first-name</saml:AttributeValue></saml:Attribute><saml:Attribute Name="urn:be:fedict:eid:idp:gender"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">MALE</saml:AttributeValue></saml:Attribute></saml:AttributeStatement></saml:Assertion></samlp:Response>
