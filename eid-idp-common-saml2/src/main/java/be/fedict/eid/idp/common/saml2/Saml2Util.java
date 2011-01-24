@@ -447,7 +447,7 @@ public abstract class Saml2Util {
                 return certChain;
         }
 
-        private static X509Certificate getEndCertificate(List<X509Certificate> certChain) {
+        public static X509Certificate getEndCertificate(List<X509Certificate> certChain) {
 
                 if (certChain.size() == 1) {
                         return certChain.get(0);

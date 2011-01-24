@@ -29,40 +29,45 @@ import java.util.List;
 @Stateless
 public class RPServiceBean implements RPService {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+        @PersistenceContext
+        private EntityManager entityManager;
 
-    @Override
-    public List<RPEntity> listRPs() {
+        @Override
+        public List<RPEntity> listRPs() {
 
-        return RPEntity.listRPs(this.entityManager);
-    }
-
-    @Override
-    public void remove(RPEntity rp) {
-
-        RPEntity attachedRp = this.entityManager.find(RPEntity.class, rp.getId());
-        this.entityManager.remove(attachedRp);
-    }
-
-    @Override
-    public RPEntity save(RPEntity rp) {
-
-        RPEntity attachedRp = this.entityManager.find(RPEntity.class, rp.getId());
-        if (null != attachedRp) {
-            // save
-            attachedRp.setName(rp.getName());
-            if (null != rp.getDomain() && rp.getDomain().trim().isEmpty()) {
-                attachedRp.setDomain(null);
-            } else {
-                attachedRp.setDomain(rp.getDomain());
-            }
-            attachedRp.setEncodedCertificate(rp.getEncodedCertificate());
-            return attachedRp;
-        } else {
-            // add
-            this.entityManager.persist(rp);
-            return rp;
+                return RPEntity.listRPs(this.entityManager);
         }
-    }
+
+        @Override
+        public void remove(RPEntity rp) {
+
+                RPEntity attachedRp = this.entityManager.find(RPEntity.class, rp.getId());
+                this.entityManager.remove(attachedRp);
+        }
+
+        @Override
+        public RPEntity save(RPEntity rp) {
+
+                RPEntity attachedRp = this.entityManager.find(RPEntity.class, rp.getId());
+                if (null != attachedRp) {
+                        // save
+                        attachedRp.setName(rp.getName());
+                        if (null != rp.getDomain() && rp.getDomain().trim().isEmpty()) {
+                                attachedRp.setDomain(null);
+                        } else {
+                                attachedRp.setDomain(rp.getDomain());
+                        }
+                        attachedRp.setEncodedCertificate(rp.getEncodedCertificate());
+                        return attachedRp;
+                } else {
+                        // add
+                        this.entityManager.persist(rp);
+                        return rp;
+                }
+        }
+
+        @Override
+        public RPEntity find(String domain) {
+                return RPEntity.findRP(this.entityManager, domain);
+        }
 }

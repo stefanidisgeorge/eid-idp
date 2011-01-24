@@ -18,12 +18,15 @@
 
 package be.fedict.eid.idp.webapp;
 
+import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.Constants;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import be.fedict.eid.idp.model.RPService;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.IncomingRequest;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +71,9 @@ public class ProtocolEntryServlet extends HttpServlet {
 
         @EJB
         IdentityService identityService;
+
+        @EJB
+        RPService rpService;
 
         private String unknownProtocolPageInitParam;
 
@@ -213,18 +220,31 @@ public class ProtocolEntryServlet extends HttpServlet {
                 }
 
                 try {
-                        IdentityProviderFlow idpFlow = protocolService
+                        IncomingRequest incomingRequest = protocolService
                                 .handleIncomingRequest(request, response);
-                        if (null == idpFlow) {
+                        if (null == incomingRequest) {
                                 LOG
                                         .debug("the protocol service handler defined its own response flow");
                                 return;
                         }
 
-                        request.getSession().setAttribute(
-                                Constants.IDP_FLOW_SESSION_ATTRIBUTE, idpFlow);
+                        // optionally authenticate RP
+                        if (null != incomingRequest.getSpDomain()) {
 
-                        switch (idpFlow) {
+                                RPEntity rp = this.rpService.find(incomingRequest.getSpDomain());
+                                if (null != rp) {
+
+                                        if (!isValid(rp, incomingRequest, request, response)) {
+                                                return;
+                                        }
+                                }
+                        }
+
+                        request.getSession().setAttribute(
+                                Constants.IDP_FLOW_SESSION_ATTRIBUTE,
+                                incomingRequest.getIdpFlow());
+
+                        switch (incomingRequest.getIdpFlow()) {
                                 case AUTHENTICATION:
                                 case AUTHENTICATION_WITH_IDENTIFICATION:
                                         response.sendRedirect(request.getContextPath()
@@ -235,7 +255,8 @@ public class ProtocolEntryServlet extends HttpServlet {
                                                 + this.identificationPageInitParam);
                                         break;
                                 default:
-                                        throw new RuntimeException("cannot handle IdP flow: " + idpFlow);
+                                        throw new RuntimeException("cannot handle " +
+                                                "IdP flow: " + incomingRequest.getIdpFlow());
                         }
                 } catch (Exception e) {
                         LOG.error("protocol error: " + e.getMessage(), e);
@@ -246,5 +267,50 @@ public class ProtocolEntryServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath()
                                 + this.protocolErrorPageInitParam);
                 }
+        }
+
+        private boolean isValid(RPEntity rp, IncomingRequest incomingRequest,
+                                HttpServletRequest request,
+                                HttpServletResponse response) throws IOException {
+
+                LOG.debug("found RP: " + rp.getName());
+
+                if (rp.isRequestSigningRequired()) {
+                        if (null == incomingRequest.getSpCertificate()) {
+                                request.getSession().setAttribute(
+                                        this.protocolErrorMessageSessionAttributeInitParam,
+                                        "Request was not signed, which is required for this SP!");
+                                response.sendRedirect(request.getContextPath()
+                                        + this.protocolErrorPageInitParam);
+                                return false;
+                        }
+                }
+
+                if (null != incomingRequest.getSpCertificate()) {
+
+                        // verify fingerprint
+                        try {
+                                String rpFingerprint =
+                                        DigestUtils.shaHex(rp.getEncodedCertificate());
+                                String requestFingerPrint =
+                                        DigestUtils.shaHex(incomingRequest.getSpCertificate().getEncoded());
+
+                                if (!rpFingerprint.equals(requestFingerPrint)) {
+                                        request.getSession().setAttribute(
+                                                this.protocolErrorMessageSessionAttributeInitParam,
+                                                "Request was not signed with the correct keystore!");
+                                        response.sendRedirect(request.getContextPath()
+                                                + this.protocolErrorPageInitParam);
+                                        return false;
+                                }
+                        } catch (CertificateEncodingException e) {
+                                return false;
+                        }
+
+                }
+
+                request.getSession().setAttribute(
+                        Constants.RP_SESSION_ATTRIBUTE, rp);
+                return true;
         }
 }
