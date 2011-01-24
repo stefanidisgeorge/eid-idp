@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>be.fedict</groupId>
@@ -115,13 +118,6 @@
                             <contextRoot>/eid-idp-admin-portal</contextRoot>
                         </webModule>
                         <jarModule>
-                            <groupId>org.jboss.el</groupId>
-                            <artifactId>jboss-el</artifactId>
-                            <includeInApplicationXml>true
-                            </includeInApplicationXml>
-                            <bundleDir>lib</bundleDir>
-                        </jarModule>
-                        <jarModule>
                             <groupId>org.openid4java</groupId>
                             <artifactId>openid4java-nodeps</artifactId>
                             <includeInApplicationXml>true
@@ -170,6 +166,9 @@
                         </webModule>
                     </modules>
                     <version>5</version>
+                    <earSourceDirectory>${project.build.outputDirectory}
+                    </earSourceDirectory>
+                    <defaultLibBundleDir>lib</defaultLibBundleDir>
                 </configuration>
             </plugin>
             <plugin>
@@ -467,6 +466,11 @@
         <dependency>
             <groupId>org.apache.ws.security</groupId>
             <artifactId>wss4j</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>el-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
