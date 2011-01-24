@@ -37,8 +37,8 @@
                 <configuration>
                     <keystore>${project.build.directory}/classes/sp.jks
                     </keystore>
-                    <dname>cn=SP, ou=Development,
-                        L=SINT-MARTENS-LATEM, ST=VL, o=LIN.K_NV, c=BE
+                    <dname>cn=SP, ou=eID Test SP,
+                        L=Brussels, ST=Brussels, o=FedICT, c=BE
                     </dname>
                     <keypass>secret</keypass>
                     <keyalg>RSA</keyalg>
