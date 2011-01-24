@@ -135,7 +135,10 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 // cannot store authRequest since it's not serializable.
                 HttpSession httpSession = request.getSession();
                 storeParameterList(parameterList, httpSession);
-                return new IncomingRequest(getAuthenticationFlow(), null, null);
+
+                String openidRealm = parameterList.getParameterValue("openid.realm");
+
+                return new IncomingRequest(getAuthenticationFlow(), openidRealm, null);
         }
 
         private static final String OPENID_PARAMETER_LIST_SESSION_ATTRIBUTE =

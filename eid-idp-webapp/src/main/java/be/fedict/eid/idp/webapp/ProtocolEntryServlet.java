@@ -231,6 +231,7 @@ public class ProtocolEntryServlet extends HttpServlet {
                         // optionally authenticate RP
                         if (null != incomingRequest.getSpDomain()) {
 
+                                LOG.debug("SP Domain: " + incomingRequest.getSpDomain());
                                 RPEntity rp = this.rpService.find(incomingRequest.getSpDomain());
                                 if (null != rp) {
 

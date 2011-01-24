@@ -100,7 +100,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 String wctx = request.getParameter("wctx");
                 LOG.debug("wctx: " + wctx);
                 storeWCtx(wctx, request);
-                return new IncomingRequest(getAuthenticationFlow(), null, null);
+                return new IncomingRequest(getAuthenticationFlow(), wtrealm, null);
         }
 
         @Override
