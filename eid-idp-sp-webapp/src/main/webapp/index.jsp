@@ -28,5 +28,9 @@ identification/authentication protocols towards the eID IdP.</p>
 		href="openid-request?UserIdentifier=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/endpoints/openid-auth-identity&SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/openid-landing">
 		OpenID eID IdP Request: Authentication + Identification</a></li>
 </ul>
+
+
+<p>Download the Test Service Provider's Certificate
+    <a href="./pki">here</a></p>
 </body>
 </html>

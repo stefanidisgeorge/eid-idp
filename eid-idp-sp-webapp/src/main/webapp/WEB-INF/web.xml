@@ -20,6 +20,16 @@
         <url-pattern>/photo</url-pattern>
     </servlet-mapping>
 
+    <!-- PKI servlet -->
+    <servlet>
+        <servlet-name>PkiServlet</servlet-name>
+        <servlet-class>be.fedict.eid.idp.sp.PkiServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PkiServlet</servlet-name>
+        <url-pattern>/pki</url-pattern>
+    </servlet-mapping>
+
     <!-- SAML2 Authentication Protocol -->
     <servlet>
         <servlet-name>SAML2AuthenticationRequestServlet</servlet-name>
