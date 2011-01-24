@@ -12,18 +12,24 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, see
+ * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model;
+package be.fedict.eid.idp.webapp;
 
-public abstract class Constants {
+import javax.ejb.Local;
 
-        public static final String IDP_JNDI_CONTEXT = "be/fedict/eid/idp/";
+@Local
+public interface SP {
 
-        public static final String IDP_FLOW_SESSION_ATTRIBUTE =
-                Constants.class.getName() + ".IdpFlow";
-        public static final String RP_SESSION_ATTRIBUTE =
-                Constants.class.getName() + ".RP";
+        /*
+        * Lifecycle.
+        */
+        void destroy();
+
+        /*
+        * Accessors
+        */
+        String getRp();
 }

@@ -30,6 +30,11 @@
                     <h:message for="domain" styleClass="error"/>
                 </s:decorate>
 
+                <h:outputText value="Requires request signing?"/>
+                <h:selectBooleanCheckbox
+                        value="#{selectedRP.requestSigningRequired}"/>
+
+
                 <h:outputLabel value="Certificate Subject"/>
                 <h:outputLabel value="#{selectedRP.certificateSubject}"/>
 

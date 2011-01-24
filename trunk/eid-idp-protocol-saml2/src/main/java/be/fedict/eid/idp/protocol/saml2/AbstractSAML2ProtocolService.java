@@ -21,10 +21,7 @@ package be.fedict.eid.idp.protocol.saml2;
 import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -48,6 +45,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -120,7 +119,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 }
         }
 
-        public IdentityProviderFlow handleIncomingRequest(
+        public IncomingRequest handleIncomingRequest(
                 HttpServletRequest request, HttpServletResponse response)
                 throws Exception {
 
@@ -146,6 +145,10 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                                 "expected a SAML2 AuthnRequest document");
                 }
                 AuthnRequest authnRequest = (AuthnRequest) samlObject;
+
+                // optionally authenticate RP
+                String issuer = authnRequest.getIssuer().getValue();
+
                 String targetUrl = authnRequest.getAssertionConsumerServiceURL();
                 LOG.debug("target URL: " + targetUrl);
                 setTargetUrl(targetUrl, request);
@@ -160,12 +163,16 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                         Saml2Util.marshall(authnRequest).getOwnerDocument(), true));
 
                 // Signature validation
+                X509Certificate certificate = null;
                 if (null != authnRequest.getSignature()) {
 
-                        Saml2Util.validateSignature(authnRequest.getSignature());
+                        List<X509Certificate> certChain =
+                                Saml2Util.validateSignature(authnRequest.getSignature());
+                        certificate = Saml2Util.getEndCertificate(certChain);
                 }
 
-                return getAuthenticationFlow();
+                return new IncomingRequest(getAuthenticationFlow(), issuer,
+                        certificate);
 
         }
 

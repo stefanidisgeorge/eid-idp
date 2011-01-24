@@ -35,55 +35,55 @@ import javax.servlet.http.HttpSession;
  */
 public interface IdentityProviderProtocolService {
 
-    /**
-     * Initializes this protocol service handler.
-     *
-     * @param servletContext servlet context
-     * @param configuration  IdP configuration
-     */
-    void init(ServletContext servletContext,
-              IdentityProviderConfiguration configuration);
+        /**
+         * Initializes this protocol service handler.
+         *
+         * @param servletContext servlet context
+         * @param configuration  IdP configuration
+         */
+        void init(ServletContext servletContext,
+                  IdentityProviderConfiguration configuration);
 
-    /**
-     * Handles an incoming request for this protocol.
-     *
-     * @param request  the HTTP request.
-     * @param response the HTTP response. Can be used if the protocol handler does
-     *                 not want to continue via the regular IdP flow.
-     * @return the flow to be continued in the IdP.
-     * @throws Exception in case this protocol service cannot handle the incoming
-     *                   request.
-     */
-    IdentityProviderFlow handleIncomingRequest(HttpServletRequest request,
-                                               HttpServletResponse response)
-            throws Exception;
+        /**
+         * Handles an incoming request for this protocol.
+         *
+         * @param request  the HTTP request.
+         * @param response the HTTP response. Can be used if the protocol handler does
+         *                 not want to continue via the regular IdP flow.
+         * @return incoming request
+         * @throws Exception in case this protocol service cannot handle the incoming
+         *                   request.
+         */
+        IncomingRequest handleIncomingRequest(HttpServletRequest request,
+                                              HttpServletResponse response)
+                throws Exception;
 
-    /**
-     * Handles the outgoing response to return to the Service Provider web
-     * application.
-     *
-     * @param httpSession the HTTP session context.
-     * @param userId      user ID
-     * @param givenName   given name
-     * @param surName     sur name
-     * @param identity    the eID identity (in case of an eID identification operation,
-     *                    else <code>null</code>)
-     * @param address     the eID address (in case of an eID identification operation,
-     *                    else <code>null</code>)
-     * @param photo       the eID photo (in case of an eID identification operation,
-     *                    else <code>null</code>)
-     * @param request     the HTTP request.
-     * @param response    the HTTP response.   @return the response object in case a Browser POST should be constructed.
-     *                    <code>null</code> in case this protocol service handles the
-     *                    response generation itself.
-     * @throws Exception in case this protocol service cannot construct the outgoing
-     *                   response.
-     * @return response
-     */
-    ReturnResponse handleReturnResponse(HttpSession httpSession, String userId,
-                                        String givenName, String surName,
-                                        Identity identity, Address address,
-                                        byte[] photo, HttpServletRequest request,
-                                        HttpServletResponse response)
-            throws Exception;
+        /**
+         * Handles the outgoing response to return to the Service Provider web
+         * application.
+         *
+         * @param httpSession the HTTP session context.
+         * @param userId      user ID
+         * @param givenName   given name
+         * @param surName     sur name
+         * @param identity    the eID identity (in case of an eID identification operation,
+         *                    else <code>null</code>)
+         * @param address     the eID address (in case of an eID identification operation,
+         *                    else <code>null</code>)
+         * @param photo       the eID photo (in case of an eID identification operation,
+         *                    else <code>null</code>)
+         * @param request     the HTTP request.
+         * @param response    the HTTP response.   @return the response object in case a Browser POST should be constructed.
+         *                    <code>null</code> in case this protocol service handles the
+         *                    response generation itself.
+         * @return response
+         * @throws Exception in case this protocol service cannot construct the outgoing
+         *                   response.
+         */
+        ReturnResponse handleReturnResponse(HttpSession httpSession, String userId,
+                                            String givenName, String surName,
+                                            Identity identity, Address address,
+                                            byte[] photo, HttpServletRequest request,
+                                            HttpServletResponse response)
+                throws Exception;
 }

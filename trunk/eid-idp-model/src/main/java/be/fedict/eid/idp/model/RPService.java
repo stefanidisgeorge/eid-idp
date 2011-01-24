@@ -26,9 +26,11 @@ import java.util.List;
 @Local
 public interface RPService {
 
-    List<RPEntity> listRPs();
+        List<RPEntity> listRPs();
 
-    void remove(RPEntity rp);
+        void remove(RPEntity rp);
 
-    RPEntity save(RPEntity rp);
+        RPEntity save(RPEntity rp);
+
+        RPEntity find(String domain);
 }

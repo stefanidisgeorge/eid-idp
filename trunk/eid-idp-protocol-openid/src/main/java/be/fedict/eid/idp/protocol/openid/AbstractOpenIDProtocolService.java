@@ -100,7 +100,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 this.configuration = configuration;
         }
 
-        public IdentityProviderFlow handleIncomingRequest(
+        public IncomingRequest handleIncomingRequest(
                 HttpServletRequest request, HttpServletResponse response)
                 throws Exception {
 
@@ -122,10 +122,10 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 throw new ServletException("unknown OpenID mode: " + openIdMode);
         }
 
-        private IdentityProviderFlow doCheckIdSetup(HttpServletRequest request,
-                                                    HttpServletResponse response,
-                                                    ServerManager serverManager,
-                                                    ParameterList parameterList)
+        private IncomingRequest doCheckIdSetup(HttpServletRequest request,
+                                               HttpServletResponse response,
+                                               ServerManager serverManager,
+                                               ParameterList parameterList)
                 throws MessageException {
 
                 LOG.debug("checkid_setup");
@@ -135,7 +135,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 // cannot store authRequest since it's not serializable.
                 HttpSession httpSession = request.getSession();
                 storeParameterList(parameterList, httpSession);
-                return getAuthenticationFlow();
+                return new IncomingRequest(getAuthenticationFlow(), null, null);
         }
 
         private static final String OPENID_PARAMETER_LIST_SESSION_ATTRIBUTE =
@@ -159,7 +159,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 return parameterList;
         }
 
-        private IdentityProviderFlow doCheckAuthentication(
+        private IncomingRequest doCheckAuthentication(
                 HttpServletResponse response, ServerManager serverManager,
                 ParameterList parameterList) throws IOException {
 
@@ -170,9 +170,9 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 return null;
         }
 
-        private IdentityProviderFlow doAssociation(HttpServletResponse response,
-                                                   ServerManager serverManager,
-                                                   ParameterList parameterList)
+        private IncomingRequest doAssociation(HttpServletResponse response,
+                                              ServerManager serverManager,
+                                              ParameterList parameterList)
                 throws IOException {
 
                 /*
