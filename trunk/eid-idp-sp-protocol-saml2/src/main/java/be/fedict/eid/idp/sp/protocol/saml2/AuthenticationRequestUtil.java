@@ -62,6 +62,14 @@ public class AuthenticationRequestUtil {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationRequestUtil.class);
 
+        static {
+                try {
+                        DefaultBootstrap.bootstrap();
+                } catch (ConfigurationException e) {
+                        throw new RuntimeException("could not bootstrap the OpenSAML2 library", e);
+                }
+        }
+
         private AuthenticationRequestUtil() {
                 // empty
         }
@@ -98,13 +106,6 @@ public class AuthenticationRequestUtil {
                 LOG.debug("SP destination: " + spDestination);
                 LOG.debug("relay state: " + relayState);
                 LOG.debug("SP identity: " + spIdentity);
-
-                try {
-                        DefaultBootstrap.bootstrap();
-                } catch (ConfigurationException e) {
-                        throw new ServletException("opensaml config error: "
-                                + e.getMessage(), e);
-                }
 
                 XMLObjectBuilderFactory builderFactory = Configuration
                         .getBuilderFactory();

@@ -62,6 +62,14 @@ public class AuthenticationResponseProcessor {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationResponseProcessor.class);
 
+        static {
+                try {
+                        DefaultBootstrap.bootstrap();
+                } catch (ConfigurationException e) {
+                        throw new RuntimeException("could not bootstrap the OpenSAML2 library", e);
+                }
+        }
+
         /**
          * Process the incoming SAML v2.0 response.
          *
@@ -74,13 +82,6 @@ public class AuthenticationResponseProcessor {
         public AuthenticationResponse process(AuthenticationResponseService service,
                                               HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
-
-                try {
-                        DefaultBootstrap.bootstrap();
-                } catch (ConfigurationException e) {
-                        throw new AuthenticationResponseProcessorException(
-                                "OpenSAML configuration exception", e);
-                }
 
                 BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
                         new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
