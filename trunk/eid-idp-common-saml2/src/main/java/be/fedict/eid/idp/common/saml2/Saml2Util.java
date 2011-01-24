@@ -401,7 +401,7 @@ public abstract class Saml2Util {
                         certificateChain.add((X509Certificate) certificate);
                 }
 
-                // add certificate as keyinfo
+                // add certificate chain as keyinfo
                 KeyInfo keyInfo = buildXMLObject(KeyInfo.class, KeyInfo.DEFAULT_ELEMENT_NAME);
                 try {
                         for (X509Certificate certificate : certificateChain) {

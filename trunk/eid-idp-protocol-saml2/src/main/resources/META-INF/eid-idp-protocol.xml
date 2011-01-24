@@ -7,6 +7,12 @@
         </Description>
         <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceIdent</ProtocolService>
         <ContextPath>/saml2-ident</ContextPath>
+        <Endpoints>
+            <Endpoint>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.SAML2MetadataHttpServletIdent</ServletClass>
+                <ContextPath>/saml2-ident-metadata.xml</ContextPath>
+            </Endpoint>
+        </Endpoints>
     </IdentityProviderProtocol>
     <IdentityProviderProtocol>
         <Name>SAML2 Protocol Service Authentication</Name>
@@ -15,6 +21,12 @@
         </Description>
         <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceAuth</ProtocolService>
         <ContextPath>/saml2-auth</ContextPath>
+        <Endpoints>
+            <Endpoint>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.SAML2MetadataHttpServletAuth</ServletClass>
+                <ContextPath>/saml2-auth-metadata.xml</ContextPath>
+            </Endpoint>
+        </Endpoints>
     </IdentityProviderProtocol>
     <IdentityProviderProtocol>
         <Name>SAML2 Protocol Service Authentication and Identification</Name>
@@ -23,5 +35,11 @@
         </Description>
         <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceAuthIdent</ProtocolService>
         <ContextPath>/saml2-auth-ident</ContextPath>
+        <Endpoints>
+            <Endpoint>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.SAML2MetadataHttpServletAuthIdent</ServletClass>
+                <ContextPath>/saml2-auth-ident-metadata.xml</ContextPath>
+            </Endpoint>
+        </Endpoints>
     </IdentityProviderProtocol>
 </IdentityProviderProtocols>
