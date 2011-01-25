@@ -48,14 +48,17 @@ public class RPEntity implements Serializable {
         private byte[] encodedCertificate;
         private boolean requestSigningRequired;
 
+        private String secretKey;
+
         public RPEntity(String name, String domain, X509Certificate certificate,
-                        boolean requestSigningRequired)
+                        boolean requestSigningRequired, String secretKey)
                 throws CertificateEncodingException {
 
                 this.name = name;
                 this.domain = domain;
                 this.encodedCertificate = certificate.getEncoded();
                 this.requestSigningRequired = requestSigningRequired;
+                this.secretKey = secretKey;
         }
 
         public RPEntity() {
@@ -140,6 +143,15 @@ public class RPEntity implements Serializable {
 
         public void setRequestSigningRequired(boolean requestSigningRequired) {
                 this.requestSigningRequired = requestSigningRequired;
+        }
+
+        @Column(nullable = true)
+        public String getSecretKey() {
+                return secretKey;
+        }
+
+        public void setSecretKey(String secretKey) {
+                this.secretKey = secretKey;
         }
 
         @SuppressWarnings("unchecked")

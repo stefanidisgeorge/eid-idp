@@ -58,6 +58,12 @@ public class RPServiceBean implements RPService {
                                 attachedRp.setDomain(rp.getDomain());
                         }
                         attachedRp.setEncodedCertificate(rp.getEncodedCertificate());
+
+                        if (null != rp.getSecretKey() && rp.getSecretKey().trim().isEmpty()) {
+                                attachedRp.setSecretKey(null);
+                        } else {
+                                attachedRp.setSecretKey(rp.getSecretKey());
+                        }
                         return attachedRp;
                 } else {
                         // add
