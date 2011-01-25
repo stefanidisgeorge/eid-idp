@@ -22,43 +22,57 @@ import org.richfaces.event.UploadEvent;
 
 import javax.ejb.Local;
 import java.io.IOException;
+import java.util.List;
 
 @Local
 public interface RP {
 
-    /*
-     * Accessors
-     */
+        /*
+        * Accessors
+        */
+        List<String> getSourceAttributes();
 
-    /*
-     * Listeners.
-     */
-    void uploadListener(UploadEvent event) throws IOException;
+        void setSourceAttributes(List<String> sourceAttributes);
 
-    /*
-    * Factories
-    */
-    void rpListFactory();
+        List<String> getSelectedAttributes();
 
-    /*
-    * Actions.
-    */
-    String add();
+        void setSelectedAttributes(List<String> selectedAttributes);
 
-    String modify();
+        /*
+        * Listeners.
+        */
+        void uploadListener(UploadEvent event) throws IOException;
 
-    String save();
+        /*
+        * Factories
+        */
+        void rpListFactory();
 
-    void select();
+        /*
+        * Actions.
+        */
+        String add();
 
-    String remove();
+        String modify();
 
-    String back();
+        String save();
 
-    /*
-    * Lifecycle.
-    */
-    void destroy();
+        void select();
 
-    void postConstruct();
+        String remove();
+
+        String back();
+
+        String selectAttributes();
+
+        String saveSelect();
+
+        void initSelect();
+
+        /*
+        * Lifecycle.
+        */
+        void destroy();
+
+        void postConstruct();
 }

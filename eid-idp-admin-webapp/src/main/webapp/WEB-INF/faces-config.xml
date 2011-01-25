@@ -59,6 +59,24 @@
             <to-view-id>/admin/rps.seam</to-view-id>
             <redirect/>
         </navigation-case>
+        <navigation-case>
+            <from-outcome>select</from-outcome>
+            <to-view-id>/admin/rp-attributes.seam</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>/admin/rp-attributes.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>back</from-outcome>
+            <to-view-id>/admin/rp-edit.seam</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/admin/rp-edit.seam</to-view-id>
+            <redirect/>
+        </navigation-case>
     </navigation-rule>
 
 </faces-config>

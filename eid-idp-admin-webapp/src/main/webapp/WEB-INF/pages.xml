@@ -12,6 +12,10 @@
         <action execute="#{identity.login}"/>
     </page>
 
+    <page view-id="/admin/rp-attributes.xhtml">
+        <action execute="#{idpRP.initSelect}"/>
+    </page>
+
     <exception class="org.jboss.seam.security.NotLoggedInException">
         <redirect view-id="/login.xhtml">
             <message>You must be logged in to perform this action.</message>

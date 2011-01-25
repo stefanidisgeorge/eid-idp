@@ -53,6 +53,7 @@ public class PersistenceTest {
                 configuration.addAnnotatedClass(RPEntity.class);
                 configuration.addAnnotatedClass(AppletConfigEntity.class);
                 configuration.addAnnotatedClass(AttributeEntity.class);
+                configuration.addAnnotatedClass(RPAttributeEntity.class);
 
                 EntityManagerFactory entityManagerFactory = configuration
                         .buildEntityManagerFactory();
