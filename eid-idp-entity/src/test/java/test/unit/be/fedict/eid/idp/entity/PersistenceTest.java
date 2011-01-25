@@ -18,10 +18,7 @@
 
 package test.unit.be.fedict.eid.idp.entity;
 
-import be.fedict.eid.idp.entity.AdministratorEntity;
-import be.fedict.eid.idp.entity.AppletConfigEntity;
-import be.fedict.eid.idp.entity.ConfigPropertyEntity;
-import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.entity.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ejb.Ejb3Configuration;
@@ -55,6 +52,7 @@ public class PersistenceTest {
                 configuration.addAnnotatedClass(ConfigPropertyEntity.class);
                 configuration.addAnnotatedClass(RPEntity.class);
                 configuration.addAnnotatedClass(AppletConfigEntity.class);
+                configuration.addAnnotatedClass(AttributeEntity.class);
 
                 EntityManagerFactory entityManagerFactory = configuration
                         .buildEntityManagerFactory();
