@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.model;
 
 import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.entity.RPEntity;
 
 import javax.ejb.Local;
 import java.util.List;
@@ -29,4 +30,6 @@ public interface AttributeService {
         List<AttributeEntity> listAttributes();
 
         AttributeEntity saveAttribute(String name);
+
+        RPEntity setAttributes(RPEntity rp, List<String> attributes);
 }

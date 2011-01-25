@@ -26,6 +26,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -50,6 +51,8 @@ public class RPEntity implements Serializable {
 
         private String secretKey;
 
+        private List<RPAttributeEntity> attributes;
+
         public RPEntity(String name, String domain, X509Certificate certificate,
                         boolean requestSigningRequired, String secretKey)
                 throws CertificateEncodingException {
@@ -59,10 +62,12 @@ public class RPEntity implements Serializable {
                 this.encodedCertificate = certificate.getEncoded();
                 this.requestSigningRequired = requestSigningRequired;
                 this.secretKey = secretKey;
+                this.attributes = new LinkedList<RPAttributeEntity>();
         }
 
         public RPEntity() {
                 super();
+                this.attributes = new LinkedList<RPAttributeEntity>();
         }
 
         @Id
@@ -152,6 +157,15 @@ public class RPEntity implements Serializable {
 
         public void setSecretKey(String secretKey) {
                 this.secretKey = secretKey;
+        }
+
+        @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, mappedBy = "rp")
+        public List<RPAttributeEntity> getAttributes() {
+                return attributes;
+        }
+
+        public void setAttributes(List<RPAttributeEntity> attributes) {
+                this.attributes = attributes;
         }
 
         @SuppressWarnings("unchecked")

@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.model.bean;
 
+import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.RPService;
 
@@ -64,10 +65,24 @@ public class RPServiceBean implements RPService {
                         } else {
                                 attachedRp.setSecretKey(rp.getSecretKey());
                         }
+
+                        // attributes
+                        for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
+                                attachedRp.getAttributes().
+                                        get(attachedRp.getAttributes().
+                                                indexOf(rpAttribute)).
+                                        setEncrypted(rpAttribute.isEncrypted());
+                        }
+
                         return attachedRp;
                 } else {
                         // add
                         this.entityManager.persist(rp);
+                        for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
+                                RPAttributeEntity newRpAttribute =
+                                        new RPAttributeEntity(rp, rpAttribute.getAttribute());
+                                this.entityManager.persist(newRpAttribute);
+                        }
                         return rp;
                 }
         }

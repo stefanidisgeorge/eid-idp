@@ -20,7 +20,10 @@ package be.fedict.eid.idp.admin.webapp.bean;
 
 import be.fedict.eid.idp.admin.webapp.AdminConstants;
 import be.fedict.eid.idp.admin.webapp.RP;
+import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.model.AttributeService;
 import be.fedict.eid.idp.model.RPService;
 import org.apache.commons.io.FileUtils;
 import org.jboss.ejb3.annotation.LocalBinding;
@@ -42,6 +45,7 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.LinkedList;
 import java.util.List;
 
 @Stateful
@@ -58,6 +62,9 @@ public class RPBean implements RP {
 
         @EJB
         private RPService rpService;
+
+        @EJB
+        private AttributeService attributeService;
 
         @In
         FacesMessages facesMessages;
@@ -76,9 +83,15 @@ public class RPBean implements RP {
         @Out(value = UPLOADED_CERTIFICATE, required = false, scope = ScopeType.CONVERSATION)
         private byte[] certificateBytes;
 
+        private List<String> sourceAttributes;
+        private List<String> selectedAttributes;
+
         @Override
         @PostConstruct
         public void postConstruct() {
+
+                this.sourceAttributes = null;
+                this.selectedAttributes = null;
         }
 
         @Override
@@ -100,6 +113,10 @@ public class RPBean implements RP {
 
                 this.log.debug("add RP");
                 this.selectedRP = new RPEntity();
+                for (AttributeEntity attribute : this.attributeService.listAttributes()) {
+                        this.selectedRP.getAttributes().add(
+                                new RPAttributeEntity(this.selectedRP, attribute));
+                }
                 return "modify";
         }
 
@@ -148,6 +165,33 @@ public class RPBean implements RP {
         }
 
         @Override
+        public String selectAttributes() {
+                return "select";
+        }
+
+        @Override
+        public String saveSelect() {
+
+                this.log.debug("save selected attributes");
+                this.selectedRP =
+                        this.attributeService.setAttributes(this.selectedRP,
+                                this.selectedAttributes);
+                return "success";
+        }
+
+        @Override
+        public void initSelect() {
+
+                this.log.debug("init select");
+                if (null != this.selectedRP) {
+                        this.selectedAttributes = new LinkedList<String>();
+                        for (RPAttributeEntity rpAttribute : this.selectedRP.getAttributes()) {
+                                this.selectedAttributes.add(rpAttribute.getAttribute().getName());
+                        }
+                }
+        }
+
+        @Override
         @Begin(join = true)
         public void uploadListener(UploadEvent event) throws IOException {
                 UploadItem item = event.getUploadItem();
@@ -176,6 +220,39 @@ public class RPBean implements RP {
                         .getInstance("X.509");
                 return (X509Certificate) certificateFactory
                         .generateCertificate(new ByteArrayInputStream(certificateBytes));
+        }
+
+        @Override
+        public List<String> getSourceAttributes() {
+
+                List<AttributeEntity> attributes = this.attributeService.
+                        listAttributes();
+                this.sourceAttributes = new LinkedList<String>();
+                for (AttributeEntity attribute : attributes) {
+                        if (null != this.selectedAttributes
+                                && !this.selectedAttributes.contains(attribute.getName())) {
+                                this.sourceAttributes.add(attribute.getName());
+                        }
+                }
+                return this.sourceAttributes;
+        }
+
+        @Override
+        public void setSourceAttributes(List<String> sourceAttributes) {
+
+                this.sourceAttributes = sourceAttributes;
+        }
+
+        @Override
+        public List<String> getSelectedAttributes() {
+
+                return this.selectedAttributes;
+        }
+
+        @Override
+        public void setSelectedAttributes(List<String> selectedAttributes) {
+
+                this.selectedAttributes = selectedAttributes;
         }
 
 }
