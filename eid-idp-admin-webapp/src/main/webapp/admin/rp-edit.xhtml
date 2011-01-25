@@ -20,15 +20,21 @@
 
                 <h:outputLabel for="name" value="Name"/>
                 <s:decorate>
-                    <h:inputText id="name" value="#{selectedRP.name}"/>
+                    <h:inputText id="name" value="#{selectedRP.name}"
+                                 size="50"/>
                     <h:message for="name" styleClass="error"/>
                 </s:decorate>
 
                 <h:outputLabel for="domain" value="Domain"/>
                 <s:decorate>
-                    <h:inputText id="domain" value="#{selectedRP.domain}"/>
+                    <h:inputText id="domain" value="#{selectedRP.domain}"
+                                 size="50"/>
                     <h:message for="domain" styleClass="error"/>
                 </s:decorate>
+
+                <h:outputText
+                        value="Encryption key (hexadecimal)"/>
+                <h:inputText value="#{selectedRP.secretKey}" size="50"/>
 
                 <h:outputText value="Requires request signing?"/>
                 <h:selectBooleanCheckbox
