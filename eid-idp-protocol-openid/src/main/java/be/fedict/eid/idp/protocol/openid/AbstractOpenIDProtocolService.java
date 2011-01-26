@@ -18,8 +18,6 @@
 
 package be.fedict.eid.idp.protocol.openid;
 
-import be.fedict.eid.applet.service.Address;
-import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.common.OpenIDAXConstants;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.codec.binary.Hex;
@@ -49,6 +47,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Map;
 
 /**
@@ -93,6 +92,13 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 return serverManager;
         }
 
+        public String getId() {
+
+                LOG.debug("get ID");
+                return "OpenID";
+        }
+
+        @Override
         public void init(ServletContext servletContext,
                          IdentityProviderConfiguration configuration) {
 
@@ -100,6 +106,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 this.configuration = configuration;
         }
 
+        @Override
         public IncomingRequest handleIncomingRequest(
                 HttpServletRequest request, HttpServletResponse response)
                 throws Exception {
@@ -116,22 +123,19 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                         return doCheckAuthentication(response, serverManager, parameterList);
                 }
                 if ("checkid_setup".equals(openIdMode)) {
-                        return doCheckIdSetup(request, response, serverManager,
-                                parameterList);
+                        return doCheckIdSetup(request, serverManager, parameterList);
                 }
                 throw new ServletException("unknown OpenID mode: " + openIdMode);
         }
 
         private IncomingRequest doCheckIdSetup(HttpServletRequest request,
-                                               HttpServletResponse response,
                                                ServerManager serverManager,
                                                ParameterList parameterList)
                 throws MessageException {
 
                 LOG.debug("checkid_setup");
                 RealmVerifier realmVerifier = serverManager.getRealmVerifier();
-                AuthRequest authRequest = AuthRequest.createAuthRequest(parameterList,
-                        realmVerifier);
+                AuthRequest.createAuthRequest(parameterList, realmVerifier);
                 // cannot store authRequest since it's not serializable.
                 HttpSession httpSession = request.getSession();
                 storeParameterList(parameterList, httpSession);
@@ -194,10 +198,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
         @SuppressWarnings("unchecked")
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
-                                                   String givenName, String surName,
-                                                   Identity identity,
-                                                   Address address,
-                                                   byte[] photo,
+                                                   Map<String, Attribute> attributes,
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
                 throws Exception {
@@ -274,8 +275,8 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                                                 LOG.debug("required attribute alias: " + alias);
                                                 LOG.debug("required attribute typeUri: " + typeUri);
 
-                                                String value = findAttribute(typeUri,
-                                                        givenName, surName, identity, address);
+                                                String value = findAttribute(
+                                                        typeUri, attributes);
                                                 if (null != value) {
                                                         fetchResponse.addAttribute(alias, typeUri, value);
                                                 }
@@ -290,8 +291,8 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                                                 LOG.debug("optional attribute alias: " + alias);
                                                 LOG.debug("optional attribute typeUri: " + typeUri);
 
-                                                String value = findAttribute(typeUri,
-                                                        givenName, surName, identity, address);
+                                                String value = findAttribute(
+                                                        typeUri, attributes);
                                                 if (null != value) {
                                                         fetchResponse.addAttribute(alias, typeUri, value);
                                                 }
@@ -336,45 +337,60 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
         }
 
         private String findAttribute(String typeUri,
-                                     String givenName, String surName,
-                                     Identity identity, Address address) {
+                                     Map<String, Attribute> attributes) {
 
-                if (typeUri.equals(OpenIDAXConstants.AX_FIRST_NAME_PERSON_TYPE)) {
-                        return givenName;
-                } else if (typeUri.equals(OpenIDAXConstants.AX_LAST_NAME_PERSON_TYPE)) {
-                        return surName;
-                } else if (typeUri.equals(OpenIDAXConstants.AX_NAME_PERSON_TYPE)) {
-                        return givenName + " " + surName;
+                for (Attribute attribute : attributes.values()) {
+
+                        if (attribute.getUri().equals(typeUri)) {
+
+                                if (attribute.getType().equals(String.class)) {
+
+                                        return (String) attribute.getValue();
+
+                                } else if (attribute.getType().equals(GregorianCalendar.class)) {
+
+                                        return new SimpleDateFormat("yyyy/MM/dd").
+                                                format(((GregorianCalendar) attribute.getValue()).getTime());
+                                } else {
+                                        throw new RuntimeException("Attribute of type \"" +
+                                                attribute.getType().getCanonicalName() +
+                                                " not supported!");
+                                }
+
+                        }
                 }
 
-                if (null == identity || null == address) {
-                        return null;
-                }
+                return null;
+        }
 
-                if (typeUri.equals(OpenIDAXConstants.AX_BIRTHDATE_TYPE)) {
-                        return new SimpleDateFormat("yyyy/MM/dd").format(identity.getDateOfBirth().getTime());
+        @Override
+        public String findAttributeUri(DefaultAttribute defaultAttribute) {
 
-                } else if (typeUri.equals(OpenIDAXConstants.AX_GENDER_TYPE)) {
-                        return IdpUtil.getGenderValue(identity);
+                switch (defaultAttribute) {
 
-                } else if (typeUri.equals(OpenIDAXConstants.AX_POSTAL_CODE_TYPE)) {
-                        return address.getZip();
-
-                } else if (typeUri.equals(OpenIDAXConstants.AX_COUNTRY_TYPE)) {
-                        return "BE";
-
-                } else if (typeUri.equals(OpenIDAXConstants.AX_POSTAL_ADDRESS_TYPE)) {
-                        return address.getStreetAndNumber();
-
-                } else if (typeUri.equals(OpenIDAXConstants.AX_CITY_TYPE)) {
-                        return address.getMunicipality();
-
-                } else if (typeUri.equals(OpenIDAXConstants.AX_NATIONALITY_TYPE)) {
-                        return identity.getNationality();
-
-                } else if (typeUri.equals(OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE)) {
-                        return identity.getPlaceOfBirth();
-
+                        case LAST_NAME:
+                                return OpenIDAXConstants.AX_LAST_NAME_PERSON_TYPE;
+                        case FIRST_NAME:
+                                return OpenIDAXConstants.AX_FIRST_NAME_PERSON_TYPE;
+                        case NAME:
+                                return OpenIDAXConstants.AX_NAME_PERSON_TYPE;
+                        case ADDRESS:
+                                return OpenIDAXConstants.AX_POSTAL_ADDRESS_TYPE;
+                        case LOCALITY:
+                                return OpenIDAXConstants.AX_CITY_TYPE;
+                        case POSTAL_CODE:
+                                return OpenIDAXConstants.AX_POSTAL_CODE_TYPE;
+                        case GENDER:
+                                return OpenIDAXConstants.AX_GENDER_TYPE;
+                        case DATE_OF_BIRTH:
+                                return OpenIDAXConstants.AX_BIRTHDATE_TYPE;
+                        case NATIONALITY:
+                                return OpenIDAXConstants.AX_NATIONALITY_TYPE;
+                        case PLACE_OF_BIRTH:
+                                return OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE;
+                        case IDENTIFIER:
+                        case PHOTO:
+                                return null;
                 }
 
                 return null;

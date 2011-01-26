@@ -24,10 +24,7 @@ import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceAuthIdent;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import be.fedict.eid.idp.spi.NameValuePair;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import be.fedict.eid.idp.spi.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -77,10 +74,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -287,8 +281,8 @@ public class SAML2ProtocolServiceTest {
                 // operate
                 saml2ProtocolService.init(null, mockConfiguration);
                 ReturnResponse returnResponse = saml2ProtocolService
-                        .handleReturnResponse(mockHttpSession, userId, givenName,
-                                surName, identity, address, null, null,
+                        .handleReturnResponse(mockHttpSession, userId,
+                                new HashMap<String, Attribute>(), null,
                                 mockHttpServletResponse);
 
                 // verify
@@ -347,8 +341,7 @@ public class SAML2ProtocolServiceTest {
                 // Operate: sign
                 Assertion assertion = Saml2Util.getAssertion("test-in-response-to",
                         "test-audience", new DateTime(), IdentityProviderFlow.AUTHENTICATION,
-                        UUID.randomUUID().toString(), "Given-name", "Sur-name",
-                        null, null, null);
+                        UUID.randomUUID().toString(), new HashMap<String, Attribute>());
                 Assertion signedAssertion = (Assertion) Saml2Util.sign(assertion,
                         idpIdentity);
 

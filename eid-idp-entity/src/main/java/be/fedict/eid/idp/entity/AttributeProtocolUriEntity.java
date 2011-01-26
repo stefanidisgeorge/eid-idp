@@ -27,59 +27,44 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = Constants.DATABASE_TABLE_PREFIX + "attribute_rp")
-@NamedQueries(@NamedQuery(name = RPAttributeEntity.LIST_ALL,
-        query = "FROM RPAttributeEntity"))
-public class RPAttributeEntity implements Serializable {
+@Table(name = Constants.DATABASE_TABLE_PREFIX + "attribute_uri")
+@NamedQueries(@NamedQuery(name = AttributeProtocolUriEntity.LIST_ALL,
+        query = "FROM AttributeProtocolUriEntity"))
+public class AttributeProtocolUriEntity implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        public static final String LIST_ALL = "idp.attr.rp.all";
+        public static final String LIST_ALL = "idp.attr.uri.all";
 
-        public static final String RP_COLUMN_NAME = "rp";
         public static final String ATTRIBUTE_COLUMN_NAME = "attribute";
 
-        private RPAttributePK pk;
+        private AttributeProtocolUriPK pk;
 
-        private RPEntity rp;
         private AttributeEntity attribute;
+        private String uri;
 
-        private boolean encrypted;
-
-
-        public RPAttributeEntity() {
+        public AttributeProtocolUriEntity() {
                 super();
         }
 
-        public RPAttributeEntity(RPEntity rp, AttributeEntity attribute) {
-
-                this.pk = new RPAttributePK(rp, attribute);
-                this.rp = rp;
+        public AttributeProtocolUriEntity(String protocolId,
+                                          AttributeEntity attribute,
+                                          String uri) {
+                this.pk = new AttributeProtocolUriPK(protocolId, attribute);
                 this.attribute = attribute;
+                this.uri = uri;
         }
 
         @EmbeddedId
         @AttributeOverrides({
-                @AttributeOverride(name = RPAttributePK.RP_COLUMN_NAME,
-                        column = @Column(name = RP_COLUMN_NAME)), //
-                @AttributeOverride(name = RPAttributePK.ATTRIBUTE_COLUMN_NAME,
+                @AttributeOverride(name = AttributeProtocolUriPK.ATTRIBUTE_COLUMN_NAME,
                         column = @Column(name = ATTRIBUTE_COLUMN_NAME))})
-        public RPAttributePK getPk() {
+        public AttributeProtocolUriPK getPk() {
                 return pk;
         }
 
-        public void setPk(RPAttributePK pk) {
+        public void setPk(AttributeProtocolUriPK pk) {
                 this.pk = pk;
-        }
-
-        @ManyToOne(optional = false)
-        @JoinColumn(name = RP_COLUMN_NAME, insertable = false, updatable = false)
-        public RPEntity getRp() {
-                return rp;
-        }
-
-        public void setRp(RPEntity rp) {
-                this.rp = rp;
         }
 
         @ManyToOne(optional = false)
@@ -92,12 +77,13 @@ public class RPAttributeEntity implements Serializable {
                 this.attribute = attribute;
         }
 
-        public boolean isEncrypted() {
-                return encrypted;
+        @Column(nullable = false)
+        public String getUri() {
+                return this.uri;
         }
 
-        public void setEncrypted(boolean encrypted) {
-                this.encrypted = encrypted;
+        public void setUri(String uri) {
+                this.uri = uri;
         }
 
         @Override
@@ -109,10 +95,10 @@ public class RPAttributeEntity implements Serializable {
                 if (null == obj) {
                         return false;
                 }
-                if (!(obj instanceof RPAttributeEntity)) {
+                if (!(obj instanceof AttributeProtocolUriEntity)) {
                         return false;
                 }
-                RPAttributeEntity rhs = (RPAttributeEntity) obj;
+                AttributeProtocolUriEntity rhs = (AttributeProtocolUriEntity) obj;
                 return new EqualsBuilder().append(this.pk, rhs.pk).isEquals();
         }
 

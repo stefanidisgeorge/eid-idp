@@ -21,6 +21,7 @@ package be.fedict.eid.idp.entity;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "attributes")
@@ -32,23 +33,34 @@ public class AttributeEntity implements Serializable {
 
         public static final String LIST_ALL = "idp.attr.all";
 
-        private String name;
+        private String uri;
+        private Set<AttributeProtocolUriEntity> protocolUris;
 
         public AttributeEntity() {
                 super();
         }
 
-        public AttributeEntity(String name) {
-                this.name = name;
+        public AttributeEntity(String uri) {
+                this.uri = uri;
         }
 
         @Id
-        public String getName() {
-                return this.name;
+        public String getUri() {
+                return this.uri;
         }
 
-        public void setName(String name) {
-                this.name = name;
+        public void setUri(String uri) {
+                this.uri = uri;
+        }
+
+        @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE,
+                mappedBy = AttributeProtocolUriEntity.ATTRIBUTE_COLUMN_NAME)
+        public Set<AttributeProtocolUriEntity> getProtocolUris() {
+                return this.protocolUris;
+        }
+
+        public void setProtocolUris(Set<AttributeProtocolUriEntity> protocolUris) {
+                this.protocolUris = protocolUris;
         }
 
         @SuppressWarnings("unchecked")

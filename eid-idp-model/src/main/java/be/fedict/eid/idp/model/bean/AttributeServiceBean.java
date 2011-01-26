@@ -18,9 +18,7 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.entity.AttributeEntity;
-import be.fedict.eid.idp.entity.RPAttributeEntity;
-import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.entity.*;
 import be.fedict.eid.idp.model.AttributeService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,12 +43,13 @@ public class AttributeServiceBean implements AttributeService {
         }
 
         @Override
-        public AttributeEntity saveAttribute(String name) {
+        public AttributeEntity saveAttribute(String uri) {
 
                 AttributeEntity attribute = this.entityManager.find(
-                        AttributeEntity.class, name);
+                        AttributeEntity.class, uri);
                 if (null == attribute) {
-                        attribute = new AttributeEntity(name);
+                        LOG.debug("Add attribute : " + uri);
+                        attribute = new AttributeEntity(uri);
                         this.entityManager.persist(attribute);
                 }
                 return attribute;
@@ -69,7 +68,7 @@ public class AttributeServiceBean implements AttributeService {
 
                         boolean found = false;
                         for (RPAttributeEntity oldRpAttribute : oldRpAttributes) {
-                                if (oldRpAttribute.getAttribute().getName().equals(attributeName)) {
+                                if (oldRpAttribute.getAttribute().getUri().equals(attributeName)) {
                                         // already in, ok
                                         found = true;
                                         break;
@@ -92,14 +91,66 @@ public class AttributeServiceBean implements AttributeService {
                 Iterator<RPAttributeEntity> iter = attachedRp.getAttributes().iterator();
                 while (iter.hasNext()) {
                         RPAttributeEntity rpAttribute = iter.next();
-                        if (!attributes.contains(rpAttribute.getAttribute().getName())) {
+                        if (!attributes.contains(rpAttribute.getAttribute().getUri())) {
                                 // removed one
                                 iter.remove();
-//                                attachedRp.getAttributes().remove(rpAttribute);
                                 this.entityManager.remove(rpAttribute);
                         }
                 }
 
                 return attachedRp;
+        }
+
+        @Override
+        public AttributeProtocolUriEntity createAttributeUri(String protocolId,
+                                                             String attributeUri,
+                                                             String protocolUri) {
+
+                LOG.debug("create attribute URI: protocol=" + protocolId +
+                        " attribute=" + attributeUri + " URI=" + protocolUri);
+
+                AttributeEntity attribute = getAttribute(attributeUri);
+
+                AttributeProtocolUriEntity attributeProtocolUri =
+                        this.entityManager.find(AttributeProtocolUriEntity.class,
+                                new AttributeProtocolUriPK(protocolId, attribute));
+                if (null == attributeProtocolUri) {
+                        LOG.debug("not yet configured, adding...");
+                        attributeProtocolUri = new AttributeProtocolUriEntity(
+                                protocolId, attribute, protocolUri);
+                        this.entityManager.persist(attributeProtocolUri);
+                }
+
+                return attributeProtocolUri;
+        }
+
+        @Override
+        public String getUri(String protocolId, String attributeUri) {
+
+                LOG.debug("get attribute URI: protocol=" + protocolId +
+                        " attribute=" + attributeUri);
+
+                AttributeEntity attribute = getAttribute(attributeUri);
+
+                AttributeProtocolUriEntity attributeProtocolUri =
+                        this.entityManager.find(AttributeProtocolUriEntity.class,
+                                new AttributeProtocolUriPK(protocolId, attribute));
+
+                if (null != attributeProtocolUri) {
+                        return attributeProtocolUri.getUri();
+                }
+
+                return attributeUri;
+        }
+
+        private AttributeEntity getAttribute(String uri) {
+
+                AttributeEntity attribute = this.entityManager.find(
+                        AttributeEntity.class, uri);
+                if (null == attribute) {
+                        throw new RuntimeException("Attribute \"" + uri +
+                                "\" not found!");
+                }
+                return attribute;
         }
 }

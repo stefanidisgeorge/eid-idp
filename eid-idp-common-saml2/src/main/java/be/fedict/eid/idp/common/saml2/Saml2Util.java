@@ -18,12 +18,8 @@
 
 package be.fedict.eid.idp.common.saml2;
 
-import be.fedict.eid.applet.service.Address;
-import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.common.AttributeConstants;
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import be.fedict.eid.idp.spi.IdpUtil;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
@@ -68,10 +64,7 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.GregorianCalendar;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Utility class for SAML v2.0
@@ -134,10 +127,7 @@ public abstract class Saml2Util {
                                              DateTime issueInstant,
                                              IdentityProviderFlow authenticationFlow,
                                              String userId,
-                                             String givenName, String surName,
-                                             Identity identity,
-                                             Address address,
-                                             byte[] photo) {
+                                             Map<String, be.fedict.eid.idp.spi.Attribute> attributes) {
 
                 Assertion assertion = buildXMLObject(Assertion.class,
                         Assertion.DEFAULT_ELEMENT_NAME);
@@ -231,44 +221,35 @@ public abstract class Saml2Util {
                                 AttributeStatement.DEFAULT_ELEMENT_NAME);
                 attributeStatements.add(attributeStatement);
 
-                addAttribute(AttributeConstants.LAST_NAME_CLAIM_TYPE_URI,
-                        surName, attributeStatement);
-                addAttribute(AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI, givenName,
-                        attributeStatement);
-                addAttribute(AttributeConstants.NAME_CLAIM_TYPE_URI,
-                        givenName + " " + surName, attributeStatement);
-                addAttribute(AttributeConstants.PPID_CLAIM_TYPE_URI, userId,
-                        attributeStatement);
+                for (Map.Entry<String, be.fedict.eid.idp.spi.Attribute> attributeEntry
+                        : attributes.entrySet()) {
 
-                if (null != address) {
-
-                        addAttribute(AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
-                                address.getStreetAndNumber(), attributeStatement);
-                        addAttribute(AttributeConstants.LOCALITY_CLAIM_TYPE_URI,
-                                address.getMunicipality(), attributeStatement);
-                        addAttribute(AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI,
-                                address.getZip(), attributeStatement);
-                }
-
-                if (null != identity) {
-
-                        addAttribute(AttributeConstants.GENDER_CLAIM_TYPE_URI,
-                                IdpUtil.getGenderValue(identity), attributeStatement);
-                        addAttribute(AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI,
-                                identity.getDateOfBirth(), attributeStatement);
-                        addAttribute(AttributeConstants.NATIONALITY_CLAIM_TYPE_URI,
-                                identity.getNationality(), attributeStatement);
-                        addAttribute(AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI,
-                                identity.getPlaceOfBirth(), attributeStatement);
-                }
-
-                if (null != photo) {
-
-                        addAttribute(AttributeConstants.PHOTO_CLAIM_TYPE_URI,
-                                photo, attributeStatement);
+                        addAttribute(attributeEntry.getValue(), attributeStatement);
                 }
 
                 return assertion;
+        }
+
+        private static void addAttribute(be.fedict.eid.idp.spi.Attribute attribute,
+                                         AttributeStatement attributeStatement) {
+
+                if (attribute.getType().equals(String.class)) {
+                        addAttribute(attribute.getUri(),
+                                (String) attribute.getValue(),
+                                attributeStatement);
+                } else if (attribute.getType().equals(GregorianCalendar.class)) {
+                        addAttribute(attribute.getUri(),
+                                (GregorianCalendar) attribute.getValue(),
+                                attributeStatement);
+                } else if (attribute.getType().equals(Byte[].class)) {
+                        addAttribute(attribute.getUri(),
+                                (byte[]) attribute.getValue(),
+                                attributeStatement);
+                } else {
+                        throw new RuntimeException("Attribute of type \"" +
+                                attribute.getType().getCanonicalName() +
+                                " not supported!");
+                }
         }
 
         @SuppressWarnings("unchecked")

@@ -91,7 +91,7 @@ public class RPEntity implements Serializable {
 
         @Column(nullable = true)
         public String getDomain() {
-                return domain;
+                return this.domain;
         }
 
         public void setDomain(String domain) {
@@ -143,7 +143,7 @@ public class RPEntity implements Serializable {
         }
 
         public boolean isRequestSigningRequired() {
-                return requestSigningRequired;
+                return this.requestSigningRequired;
         }
 
         public void setRequestSigningRequired(boolean requestSigningRequired) {
@@ -152,16 +152,17 @@ public class RPEntity implements Serializable {
 
         @Column(nullable = true)
         public String getSecretKey() {
-                return secretKey;
+                return this.secretKey;
         }
 
         public void setSecretKey(String secretKey) {
                 this.secretKey = secretKey;
         }
 
-        @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, mappedBy = "rp")
+        @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE,
+                mappedBy = RPAttributeEntity.RP_COLUMN_NAME)
         public List<RPAttributeEntity> getAttributes() {
-                return attributes;
+                return this.attributes;
         }
 
         public void setAttributes(List<RPAttributeEntity> attributes) {
