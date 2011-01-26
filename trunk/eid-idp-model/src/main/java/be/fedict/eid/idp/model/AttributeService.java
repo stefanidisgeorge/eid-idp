@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.model;
 
 import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.entity.AttributeProtocolUriEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 
 import javax.ejb.Local;
@@ -32,4 +33,10 @@ public interface AttributeService {
         AttributeEntity saveAttribute(String name);
 
         RPEntity setAttributes(RPEntity rp, List<String> attributes);
+
+        AttributeProtocolUriEntity createAttributeUri(String protocolId,
+                                                      String attributeUri,
+                                                      String protocolUri);
+
+        String getUri(String protocolId, String attributeUri);
 }

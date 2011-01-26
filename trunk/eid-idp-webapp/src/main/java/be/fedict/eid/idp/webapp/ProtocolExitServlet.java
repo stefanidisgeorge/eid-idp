@@ -22,11 +22,20 @@ import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.applet.service.impl.handler.AuthenticationDataMessageHandler;
 import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.model.AttributeService;
+import be.fedict.eid.idp.model.Constants;
+import be.fedict.eid.idp.model.IdentityService;
+import be.fedict.eid.idp.spi.*;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import javax.ejb.EJB;
 import javax.security.auth.x500.X500Principal;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -35,7 +44,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Protocol Exit Servlet. Operates as a broker towards protocol services.
@@ -44,141 +57,300 @@ import java.security.cert.X509Certificate;
  */
 public class ProtocolExitServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-    private static final Log LOG = LogFactory.getLog(ProtocolExitServlet.class);
+        private static final Log LOG = LogFactory.getLog(ProtocolExitServlet.class);
 
-    private String protocolErrorPageInitParam;
+        private String protocolErrorPageInitParam;
 
-    private String protocolErrorMessageSessionAttributeInitParam;
+        private String protocolErrorMessageSessionAttributeInitParam;
 
-    private String protocolResponsePostPageInitParam;
+        private String protocolResponsePostPageInitParam;
 
-    private String responseActionSessionAttributeInitParam;
+        private String responseActionSessionAttributeInitParam;
 
-    private String responseAttributesSessionAttributeInitParam;
+        private String responseAttributesSessionAttributeInitParam;
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        this.protocolErrorPageInitParam = getRequiredInitParameter(config,
-                "ProtocolErrorPage");
-        this.protocolErrorMessageSessionAttributeInitParam = getRequiredInitParameter(
-                config, "ProtocolErrorMessageSessionAttribute");
-        this.protocolResponsePostPageInitParam = getRequiredInitParameter(
-                config, "ProtocolResponsePostPage");
-        this.responseActionSessionAttributeInitParam = getRequiredInitParameter(
-                config, "ResponseActionSessionAttribute");
-        this.responseAttributesSessionAttributeInitParam = getRequiredInitParameter(
-                config, "ResponseAttributesSessionAttribute");
-    }
+        @EJB
+        IdentityService identityService;
 
-    private String getRequiredInitParameter(ServletConfig config,
-                                            String initParamName) throws ServletException {
-        String value = config.getInitParameter(initParamName);
-        if (null == value) {
-            throw new ServletException(initParamName + " init-param required");
-        }
-        return value;
-    }
+        @EJB
+        AttributeService attributeService;
 
-    @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException, IOException {
-        LOG.debug("doGet");
-        IdentityProviderProtocolService protocolService = ProtocolEntryServlet
-                .getProtocolService(request);
-
-        // get eID data from Http Session
-        HttpSession httpSession = request.getSession();
-        Identity identity = (Identity) httpSession
-                .getAttribute(IdentityDataMessageHandler.IDENTITY_SESSION_ATTRIBUTE);
-        Address address = (Address) httpSession
-                .getAttribute(IdentityDataMessageHandler.ADDRESS_SESSION_ATTRIBUTE);
-        String authenticatedIdentifier = (String) httpSession
-                .getAttribute(AuthenticationDataMessageHandler.AUTHENTICATED_USER_IDENTIFIER_SESSION_ATTRIBUTE);
-        X509Certificate authnCertificate =
-                (X509Certificate) httpSession.getAttribute(IdentityDataMessageHandler.AUTHN_CERT_SESSION_ATTRIBUTE);
-        byte[] photo = (byte[]) httpSession.getAttribute(IdentityDataMessageHandler.PHOTO_SESSION_ATTRIBUTE);
-
-        String userId;
-        String givenName;
-        String surName;
-        if (null != identity) {
-            userId = identity.getNationalNumber();
-            givenName = identity.getFirstName();
-            surName = identity.getName();
-        } else {
-            userId = authenticatedIdentifier;
-            givenName = getGivenName(authnCertificate);
-            surName = getSurName(authnCertificate);
+        @Override
+        public void init(ServletConfig config) throws ServletException {
+                this.protocolErrorPageInitParam = getRequiredInitParameter(config,
+                        "ProtocolErrorPage");
+                this.protocolErrorMessageSessionAttributeInitParam = getRequiredInitParameter(
+                        config, "ProtocolErrorMessageSessionAttribute");
+                this.protocolResponsePostPageInitParam = getRequiredInitParameter(
+                        config, "ProtocolResponsePostPage");
+                this.responseActionSessionAttributeInitParam = getRequiredInitParameter(
+                        config, "ResponseActionSessionAttribute");
+                this.responseAttributesSessionAttributeInitParam = getRequiredInitParameter(
+                        config, "ResponseAttributesSessionAttribute");
         }
 
-        // return protocol specific response
-        ReturnResponse returnResponse;
-        try {
-            returnResponse = protocolService.handleReturnResponse(httpSession,
-                    userId, givenName, surName, identity, address, photo,
-                    request, response);
-        } catch (Exception e) {
-            LOG.error("protocol error: " + e.getMessage(), e);
-            httpSession.setAttribute(
-                    this.protocolErrorMessageSessionAttributeInitParam, e
-                    .getMessage());
-            response.sendRedirect(request.getContextPath()
-                    + this.protocolErrorPageInitParam);
-            return;
+        private String getRequiredInitParameter(ServletConfig config,
+                                                String initParamName) throws ServletException {
+                String value = config.getInitParameter(initParamName);
+                if (null == value) {
+                        throw new ServletException(initParamName + " init-param required");
+                }
+                return value;
         }
-        if (null != returnResponse) {
-            /*
-                * This means that the protocol service wants us to construct some
-                * Browser POST response towards the Service Provider landing site.
+
+        @Override
+        protected void doGet(HttpServletRequest request,
+                             HttpServletResponse response) throws ServletException, IOException {
+                LOG.debug("doGet");
+                IdentityProviderProtocolService protocolService = ProtocolEntryServlet
+                        .getProtocolService(request);
+
+                // get optional RP from Http Session
+                RPEntity rp =
+                        (RPEntity) request.getSession().getAttribute(Constants.RP_SESSION_ATTRIBUTE);
+
+                // get eID data from Http Session
+                HttpSession httpSession = request.getSession();
+                Identity identity = (Identity) httpSession
+                        .getAttribute(IdentityDataMessageHandler.IDENTITY_SESSION_ATTRIBUTE);
+                Address address = (Address) httpSession
+                        .getAttribute(IdentityDataMessageHandler.ADDRESS_SESSION_ATTRIBUTE);
+                String authenticatedIdentifier = (String) httpSession
+                        .getAttribute(AuthenticationDataMessageHandler.AUTHENTICATED_USER_IDENTIFIER_SESSION_ATTRIBUTE);
+                X509Certificate authnCertificate =
+                        (X509Certificate) httpSession.getAttribute(IdentityDataMessageHandler.AUTHN_CERT_SESSION_ATTRIBUTE);
+                byte[] photo = (byte[]) httpSession.getAttribute(IdentityDataMessageHandler.PHOTO_SESSION_ATTRIBUTE);
+
+                // get userID + attributes
+                String userId;
+                if (null != identity) {
+                        userId = getUniqueId(identity.getNationalNumber(), rp);
+                } else {
+                        userId = getUniqueId(authenticatedIdentifier, rp);
+                }
+                Map<String, Attribute> attributes = getAttributes(rp,
+                        protocolService.getId(), userId, identity, address,
+                        authnCertificate, photo);
+
+                // return protocol specific response
+                ReturnResponse returnResponse;
+                try {
+                        returnResponse = protocolService.handleReturnResponse(httpSession,
+                                userId, attributes, request, response);
+                } catch (Exception e) {
+                        LOG.error("protocol error: " + e.getMessage(), e);
+                        httpSession.setAttribute(
+                                this.protocolErrorMessageSessionAttributeInitParam, e
+                                .getMessage());
+                        response.sendRedirect(request.getContextPath()
+                                + this.protocolErrorPageInitParam);
+                        return;
+                }
+                if (null != returnResponse) {
+                        /*
+                        * This means that the protocol service wants us to construct some
+                        * Browser POST response towards the Service Provider landing site.
+                        */
+                        LOG.debug("constructing generic Browser POST response...");
+                        httpSession.setAttribute(
+                                this.responseActionSessionAttributeInitParam,
+                                returnResponse.getActionUrl());
+                        httpSession.setAttribute(
+                                this.responseAttributesSessionAttributeInitParam,
+                                returnResponse.getAttributes());
+                        response.sendRedirect(request.getContextPath()
+                                + this.protocolResponsePostPageInitParam);
+                        return;
+                }
+
+                /*
+                * Clean-up the session here as it is no longer used after this point.
                 */
-            LOG.debug("constructing generic Browser POST response...");
-            httpSession.setAttribute(
-                    this.responseActionSessionAttributeInitParam,
-                    returnResponse.getActionUrl());
-            httpSession.setAttribute(
-                    this.responseAttributesSessionAttributeInitParam,
-                    returnResponse.getAttributes());
-            response.sendRedirect(request.getContextPath()
-                    + this.protocolResponsePostPageInitParam);
-            return;
+                httpSession.invalidate();
+        }
+
+        /**
+         * Optionally encrypt the user ID
+         *
+         * @param userId user ID to encrypt ( or not )
+         * @param rp     rp, can be null
+         * @return (encrypted) user ID
+         */
+        private String getUniqueId(String userId, RPEntity rp) {
+
+                String uniqueId = userId;
+
+                byte[] hmacSecret = getHmacSecret(rp);
+
+                if (null != hmacSecret) {
+                        SecretKey macKey = new SecretKeySpec(hmacSecret, "HmacSHA1");
+                        Mac mac;
+                        try {
+                                mac = Mac.getInstance(macKey.getAlgorithm());
+                        } catch (NoSuchAlgorithmException e) {
+                                throw new RuntimeException("HMAC algo not available: "
+                                        + e.getMessage());
+                        }
+                        try {
+                                mac.init(macKey);
+                        } catch (InvalidKeyException e) {
+                                LOG.error("invalid secret key: " + e.getMessage(), e);
+                                throw new RuntimeException("invalid secret");
+                        }
+                        mac.update(uniqueId.getBytes());
+                        byte[] resultHMac = mac.doFinal();
+                        uniqueId = new String(Hex.encodeHex(resultHMac))
+                                .toUpperCase();
+                }
+                return uniqueId;
+        }
+
+        private byte[] getHmacSecret(RPEntity rp) {
+
+                if (null == rp ||
+                        null == rp.getSecretKey() ||
+                        rp.getSecretKey().trim().isEmpty()) {
+                        // RP dont have one, go to IdP default
+                        return this.identityService.getHmacSecret();
+                }
+
+                try {
+                        return Hex.decodeHex(rp.getSecretKey().toCharArray());
+                } catch (DecoderException e) {
+                        throw new RuntimeException("HEX decoder error: " + e.getMessage(),
+                                e);
+                }
+
+        }
+
+        /**
+         * @param protocolId   ID of authn protocol
+         * @param attributeUri attribute's default URI
+         * @return the protocol specific URI if any ( or else default URI )
+         */
+        private String getUri(String protocolId, String attributeUri) {
+
+                return this.attributeService.getUri(protocolId, attributeUri);
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T> Attribute getAttribute(String protocolId,
+                                           DefaultAttribute defaultAttribute,
+                                           T value) {
+
+                return new Attribute<T>(defaultAttribute.getUri(),
+                        (Class<T>) defaultAttribute.getType(), value,
+                        getUri(protocolId, defaultAttribute.getUri()));
         }
 
         /*
-        * Clean-up the session here as it is no longer used after this point.
-        */
-        httpSession.invalidate();
-    }
+         * Construct list of attributes given the eID data.
+         */
+        private Map<String, Attribute> getAttributes(RPEntity rp,
+                                                     String protocolId,
+                                                     String userId,
+                                                     Identity identity,
+                                                     Address address,
+                                                     X509Certificate authnCertificate,
+                                                     byte[] photo) {
 
-    private static String getGivenName(X509Certificate authnCertificate) {
+                Map<String, Attribute> attributes = new HashMap<String, Attribute>();
 
-        X500Principal subjectPrincipal = authnCertificate.getSubjectX500Principal();
-        String subjectName = subjectPrincipal.toString();
-        return getAttributeFromSubjectName(subjectName, "GIVENNAME");
-    }
+                String givenName;
+                String surName;
+                if (null != identity) {
+                        givenName = identity.getFirstName();
+                        surName = identity.getName();
+                } else {
+                        givenName = getGivenName(authnCertificate);
+                        surName = getSurName(authnCertificate);
+                }
 
-    private static String getSurName(X509Certificate authnCertificate) {
+                attributes.put(DefaultAttribute.LAST_NAME.getUri(),
+                        getAttribute(protocolId, DefaultAttribute.LAST_NAME,
+                                surName));
 
-        X500Principal subjectPrincipal = authnCertificate.getSubjectX500Principal();
-        String subjectName = subjectPrincipal.toString();
-        return getAttributeFromSubjectName(subjectName, "SURNAME");
-    }
+                attributes.put(DefaultAttribute.FIRST_NAME.getUri(),
+                        getAttribute(protocolId, DefaultAttribute.FIRST_NAME,
+                                givenName));
 
-    private static String getAttributeFromSubjectName(String subjectName, String attributeName) {
+                attributes.put(DefaultAttribute.NAME.getUri(),
+                        getAttribute(protocolId, DefaultAttribute.NAME,
+                                givenName + " " + surName));
 
-        int attributeBegin = subjectName.indexOf(attributeName + '=');
-        if (-1 == attributeBegin) {
-            throw new IllegalArgumentException("attribute name does not occur in subject: " + attributeName);
+                attributes.put(DefaultAttribute.IDENTIFIER.getUri(),
+                        getAttribute(protocolId, DefaultAttribute.IDENTIFIER,
+                                userId));
+
+                if (null != address) {
+
+                        attributes.put(DefaultAttribute.ADDRESS.getUri(),
+                                getAttribute(protocolId, DefaultAttribute.ADDRESS,
+                                        address.getStreetAndNumber()));
+                        attributes.put(DefaultAttribute.LOCALITY.getUri(),
+                                getAttribute(protocolId, DefaultAttribute.LOCALITY,
+                                        address.getMunicipality()));
+                        attributes.put(DefaultAttribute.POSTAL_CODE.getUri(),
+                                getAttribute(protocolId, DefaultAttribute.POSTAL_CODE,
+                                        address.getZip()));
+                }
+
+                if (null != identity) {
+
+                        attributes.put(DefaultAttribute.GENDER.getUri(),
+                                getAttribute(protocolId, DefaultAttribute.GENDER,
+                                        IdpUtil.getGenderValue(identity)));
+                        attributes.put(DefaultAttribute.DATE_OF_BIRTH.getUri(),
+                                getAttribute(protocolId, DefaultAttribute.DATE_OF_BIRTH,
+                                        identity.getDateOfBirth()));
+                        attributes.put(DefaultAttribute.NATIONALITY.getUri(),
+                                getAttribute(protocolId, DefaultAttribute.NATIONALITY,
+                                        identity.getNationality()));
+                        attributes.put(DefaultAttribute.PLACE_OF_BIRTH.getUri(),
+                                getAttribute(protocolId, DefaultAttribute.PLACE_OF_BIRTH,
+                                        identity.getPlaceOfBirth()));
+                }
+
+                if (null != photo) {
+
+                        attributes.put(DefaultAttribute.PHOTO.getUri(),
+                                getAttribute(protocolId, DefaultAttribute.PHOTO,
+                                        photo));
+                }
+
+                return attributes;
         }
-        attributeBegin += attributeName.length() + 1; // "attributeName="
-        int attributeEnd = subjectName.indexOf(',', attributeBegin);
-        if (-1 == attributeEnd)
-        // last field has no trailing ","
-        {
-            attributeEnd = subjectName.length();
+
+        private static String getGivenName(X509Certificate authnCertificate) {
+
+                X500Principal subjectPrincipal = authnCertificate.getSubjectX500Principal();
+                String subjectName = subjectPrincipal.toString();
+                return getAttributeFromSubjectName(subjectName, "GIVENNAME");
         }
-        return subjectName.substring(attributeBegin, attributeEnd);
-    }
+
+        private static String getSurName(X509Certificate authnCertificate) {
+
+                X500Principal subjectPrincipal = authnCertificate.getSubjectX500Principal();
+                String subjectName = subjectPrincipal.toString();
+                return getAttributeFromSubjectName(subjectName, "SURNAME");
+        }
+
+        private static String getAttributeFromSubjectName(String subjectName, String attributeName) {
+
+                int attributeBegin = subjectName.indexOf(attributeName + '=');
+                if (-1 == attributeBegin) {
+                        throw new IllegalArgumentException("attribute name does not occur in subject: " + attributeName);
+                }
+                attributeBegin += attributeName.length() + 1; // "attributeName="
+                int attributeEnd = subjectName.indexOf(',', attributeBegin);
+                if (-1 == attributeEnd)
+                // last field has no trailing ","
+                {
+                        attributeEnd = subjectName.length();
+                }
+                return subjectName.substring(attributeBegin, attributeEnd);
+        }
 
 }

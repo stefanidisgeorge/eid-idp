@@ -25,33 +25,29 @@ package be.fedict.eid.idp.common;
  */
 public abstract class OpenIDAXConstants {
 
-    // default attributes
-    public static final String AX_NAME_PERSON_TYPE =
-            "http://axschema.org/namePerson";
-    public static final String AX_FIRST_NAME_PERSON_TYPE =
-            "http://axschema.org/namePerson/first";
-    public static final String AX_LAST_NAME_PERSON_TYPE =
-            "http://axschema.org/namePerson/last";
+        // default attributes
+        public static final String AX_NAME_PERSON_TYPE =
+                "http://axschema.org/namePerson";
+        public static final String AX_FIRST_NAME_PERSON_TYPE =
+                "http://axschema.org/namePerson/first";
+        public static final String AX_LAST_NAME_PERSON_TYPE =
+                "http://axschema.org/namePerson/last";
 
-    // address attributes
-    public static final String AX_POSTAL_ADDRESS_TYPE =
-            "http://axschema.org/contact/postalAddress/home";
-    public static final String AX_CITY_TYPE =
-            "http://axschema.org/contact/city/home";
-    public static final String AX_POSTAL_CODE_TYPE =
-            "http://axschema.org/contact/postalCode/home";
+        // address attributes
+        public static final String AX_POSTAL_ADDRESS_TYPE =
+                "http://axschema.org/contact/postalAddress/home";
+        public static final String AX_CITY_TYPE =
+                "http://axschema.org/contact/city/home";
+        public static final String AX_POSTAL_CODE_TYPE =
+                "http://axschema.org/contact/postalCode/home";
 
-    // identity attributes
-    public static final String AX_BIRTHDATE_TYPE =
-            "http://axschema.org/birthDate";
-    public static final String AX_GENDER_TYPE =
-            "http://axschema.org/person/gender";
-    public static final String AX_NATIONALITY_TYPE =
-            "http://axschema.org/eid/nationality";
-    public static final String AX_PLACE_OF_BIRTH_TYPE =
-            "http://axschema.org/eid/pob";
-
-    // custom attributes
-    public static final String AX_COUNTRY_TYPE =
-            "http://axschema.org/contact/country/home";
+        // identity attributes
+        public static final String AX_BIRTHDATE_TYPE =
+                "http://axschema.org/birthDate";
+        public static final String AX_GENDER_TYPE =
+                "http://axschema.org/person/gender";
+        public static final String AX_NATIONALITY_TYPE =
+                "http://axschema.org/eid/nationality";
+        public static final String AX_PLACE_OF_BIRTH_TYPE =
+                "http://axschema.org/eid/pob";
 }

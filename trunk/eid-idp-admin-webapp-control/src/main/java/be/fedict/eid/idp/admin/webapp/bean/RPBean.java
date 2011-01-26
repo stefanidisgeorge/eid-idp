@@ -186,7 +186,7 @@ public class RPBean implements RP {
                 if (null != this.selectedRP) {
                         this.selectedAttributes = new LinkedList<String>();
                         for (RPAttributeEntity rpAttribute : this.selectedRP.getAttributes()) {
-                                this.selectedAttributes.add(rpAttribute.getAttribute().getName());
+                                this.selectedAttributes.add(rpAttribute.getAttribute().getUri());
                         }
                 }
         }
@@ -230,8 +230,8 @@ public class RPBean implements RP {
                 this.sourceAttributes = new LinkedList<String>();
                 for (AttributeEntity attribute : attributes) {
                         if (null != this.selectedAttributes
-                                && !this.selectedAttributes.contains(attribute.getName())) {
-                                this.sourceAttributes.add(attribute.getName());
+                                && !this.selectedAttributes.contains(attribute.getUri())) {
+                                this.sourceAttributes.add(attribute.getUri());
                         }
                 }
                 return this.sourceAttributes;

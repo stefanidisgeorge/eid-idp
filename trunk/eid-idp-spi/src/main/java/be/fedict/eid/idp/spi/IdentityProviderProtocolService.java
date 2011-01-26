@@ -18,13 +18,11 @@
 
 package be.fedict.eid.idp.spi;
 
-import be.fedict.eid.applet.service.Address;
-import be.fedict.eid.applet.service.Identity;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Map;
 
 /**
  * eID IdP Service Provider Interface for an identification/authentication
@@ -34,6 +32,11 @@ import javax.servlet.http.HttpSession;
  * @author Frank Cornelis
  */
 public interface IdentityProviderProtocolService {
+
+        /**
+         * @return protocol specific ID.
+         */
+        String getId();
 
         /**
          * Initializes this protocol service handler.
@@ -64,14 +67,7 @@ public interface IdentityProviderProtocolService {
          *
          * @param httpSession the HTTP session context.
          * @param userId      user ID
-         * @param givenName   given name
-         * @param surName     sur name
-         * @param identity    the eID identity (in case of an eID identification operation,
-         *                    else <code>null</code>)
-         * @param address     the eID address (in case of an eID identification operation,
-         *                    else <code>null</code>)
-         * @param photo       the eID photo (in case of an eID identification operation,
-         *                    else <code>null</code>)
+         * @param attributes  returned attribute map
          * @param request     the HTTP request.
          * @param response    the HTTP response.   @return the response object in case a Browser POST should be constructed.
          *                    <code>null</code> in case this protocol service handles the
@@ -81,9 +77,15 @@ public interface IdentityProviderProtocolService {
          *                   response.
          */
         ReturnResponse handleReturnResponse(HttpSession httpSession, String userId,
-                                            String givenName, String surName,
-                                            Identity identity, Address address,
-                                            byte[] photo, HttpServletRequest request,
+                                            Map<String, Attribute> attributes,
+                                            HttpServletRequest request,
                                             HttpServletResponse response)
                 throws Exception;
+
+        /**
+         * @param defaultAttribute default eID Attribute
+         * @return protocol specific URI for this attribute or <code>null</code>
+         *         if default uri is ok
+         */
+        String findAttributeUri(DefaultAttribute defaultAttribute);
 }

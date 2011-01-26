@@ -26,40 +26,40 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 @Embeddable
-public class RPAttributePK implements Serializable {
+public class AttributeProtocolUriPK implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        public static final String RP_COLUMN_NAME = "rpId";
+        public static final String PROTOCOL_COLUMN_NAME = "protocolId";
         public static final String ATTRIBUTE_COLUMN_NAME = "attributeUri";
 
-        private long rpId;
+        private String protocolId;
         private String attributeUri;
 
-        public RPAttributePK() {
+        public AttributeProtocolUriPK() {
                 super();
         }
 
-        public RPAttributePK(RPEntity rp, AttributeEntity attribute) {
+        public AttributeProtocolUriPK(String protocolId, AttributeEntity attribute) {
 
-                this.rpId = rp.getId();
+                this.protocolId = protocolId;
                 this.attributeUri = attribute.getUri();
         }
 
+        public String getProtocolId() {
+                return this.protocolId;
+        }
+
+        public void setProtocolId(String protocolId) {
+                this.protocolId = protocolId;
+        }
+
         public String getAttributeUri() {
-                return attributeUri;
+                return this.attributeUri;
         }
 
         public void setAttributeUri(String attributeUri) {
                 this.attributeUri = attributeUri;
-        }
-
-        public long getRpId() {
-                return rpId;
-        }
-
-        public void setRpId(long rpId) {
-                this.rpId = rpId;
         }
 
         @Override
@@ -71,25 +71,26 @@ public class RPAttributePK implements Serializable {
                 if (this == obj) {
                         return true;
                 }
-                if (!(obj instanceof RPAttributePK)) {
+                if (!(obj instanceof AttributeProtocolUriPK)) {
                         return false;
                 }
-                RPAttributePK rhs = (RPAttributePK) obj;
-                return new EqualsBuilder().append(this.rpId, rhs.rpId)
+                AttributeProtocolUriPK rhs = (AttributeProtocolUriPK) obj;
+                return new EqualsBuilder().append(this.protocolId, rhs.protocolId)
                         .append(this.attributeUri, rhs.attributeUri).isEquals();
         }
 
         @Override
         public int hashCode() {
 
-                return new HashCodeBuilder().append(this.rpId).append(
+                return new HashCodeBuilder().append(this.protocolId).append(
                         this.attributeUri).toHashCode();
         }
 
         @Override
         public String toString() {
 
-                return new ToStringBuilder(this).append("RP",
-                        this.rpId).append("attribute", this.attributeUri).toString();
+                return new ToStringBuilder(this).append("Protocol",
+                        this.protocolId).append("attribute", this.attributeUri).
+                        toString();
         }
 }

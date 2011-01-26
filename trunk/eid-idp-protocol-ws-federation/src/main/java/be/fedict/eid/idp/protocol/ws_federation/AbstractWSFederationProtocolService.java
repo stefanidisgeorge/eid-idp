@@ -18,8 +18,7 @@
 
 package be.fedict.eid.idp.protocol.ws_federation;
 
-import be.fedict.eid.applet.service.Address;
-import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.idp.common.AttributeConstants;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
@@ -39,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 /**
  * WS-Federation Web (Passive) Requestors. We could use OpenAM (OpenSS0), but
@@ -80,6 +80,13 @@ public abstract class AbstractWSFederationProtocolService implements
         }
 
         @Override
+        public String getId() {
+
+                LOG.debug("get ID");
+                return "WS-Federation";
+        }
+
+        @Override
         public IncomingRequest handleIncomingRequest(
                 HttpServletRequest request, HttpServletResponse response)
                 throws Exception {
@@ -106,9 +113,7 @@ public abstract class AbstractWSFederationProtocolService implements
         @Override
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
-                                                   String givenName, String surName,
-                                                   Identity identity, Address address,
-                                                   byte[] photo,
+                                                   Map<String, Attribute> attributes,
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
                 throws Exception {
@@ -119,18 +124,13 @@ public abstract class AbstractWSFederationProtocolService implements
                 String wctx = retrieveWctx(httpSession);
                 returnResponse.addAttribute("wctx", wctx);
 
-                String wresult = getWResult(wctx, wtrealm, userId, givenName, surName,
-                        identity, address, photo);
+                String wresult = getWResult(wctx, wtrealm, userId, attributes);
                 returnResponse.addAttribute("wresult", wresult);
                 return returnResponse;
         }
 
         private String getWResult(String wctx, String wtrealm,
-                                  String userId,
-                                  String givenName, String surName,
-                                  Identity identity,
-                                  Address address,
-                                  byte[] photo)
+                                  String userId, Map<String, Attribute> attributes)
                 throws TransformerException, IOException {
 
                 RequestSecurityTokenResponseCollection requestSecurityTokenResponseCollection =
@@ -172,7 +172,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 DateTime issueInstantDateTime = new DateTime();
                 Assertion assertion = Saml2Util.getAssertion(null, wtrealm,
                         issueInstantDateTime, getAuthenticationFlow(), userId,
-                        givenName, surName, identity, address, photo);
+                        attributes);
 
                 requestedSecurityToken.setUnknownXMLObject(assertion);
 
@@ -203,6 +203,40 @@ public abstract class AbstractWSFederationProtocolService implements
                          IdentityProviderConfiguration configuration) {
                 LOG.debug("init");
                 this.configuration = configuration;
+        }
+
+        @Override
+        public String findAttributeUri(DefaultAttribute defaultAttribute) {
+
+                switch (defaultAttribute) {
+
+                        case LAST_NAME:
+                                return AttributeConstants.LAST_NAME_CLAIM_TYPE_URI;
+                        case FIRST_NAME:
+                                return AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI;
+                        case NAME:
+                                return AttributeConstants.NAME_CLAIM_TYPE_URI;
+                        case IDENTIFIER:
+                                return AttributeConstants.PPID_CLAIM_TYPE_URI;
+                        case ADDRESS:
+                                return AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI;
+                        case LOCALITY:
+                                return AttributeConstants.LOCALITY_CLAIM_TYPE_URI;
+                        case POSTAL_CODE:
+                                return AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI;
+                        case GENDER:
+                                return AttributeConstants.GENDER_CLAIM_TYPE_URI;
+                        case DATE_OF_BIRTH:
+                                return AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI;
+                        case NATIONALITY:
+                                return AttributeConstants.NATIONALITY_CLAIM_TYPE_URI;
+                        case PLACE_OF_BIRTH:
+                                return AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI;
+                        case PHOTO:
+                                return AttributeConstants.PHOTO_CLAIM_TYPE_URI;
+                }
+
+                return null;
         }
 
         protected abstract IdentityProviderFlow getAuthenticationFlow();

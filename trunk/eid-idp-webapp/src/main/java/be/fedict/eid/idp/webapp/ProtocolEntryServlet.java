@@ -183,10 +183,12 @@ public class ProtocolEntryServlet extends HttpServlet {
         }
 
         public static IdentityProviderProtocolService getProtocolService(
+
                 HttpServletRequest request) throws ServletException {
                 String contextPath = getProtocolServiceContextPath(request);
                 ServletContext servletContext = request.getServletContext();
-                Map<String, IdentityProviderProtocolService> protocolServices = getProtocolServices(servletContext);
+                Map<String, IdentityProviderProtocolService> protocolServices =
+                        getProtocolServices(servletContext);
                 IdentityProviderProtocolService protocolService = protocolServices
                         .get(contextPath);
                 if (null == protocolService) {
@@ -287,7 +289,8 @@ public class ProtocolEntryServlet extends HttpServlet {
                         }
                 }
 
-                if (null != incomingRequest.getSpCertificate()) {
+                if (null != incomingRequest.getSpCertificate() &&
+                        null != rp.getEncodedCertificate()) {
 
                         // verify fingerprint
                         try {
