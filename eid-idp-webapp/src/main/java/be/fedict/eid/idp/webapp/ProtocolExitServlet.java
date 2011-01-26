@@ -22,6 +22,7 @@ import be.fedict.eid.applet.service.Address;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.applet.service.impl.handler.AuthenticationDataMessageHandler;
 import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
+import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.AttributeService;
 import be.fedict.eid.idp.model.Constants;
@@ -130,9 +131,14 @@ public class ProtocolExitServlet extends HttpServlet {
                 } else {
                         userId = getUniqueId(authenticatedIdentifier, rp);
                 }
-                Map<String, Attribute> attributes = getAttributes(rp,
+                Map<String, Attribute> attributes = getAttributes(
                         protocolService.getId(), userId, identity, address,
                         authnCertificate, photo);
+
+                // filter out attributes if RP was authenticated
+                if (null != rp) {
+                        attributes = filterAttributes(rp, attributes);
+                }
 
                 // return protocol specific response
                 ReturnResponse returnResponse;
@@ -169,6 +175,22 @@ public class ProtocolExitServlet extends HttpServlet {
                 * Clean-up the session here as it is no longer used after this point.
                 */
                 httpSession.invalidate();
+        }
+
+        /*
+         * Filter out attributes not specified in the RP's configuration
+         */
+        private Map<String, Attribute> filterAttributes(RPEntity rp, Map<String, Attribute> attributes) {
+
+                Map<String, Attribute> filteredAttributes = new HashMap<String, Attribute>();
+                for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
+
+                        if (attributes.keySet().contains(rpAttribute.getAttribute().getUri())) {
+                                filteredAttributes.put(rpAttribute.getAttribute().getUri(),
+                                        attributes.get(rpAttribute.getAttribute().getUri()));
+                        }
+                }
+                return filteredAttributes;
         }
 
         /**
@@ -248,8 +270,7 @@ public class ProtocolExitServlet extends HttpServlet {
         /*
          * Construct list of attributes given the eID data.
          */
-        private Map<String, Attribute> getAttributes(RPEntity rp,
-                                                     String protocolId,
+        private Map<String, Attribute> getAttributes(String protocolId,
                                                      String userId,
                                                      Identity identity,
                                                      Address address,
