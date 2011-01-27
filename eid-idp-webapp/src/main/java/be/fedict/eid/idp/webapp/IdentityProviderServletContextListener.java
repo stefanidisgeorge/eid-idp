@@ -149,13 +149,10 @@ public class IdentityProviderServletContextListener implements
                                         identityProviderProtocolType);
 
                         for (DefaultAttribute defaultAttribute : DefaultAttribute.values()) {
-                                String protocolUri = protocolService.findAttributeUri(defaultAttribute);
-                                if (null != protocolUri) {
-                                        this.attributeService.createAttributeUri(
-                                                protocolService.getId(),
-                                                defaultAttribute.getUri(),
-                                                protocolUri);
-                                }
+                                this.attributeService.createAttributeUri(
+                                        protocolService.getId(),
+                                        defaultAttribute.getUri(),
+                                        protocolService.findAttributeUri(defaultAttribute));
                         }
                 }
         }

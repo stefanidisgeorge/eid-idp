@@ -30,6 +30,8 @@ public interface AttributeService {
 
         List<AttributeEntity> listAttributes();
 
+        List<AttributeProtocolUriEntity> listAttributeUris();
+
         AttributeEntity saveAttribute(String name);
 
         RPEntity setAttributes(RPEntity rp, List<String> attributes);
@@ -39,4 +41,6 @@ public interface AttributeService {
                                                       String protocolUri);
 
         String getUri(String protocolId, String attributeUri);
+
+        void saveAttributeUris(List<AttributeProtocolUriEntity> attributeUris);
 }

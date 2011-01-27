@@ -43,6 +43,11 @@ public class AttributeServiceBean implements AttributeService {
         }
 
         @Override
+        public List<AttributeProtocolUriEntity> listAttributeUris() {
+                return AttributeProtocolUriEntity.listAll(this.entityManager);
+        }
+
+        @Override
         public AttributeEntity saveAttribute(String uri) {
 
                 AttributeEntity attribute = this.entityManager.find(
@@ -136,11 +141,34 @@ public class AttributeServiceBean implements AttributeService {
                         this.entityManager.find(AttributeProtocolUriEntity.class,
                                 new AttributeProtocolUriPK(protocolId, attribute));
 
-                if (null != attributeProtocolUri) {
+                if (null != attributeProtocolUri &&
+                        null != attributeProtocolUri.getUri() &&
+                        !attributeProtocolUri.getUri().isEmpty()) {
                         return attributeProtocolUri.getUri();
                 }
 
                 return attributeUri;
+        }
+
+        @Override
+        public void saveAttributeUris(List<AttributeProtocolUriEntity> attributeUris) {
+
+                LOG.debug("save attribute URIs");
+                for (AttributeProtocolUriEntity attributeUri : attributeUris) {
+
+                        AttributeProtocolUriEntity attachedAttributeUri =
+                                this.entityManager.find(
+                                        AttributeProtocolUriEntity.class,
+                                        attributeUri.getPk());
+                        if (null == attachedAttributeUri) {
+                                throw new RuntimeException("Attribute URI not " +
+                                        "found ?! ( attribute=" +
+                                        attributeUri.getAttribute().getUri() +
+                                        " protocol=" +
+                                        attributeUri.getPk().getProtocolId());
+                        }
+                        attachedAttributeUri.setUri(attributeUri.getUri());
+                }
         }
 
         private AttributeEntity getAttribute(String uri) {
