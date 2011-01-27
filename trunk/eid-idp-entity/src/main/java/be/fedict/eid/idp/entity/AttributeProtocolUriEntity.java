@@ -25,11 +25,13 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "attribute_uri")
-@NamedQueries(@NamedQuery(name = AttributeProtocolUriEntity.LIST_ALL,
-        query = "FROM AttributeProtocolUriEntity"))
+@NamedQueries({@NamedQuery(name = AttributeProtocolUriEntity.LIST_ALL,
+        query = "SELECT apu FROM AttributeProtocolUriEntity AS apu " +
+                "ORDER BY apu.attribute")})
 public class AttributeProtocolUriEntity implements Serializable {
 
         private static final long serialVersionUID = 1L;
@@ -77,13 +79,21 @@ public class AttributeProtocolUriEntity implements Serializable {
                 this.attribute = attribute;
         }
 
-        @Column(nullable = false)
+        @Column(nullable = true)
         public String getUri() {
                 return this.uri;
         }
 
         public void setUri(String uri) {
                 this.uri = uri;
+        }
+
+        @SuppressWarnings("unchecked")
+        public static List<AttributeProtocolUriEntity> listAll(EntityManager entityManager) {
+
+                Query query = entityManager.createNamedQuery(LIST_ALL);
+                return query.getResultList();
+
         }
 
         @Override
