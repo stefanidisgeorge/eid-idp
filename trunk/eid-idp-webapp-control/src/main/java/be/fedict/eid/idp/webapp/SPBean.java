@@ -18,24 +18,26 @@
 
 package be.fedict.eid.idp.webapp;
 
+import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.Constants;
 import org.jboss.ejb3.annotation.LocalBinding;
-import org.jboss.seam.annotations.Destroy;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.datamodel.DataModel;
 import org.jboss.seam.contexts.SessionContext;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.Log;
 
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
+import java.util.List;
 
 @Stateful
 @Name("idpSP")
 @LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "webapp/SPBean")
 public class SPBean implements SP {
+
+        private static final String ATTRIBUTE_LIST_NAME = "idpRPAttributes";
 
         @Logger
         private Log log;
@@ -45,6 +47,10 @@ public class SPBean implements SP {
 
         @In(create = true)
         FacesMessages facesMessages;
+
+        @SuppressWarnings("unused")
+        @DataModel(ATTRIBUTE_LIST_NAME)
+        private List<RPAttributeEntity> attributeList;
 
         @Remove
         @Destroy
@@ -63,4 +69,16 @@ public class SPBean implements SP {
                 }
                 return null;
         }
+
+        @Override
+        @Factory(ATTRIBUTE_LIST_NAME)
+        public void attributeFactory() {
+
+                RPEntity rp = (RPEntity)
+                        this.sessionContext.get(Constants.RP_SESSION_ATTRIBUTE);
+                if (null != rp) {
+                        this.attributeList = rp.getAttributes();
+                }
+        }
+
 }

@@ -32,4 +32,9 @@ public interface SP {
         * Accessors
         */
         String getRp();
+
+        /*
+        * Factories
+        */
+        void attributeFactory();
 }
