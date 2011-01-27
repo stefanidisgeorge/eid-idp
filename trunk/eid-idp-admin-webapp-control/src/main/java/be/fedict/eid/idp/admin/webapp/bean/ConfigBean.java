@@ -177,16 +177,17 @@ public class ConfigBean implements Config {
                 this.log.debug("save applet config");
 
                 // Applet config
-                try {
-                        this.appletConfig.setServerCertificate(
-                                getCertificate(this.certificateBytes));
-                } catch (CertificateException e) {
-                        this.log.error("Certificate exception: " + e.getMessage(), e);
-                        this.facesMessages.addToControl("upload", "Invalid certificate");
-                        return null;
+                if (null != this.certificateBytes) {
+                        try {
+                                this.appletConfig.setServerCertificate(
+                                        getCertificate(this.certificateBytes));
+                        } catch (CertificateException e) {
+                                this.log.error("Certificate exception: " + e.getMessage(), e);
+                                this.facesMessages.addToControl("upload", "Invalid certificate");
+                                return null;
+                        }
+                        this.configuration.setAppletConfig(this.appletConfig);
                 }
-
-                this.configuration.setAppletConfig(this.appletConfig);
 
                 this.selectedTab = ConfigurationTab.tab_applet.name();
                 return "success";
