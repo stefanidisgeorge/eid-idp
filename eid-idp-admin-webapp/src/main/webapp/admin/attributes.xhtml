@@ -20,14 +20,14 @@
                             value="#{idpAttributeUriList}"
                             rows="10">
 
-                <h:column>
+                <rich:column sortBy="#{item.attribute.uri}">
                     <f:facet name="header">Attribute</f:facet>
                     <h:outputText value="#{item.attribute.uri}"/>
-                </h:column>
-                <h:column>
+                </rich:column>
+                <rich:column sortBy="#{item.pk.protocolId}">
                     <f:facet name="header">Protocol</f:facet>
                     <h:outputText value="#{item.pk.protocolId}"/>
-                </h:column>
+                </rich:column>
                 <h:column>
                     <f:facet name="header">URI</f:facet>
                     <s:decorate>
@@ -37,10 +37,10 @@
                 </h:column>
 
                 <f:facet name="footer">
-                         <rich:datascroller for="data" pageIndexVar="pageIndex"
-                                 pagesVar="pages" fastControls="hide">
-                         </rich:datascroller>
-                 </f:facet>
+                    <rich:datascroller for="data" pageIndexVar="pageIndex"
+                                       pagesVar="pages" fastControls="hide">
+                    </rich:datascroller>
+                </f:facet>
 
             </rich:dataTable>
 

@@ -17,6 +17,16 @@
                     rendered="#{idpSP.rp != null}"/>
         </p>
 
+        <p>#{messages.attributeInfo}</p>
+        <rich:dataTable id="data" var="item"
+                        value="#{idpRPAttributes}"
+                        rendered="#{idpSP.rp != null}">
+
+            <h:column>
+                <h:outputText value="#{item.attribute.uri}"/>
+            </h:column>
+        </rich:dataTable>
+
         <script src="https://www.java.com/js/deployJava.js"></script>
         <script>
             var attributes = {
