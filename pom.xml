@@ -42,6 +42,7 @@
         <module>eid-idp-admin-webapp-control</module>
         <module>eid-idp-sp-webapp</module>
         <module>eid-idp-deploy</module>
+        <module>eid-idp-attribute-age</module>
     </modules>
     <profiles>
         <profile>

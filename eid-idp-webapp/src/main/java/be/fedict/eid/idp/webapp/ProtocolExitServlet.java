@@ -25,6 +25,7 @@ import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
 import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.AttributeService;
+import be.fedict.eid.idp.model.AttributeServiceManager;
 import be.fedict.eid.idp.model.Constants;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.spi.*;
@@ -77,6 +78,9 @@ public class ProtocolExitServlet extends HttpServlet {
 
         @EJB
         AttributeService attributeService;
+
+        @EJB
+        AttributeServiceManager attributeServiceManager;
 
         @Override
         public void init(ServletConfig config) throws ServletException {
@@ -134,6 +138,12 @@ public class ProtocolExitServlet extends HttpServlet {
                 Map<String, Attribute> attributes = getAttributes(
                         protocolService.getId(), userId, identity, address,
                         authnCertificate, photo);
+
+                for (IdentityProviderAttributeService attributeService :
+                        this.attributeServiceManager.getAttributeServices()) {
+
+                        attributeService.addAttribute(attributes);
+                }
 
                 // filter out attributes if RP was authenticated
                 if (null != rp) {

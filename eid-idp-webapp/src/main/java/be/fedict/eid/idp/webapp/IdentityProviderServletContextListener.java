@@ -18,13 +18,16 @@
 
 package be.fedict.eid.idp.webapp;
 
+import be.fedict.eid.idp.entity.AttributeEntity;
 import be.fedict.eid.idp.model.AttributeService;
+import be.fedict.eid.idp.model.AttributeServiceManager;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import be.fedict.eid.idp.spi.DefaultAttribute;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.attribute.IdentityProviderAttributeType;
 import be.fedict.eid.idp.spi.protocol.EndpointType;
 import be.fedict.eid.idp.spi.protocol.EndpointsType;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
@@ -46,6 +49,9 @@ public class IdentityProviderServletContextListener implements
         private ProtocolServiceManager protocolServiceManager;
 
         @EJB
+        private AttributeServiceManager attributeServiceManager;
+
+        @EJB
         private IdentityService identityService;
 
         @EJB
@@ -61,6 +67,8 @@ public class IdentityProviderServletContextListener implements
                 initIdentity();
 
                 initAttributes();
+
+                initAttributeServices();
 
                 initProtocolServices(event);
 
@@ -97,6 +105,21 @@ public class IdentityProviderServletContextListener implements
                         .setAttribute(
                                 IdentityProviderConfigurationFactory.IDENTITY_PROVIDER_CONFIGURATION_CONTEXT_ATTRIBUTE,
                                 this.identityService);
+        }
+
+        private void initAttributeServices() {
+
+                List<IdentityProviderAttributeType> identityProviderAttributeTypes =
+                        this.attributeServiceManager.getAttributeServiceTypes();
+
+                for (IdentityProviderAttributeType identityProviderAttributeType :
+                        identityProviderAttributeTypes) {
+
+                        String uri = identityProviderAttributeType.getURI();
+
+                        LOG.debug("initializating attribute service for: " + uri);
+                        this.attributeService.saveAttribute(uri);
+                }
         }
 
         private void initProtocolServices(ServletContextEvent event) {
@@ -148,11 +171,12 @@ public class IdentityProviderServletContextListener implements
                                 this.protocolServiceManager.getProtocolService(
                                         identityProviderProtocolType);
 
-                        for (DefaultAttribute defaultAttribute : DefaultAttribute.values()) {
+                        for (AttributeEntity attribute : this.attributeService.listAttributes()) {
+
                                 this.attributeService.createAttributeUri(
                                         protocolService.getId(),
-                                        defaultAttribute.getUri(),
-                                        protocolService.findAttributeUri(defaultAttribute));
+                                        attribute.getUri(),
+                                        protocolService.findAttributeUri(attribute.getUri()));
                         }
                 }
         }

@@ -26,6 +26,7 @@
 				<artifactId>maven-jaxb2-plugin</artifactId>
 				<executions>
 					<execution>
+                        <id>protocol</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
@@ -33,10 +34,25 @@
 							<schemaIncludes>
 								<schemaInclude>eid-idp-protocol.xsd</schemaInclude>
 							</schemaIncludes>
-							<debug>true</debug>
+							<debug>false</debug>
 							<verbose>true</verbose>
+                            <generateDirectory>${project.build.directory}/generated-sources/protocol</generateDirectory>
 						</configuration>
 					</execution>
+                    <execution>
+                        <id>attribute</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaIncludes>
+                                <schemaInclude>eid-idp-attribute.xsd</schemaInclude>
+                            </schemaIncludes>
+                            <debug>false</debug>
+                            <verbose>true</verbose>
+                            <generateDirectory>${project.build.directory}/generated-sources/attribute</generateDirectory>
+                        </configuration>
+                    </execution>
 				</executions>
 				<dependencies>
 					<dependency>

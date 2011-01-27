@@ -57,4 +57,14 @@ public enum DefaultAttribute {
         public Class<?> getType() {
                 return type;
         }
+
+        public static DefaultAttribute findDefaultAttribute(String uri) {
+
+                for (DefaultAttribute defaultAttribute : values()) {
+                        if (defaultAttribute.getUri().equals(uri)) {
+                                return defaultAttribute;
+                        }
+                }
+                return null;
+        }
 }

@@ -206,36 +206,38 @@ public abstract class AbstractWSFederationProtocolService implements
         }
 
         @Override
-        public String findAttributeUri(DefaultAttribute defaultAttribute) {
+        public String findAttributeUri(String uri) {
 
-                switch (defaultAttribute) {
+                DefaultAttribute defaultAttribute = DefaultAttribute.findDefaultAttribute(uri);
+                if (null != defaultAttribute) {
+                        switch (defaultAttribute) {
 
-                        case LAST_NAME:
-                                return AttributeConstants.LAST_NAME_CLAIM_TYPE_URI;
-                        case FIRST_NAME:
-                                return AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI;
-                        case NAME:
-                                return AttributeConstants.NAME_CLAIM_TYPE_URI;
-                        case IDENTIFIER:
-                                return AttributeConstants.PPID_CLAIM_TYPE_URI;
-                        case ADDRESS:
-                                return AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI;
-                        case LOCALITY:
-                                return AttributeConstants.LOCALITY_CLAIM_TYPE_URI;
-                        case POSTAL_CODE:
-                                return AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI;
-                        case GENDER:
-                                return AttributeConstants.GENDER_CLAIM_TYPE_URI;
-                        case DATE_OF_BIRTH:
-                                return AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI;
-                        case NATIONALITY:
-                                return AttributeConstants.NATIONALITY_CLAIM_TYPE_URI;
-                        case PLACE_OF_BIRTH:
-                                return AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI;
-                        case PHOTO:
-                                return AttributeConstants.PHOTO_CLAIM_TYPE_URI;
+                                case LAST_NAME:
+                                        return AttributeConstants.LAST_NAME_CLAIM_TYPE_URI;
+                                case FIRST_NAME:
+                                        return AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI;
+                                case NAME:
+                                        return AttributeConstants.NAME_CLAIM_TYPE_URI;
+                                case IDENTIFIER:
+                                        return AttributeConstants.PPID_CLAIM_TYPE_URI;
+                                case ADDRESS:
+                                        return AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI;
+                                case LOCALITY:
+                                        return AttributeConstants.LOCALITY_CLAIM_TYPE_URI;
+                                case POSTAL_CODE:
+                                        return AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI;
+                                case GENDER:
+                                        return AttributeConstants.GENDER_CLAIM_TYPE_URI;
+                                case DATE_OF_BIRTH:
+                                        return AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI;
+                                case NATIONALITY:
+                                        return AttributeConstants.NATIONALITY_CLAIM_TYPE_URI;
+                                case PLACE_OF_BIRTH:
+                                        return AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI;
+                                case PHOTO:
+                                        return AttributeConstants.PHOTO_CLAIM_TYPE_URI;
+                        }
                 }
-
                 return null;
         }
 
