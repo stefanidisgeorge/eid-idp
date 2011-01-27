@@ -39,4 +39,5 @@
             <element name="Description" type="xsd:string" minOccurs="0"/>
         </sequence>
     </complexType>
+
 </schema>

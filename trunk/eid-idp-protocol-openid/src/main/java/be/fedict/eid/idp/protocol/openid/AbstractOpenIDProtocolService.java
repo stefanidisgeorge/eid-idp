@@ -98,7 +98,6 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 return "OpenID";
         }
 
-        @Override
         public void init(ServletContext servletContext,
                          IdentityProviderConfiguration configuration) {
 
@@ -106,7 +105,6 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 this.configuration = configuration;
         }
 
-        @Override
         public IncomingRequest handleIncomingRequest(
                 HttpServletRequest request, HttpServletResponse response)
                 throws Exception {
@@ -363,36 +361,37 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 return null;
         }
 
-        @Override
-        public String findAttributeUri(DefaultAttribute defaultAttribute) {
+        public String findAttributeUri(String uri) {
 
-                switch (defaultAttribute) {
+                DefaultAttribute defaultAttribute = DefaultAttribute.findDefaultAttribute(uri);
+                if (null != defaultAttribute) {
+                        switch (defaultAttribute) {
 
-                        case LAST_NAME:
-                                return OpenIDAXConstants.AX_LAST_NAME_PERSON_TYPE;
-                        case FIRST_NAME:
-                                return OpenIDAXConstants.AX_FIRST_NAME_PERSON_TYPE;
-                        case NAME:
-                                return OpenIDAXConstants.AX_NAME_PERSON_TYPE;
-                        case ADDRESS:
-                                return OpenIDAXConstants.AX_POSTAL_ADDRESS_TYPE;
-                        case LOCALITY:
-                                return OpenIDAXConstants.AX_CITY_TYPE;
-                        case POSTAL_CODE:
-                                return OpenIDAXConstants.AX_POSTAL_CODE_TYPE;
-                        case GENDER:
-                                return OpenIDAXConstants.AX_GENDER_TYPE;
-                        case DATE_OF_BIRTH:
-                                return OpenIDAXConstants.AX_BIRTHDATE_TYPE;
-                        case NATIONALITY:
-                                return OpenIDAXConstants.AX_NATIONALITY_TYPE;
-                        case PLACE_OF_BIRTH:
-                                return OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE;
-                        case IDENTIFIER:
-                        case PHOTO:
-                                return null;
+                                case LAST_NAME:
+                                        return OpenIDAXConstants.AX_LAST_NAME_PERSON_TYPE;
+                                case FIRST_NAME:
+                                        return OpenIDAXConstants.AX_FIRST_NAME_PERSON_TYPE;
+                                case NAME:
+                                        return OpenIDAXConstants.AX_NAME_PERSON_TYPE;
+                                case ADDRESS:
+                                        return OpenIDAXConstants.AX_POSTAL_ADDRESS_TYPE;
+                                case LOCALITY:
+                                        return OpenIDAXConstants.AX_CITY_TYPE;
+                                case POSTAL_CODE:
+                                        return OpenIDAXConstants.AX_POSTAL_CODE_TYPE;
+                                case GENDER:
+                                        return OpenIDAXConstants.AX_GENDER_TYPE;
+                                case DATE_OF_BIRTH:
+                                        return OpenIDAXConstants.AX_BIRTHDATE_TYPE;
+                                case NATIONALITY:
+                                        return OpenIDAXConstants.AX_NATIONALITY_TYPE;
+                                case PLACE_OF_BIRTH:
+                                        return OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE;
+                                case IDENTIFIER:
+                                case PHOTO:
+                                        return null;
+                        }
                 }
-
                 return null;
         }
 

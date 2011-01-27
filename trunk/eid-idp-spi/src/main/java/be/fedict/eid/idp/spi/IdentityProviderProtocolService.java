@@ -83,9 +83,9 @@ public interface IdentityProviderProtocolService {
                 throws Exception;
 
         /**
-         * @param defaultAttribute default eID Attribute
+         * @param uri attribute URI
          * @return protocol specific URI for this attribute or <code>null</code>
          *         if default uri is ok
          */
-        String findAttributeUri(DefaultAttribute defaultAttribute);
+        String findAttributeUri(String uri);
 }

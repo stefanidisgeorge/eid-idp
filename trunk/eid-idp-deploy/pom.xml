@@ -79,6 +79,12 @@
                             </includeInApplicationXml>
                         </jarModule>
                         <jarModule>
+                            <groupId>be.fedict.eid-idp</groupId>
+                            <artifactId>eid-idp-attribute-age</artifactId>
+                            <includeInApplicationXml>true
+                            </includeInApplicationXml>
+                        </jarModule>
+                        <jarModule>
                             <groupId>be.fedict.eid-trust-service</groupId>
                             <artifactId>eid-trust-service-client</artifactId>
                             <includeInApplicationXml>true
@@ -267,6 +273,11 @@
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-protocol-ws-federation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>be.fedict.eid-idp</groupId>
+            <artifactId>eid-idp-attribute-age</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

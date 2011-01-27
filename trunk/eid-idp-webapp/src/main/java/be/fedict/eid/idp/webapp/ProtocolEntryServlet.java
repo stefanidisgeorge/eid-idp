@@ -19,12 +19,11 @@
 package be.fedict.eid.idp.webapp;
 
 import be.fedict.eid.idp.entity.RPEntity;
-import be.fedict.eid.idp.model.Constants;
-import be.fedict.eid.idp.model.IdentityService;
-import be.fedict.eid.idp.model.ProtocolServiceManager;
-import be.fedict.eid.idp.model.RPService;
+import be.fedict.eid.idp.model.*;
+import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.IncomingRequest;
+import be.fedict.eid.idp.spi.attribute.IdentityProviderAttributeType;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
@@ -66,8 +65,15 @@ public class ProtocolEntryServlet extends HttpServlet {
                 .getName()
                 + ".ProtocolServices";
 
+        public static final String ATTRIBUTE_SERVICES_ATTRIBUTE = ProtocolEntryServlet.class
+                .getName()
+                + ".AttributeServices";
+
         @EJB
         private ProtocolServiceManager protocolServiceManager;
+
+        @EJB
+        private AttributeServiceManager attributeServiceManager;
 
         @EJB
         IdentityService identityService;
@@ -102,6 +108,25 @@ public class ProtocolEntryServlet extends HttpServlet {
                 ServletContext servletContext) {
                 servletContext.setAttribute(PROTOCOL_SERVICES_ATTRIBUTE,
                         protocolServices);
+        }
+
+        public static Map<String, IdentityProviderAttributeService> getAttributeServices(
+                ServletContext servletContext) throws ServletException {
+                return findAttributeServices(servletContext);
+        }
+
+        @SuppressWarnings("unchecked")
+        public static Map<String, IdentityProviderAttributeService> findAttributeServices(
+                ServletContext servletContext) throws ServletException {
+                return (Map<String, IdentityProviderAttributeService>) servletContext
+                        .getAttribute(ATTRIBUTE_SERVICES_ATTRIBUTE);
+        }
+
+        private static void setAttributeServices(
+                Map<String, IdentityProviderAttributeService> attributeServices,
+                ServletContext servletContext) {
+                servletContext.setAttribute(ATTRIBUTE_SERVICES_ATTRIBUTE,
+                        attributeServices);
         }
 
         @Override
@@ -143,6 +168,30 @@ public class ProtocolEntryServlet extends HttpServlet {
                                 protocolService.init(servletContext,
                                         this.identityService);
                                 protocolServices.put(contextPath, protocolService);
+                        }
+                }
+
+                /*
+                * Initialize the attribute services.
+                */
+                if (null == findAttributeServices(servletContext)) {
+                        Map<String, IdentityProviderAttributeService> attributeServices =
+                                new HashMap<String, IdentityProviderAttributeService>();
+                        setAttributeServices(attributeServices, servletContext);
+                        List<IdentityProviderAttributeType> identityProviderAttributes =
+                                this.attributeServiceManager.getAttributeServiceTypes();
+                        for (IdentityProviderAttributeType identityProviderAttribute : identityProviderAttributes) {
+                                String uri = identityProviderAttribute.getURI();
+                                LOG.debug("attribute URI: " + uri);
+                                IdentityProviderAttributeService attributeService =
+                                        this.attributeServiceManager.getAttributeService(identityProviderAttribute);
+                                if (attributeServices.containsKey(uri)) {
+                                        throw new ServletException(
+                                                "attribute service for URI already registered: "
+                                                        + uri);
+                                }
+                                attributeService.init(servletContext);
+                                attributeServices.put(uri, attributeService);
                         }
                 }
         }
