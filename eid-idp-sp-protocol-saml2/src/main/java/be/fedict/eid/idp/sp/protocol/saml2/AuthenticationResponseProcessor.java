@@ -125,6 +125,7 @@ public class AuthenticationResponseProcessor {
                 }
 
                 Assertion assertion = assertions.get(0);
+                LOG.debug("issuer: " + assertion.getIssuer().getValue());
                 List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
                 if (authnStatements.isEmpty()) {
                         throw new AuthenticationResponseProcessorException(

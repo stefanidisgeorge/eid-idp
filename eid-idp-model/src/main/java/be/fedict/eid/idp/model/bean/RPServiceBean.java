@@ -53,6 +53,7 @@ public class RPServiceBean implements RPService {
                 if (null != attachedRp) {
                         // save
                         attachedRp.setName(rp.getName());
+                        attachedRp.setRequestSigningRequired(rp.isRequestSigningRequired());
                         if (null != rp.getDomain() && rp.getDomain().trim().isEmpty()) {
                                 attachedRp.setDomain(null);
                         } else {

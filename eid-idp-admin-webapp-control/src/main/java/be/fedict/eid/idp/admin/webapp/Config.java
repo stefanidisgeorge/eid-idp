@@ -60,6 +60,10 @@ public interface Config {
 
         void setHttpProxyPort(Integer httpProxyPort);
 
+        String getDefaultIssuer();
+
+        void setDefaultIssuer(String defaultIssuer);
+
         AppletConfigEntity getAppletConfig();
 
         void setAppletConfig(AppletConfigEntity appletConfig);
@@ -81,9 +85,9 @@ public interface Config {
         /*
         * Actions.
         */
-        String saveXkms();
+        String saveIdP();
 
-        String savePseudonym();
+        String saveXkms();
 
         String saveNetwork();
 

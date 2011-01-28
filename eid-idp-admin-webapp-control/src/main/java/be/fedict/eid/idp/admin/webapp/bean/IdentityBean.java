@@ -20,7 +20,7 @@ package be.fedict.eid.idp.admin.webapp.bean;
 
 import be.fedict.eid.idp.admin.webapp.AdminConstants;
 import be.fedict.eid.idp.admin.webapp.Identity;
-import be.fedict.eid.idp.model.IdentityConfig;
+import be.fedict.eid.idp.model.IdPIdentityConfig;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.KeyStoreType;
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
@@ -61,7 +61,7 @@ public class IdentityBean implements Identity {
         private boolean nameReadOnly = true;
 
         private List<String> identityNames;
-        private IdentityConfig identityConfig;
+        private IdPIdentityConfig idPIdentityConfig;
 
 
         @Override
@@ -70,17 +70,17 @@ public class IdentityBean implements Identity {
 
                 // Identity Config
                 if (null != this.name) {
-                        this.identityConfig = this.identityService.findIdentityConfig(this.name);
-                        if (null == this.identityConfig) {
-                                this.identityConfig = new IdentityConfig(this.name);
+                        this.idPIdentityConfig = this.identityService.findIdentityConfig(this.name);
+                        if (null == this.idPIdentityConfig) {
+                                this.idPIdentityConfig = new IdPIdentityConfig(this.name);
                         }
                 } else {
-                        this.identityConfig = this.identityService.findIdentityConfig();
-                        if (null == this.identityConfig) {
-                                this.identityConfig = new IdentityConfig("");
+                        this.idPIdentityConfig = this.identityService.findIdentityConfig();
+                        if (null == this.idPIdentityConfig) {
+                                this.idPIdentityConfig = new IdPIdentityConfig("");
                         }
                 }
-                this.name = this.identityConfig.getName();
+                this.name = this.idPIdentityConfig.getName();
                 this.identityNames = this.identityService.getIdentities();
 
                 this.nameReadOnly = !this.name.isEmpty();
@@ -98,9 +98,9 @@ public class IdentityBean implements Identity {
 
                 try {
                         // Identity Config
-                        this.identityService.setIdentity(this.identityConfig);
+                        this.identityService.setIdentity(this.idPIdentityConfig);
 
-                        if (this.identityConfig.isActive()) {
+                        if (this.idPIdentityConfig.isActive()) {
                                 this.identityService.reloadIdentity();
                         }
                         this.identityNames = this.identityService.getIdentities();
@@ -117,7 +117,7 @@ public class IdentityBean implements Identity {
                 this.log.debug("activate: " + this.name);
 
                 try {
-                        this.identityConfig.setActive(true);
+                        this.idPIdentityConfig.setActive(true);
                         this.identityService.setActiveIdentity(this.name);
                         return "success";
                 } catch (KeyStoreLoadException e) {
@@ -132,7 +132,7 @@ public class IdentityBean implements Identity {
                 this.log.debug("remove: " + this.name);
 
                 // disallow removing currently active
-                if (this.identityConfig.isActive() && this.identityNames.size() != 1) {
+                if (this.idPIdentityConfig.isActive() && this.identityNames.size() != 1) {
                         this.facesMessages.add(StatusMessage.Severity.ERROR,
                                 "Identity is currently active, cannot remove.");
                         return null;
@@ -142,11 +142,11 @@ public class IdentityBean implements Identity {
                 this.identityService.removeIdentityConfig(this.name);
 
                 // load default config and list of identities
-                this.identityConfig = this.identityService.findIdentityConfig();
-                if (null == this.identityConfig) {
-                        this.identityConfig = new IdentityConfig("");
+                this.idPIdentityConfig = this.identityService.findIdentityConfig();
+                if (null == this.idPIdentityConfig) {
+                        this.idPIdentityConfig = new IdPIdentityConfig("");
                 }
-                this.name = this.identityConfig.getName();
+                this.name = this.idPIdentityConfig.getName();
                 this.identityNames = this.identityService.getIdentities();
                 return "success";
         }
@@ -164,7 +164,7 @@ public class IdentityBean implements Identity {
 
         @Override
         public String getIdentityLabel() {
-                return "Identity" + (this.identityConfig.isActive() ? " (Active)" : "");
+                return "Identity" + (this.idPIdentityConfig.isActive() ? " (Active)" : "");
         }
 
         @Override
@@ -177,17 +177,17 @@ public class IdentityBean implements Identity {
         public void setName(String name) {
 
                 if (name.equals(ADD_IDENTITY_LABEL)) {
-                        this.identityConfig = new IdentityConfig("");
+                        this.idPIdentityConfig = new IdPIdentityConfig("");
                         this.nameReadOnly = false;
-                        this.name = this.identityConfig.getName();
+                        this.name = this.idPIdentityConfig.getName();
                 } else {
-                        IdentityConfig identityConfig = this.identityService.findIdentityConfig(name);
-                        if (null != identityConfig) {
-                                this.identityConfig = identityConfig;
-                                this.name = this.identityConfig.getName();
+                        IdPIdentityConfig idPIdentityConfig = this.identityService.findIdentityConfig(name);
+                        if (null != idPIdentityConfig) {
+                                this.idPIdentityConfig = idPIdentityConfig;
+                                this.name = this.idPIdentityConfig.getName();
                         } else {
                                 this.name = name;
-                                this.identityConfig.setName(name);
+                                this.idPIdentityConfig.setName(name);
                         }
                 }
         }
@@ -199,51 +199,51 @@ public class IdentityBean implements Identity {
 
         @Override
         public String getKeyStoreType() {
-                return identityConfig.getKeyStoreType().name();
+                return idPIdentityConfig.getKeyStoreType().name();
         }
 
         @Override
         public void setKeyStoreType(String keyStoreType) {
-                this.identityConfig.setKeyStoreType(KeyStoreType.valueOf(keyStoreType));
+                this.idPIdentityConfig.setKeyStoreType(KeyStoreType.valueOf(keyStoreType));
         }
 
         @Override
         public String getKeyStorePath() {
-                return this.identityConfig.getKeyStorePath();
+                return this.idPIdentityConfig.getKeyStorePath();
         }
 
         @Override
         public void setKeyStorePath(String keyStorePath) {
-                this.identityConfig.setKeyStorePath(keyStorePath);
+                this.idPIdentityConfig.setKeyStorePath(keyStorePath);
         }
 
         @Override
         public String getKeyStorePassword() {
-                return this.identityConfig.getKeyStorePassword();
+                return this.idPIdentityConfig.getKeyStorePassword();
         }
 
         @Override
         public void setKeyStorePassword(String keyStorePassword) {
-                this.identityConfig.setKeyStorePassword(keyStorePassword);
+                this.idPIdentityConfig.setKeyStorePassword(keyStorePassword);
         }
 
         @Override
         public String getKeyEntryPassword() {
-                return this.identityConfig.getKeyEntryPassword();
+                return this.idPIdentityConfig.getKeyEntryPassword();
         }
 
         @Override
         public void setKeyEntryPassword(String keyEntryPassword) {
-                this.identityConfig.setKeyEntryPassword(keyEntryPassword);
+                this.idPIdentityConfig.setKeyEntryPassword(keyEntryPassword);
         }
 
         @Override
         public String getKeyEntryAlias() {
-                return this.identityConfig.getKeyEntryAlias();
+                return this.idPIdentityConfig.getKeyEntryAlias();
         }
 
         @Override
         public void setKeyEntryAlias(String keyEntryAlias) {
-                this.identityConfig.setKeyEntryAlias(keyEntryAlias);
+                this.idPIdentityConfig.setKeyEntryAlias(keyEntryAlias);
         }
 }

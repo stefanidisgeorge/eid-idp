@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.model;
 
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
+import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 
 import javax.ejb.Local;
@@ -37,12 +38,12 @@ public interface IdentityService extends IdentityProviderConfiguration {
 
     void setActiveIdentity(String name) throws KeyStoreLoadException;
 
-    KeyStore.PrivateKeyEntry setIdentity(IdentityConfig identityConfig)
+    IdPIdentity setIdentity(IdPIdentityConfig idPIdentityConfig)
             throws KeyStoreLoadException;
 
-    IdentityConfig findIdentityConfig();
+    IdPIdentityConfig findIdentityConfig();
 
-    IdentityConfig findIdentityConfig(String name);
+    IdPIdentityConfig findIdentityConfig(String name);
 
     void removeIdentityConfig(String name);
 

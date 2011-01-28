@@ -24,6 +24,7 @@ import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
 import be.fedict.eid.idp.protocol.ws_federation.AbstractWSFederationProtocolService;
 import be.fedict.eid.idp.protocol.ws_federation.WSFederationProtocolServiceAuthIdent;
+import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.NameValuePair;
 import be.fedict.eid.idp.spi.ReturnResponse;
@@ -101,8 +102,10 @@ public class WSFederationProtocolServiceTest {
                 DateTime notAfter = notBefore.plusMonths(1);
                 X509Certificate certificate = generateSelfSignedCertificate(keyPair,
                         "CN=Test", notBefore, notAfter);
-                KeyStore.PrivateKeyEntry idPIdentity =
-                        new KeyStore.PrivateKeyEntry(keyPair.getPrivate(), new java.security.cert.Certificate[]{certificate});
+
+                IdPIdentity idPIdentity = new IdPIdentity("test",
+                        new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),
+                                new java.security.cert.Certificate[]{certificate}));
 
                 HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
                 String userId = UUID.randomUUID().toString();

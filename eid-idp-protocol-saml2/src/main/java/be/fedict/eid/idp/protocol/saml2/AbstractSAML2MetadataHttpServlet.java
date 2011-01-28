@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.protocol.saml2;
 
 import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import org.apache.commons.logging.Log;
@@ -106,7 +107,7 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
                 entityDescriptor.setEntityID(location);
 
                 // signature
-                KeyStore.PrivateKeyEntry identity = configuration.findIdentity();
+                IdPIdentity identity = configuration.findIdentity();
                 if (null != identity) {
                         // Add a signature to the entity descriptor.
                         Signature signature = Saml2Util.buildXMLObject(Signature.class,
@@ -117,15 +118,17 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
                                 SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
 
                         // add certificate chain as keyinfo
-                        signature.setKeyInfo(getKeyInfo(identity));
+                        signature.setKeyInfo(getKeyInfo(identity.getPrivateKeyEntry()));
 
                         BasicX509Credential signingCredential = new BasicX509Credential();
-                        signingCredential.setPrivateKey(identity.getPrivateKey());
+                        signingCredential.setPrivateKey(identity.getPrivateKeyEntry().
+                                getPrivateKey());
                         signingCredential.setEntityCertificateChain(
-                                getCertificateChain(identity));
+                                getCertificateChain(identity.getPrivateKeyEntry()));
                         signature.setSigningCredential(signingCredential);
 
-                        String algorithm = identity.getPrivateKey().getAlgorithm();
+                        String algorithm = identity.getPrivateKeyEntry()
+                                .getPrivateKey().getAlgorithm();
                         if ("RSA".equals(algorithm)) {
                                 signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA);
                         } else {
@@ -146,7 +149,7 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
                         KeyDescriptor keyDescriptor =
                                 Saml2Util.buildXMLObject(KeyDescriptor.class,
                                         KeyDescriptor.DEFAULT_ELEMENT_NAME);
-                        keyDescriptor.setKeyInfo(getKeyInfo(identity));
+                        keyDescriptor.setKeyInfo(getKeyInfo(identity.getPrivateKeyEntry()));
                         idpSsoDescriptor.getKeyDescriptors().add(keyDescriptor);
                 }
 
@@ -165,11 +168,11 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
 
                         LOG.debug("sign SAML2 Metadata");
                         element = Saml2Util.signAsElement(entityDescriptor, entityDescriptor,
-                                (X509Certificate) identity.getCertificate(),
-                                identity.getPrivateKey());
+                                (X509Certificate) identity.getPrivateKeyEntry().
+                                        getCertificate(),
+                                identity.getPrivateKeyEntry().getPrivateKey());
                 } else {
 
-                        // TODO: explode here?
                         LOG.warn("SAML2 Metadata NOT signed!");
                         element = Saml2Util.marshall(entityDescriptor);
                 }

@@ -247,8 +247,9 @@ public class SAML2ProtocolServiceTest {
                 X509Certificate certificate = generateSelfSignedCertificate(keyPair,
                         "CN=Test", notBefore, notAfter);
 
-                KeyStore.PrivateKeyEntry idpIdentity =
-                        new KeyStore.PrivateKeyEntry(keyPair.getPrivate(), new Certificate[]{certificate});
+                IdPIdentity idpIdentity = new IdPIdentity("test",
+                        new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),
+                                new Certificate[]{certificate}));
 
                 IdentityProviderConfiguration mockConfiguration = EasyMock
                         .createMock(IdentityProviderConfiguration.class);
@@ -339,8 +340,9 @@ public class SAML2ProtocolServiceTest {
                                 certChain);
 
                 // Operate: sign
-                Assertion assertion = Saml2Util.getAssertion("test-in-response-to",
-                        "test-audience", new DateTime(), IdentityProviderFlow.AUTHENTICATION,
+                Assertion assertion = Saml2Util.getAssertion("test-issuer",
+                        "test-in-response-to", "test-audience", new DateTime(),
+                        IdentityProviderFlow.AUTHENTICATION,
                         UUID.randomUUID().toString(), new HashMap<String, Attribute>());
                 Assertion signedAssertion = (Assertion) Saml2Util.sign(assertion,
                         idpIdentity);

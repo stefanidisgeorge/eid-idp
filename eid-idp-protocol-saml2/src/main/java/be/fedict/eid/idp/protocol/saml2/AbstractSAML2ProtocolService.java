@@ -44,7 +44,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -201,6 +200,18 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 String relayState = getRelayState(httpSession);
                 String inResponseTo = getInResponseTo(httpSession);
 
+
+                IdPIdentity idpIdentity = this.configuration.findIdentity();
+                String issuerName;
+                if (null != idpIdentity) {
+                        issuerName = idpIdentity.getName();
+                } else {
+                        issuerName = this.configuration.getDefaultIssuer();
+                }
+                if (null == issuerName) {
+                        issuerName = "Default";
+                }
+
                 Response samlResponse = Saml2Util.buildXMLObject(Response.class,
                         Response.DEFAULT_ELEMENT_NAME);
                 DateTime issueInstant = new DateTime();
@@ -209,6 +220,11 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 samlResponse.setDestination(targetUrl);
                 String samlResponseId = "saml-response-" + UUID.randomUUID().toString();
                 samlResponse.setID(samlResponseId);
+
+                Issuer issuer = Saml2Util.buildXMLObject(Issuer.class,
+                        Issuer.DEFAULT_ELEMENT_NAME);
+                issuer.setValue(issuerName);
+                samlResponse.setIssuer(issuer);
 
                 Status status = Saml2Util.buildXMLObject(Status.class,
                         Status.DEFAULT_ELEMENT_NAME);
@@ -219,14 +235,13 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 statusCode.setValue(StatusCode.SUCCESS_URI);
 
                 // generate assertion
-                Assertion assertion = Saml2Util.getAssertion(inResponseTo,
-                        targetUrl, issueInstant, getAuthenticationFlow(),
-                        userId, attributes);
+                Assertion assertion = Saml2Util.getAssertion(issuerName,
+                        inResponseTo, targetUrl, issueInstant,
+                        getAuthenticationFlow(), userId, attributes);
 
                 // sign assertion
-                KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
                 if (null != idpIdentity) {
-                        Saml2Util.sign(assertion, idpIdentity);
+                        Saml2Util.sign(assertion, idpIdentity.getPrivateKeyEntry());
                 }
 
                 samlResponse.getAssertions().add(assertion);
@@ -242,7 +257,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 if (null != idpIdentity) {
 
                         BasicX509Credential credential = new BasicX509Credential();
-                        credential.setPrivateKey(idpIdentity.getPrivateKey());
+                        credential.setPrivateKey(idpIdentity.getPrivateKeyEntry().getPrivateKey());
                         credential.setEntityCertificateChain(this.configuration.getIdentityCertificateChain());
 
                         // enable adding the cert.chain as KeyInfo

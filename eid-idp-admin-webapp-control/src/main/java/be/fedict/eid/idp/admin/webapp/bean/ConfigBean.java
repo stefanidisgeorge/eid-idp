@@ -69,14 +69,15 @@ public class ConfigBean implements Config {
         private byte[] certificateBytes;
 
         enum ConfigurationTab {
-                tab_xkms, tab_pseudonym, tab_network, tab_applet
+                tab_xkms, tab_idp, tab_network, tab_applet
         }
+
+        private String defaultIssuer;
+        private String hmacSecret;
 
         private String xkmsUrl;
         private String xkmsAuthTrustDomain;
         private String xkmsIdentTrustDomain;
-
-        private String hmacSecret;
 
         private Boolean httpProxy;
         private String httpProxyHost;
@@ -89,6 +90,12 @@ public class ConfigBean implements Config {
         @PostConstruct
         public void postConstruct() {
 
+                // IdP Config
+                this.defaultIssuer = this.configuration.getValue(
+                        ConfigProperty.DEFAULT_ISSUER, String.class);
+                this.hmacSecret = this.configuration.getValue(ConfigProperty.HMAC_SECRET,
+                        String.class);
+
                 // XKMS Config
                 this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
                         String.class);
@@ -98,10 +105,6 @@ public class ConfigBean implements Config {
                 this.xkmsIdentTrustDomain =
                         this.configuration.getValue(ConfigProperty.XKMS_IDENT_TRUST_DOMAIN,
                                 String.class);
-
-                // Pseudonym Config
-                this.hmacSecret = this.configuration.getValue(ConfigProperty.HMAC_SECRET,
-                        String.class);
 
                 // Network Config
                 this.httpProxy = this.configuration.getValue(
@@ -139,15 +142,17 @@ public class ConfigBean implements Config {
         }
 
         @Override
-        public String savePseudonym() {
+        public String saveIdP() {
 
-                this.log.debug("save pseudonym");
+                this.log.debug("save idp");
 
-                // Pseudonym Config
+                // IdP Config
+                this.configuration.setValue(ConfigProperty.DEFAULT_ISSUER,
+                        this.defaultIssuer);
                 this.configuration.setValue(ConfigProperty.HMAC_SECRET,
                         this.hmacSecret);
 
-                this.selectedTab = ConfigurationTab.tab_pseudonym.name();
+                this.selectedTab = ConfigurationTab.tab_idp.name();
 
                 return "success";
         }
@@ -293,6 +298,16 @@ public class ConfigBean implements Config {
         @Override
         public void setAppletConfig(AppletConfigEntity appletConfig) {
                 this.appletConfig = appletConfig;
+        }
+
+        @Override
+        public String getDefaultIssuer() {
+                return defaultIssuer;
+        }
+
+        @Override
+        public void setDefaultIssuer(String defaultIssuer) {
+                this.defaultIssuer = defaultIssuer;
         }
 
         @Override
