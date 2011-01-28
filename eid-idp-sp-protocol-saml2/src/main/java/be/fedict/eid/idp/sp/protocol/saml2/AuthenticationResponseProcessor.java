@@ -245,7 +245,7 @@ public class AuthenticationResponseProcessor {
 
                 return new AuthenticationResponse(authenticationTime,
                         identifier, authenticationPolicy, attributeMap,
-                        relayState);
+                        relayState, assertion);
         }
 
         private void validateSignature(AuthenticationResponseService service,
