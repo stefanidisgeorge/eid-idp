@@ -18,8 +18,10 @@
 
 package be.fedict.eid.idp.webapp;
 
+import be.fedict.eid.idp.entity.AttributeEntity;
 import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.model.AttributeService;
 import be.fedict.eid.idp.model.Constants;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.annotations.*;
@@ -28,8 +30,10 @@ import org.jboss.seam.contexts.SessionContext;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.Log;
 
+import javax.ejb.EJB;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
+import java.util.LinkedList;
 import java.util.List;
 
 @Stateful
@@ -48,9 +52,12 @@ public class SPBean implements SP {
         @In(create = true)
         FacesMessages facesMessages;
 
+        @EJB
+        AttributeService attributeService;
+
         @SuppressWarnings("unused")
         @DataModel(ATTRIBUTE_LIST_NAME)
-        private List<RPAttributeEntity> attributeList;
+        private List<AttributeEntity> attributeList;
 
         @Remove
         @Destroy
@@ -77,7 +84,12 @@ public class SPBean implements SP {
                 RPEntity rp = (RPEntity)
                         this.sessionContext.get(Constants.RP_SESSION_ATTRIBUTE);
                 if (null != rp) {
-                        this.attributeList = rp.getAttributes();
+                        this.attributeList = new LinkedList<AttributeEntity>();
+                        for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
+                                this.attributeList.add(rpAttribute.getAttribute());
+                        }
+                } else {
+                        this.attributeList = this.attributeService.listAttributes();
                 }
         }
 
