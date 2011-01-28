@@ -19,11 +19,10 @@
 
         <p>#{messages.attributeInfo}</p>
         <rich:dataTable id="data" var="item"
-                        value="#{idpRPAttributes}"
-                        rendered="#{idpSP.rp != null}">
+                        value="#{idpRPAttributes}">
 
             <h:column>
-                <h:outputText value="#{item.attribute.uri}"/>
+                <h:outputText value="#{item.uri}"/>
             </h:column>
         </rich:dataTable>
 
