@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.attribute.age;
 
 import be.fedict.eid.idp.spi.Attribute;
+import be.fedict.eid.idp.spi.AttributeType;
 import be.fedict.eid.idp.spi.DefaultAttribute;
 import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
 import org.apache.commons.logging.Log;
@@ -49,16 +50,18 @@ public class AgeAttributeService implements IdentityProviderAttributeService {
         public void addAttribute(Map<String, Attribute> attributeMap) {
 
                 LOG.debug("Add age attribute");
-                Attribute<GregorianCalendar> dobAttribute =
+                Attribute dobAttribute =
                         attributeMap.get(DefaultAttribute.DATE_OF_BIRTH.getUri());
                 if (null != dobAttribute) {
 
-                        DateTime dob = new DateTime(dobAttribute.getValue().getTime());
+                        GregorianCalendar dobValue =
+                                (GregorianCalendar) dobAttribute.getValue();
+                        DateTime dob = new DateTime(dobValue.getTime());
                         DateTime now = new DateTime();
                         Years years = Years.yearsBetween(dob, now);
                         int age = years.getYears();
-                        attributeMap.put(URI, new Attribute<String>(URI,
-                                String.class, Integer.toString(age), URI));
+                        attributeMap.put(URI, new Attribute(URI,
+                                AttributeType.INTEGER, age));
                 }
         }
 }

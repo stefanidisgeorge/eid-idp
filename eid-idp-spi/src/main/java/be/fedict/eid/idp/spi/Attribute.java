@@ -21,31 +21,17 @@ package be.fedict.eid.idp.spi;
 /**
  * Attribute data object returned to the authentication protocols.
  */
-public class Attribute<T> {
-
-        private final String name;
-        private final Class<T> type;
-        private final T value;
+public class Attribute {
 
         private String uri;
+        private final AttributeType attributeType;
+        private final Object value;
 
-        public Attribute(String name, Class<T> type, T value, String uri) {
-                this.name = name;
-                this.type = type;
-                this.value = value;
+        public Attribute(String uri, AttributeType attributeType,
+                         Object value) {
                 this.uri = uri;
-        }
-
-        public String getName() {
-                return this.name;
-        }
-
-        public Class<T> getType() {
-                return this.type;
-        }
-
-        public T getValue() {
-                return this.value;
+                this.attributeType = attributeType;
+                this.value = value;
         }
 
         public String getUri() {
@@ -54,5 +40,13 @@ public class Attribute<T> {
 
         public void setUri(String uri) {
                 this.uri = uri;
+        }
+
+        public AttributeType getAttributeType() {
+                return attributeType;
+        }
+
+        public Object getValue() {
+                return this.value;
         }
 }

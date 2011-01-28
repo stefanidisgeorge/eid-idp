@@ -37,6 +37,7 @@ import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
+import org.opensaml.xml.schema.XSInteger;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 import org.opensaml.xml.security.x509.BasicX509Credential;
@@ -209,6 +210,12 @@ public class AuthenticationResponseProcessor {
                                 if (attribute.getAttributeValues().get(0) instanceof XSString) {
 
                                         XSString attributeValue = (XSString) attribute
+                                                .getAttributeValues().get(0);
+                                        attributeMap.put(attributeName, attributeValue.getValue());
+
+                                } else if (attribute.getAttributeValues().get(0) instanceof XSInteger) {
+
+                                        XSInteger attributeValue = (XSInteger) attribute
                                                 .getAttributeValues().get(0);
                                         attributeMap.put(attributeName, attributeValue.getValue());
 

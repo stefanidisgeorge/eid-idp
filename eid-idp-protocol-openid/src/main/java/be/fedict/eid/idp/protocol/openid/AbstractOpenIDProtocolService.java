@@ -341,20 +341,20 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
 
                         if (attribute.getUri().equals(typeUri)) {
 
-                                if (attribute.getType().equals(String.class)) {
+                                switch (attribute.getAttributeType()) {
 
-                                        return (String) attribute.getValue();
-
-                                } else if (attribute.getType().equals(GregorianCalendar.class)) {
-
-                                        return new SimpleDateFormat("yyyy/MM/dd").
-                                                format(((GregorianCalendar) attribute.getValue()).getTime());
-                                } else {
-                                        throw new RuntimeException("Attribute of type \"" +
-                                                attribute.getType().getCanonicalName() +
-                                                " not supported!");
+                                        case STRING:
+                                                return (String) attribute.getValue();
+                                        case INTEGER:
+                                                return attribute.getValue().toString();
+                                        case DATE:
+                                                return new SimpleDateFormat("yyyy/MM/dd").
+                                                        format(((GregorianCalendar) attribute.getValue()).getTime());
+                                        case BINARY:
+                                                throw new RuntimeException("Binary " +
+                                                        "attribute type not supported " +
+                                                        "for OpenID (uri=" + attribute.getUri());
                                 }
-
                         }
                 }
 

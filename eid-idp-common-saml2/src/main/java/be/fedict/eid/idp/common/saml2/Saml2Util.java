@@ -39,6 +39,7 @@ import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
+import org.opensaml.xml.schema.XSInteger;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.BasicCredential;
@@ -233,23 +234,33 @@ public abstract class Saml2Util {
         private static void addAttribute(be.fedict.eid.idp.spi.Attribute attribute,
                                          AttributeStatement attributeStatement) {
 
-                if (attribute.getType().equals(String.class)) {
-                        addAttribute(attribute.getUri(),
-                                (String) attribute.getValue(),
-                                attributeStatement);
-                } else if (attribute.getType().equals(GregorianCalendar.class)) {
-                        addAttribute(attribute.getUri(),
-                                (GregorianCalendar) attribute.getValue(),
-                                attributeStatement);
-                } else if (attribute.getType().equals(Byte[].class)) {
-                        addAttribute(attribute.getUri(),
-                                (byte[]) attribute.getValue(),
-                                attributeStatement);
-                } else {
-                        throw new RuntimeException("Attribute of type \"" +
-                                attribute.getType().getCanonicalName() +
-                                " not supported!");
+                switch (attribute.getAttributeType()) {
+
+                        case STRING:
+                                addAttribute(attribute.getUri(),
+                                        (String) attribute.getValue(),
+                                        attributeStatement);
+                                return;
+                        case INTEGER:
+                                addAttribute(attribute.getUri(),
+                                        (Integer) attribute.getValue(),
+                                        attributeStatement);
+                                return;
+                        case DATE:
+                                addAttribute(attribute.getUri(),
+                                        (GregorianCalendar) attribute.getValue(),
+                                        attributeStatement);
+                                return;
+                        case BINARY:
+                                addAttribute(attribute.getUri(),
+                                        (byte[]) attribute.getValue(),
+                                        attributeStatement);
+                                return;
                 }
+
+                throw new RuntimeException("Attribute " + attribute.getUri() +
+                        " of type \"" + attribute.getAttributeType().getType() +
+                        " not supported!");
         }
 
         @SuppressWarnings("unchecked")
@@ -266,6 +277,24 @@ public abstract class Saml2Util {
                         Configuration.getBuilderFactory().getBuilder(XSString.TYPE_NAME);
                 XSString xmlAttributeValue = builder.buildObject(
                         AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+                xmlAttributeValue.setValue(attributeValue);
+                attribute.getAttributeValues().add(xmlAttributeValue);
+        }
+
+        @SuppressWarnings("unchecked")
+        private static void addAttribute(String attributeName, Integer attributeValue,
+                                         AttributeStatement attributeStatement) {
+
+                List<Attribute> attributes = attributeStatement.getAttributes();
+
+                Attribute attribute = buildXMLObject(Attribute.class, Attribute.DEFAULT_ELEMENT_NAME);
+                attribute.setName(attributeName);
+                attributes.add(attribute);
+
+                XMLObjectBuilder<XSInteger> builder =
+                        Configuration.getBuilderFactory().getBuilder(XSInteger.TYPE_NAME);
+                XSInteger xmlAttributeValue = builder.buildObject(
+                        AttributeValue.DEFAULT_ELEMENT_NAME, XSInteger.TYPE_NAME);
                 xmlAttributeValue.setValue(attributeValue);
                 attribute.getAttributeValues().add(xmlAttributeValue);
         }
