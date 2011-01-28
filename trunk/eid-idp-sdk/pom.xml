@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>be.fedict</groupId>
@@ -78,6 +81,47 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>unpack-javadoc-saml2-spi</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>be.fedict.eid-idp</groupId>
+                                    <artifactId>eid-idp-sp-protocol-saml2-spi
+                                    </artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>javadoc</classifier>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/files/javadoc/saml2-spi
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-javadoc-common</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>be.fedict.eid-idp</groupId>
+                                    <artifactId>eid-idp-common</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>javadoc</classifier>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/files/javadoc/common
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>copy</id>
                         <phase>package</phase>
                         <goals>
@@ -87,6 +131,8 @@
                             <outputDirectory>
                                 ${project.build.directory}/dependencies
                             </outputDirectory>
+                            <excludeArtifactIds>eid-idp-devel-guide
+                            </excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
@@ -120,6 +166,12 @@
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-sp-protocol-openid</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>

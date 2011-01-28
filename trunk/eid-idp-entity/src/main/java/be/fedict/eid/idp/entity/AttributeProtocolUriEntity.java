@@ -27,6 +27,13 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Attribute Protocol URI entity.
+ * <p/>
+ * This entity allows for (optional) configuration of protocol-specific
+ * attribute URIs to * be returned instead of the default
+ * {@link AttributeEntity#getUri()}.
+ */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "attribute_uri")
 @NamedQueries({@NamedQuery(name = AttributeProtocolUriEntity.LIST_ALL,

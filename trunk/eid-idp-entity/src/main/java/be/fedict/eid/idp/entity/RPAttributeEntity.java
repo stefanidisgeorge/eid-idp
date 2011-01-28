@@ -26,6 +26,12 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import javax.persistence.*;
 import java.io.Serializable;
 
+/**
+ * Relying Party (RP) Attribute Entity.
+ * <p/>
+ * These entities specify the custom set of attributes to be returned for a
+ * specific RP along with whether they need to be returned encrypted or not.
+ */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "attribute_rp")
 @NamedQueries(@NamedQuery(name = RPAttributeEntity.LIST_ALL,

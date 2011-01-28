@@ -28,6 +28,12 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
+/**
+ * Applet configuration entity.
+ * <p/>
+ * Allows an administrator to specify the SSL certificate to be used for secure
+ * channel binding when using the eID Applet.
+ */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "applet")
 @NamedQueries({@NamedQuery(name = AppletConfigEntity.LIST_ALL, query = "FROM AppletConfigEntity ")})
