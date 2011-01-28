@@ -136,9 +136,9 @@ public class ProtocolExitServlet extends HttpServlet {
                         userId = getUniqueId(authenticatedIdentifier, rp);
                 }
                 Map<String, Attribute> attributes = getAttributes(
-                        protocolService.getId(), userId, identity, address,
-                        authnCertificate, photo);
+                        userId, identity, address, authnCertificate, photo);
 
+                // add derived attributes
                 for (IdentityProviderAttributeService attributeService :
                         this.attributeServiceManager.getAttributeServices()) {
 
@@ -148,6 +148,12 @@ public class ProtocolExitServlet extends HttpServlet {
                 // filter out attributes if RP was authenticated
                 if (null != rp) {
                         attributes = filterAttributes(rp, attributes);
+                }
+
+                // set protocol specific URIs if possible
+                for (Attribute attribute : attributes.values()) {
+                        attribute.setUri(getUri(protocolService.getId(),
+                                attribute.getUri()));
                 }
 
                 // return protocol specific response
@@ -267,21 +273,17 @@ public class ProtocolExitServlet extends HttpServlet {
                 return this.attributeService.getUri(protocolId, attributeUri);
         }
 
-        @SuppressWarnings("unchecked")
-        private <T> Attribute getAttribute(String protocolId,
-                                           DefaultAttribute defaultAttribute,
-                                           T value) {
+        private Attribute getAttribute(DefaultAttribute defaultAttribute,
+                                       Object value) {
 
-                return new Attribute<T>(defaultAttribute.getUri(),
-                        (Class<T>) defaultAttribute.getType(), value,
-                        getUri(protocolId, defaultAttribute.getUri()));
+                return new Attribute(defaultAttribute.getUri(),
+                        defaultAttribute.getAttributeType(), value);
         }
 
         /*
          * Construct list of attributes given the eID data.
          */
-        private Map<String, Attribute> getAttributes(String protocolId,
-                                                     String userId,
+        private Map<String, Attribute> getAttributes(String userId,
                                                      Identity identity,
                                                      Address address,
                                                      X509Certificate authnCertificate,
@@ -300,54 +302,51 @@ public class ProtocolExitServlet extends HttpServlet {
                 }
 
                 attributes.put(DefaultAttribute.LAST_NAME.getUri(),
-                        getAttribute(protocolId, DefaultAttribute.LAST_NAME,
-                                surName));
+                        getAttribute(DefaultAttribute.LAST_NAME, surName));
 
                 attributes.put(DefaultAttribute.FIRST_NAME.getUri(),
-                        getAttribute(protocolId, DefaultAttribute.FIRST_NAME,
-                                givenName));
+                        getAttribute(DefaultAttribute.FIRST_NAME, givenName));
 
                 attributes.put(DefaultAttribute.NAME.getUri(),
-                        getAttribute(protocolId, DefaultAttribute.NAME,
+                        getAttribute(DefaultAttribute.NAME,
                                 givenName + " " + surName));
 
                 attributes.put(DefaultAttribute.IDENTIFIER.getUri(),
-                        getAttribute(protocolId, DefaultAttribute.IDENTIFIER,
-                                userId));
+                        getAttribute(DefaultAttribute.IDENTIFIER, userId));
 
                 if (null != address) {
 
                         attributes.put(DefaultAttribute.ADDRESS.getUri(),
-                                getAttribute(protocolId, DefaultAttribute.ADDRESS,
+                                getAttribute(DefaultAttribute.ADDRESS,
                                         address.getStreetAndNumber()));
                         attributes.put(DefaultAttribute.LOCALITY.getUri(),
-                                getAttribute(protocolId, DefaultAttribute.LOCALITY,
+                                getAttribute(DefaultAttribute.LOCALITY,
                                         address.getMunicipality()));
                         attributes.put(DefaultAttribute.POSTAL_CODE.getUri(),
-                                getAttribute(protocolId, DefaultAttribute.POSTAL_CODE,
+                                getAttribute(DefaultAttribute.POSTAL_CODE,
                                         address.getZip()));
                 }
 
                 if (null != identity) {
 
                         attributes.put(DefaultAttribute.GENDER.getUri(),
-                                getAttribute(protocolId, DefaultAttribute.GENDER,
+                                getAttribute(DefaultAttribute.GENDER,
                                         IdpUtil.getGenderValue(identity)));
                         attributes.put(DefaultAttribute.DATE_OF_BIRTH.getUri(),
-                                getAttribute(protocolId, DefaultAttribute.DATE_OF_BIRTH,
+                                getAttribute(DefaultAttribute.DATE_OF_BIRTH,
                                         identity.getDateOfBirth()));
                         attributes.put(DefaultAttribute.NATIONALITY.getUri(),
-                                getAttribute(protocolId, DefaultAttribute.NATIONALITY,
+                                getAttribute(DefaultAttribute.NATIONALITY,
                                         identity.getNationality()));
                         attributes.put(DefaultAttribute.PLACE_OF_BIRTH.getUri(),
-                                getAttribute(protocolId, DefaultAttribute.PLACE_OF_BIRTH,
+                                getAttribute(DefaultAttribute.PLACE_OF_BIRTH,
                                         identity.getPlaceOfBirth()));
                 }
 
                 if (null != photo) {
 
                         attributes.put(DefaultAttribute.PHOTO.getUri(),
-                                getAttribute(protocolId, DefaultAttribute.PHOTO,
+                                getAttribute(DefaultAttribute.PHOTO,
                                         photo));
                 }
 

@@ -18,8 +18,6 @@
 
 package be.fedict.eid.idp.spi;
 
-import java.util.GregorianCalendar;
-
 /**
  * Enumeration of all default eID Attributes.
  *
@@ -27,35 +25,34 @@ import java.util.GregorianCalendar;
  */
 public enum DefaultAttribute {
 
-        LAST_NAME("be:fedict:eid:idp:lastname", String.class),
-        FIRST_NAME("be:fedict:eid:idp:firstname", String.class),
-        NAME("be:fedict:eid:idp:name", String.class),
-        IDENTIFIER("be:fedict:eid:idp:identifier", String.class),
-        ADDRESS("be:fedict:eid:idp:address", String.class),
-        LOCALITY("be:fedict:eid:idp:locality", String.class),
-        POSTAL_CODE("be:fedict:eid:idp:postalcode", String.class),
-        GENDER("be:fedict:eid:idp:gender", String.class),
-        DATE_OF_BIRTH("be:fedict:eid:idp:dob", GregorianCalendar.class),
-        NATIONALITY("be:fedict:eid:idp:nationality", String.class),
-        PLACE_OF_BIRTH("be:fedict:eid:idp:pob", String.class),
-        PHOTO("be:fedict:eid:idp:photo", Byte[].class);
+        LAST_NAME("be:fedict:eid:idp:lastname", AttributeType.STRING),
+        FIRST_NAME("be:fedict:eid:idp:firstname", AttributeType.STRING),
+        NAME("be:fedict:eid:idp:name", AttributeType.STRING),
+        IDENTIFIER("be:fedict:eid:idp:identifier", AttributeType.STRING),
+        ADDRESS("be:fedict:eid:idp:address", AttributeType.STRING),
+        LOCALITY("be:fedict:eid:idp:locality", AttributeType.STRING),
+        POSTAL_CODE("be:fedict:eid:idp:postalcode", AttributeType.STRING),
+        GENDER("be:fedict:eid:idp:gender", AttributeType.STRING),
+        DATE_OF_BIRTH("be:fedict:eid:idp:dob", AttributeType.DATE),
+        NATIONALITY("be:fedict:eid:idp:nationality", AttributeType.STRING),
+        PLACE_OF_BIRTH("be:fedict:eid:idp:pob", AttributeType.STRING),
+        PHOTO("be:fedict:eid:idp:photo", AttributeType.BINARY);
 
 
         private final String uri;
+        private final AttributeType attributeType;
 
-        private final Class<?> type;
-
-        private DefaultAttribute(String uri, Class<?> type) {
+        private DefaultAttribute(String uri, AttributeType attributeType) {
                 this.uri = uri;
-                this.type = type;
+                this.attributeType = attributeType;
         }
 
         public String getUri() {
                 return this.uri;
         }
 
-        public Class<?> getType() {
-                return type;
+        public AttributeType getAttributeType() {
+                return this.attributeType;
         }
 
         public static DefaultAttribute findDefaultAttribute(String uri) {
