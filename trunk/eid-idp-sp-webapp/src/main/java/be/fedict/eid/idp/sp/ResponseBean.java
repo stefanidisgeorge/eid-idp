@@ -56,6 +56,7 @@ public class ResponseBean {
                                 this.identifier = response.getIdentifier();
                                 this.attributeMap = response.getAttributeMap();
                                 this.policy = response.getAuthenticationPolicy().getUri();
+                                LOG.debug("SAML2 assertion: " + response.getAssertion());
                         } else {
                                 // openid
                                 OpenIDAuthenticationResponse response =
