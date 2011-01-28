@@ -29,6 +29,23 @@ import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Relying Party (RP) entity.
+ * <p/>
+ * Holds the configuration of a RP.
+ * <p/>
+ * The domain is used by the authentication
+ * protocols for authentication.
+ * <p/>
+ * The certificate is (optionally, depending on
+ * the protocol) used for verification of the signed authentication request
+ * token.
+ * <p/>
+ * The secret key is used for encryption of the user identifier and attributes
+ * if needed.
+ * <p/>
+ * The attributes is the custom set of attributes related to this RP.
+ */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "rp")
 @NamedQueries({@NamedQuery(name = RPEntity.LIST_ALL, query = "FROM RPEntity "),
