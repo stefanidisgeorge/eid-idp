@@ -17,6 +17,20 @@
             <rich:tabPanel switchType="client"
                            selectedTab="#{idpConfig.selectedTab}">
 
+                <rich:tab name="tab_idp" label="IdP Default Configuration">
+                    <h:panelGrid columns="2">
+                        <h:outputText
+                                value="Default authentication token issuer name:"/>
+                        <h:inputText value="#{idpConfig.defaultIssuer}"/>
+
+                        <h:outputText
+                                value="Default HMAC-SHA1 secret (hexadecimal):"/>
+                        <h:inputText value="#{idpConfig.hmacSecret}" size="50"/>
+                    </h:panelGrid>
+                    <h:commandButton value="Save"
+                                     action="#{idpConfig.saveIdP}"/>
+                </rich:tab>
+
                 <rich:tab name="tab_xkms" label="PKI validation">
                     <h:panelGrid columns="2">
                         <h:outputText value="eID Trust Service XKMS2 URL:"/>
@@ -32,16 +46,6 @@
                     </h:panelGrid>
                     <h:commandButton value="Save"
                                      action="#{idpConfig.saveXkms}"/>
-                </rich:tab>
-
-                <rich:tab name="tab_pseudonym" label="Pseudonyms">
-                    <h:panelGrid columns="2">
-                        <h:outputText
-                                value="Default HMAC-SHA1 secret (hexadecimal):"/>
-                        <h:inputText value="#{idpConfig.hmacSecret}" size="50"/>
-                    </h:panelGrid>
-                    <h:commandButton value="Save"
-                                     action="#{idpConfig.savePseudonym}"/>
                 </rich:tab>
 
                 <rich:tab name="tab_network" label="Network">
@@ -69,7 +73,8 @@
                         <h:outputLabel
                                 value="#{idpConfig.appletConfig.serverCertificateSubject}"/>
 
-                        <h:outputLabel for="upload" value="SSL Server Certificate"/>
+                        <h:outputLabel for="upload"
+                                       value="SSL Server Certificate"/>
                         <rich:fileUpload
                                 fileUploadListener="#{idpConfig.uploadListener}"
                                 maxFilesQuantity="1" id="upload"

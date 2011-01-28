@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSession;
 import javax.xml.transform.TransformerException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
@@ -168,26 +167,34 @@ public abstract class AbstractWSFederationProtocolService implements
                 requestSecurityTokenResponse.getUnknownXMLObjects().add(keyType);
                 requestSecurityTokenResponse.getUnknownXMLObjects().add(requestedSecurityToken);
 
+                IdPIdentity idpIdentity = this.configuration.findIdentity();
+                String issuerName;
+                if (null != idpIdentity) {
+                        issuerName = idpIdentity.getName();
+                } else {
+                        issuerName = this.configuration.getDefaultIssuer();
+                }
+                if (null == issuerName) {
+                        issuerName = "Default";
+                }
 
                 DateTime issueInstantDateTime = new DateTime();
-                Assertion assertion = Saml2Util.getAssertion(null, wtrealm,
-                        issueInstantDateTime, getAuthenticationFlow(), userId,
-                        attributes);
+                Assertion assertion = Saml2Util.getAssertion(issuerName, null,
+                        wtrealm, issueInstantDateTime, getAuthenticationFlow(),
+                        userId, attributes);
 
                 requestedSecurityToken.setUnknownXMLObject(assertion);
-
-                KeyStore.PrivateKeyEntry idpIdentity = this.configuration.findIdentity();
 
                 Element element;
                 if (null != idpIdentity) {
 
                         LOG.debug("sign assertion");
                         element = Saml2Util.signAsElement(requestSecurityTokenResponseCollection,
-                                assertion, (X509Certificate) idpIdentity.getCertificate(),
-                                idpIdentity.getPrivateKey());
+                                assertion, (X509Certificate) idpIdentity.
+                                        getPrivateKeyEntry().getCertificate(),
+                                idpIdentity.getPrivateKeyEntry().getPrivateKey());
                 } else {
 
-                        // TODO: explode here? will fail at RP for sure if not signed so ...
                         LOG.warn("assertion NOT signed!");
                         element = Saml2Util.marshall(requestSecurityTokenResponseCollection);
                 }

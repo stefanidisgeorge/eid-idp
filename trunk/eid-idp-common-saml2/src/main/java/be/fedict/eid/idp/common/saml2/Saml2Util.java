@@ -123,7 +123,8 @@ public abstract class Saml2Util {
                 }
         }
 
-        public static Assertion getAssertion(String inResponseTo,
+        public static Assertion getAssertion(String issuerName,
+                                             String inResponseTo,
                                              String audienceUri,
                                              DateTime issueInstant,
                                              IdentityProviderFlow authenticationFlow,
@@ -139,7 +140,7 @@ public abstract class Saml2Util {
 
                 Issuer issuer = buildXMLObject(Issuer.class, Issuer.DEFAULT_ELEMENT_NAME);
                 assertion.setIssuer(issuer);
-                issuer.setValue("http://www.e-contract.be/"); // TODO
+                issuer.setValue(issuerName);
 
                 Conditions conditions =
                         buildXMLObject(Conditions.class, Conditions.DEFAULT_ELEMENT_NAME);

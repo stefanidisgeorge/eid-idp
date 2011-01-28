@@ -18,11 +18,9 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.model.ConfigProperty;
-import be.fedict.eid.idp.model.Configuration;
-import be.fedict.eid.idp.model.IdentityConfig;
-import be.fedict.eid.idp.model.KeyStoreType;
+import be.fedict.eid.idp.model.*;
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
+import be.fedict.eid.idp.spi.IdPIdentity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import sun.security.pkcs11.SunPKCS11;
@@ -44,280 +42,285 @@ import java.util.List;
 @Startup
 public class IdentityServiceSingletonBean {
 
-    private static final Log LOG = LogFactory
-            .getLog(IdentityServiceSingletonBean.class);
+        private static final Log LOG = LogFactory
+                .getLog(IdentityServiceSingletonBean.class);
 
-    private PrivateKeyEntry identity;
+        private IdPIdentity identity;
 
-    @EJB
-    private Configuration configuration;
+        @EJB
+        private Configuration configuration;
 
-    /**
-     * @return if an active identity is configured
-     */
-    public boolean isIdentityConfigured() {
-        return null != this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
-                String.class);
-    }
-
-    /**
-     * @return list of all identity configurations's names
-     */
-    public List<String> getIdentities() {
-
-        return this.configuration.getIndexes(ConfigProperty.KEY_STORE_TYPE);
-    }
-
-    /**
-     * Set new active identity
-     *
-     * @param name new active identity's name
-     * @throws KeyStoreLoadException failed to load keystore
-     */
-    public void setActiveIdentity(String name) throws KeyStoreLoadException {
-
-        LOG.debug("set active identity: " + name);
-        IdentityConfig identityConfig = findIdentityConfig(name);
-
-        if (null == identityConfig) {
-            throw new KeyStoreLoadException("Identity config \"" + name + "\" not found!");
+        /**
+         * @return if an active identity is configured
+         */
+        public boolean isIdentityConfigured() {
+                return null != this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
+                        String.class);
         }
 
-        this.configuration.setValue(ConfigProperty.ACTIVE_IDENTITY, name);
+        /**
+         * @return list of all identity configurations's names
+         */
+        public List<String> getIdentities() {
 
-        this.identity = loadIdentity(identityConfig);
-        LOG.debug("private key entry reloaded");
-    }
+                return this.configuration.getIndexes(ConfigProperty.KEY_STORE_TYPE);
+        }
 
-    /**
-     * Reload current active identity
-     *
-     * @throws KeyStoreLoadException failed to load keystore
-     */
-    public void reloadIdentity() throws KeyStoreLoadException {
+        /**
+         * Set new active identity
+         *
+         * @param name new active identity's name
+         * @throws KeyStoreLoadException failed to load keystore
+         */
+        public void setActiveIdentity(String name) throws KeyStoreLoadException {
 
-        this.identity = loadIdentity(findActiveIdentityName());
-        LOG.debug("private key entry reloaded");
-    }
+                LOG.debug("set active identity: " + name);
+                IdPIdentityConfig idPIdentityConfig = findIdentityConfig(name);
 
-    /**
-     * Load identity keystore with specified name
-     *
-     * @param name identity name
-     * @return private key entry of identity
-     * @throws KeyStoreLoadException failed to load keystore
-     */
-    public PrivateKeyEntry loadIdentity(String name)
-            throws KeyStoreLoadException {
+                if (null == idPIdentityConfig) {
+                        throw new KeyStoreLoadException("Identity config \"" + name + "\" not found!");
+                }
 
-        IdentityConfig identityConfig = findIdentityConfig(name);
-        return loadIdentity(identityConfig);
-    }
+                this.configuration.setValue(ConfigProperty.ACTIVE_IDENTITY, name);
 
-    /**
-     * Load identity keystore
-     *
-     * @param identityConfig identity configuration
-     * @return private key entry of identity
-     * @throws KeyStoreLoadException failed to load keystore
-     */
-    public PrivateKeyEntry loadIdentity(IdentityConfig identityConfig)
-            throws KeyStoreLoadException {
+                this.identity = loadIdentity(idPIdentityConfig);
+                LOG.debug("private key entry reloaded");
+        }
 
-        try {
+        /**
+         * Reload current active identity
+         *
+         * @throws KeyStoreLoadException failed to load keystore
+         */
+        public void reloadIdentity() throws KeyStoreLoadException {
 
-            if (null == identityConfig) {
-                throw new KeyStoreLoadException("Identity config is empty!");
-            }
+                this.identity = loadIdentity(findActiveIdentityName());
+                LOG.debug("private key entry reloaded");
+        }
 
-            FileInputStream keyStoreInputStream = null;
-            if (identityConfig.getKeyStoreType().equals(KeyStoreType.PKCS11)) {
-                Security.addProvider(new SunPKCS11(identityConfig.getKeyStorePath()));
-            } else {
+        /**
+         * Load identity keystore with specified name
+         *
+         * @param name identity name
+         * @return IdP identity
+         * @throws KeyStoreLoadException failed to load keystore
+         */
+        public IdPIdentity loadIdentity(String name)
+                throws KeyStoreLoadException {
+
+                IdPIdentityConfig idPIdentityConfig = findIdentityConfig(name);
+                return loadIdentity(idPIdentityConfig);
+        }
+
+        /**
+         * Load identity keystore
+         *
+         * @param idPIdentityConfig identity configuration
+         * @return private key entry of identity
+         * @throws KeyStoreLoadException failed to load keystore
+         */
+        public IdPIdentity loadIdentity(IdPIdentityConfig idPIdentityConfig)
+                throws KeyStoreLoadException {
+
                 try {
-                    keyStoreInputStream = new FileInputStream(identityConfig.getKeyStorePath());
-                } catch (FileNotFoundException e) {
-                    throw new KeyStoreLoadException(
-                            "Can't load keystore from config-specified location: "
-                                    + identityConfig.getKeyStorePath(), e);
+
+                        if (null == idPIdentityConfig) {
+                                throw new KeyStoreLoadException("Identity config is empty!");
+                        }
+
+                        FileInputStream keyStoreInputStream = null;
+                        if (idPIdentityConfig.getKeyStoreType().equals(KeyStoreType.PKCS11)) {
+                                Security.addProvider(new SunPKCS11(
+                                        idPIdentityConfig.getKeyStorePath()));
+                        } else {
+                                try {
+                                        keyStoreInputStream =
+                                                new FileInputStream(
+                                                        idPIdentityConfig.getKeyStorePath());
+                                } catch (FileNotFoundException e) {
+                                        throw new KeyStoreLoadException(
+                                                "Can't load keystore from config-specified location: "
+                                                        + idPIdentityConfig.getKeyStorePath(), e);
+                                }
+                        }
+
+
+                        // load keystore
+                        KeyStore keyStore = KeyStore.getInstance(idPIdentityConfig.getKeyStoreType()
+                                .getJavaKeyStoreType());
+                        char[] password;
+                        if (null != idPIdentityConfig.getKeyStorePassword() &&
+                                !idPIdentityConfig.getKeyStorePassword().isEmpty()) {
+                                password = idPIdentityConfig.getKeyStorePassword().toCharArray();
+                        } else {
+                                password = null;
+                        }
+                        keyStore.load(keyStoreInputStream, password);
+
+
+                        // find entry alias
+                        Enumeration<String> aliases = keyStore.aliases();
+                        if (!aliases.hasMoreElements()) {
+                                throw new KeyStoreLoadException("no keystore aliases present");
+                        }
+
+                        String alias;
+                        if (null != idPIdentityConfig.getKeyEntryAlias() &&
+                                !idPIdentityConfig.getKeyEntryAlias().trim().isEmpty()) {
+                                boolean found = false;
+                                while (aliases.hasMoreElements()) {
+                                        if (aliases.nextElement().equals(
+                                                idPIdentityConfig.getKeyEntryAlias())) {
+                                                found = true;
+                                                break;
+                                        }
+                                }
+                                if (!found) {
+                                        throw new KeyStoreLoadException("no keystore entry with alias \"" +
+                                                idPIdentityConfig.getKeyEntryAlias() + "\"");
+                                }
+                                alias = idPIdentityConfig.getKeyEntryAlias();
+                        } else {
+                                alias = aliases.nextElement();
+                        }
+                        LOG.debug("keystore alias: " + alias);
+
+                        // get keystore entry
+                        char[] entryPassword;
+                        if (null != idPIdentityConfig.getKeyEntryPassword() &&
+                                !idPIdentityConfig.getKeyEntryPassword().isEmpty()) {
+                                entryPassword = idPIdentityConfig.getKeyEntryPassword().toCharArray();
+                        } else {
+                                entryPassword = null;
+                        }
+
+                        KeyStore.Entry entry = keyStore.getEntry(alias,
+                                new KeyStore.PasswordProtection(entryPassword));
+                        if (!(entry instanceof PrivateKeyEntry)) {
+                                throw new KeyStoreLoadException("private key entry expected");
+                        }
+                        return new IdPIdentity(idPIdentityConfig.getName(),
+                                (PrivateKeyEntry) entry);
+                } catch (KeyStoreException e) {
+                        throw new KeyStoreLoadException(e);
+                } catch (CertificateException e) {
+                        throw new KeyStoreLoadException(e);
+                } catch (NoSuchAlgorithmException e) {
+                        throw new KeyStoreLoadException(e);
+                } catch (UnrecoverableEntryException e) {
+                        throw new KeyStoreLoadException(e);
+                } catch (IOException e) {
+                        throw new KeyStoreLoadException(e);
                 }
-            }
+        }
 
+        /**
+         * @return current IdP Identity or <code>null</code> if none.
+         */
+        public IdPIdentity findIdentity() {
 
-            // load keystore
-            KeyStore keyStore = KeyStore.getInstance(identityConfig.getKeyStoreType()
-                    .getJavaKeyStoreType());
-            char[] password;
-            if (null != identityConfig.getKeyStorePassword() &&
-                    !identityConfig.getKeyStorePassword().isEmpty()) {
-                password = identityConfig.getKeyStorePassword().toCharArray();
-            } else {
-                password = null;
-            }
-            keyStore.load(keyStoreInputStream, password);
+                return this.identity;
+        }
 
+        /**
+         * @return current identity's configuration or <codE>null</code> if none.
+         */
+        public IdPIdentityConfig findIdentityConfig() {
 
-            // find entry alias
-            Enumeration<String> aliases = keyStore.aliases();
-            if (!aliases.hasMoreElements()) {
-                throw new KeyStoreLoadException("no keystore aliases present");
-            }
-
-            String alias;
-            if (null != identityConfig.getKeyEntryAlias() &&
-                    !identityConfig.getKeyEntryAlias().trim().isEmpty()) {
-                boolean found = false;
-                while (aliases.hasMoreElements()) {
-                    if (aliases.nextElement().equals(identityConfig.getKeyEntryAlias())) {
-                        found = true;
-                        break;
-                    }
+                String activeIdentity = findActiveIdentityName();
+                if (null == activeIdentity) {
+                        return null;
                 }
-                if (!found) {
-                    throw new KeyStoreLoadException("no keystore entry with alias \"" +
-                            identityConfig.getKeyEntryAlias() + "\"");
+                IdPIdentityConfig idPIdentityConfig = findIdentityConfig(activeIdentity);
+                if (null == idPIdentityConfig) {
+                        throw new EJBException("Identity config " + activeIdentity + " not found!");
                 }
-                alias = identityConfig.getKeyEntryAlias();
-            } else {
-                alias = aliases.nextElement();
-            }
-            LOG.debug("keystore alias: " + alias);
-
-            // get keystore entry
-            char[] entryPassword;
-            if (null != identityConfig.getKeyEntryPassword() &&
-                    !identityConfig.getKeyEntryPassword().isEmpty()) {
-                entryPassword = identityConfig.getKeyEntryPassword().toCharArray();
-            } else {
-                entryPassword = null;
-            }
-
-            KeyStore.Entry entry = keyStore.getEntry(alias,
-                    new KeyStore.PasswordProtection(entryPassword));
-            if (!(entry instanceof PrivateKeyEntry)) {
-                throw new KeyStoreLoadException("private key entry expected");
-            }
-            return (PrivateKeyEntry) entry;
-        } catch (KeyStoreException e) {
-            throw new KeyStoreLoadException(e);
-        } catch (CertificateException e) {
-            throw new KeyStoreLoadException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new KeyStoreLoadException(e);
-        } catch (UnrecoverableEntryException e) {
-            throw new KeyStoreLoadException(e);
-        } catch (IOException e) {
-            throw new KeyStoreLoadException(e);
-        }
-    }
-
-    /**
-     * @return current identity's private key entry or <code>null</code> if none.
-     */
-    public PrivateKeyEntry findIdentity() {
-
-        return this.identity;
-    }
-
-    /**
-     * @return current identity's configuration or <codE>null</code> if none.
-     */
-    public IdentityConfig findIdentityConfig() {
-
-        String activeIdentity = findActiveIdentityName();
-        if (null == activeIdentity) {
-            return null;
-        }
-        IdentityConfig identityConfig = findIdentityConfig(activeIdentity);
-        if (null == identityConfig) {
-            throw new EJBException("Identity config " + activeIdentity + " not found!");
-        }
-        return identityConfig;
-    }
-
-    /**
-     * @param name identity name
-     * @return identity config or <code>null</code> if not found.
-     */
-    public IdentityConfig findIdentityConfig(String name) {
-
-        KeyStoreType keyStoreType = this.configuration.getValue(
-                ConfigProperty.KEY_STORE_TYPE, name, KeyStoreType.class);
-        if (null == keyStoreType) {
-            return null;
-        }
-        String keyStorePath = this.configuration.getValue(
-                ConfigProperty.KEY_STORE_PATH, name, String.class);
-        String keyStoreSecret = this.configuration.getValue(
-                ConfigProperty.KEY_STORE_SECRET, name, String.class);
-        String keyEntrySecret = this.configuration.getValue(
-                ConfigProperty.KEY_ENTRY_SECRET, name, String.class);
-        String keyEntryAlias = this.configuration.getValue(
-                ConfigProperty.KEY_ENTRY_ALIAS, name, String.class);
-
-        IdentityConfig identityConfig = new IdentityConfig(name, keyStoreType,
-                keyStorePath, keyStoreSecret, keyEntrySecret, keyEntryAlias);
-
-        String activeIdentity = findActiveIdentityName();
-        if (null != activeIdentity) {
-            identityConfig.setActive(identityConfig.getName().equals(activeIdentity));
+                return idPIdentityConfig;
         }
 
-        return identityConfig;
-    }
+        /**
+         * @param name identity name
+         * @return identity config or <code>null</code> if not found.
+         */
+        public IdPIdentityConfig findIdentityConfig(String name) {
 
-    private String findActiveIdentityName() {
+                KeyStoreType keyStoreType = this.configuration.getValue(
+                        ConfigProperty.KEY_STORE_TYPE, name, KeyStoreType.class);
+                if (null == keyStoreType) {
+                        return null;
+                }
+                String keyStorePath = this.configuration.getValue(
+                        ConfigProperty.KEY_STORE_PATH, name, String.class);
+                String keyStoreSecret = this.configuration.getValue(
+                        ConfigProperty.KEY_STORE_SECRET, name, String.class);
+                String keyEntrySecret = this.configuration.getValue(
+                        ConfigProperty.KEY_ENTRY_SECRET, name, String.class);
+                String keyEntryAlias = this.configuration.getValue(
+                        ConfigProperty.KEY_ENTRY_ALIAS, name, String.class);
 
-        return this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
-                String.class);
-    }
+                IdPIdentityConfig idPIdentityConfig = new IdPIdentityConfig(name, keyStoreType,
+                        keyStorePath, keyStoreSecret, keyEntrySecret, keyEntryAlias);
 
-    /**
-     * Add/update identity from specified configuration
-     *
-     * @param identityConfig identity configuration
-     * @return private key entry of identity
-     * @throws KeyStoreLoadException failed to load keystore
-     */
-    public PrivateKeyEntry setIdentity(IdentityConfig identityConfig)
-            throws KeyStoreLoadException {
+                String activeIdentity = findActiveIdentityName();
+                if (null != activeIdentity) {
+                        idPIdentityConfig.setActive(idPIdentityConfig.getName().equals(activeIdentity));
+                }
 
-        LOG.debug("set identity: " + identityConfig.getName());
-
-        this.configuration.setValue(ConfigProperty.KEY_STORE_TYPE,
-                identityConfig.getName(), identityConfig.getKeyStoreType());
-        this.configuration.setValue(ConfigProperty.KEY_STORE_PATH,
-                identityConfig.getName(), identityConfig.getKeyStorePath());
-        this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET,
-                identityConfig.getName(), identityConfig.getKeyStorePassword());
-        this.configuration.setValue(ConfigProperty.KEY_ENTRY_SECRET,
-                identityConfig.getName(), identityConfig.getKeyEntryPassword());
-        if (null != identityConfig.getKeyEntryAlias()) {
-            this.configuration.setValue(ConfigProperty.KEY_ENTRY_ALIAS,
-                    identityConfig.getName(), identityConfig.getKeyEntryAlias());
+                return idPIdentityConfig;
         }
 
-        return loadIdentity(identityConfig.getName());
-    }
+        private String findActiveIdentityName() {
 
-    /**
-     * Remove identity configuration
-     *
-     * @param name name of identity config to remove
-     */
-    public void removeIdentityConfig(String name) {
-
-        LOG.debug("remove identity: " + name);
-
-        String activeIdentity = findActiveIdentityName();
-        if (null != activeIdentity && activeIdentity.equals(name)) {
-            this.configuration.removeValue(ConfigProperty.ACTIVE_IDENTITY);
+                return this.configuration.getValue(ConfigProperty.ACTIVE_IDENTITY,
+                        String.class);
         }
 
-        this.configuration.removeValue(ConfigProperty.KEY_STORE_TYPE, name);
-        this.configuration.removeValue(ConfigProperty.KEY_STORE_PATH, name);
-        this.configuration.removeValue(ConfigProperty.KEY_STORE_SECRET, name);
-        this.configuration.removeValue(ConfigProperty.KEY_ENTRY_SECRET, name);
-        this.configuration.removeValue(ConfigProperty.KEY_ENTRY_ALIAS, name);
-    }
+        /**
+         * Add/update identity from specified configuration
+         *
+         * @param idPIdentityConfig identity configuration
+         * @return IdP Identity
+         * @throws KeyStoreLoadException failed to load keystore
+         */
+        public IdPIdentity setIdentity(IdPIdentityConfig idPIdentityConfig)
+                throws KeyStoreLoadException {
+
+                LOG.debug("set identity: " + idPIdentityConfig.getName());
+
+                this.configuration.setValue(ConfigProperty.KEY_STORE_TYPE,
+                        idPIdentityConfig.getName(), idPIdentityConfig.getKeyStoreType());
+                this.configuration.setValue(ConfigProperty.KEY_STORE_PATH,
+                        idPIdentityConfig.getName(), idPIdentityConfig.getKeyStorePath());
+                this.configuration.setValue(ConfigProperty.KEY_STORE_SECRET,
+                        idPIdentityConfig.getName(), idPIdentityConfig.getKeyStorePassword());
+                this.configuration.setValue(ConfigProperty.KEY_ENTRY_SECRET,
+                        idPIdentityConfig.getName(), idPIdentityConfig.getKeyEntryPassword());
+                if (null != idPIdentityConfig.getKeyEntryAlias()) {
+                        this.configuration.setValue(ConfigProperty.KEY_ENTRY_ALIAS,
+                                idPIdentityConfig.getName(), idPIdentityConfig.getKeyEntryAlias());
+                }
+
+                return loadIdentity(idPIdentityConfig.getName());
+        }
+
+        /**
+         * Remove identity configuration
+         *
+         * @param name name of identity config to remove
+         */
+        public void removeIdentityConfig(String name) {
+
+                LOG.debug("remove identity: " + name);
+
+                String activeIdentity = findActiveIdentityName();
+                if (null != activeIdentity && activeIdentity.equals(name)) {
+                        this.configuration.removeValue(ConfigProperty.ACTIVE_IDENTITY);
+                }
+
+                this.configuration.removeValue(ConfigProperty.KEY_STORE_TYPE, name);
+                this.configuration.removeValue(ConfigProperty.KEY_STORE_PATH, name);
+                this.configuration.removeValue(ConfigProperty.KEY_STORE_SECRET, name);
+                this.configuration.removeValue(ConfigProperty.KEY_ENTRY_SECRET, name);
+                this.configuration.removeValue(ConfigProperty.KEY_ENTRY_ALIAS, name);
+        }
 }

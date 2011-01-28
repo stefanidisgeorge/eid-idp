@@ -26,37 +26,39 @@ package be.fedict.eid.idp.model;
  */
 public enum ConfigProperty {
 
-    XKMS_URL("xkms-url", String.class),
-    XKMS_AUTH_TRUST_DOMAIN("xkms-auth-trust-domain", String.class),
-    XKMS_IDENT_TRUST_DOMAIN("xkms-ident-trust-domain", String.class),
+        DEFAULT_ISSUER("default-issuer", String.class),
 
-    HTTP_PROXY_ENABLED("http-proxy", Boolean.class),
-    HTTP_PROXY_HOST("http-proxy-host", String.class),
-    HTTP_PROXY_PORT("http-proxy-port", Integer.class),
+        XKMS_URL("xkms-url", String.class),
+        XKMS_AUTH_TRUST_DOMAIN("xkms-auth-trust-domain", String.class),
+        XKMS_IDENT_TRUST_DOMAIN("xkms-ident-trust-domain", String.class),
 
-    HMAC_SECRET("hmac-secret", String.class),
+        HTTP_PROXY_ENABLED("http-proxy", Boolean.class),
+        HTTP_PROXY_HOST("http-proxy-host", String.class),
+        HTTP_PROXY_PORT("http-proxy-port", Integer.class),
 
-    ACTIVE_IDENTITY("active-identity", String.class),
-    KEY_STORE_TYPE("key-store-type", KeyStoreType.class),
-    KEY_STORE_PATH("key-store-path", String.class),
-    KEY_STORE_SECRET("key-store-secret", String.class),
-    KEY_ENTRY_SECRET("key-entry-secret", String.class),
-    KEY_ENTRY_ALIAS("key-entry-alias", String.class);
+        HMAC_SECRET("hmac-secret", String.class),
 
-    private final String name;
+        ACTIVE_IDENTITY("active-identity", String.class),
+        KEY_STORE_TYPE("key-store-type", KeyStoreType.class),
+        KEY_STORE_PATH("key-store-path", String.class),
+        KEY_STORE_SECRET("key-store-secret", String.class),
+        KEY_ENTRY_SECRET("key-entry-secret", String.class),
+        KEY_ENTRY_ALIAS("key-entry-alias", String.class);
 
-    private final Class<?> type;
+        private final String name;
 
-    private ConfigProperty(String name, Class<?> type) {
-        this.name = name;
-        this.type = type;
-    }
+        private final Class<?> type;
 
-    public String getName() {
-        return this.name;
-    }
+        private ConfigProperty(String name, Class<?> type) {
+                this.name = name;
+                this.type = type;
+        }
 
-    public Class<?> getType() {
-        return this.type;
-    }
+        public String getName() {
+                return this.name;
+        }
+
+        public Class<?> getType() {
+                return this.type;
+        }
 }
