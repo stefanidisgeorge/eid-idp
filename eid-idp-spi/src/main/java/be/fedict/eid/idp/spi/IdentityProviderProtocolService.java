@@ -41,11 +41,13 @@ public interface IdentityProviderProtocolService {
         /**
          * Initializes this protocol service handler.
          *
-         * @param servletContext servlet context
-         * @param configuration  IdP configuration
+         * @param servletContext         servlet context
+         * @param configuration          IdP configuration
+         * @param protocolStorageService protocol storage service
          */
         void init(ServletContext servletContext,
-                  IdentityProviderConfiguration configuration);
+                  IdentityProviderConfiguration configuration,
+                  ProtocolStorageService protocolStorageService);
 
         /**
          * Handles an incoming request for this protocol.

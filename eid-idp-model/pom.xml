@@ -40,6 +40,7 @@
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-entity</artifactId>
+            <type>ejb</type>
             <version>${project.version}</version>
         </dependency>
         <dependency>
