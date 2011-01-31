@@ -12,18 +12,28 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, see
+ * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.protocol.saml2;
+package be.fedict.eid.idp.spi;
 
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import javax.servlet.ServletContext;
 
-public class SAML2ProtocolServiceIdent extends AbstractSAML2ProtocolService {
+/**
+ * Protocol specific storage service.
+ *
+ * @author Wim Vandenhaute
+ */
+public interface ProtocolStorageService {
 
-    @Override
-    protected IdentityProviderFlow getAuthenticationFlow() {
-        return IdentityProviderFlow.IDENTIFICATION;
-    }
+        void setValue(ServletContext servletContext, String name, Object value,
+                      int validity);
+
+        <T> T findValue(ServletContext servletContext, String name, Class<T> type);
+
+        void removeValue(ServletContext servletContext, String name);
+
 }
+
+

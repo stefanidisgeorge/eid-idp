@@ -142,6 +142,7 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
                                 IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
                 entityDescriptor.getRoleDescriptors().add(idpSsoDescriptor);
 
+                // TODO: ok?
                 idpSsoDescriptor.setWantAuthnRequestsSigned(false);
                 idpSsoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
 

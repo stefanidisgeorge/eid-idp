@@ -32,12 +32,8 @@ import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
 import org.opensaml.saml2.core.*;
-import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.Configuration;
 import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.security.x509.BasicX509Credential;
-import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -59,7 +55,8 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         private static final Log LOG = LogFactory
                 .getLog(AbstractSAML2ProtocolService.class);
 
-        private IdentityProviderConfiguration configuration;
+        protected IdentityProviderConfiguration configuration;
+        protected ProtocolStorageService protocolStorageService;
 
         public static final String TARGET_URL_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
                 .getName()
@@ -104,7 +101,6 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                         .getAttribute(RELAY_STATE_SESSION_ATTRIBUTE);
         }
 
-        @Override
         public String getId() {
 
                 LOG.debug("get ID");
@@ -112,12 +108,13 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         }
 
         @SuppressWarnings("unchecked")
-        @Override
         public void init(ServletContext servletContext,
-                         IdentityProviderConfiguration configuration) {
+                         IdentityProviderConfiguration configuration,
+                         ProtocolStorageService protocolStorageService) {
 
                 LOG.debug("init");
                 this.configuration = configuration;
+                this.protocolStorageService = protocolStorageService;
 
                 try {
                         DefaultBootstrap.bootstrap();
@@ -128,7 +125,6 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 }
         }
 
-        @Override
         public IncomingRequest handleIncomingRequest(
                 HttpServletRequest request, HttpServletResponse response)
                 throws Exception {
@@ -186,8 +182,6 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
         }
 
-        @SuppressWarnings("unchecked")
-        @Override
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
                                                    Map<String, Attribute> attributes,
@@ -199,7 +193,6 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 String targetUrl = getTargetUrl(httpSession);
                 String relayState = getRelayState(httpSession);
                 String inResponseTo = getInResponseTo(httpSession);
-
 
                 IdPIdentity idpIdentity = this.configuration.findIdentity();
                 String issuerName;
@@ -246,37 +239,15 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
                 samlResponse.getAssertions().add(assertion);
 
-                ReturnResponse returnResponse = new ReturnResponse(targetUrl);
-
-                HTTPPostEncoder messageEncoder = new HTTPPostEncoder();
-                BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
-                messageContext.setOutboundSAMLMessage(samlResponse);
-                messageContext.setRelayState(relayState);
-
                 // sign response
                 if (null != idpIdentity) {
-
-                        BasicX509Credential credential = new BasicX509Credential();
-                        credential.setPrivateKey(idpIdentity.getPrivateKeyEntry().getPrivateKey());
-                        credential.setEntityCertificateChain(this.configuration.getIdentityCertificateChain());
-
-                        // enable adding the cert.chain as KeyInfo
-                        X509KeyInfoGeneratorFactory factory =
-                                (X509KeyInfoGeneratorFactory) Configuration.getGlobalSecurityConfiguration().
-                                        getKeyInfoGeneratorManager().getDefaultManager().
-                                        getFactory(credential);
-                        factory.setEmitEntityCertificateChain(true);
-
-                        messageContext.setOutboundSAMLMessageSigningCredential(credential);
+                        Saml2Util.sign(samlResponse, idpIdentity.getPrivateKeyEntry());
                 }
-                OutTransport outTransport = new HTTPOutTransport(returnResponse);
-                messageContext.setOutboundMessageTransport(outTransport);
 
-                messageEncoder.encode(messageContext);
-                return returnResponse;
+                return handleSamlResponse(request.getSession().getServletContext(),
+                        targetUrl, samlResponse, relayState);
         }
 
-        @Override
         public String findAttributeUri(String uri) {
 
                 DefaultAttribute defaultAttribute = DefaultAttribute.findDefaultAttribute(uri);
@@ -314,4 +285,9 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         }
 
         protected abstract IdentityProviderFlow getAuthenticationFlow();
+
+        protected abstract ReturnResponse handleSamlResponse(ServletContext servletContext,
+                                                             String targetUrl,
+                                                             Response samlResponse,
+                                                             String relayState) throws Exception;
 }

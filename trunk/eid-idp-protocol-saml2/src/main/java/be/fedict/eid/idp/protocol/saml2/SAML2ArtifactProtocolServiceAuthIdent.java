@@ -20,10 +20,10 @@ package be.fedict.eid.idp.protocol.saml2;
 
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 
-public class SAML2ProtocolServiceAuth extends AbstractSAML2ProtocolService {
+public class SAML2ArtifactProtocolServiceAuthIdent extends AbstractSAML2ArtifactProtocolService {
 
-    @Override
-    protected IdentityProviderFlow getAuthenticationFlow() {
-        return IdentityProviderFlow.AUTHENTICATION;
-    }
+        @Override
+        protected IdentityProviderFlow getAuthenticationFlow() {
+                return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
+        }
 }

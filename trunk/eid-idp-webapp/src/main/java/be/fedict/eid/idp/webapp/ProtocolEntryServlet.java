@@ -70,10 +70,10 @@ public class ProtocolEntryServlet extends HttpServlet {
                 + ".AttributeServices";
 
         @EJB
-        private ProtocolServiceManager protocolServiceManager;
+        ProtocolServiceManager protocolServiceManager;
 
         @EJB
-        private AttributeServiceManager attributeServiceManager;
+        AttributeServiceManager attributeServiceManager;
 
         @EJB
         IdentityService identityService;
@@ -165,8 +165,11 @@ public class ProtocolEntryServlet extends HttpServlet {
                                                 "protocol service for context path already registered: "
                                                         + contextPath);
                                 }
+
                                 protocolService.init(servletContext,
-                                        this.identityService);
+                                        this.identityService,
+                                        new ProtocolStorageServiceImpl(
+                                                protocolService.getId()));
                                 protocolServices.put(contextPath, protocolService);
                         }
                 }
@@ -232,8 +235,8 @@ public class ProtocolEntryServlet extends HttpServlet {
         }
 
         public static IdentityProviderProtocolService getProtocolService(
-
                 HttpServletRequest request) throws ServletException {
+
                 String contextPath = getProtocolServiceContextPath(request);
                 ServletContext servletContext = request.getServletContext();
                 Map<String, IdentityProviderProtocolService> protocolServices =
@@ -248,7 +251,9 @@ public class ProtocolEntryServlet extends HttpServlet {
         }
 
         private void handleRequest(HttpServletRequest request,
-                                   HttpServletResponse response) throws IOException, ServletException {
+                                   HttpServletResponse response)
+                throws IOException, ServletException {
+
                 LOG.debug("handle request");
                 LOG.debug("request URI: " + request.getRequestURI());
                 LOG.debug("request method: " + request.getMethod());
@@ -260,7 +265,8 @@ public class ProtocolEntryServlet extends HttpServlet {
                 setProtocolServiceContextPath(protocolServiceContextPath, request);
 
                 ServletContext servletContext = request.getServletContext();
-                Map<String, IdentityProviderProtocolService> protocolServices = getProtocolServices(servletContext);
+                Map<String, IdentityProviderProtocolService> protocolServices =
+                        getProtocolServices(servletContext);
                 IdentityProviderProtocolService protocolService = protocolServices
                         .get(protocolServiceContextPath);
                 if (null == protocolService) {
@@ -274,8 +280,8 @@ public class ProtocolEntryServlet extends HttpServlet {
                         IncomingRequest incomingRequest = protocolService
                                 .handleIncomingRequest(request, response);
                         if (null == incomingRequest) {
-                                LOG
-                                        .debug("the protocol service handler defined its own response flow");
+                                LOG.debug("the protocol service handler " +
+                                        "defined its own response flow");
                                 return;
                         }
 

@@ -45,6 +45,7 @@ import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 import org.opensaml.xml.security.x509.BasicX509Credential;
+import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 import org.opensaml.xml.signature.*;
 import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
@@ -423,9 +424,18 @@ public abstract class Saml2Util {
                 }
                 signature.setKeyInfo(keyInfo);
 
+
                 BasicX509Credential signingCredential = new BasicX509Credential();
                 signingCredential.setPrivateKey(privateKeyEntry.getPrivateKey());
                 signingCredential.setEntityCertificateChain(certificateChain);
+
+                // enable adding the cert.chain as KeyInfo
+                X509KeyInfoGeneratorFactory factory =
+                        (X509KeyInfoGeneratorFactory) org.opensaml.xml.Configuration.getGlobalSecurityConfiguration().
+                                getKeyInfoGeneratorManager().getDefaultManager().
+                                getFactory(signingCredential);
+                factory.setEmitEntityCertificateChain(true);
+
                 signature.setSigningCredential(signingCredential);
                 signableSAMLObject.setSignature(signature);
 

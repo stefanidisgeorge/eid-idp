@@ -23,7 +23,7 @@ import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
-import be.fedict.eid.idp.protocol.saml2.SAML2ProtocolServiceAuthIdent;
+import be.fedict.eid.idp.protocol.saml2.SAML2BrowserPostProtocolServiceAuthIdent;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -63,6 +63,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.tidy.Tidy;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -180,8 +181,8 @@ public class SAML2ProtocolServiceTest {
         @Test
         public void testHandleIncomingRequest() throws Exception {
                 // setup
-                SAML2ProtocolServiceAuthIdent saml2ProtocolService =
-                        new SAML2ProtocolServiceAuthIdent();
+                SAML2BrowserPostProtocolServiceAuthIdent saml2BrowserPostProtocolService =
+                        new SAML2BrowserPostProtocolServiceAuthIdent();
                 HttpServletRequest mockHttpServletRequest = EasyMock
                         .createMock(HttpServletRequest.class);
 
@@ -213,7 +214,7 @@ public class SAML2ProtocolServiceTest {
                 EasyMock.replay(mockHttpServletRequest, mockHttpSession);
 
                 // operate
-                saml2ProtocolService
+                saml2BrowserPostProtocolService
                         .handleIncomingRequest(mockHttpServletRequest, null);
 
                 // verify
@@ -223,8 +224,8 @@ public class SAML2ProtocolServiceTest {
         @Test
         public void testHandleReturnResponse() throws Exception {
                 // setup
-                SAML2ProtocolServiceAuthIdent saml2ProtocolService =
-                        new SAML2ProtocolServiceAuthIdent();
+                SAML2BrowserPostProtocolServiceAuthIdent saml2BrowserPostProtocolService =
+                        new SAML2BrowserPostProtocolServiceAuthIdent();
 
                 Address address = new Address();
                 String userId = UUID.randomUUID().toString();
@@ -238,8 +239,12 @@ public class SAML2ProtocolServiceTest {
                 identity.nationality = "BELG";
                 identity.placeOfBirth = "Gent";
                 HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
+                HttpServletRequest mockHttpServletRequest = EasyMock
+                        .createMock(HttpServletRequest.class);
                 HttpServletResponse mockHttpServletResponse = EasyMock
                         .createMock(HttpServletResponse.class);
+                ServletContext mockServletContext =
+                        EasyMock.createMock(ServletContext.class);
 
                 KeyPair keyPair = generateKeyPair();
                 DateTime notBefore = new DateTime();
@@ -276,18 +281,24 @@ public class SAML2ProtocolServiceTest {
                 EasyMock.expect(mockConfiguration.getIdentityCertificateChain()).andStubReturn(
                         Collections.singletonList(certificate));
 
+                EasyMock.expect(mockHttpServletRequest.getSession()).andReturn(
+                        mockHttpSession);
+                EasyMock.expect(mockHttpSession.getServletContext()).andReturn(
+                        mockServletContext);
+
                 // prepare
-                EasyMock.replay(mockHttpSession, mockConfiguration);
+                EasyMock.replay(mockHttpServletRequest, mockHttpSession, mockConfiguration);
 
                 // operate
-                saml2ProtocolService.init(null, mockConfiguration);
-                ReturnResponse returnResponse = saml2ProtocolService
+                saml2BrowserPostProtocolService.init(null, mockConfiguration, null);
+                ReturnResponse returnResponse = saml2BrowserPostProtocolService
                         .handleReturnResponse(mockHttpSession, userId,
-                                new HashMap<String, Attribute>(), null,
+                                new HashMap<String, Attribute>(),
+                                mockHttpServletRequest,
                                 mockHttpServletResponse);
 
                 // verify
-                EasyMock.verify(mockHttpSession, mockConfiguration);
+                EasyMock.verify(mockHttpServletRequest, mockHttpSession, mockConfiguration);
                 assertNotNull(returnResponse);
                 assertEquals("http://127.0.0.1", returnResponse.getActionUrl());
                 List<NameValuePair> attributes = returnResponse.getAttributes();

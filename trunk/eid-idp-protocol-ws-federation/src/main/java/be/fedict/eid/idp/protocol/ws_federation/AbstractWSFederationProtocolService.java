@@ -58,6 +58,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 AbstractWSFederationProtocolService.class.getName() + ".wtrealm";
 
         private IdentityProviderConfiguration configuration;
+        private ProtocolStorageService protocolStorageService;
 
         private void storeWCtx(String wctx, HttpServletRequest request) {
                 HttpSession httpSession = request.getSession();
@@ -207,9 +208,12 @@ public abstract class AbstractWSFederationProtocolService implements
 
         @Override
         public void init(ServletContext servletContext,
-                         IdentityProviderConfiguration configuration) {
+                         IdentityProviderConfiguration configuration,
+                         ProtocolStorageService protocolStorageService) {
+
                 LOG.debug("init");
                 this.configuration = configuration;
+                this.protocolStorageService = protocolStorageService;
         }
 
         @Override
