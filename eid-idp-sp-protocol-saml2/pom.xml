@@ -78,6 +78,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>be.fedict.eid-idp</groupId>
+            <artifactId>eid-idp-protocol-saml2-ws</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
         </dependency>
