@@ -156,12 +156,17 @@ public class ProtocolExitServlet extends HttpServlet {
                                 attribute.getUri()));
                 }
 
+                String targetURL = null;
+                if (null != rp) {
+                        targetURL = rp.getTargetURL();
+                }
+
                 // return protocol specific response
                 ReturnResponse returnResponse;
                 try {
                         returnResponse = protocolService.handleReturnResponse(
-                                httpSession, userId, attributes, request,
-                                response);
+                                httpSession, userId, attributes, targetURL,
+                                request, response);
                 } catch (Exception e) {
                         LOG.error("protocol error: " + e.getMessage(), e);
                         httpSession.setAttribute(

@@ -114,12 +114,18 @@ public abstract class AbstractWSFederationProtocolService implements
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
                                                    Map<String, Attribute> attributes,
+                                                   String rpTargetUrl,
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
                 throws Exception {
                 LOG.debug("handleReturnResponse");
+
                 String wtrealm = retrieveWtrealm(httpSession);
-                ReturnResponse returnResponse = new ReturnResponse(wtrealm);
+                String targetUrl = rpTargetUrl;
+                if (null == targetUrl) {
+                        targetUrl = wtrealm;
+                }
+                ReturnResponse returnResponse = new ReturnResponse(targetUrl);
                 returnResponse.addAttribute("wa", "wsignin1.0");
                 String wctx = retrieveWctx(httpSession);
                 returnResponse.addAttribute("wctx", wctx);

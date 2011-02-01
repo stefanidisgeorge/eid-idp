@@ -200,6 +200,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
                                                    Map<String, Attribute> attributes,
+                                                   String rpTargetUrl,
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
                 throws Exception {
@@ -331,7 +332,11 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                         */
                         serverManager.sign(authSuccess);
                 }
-                String destinationUrl = message.getDestinationUrl(true);
+
+                String destinationUrl = rpTargetUrl;
+                if (null == destinationUrl) {
+                        destinationUrl = message.getDestinationUrl(true);
+                }
                 LOG.debug("destination URL: " + destinationUrl);
                 response.sendRedirect(destinationUrl);
                 return null;

@@ -293,7 +293,7 @@ public class SAML2ProtocolServiceTest {
                 saml2BrowserPostProtocolService.init(null, mockConfiguration, null);
                 ReturnResponse returnResponse = saml2BrowserPostProtocolService
                         .handleReturnResponse(mockHttpSession, userId,
-                                new HashMap<String, Attribute>(),
+                                new HashMap<String, Attribute>(), null,
                                 mockHttpServletRequest,
                                 mockHttpServletResponse);
 
