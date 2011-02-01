@@ -49,4 +49,10 @@
         </Description>
         <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2ArtifactProtocolServiceAuthIdent</ProtocolService>
         <ContextPath>/saml2-artifact-auth-ident</ContextPath>
+        <WSEndpoints>
+            <WSEndpoint>
+                <WSImplClass>be.fedict.eid.idp.saml2.ws.ArtifactServicePortImpl</WSImplClass>
+                <ContextPath>/artifact</ContextPath>
+            </WSEndpoint>
+        </WSEndpoints>
     </IdentityProviderProtocol></IdentityProviderProtocols>

@@ -67,6 +67,18 @@
                         </jarModule>
                         <jarModule>
                             <groupId>be.fedict.eid-idp</groupId>
+                            <artifactId>eid-idp-protocol-saml2-ws</artifactId>
+                            <includeInApplicationXml>true
+                            </includeInApplicationXml>
+                        </jarModule>
+                        <jarModule>
+                            <groupId>be.fedict.eid-idp</groupId>
+                            <artifactId>eid-idp-protocol-saml2-ws-impl</artifactId>
+                            <includeInApplicationXml>true
+                            </includeInApplicationXml>
+                        </jarModule>
+                        <jarModule>
+                            <groupId>be.fedict.eid-idp</groupId>
                             <artifactId>eid-idp-protocol-openid</artifactId>
                             <includeInApplicationXml>true
                             </includeInApplicationXml>
@@ -257,6 +269,16 @@
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-protocol-saml2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>be.fedict.eid-idp</groupId>
+            <artifactId>eid-idp-protocol-saml2-ws</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>be.fedict.eid-idp</groupId>
+            <artifactId>eid-idp-protocol-saml2-ws-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
