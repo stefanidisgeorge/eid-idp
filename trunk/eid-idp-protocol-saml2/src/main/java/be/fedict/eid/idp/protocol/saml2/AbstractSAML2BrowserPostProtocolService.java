@@ -42,22 +42,6 @@ public abstract class AbstractSAML2BrowserPostProtocolService extends AbstractSA
                 messageContext.setOutboundSAMLMessage(samlResponse);
                 messageContext.setRelayState(relayState);
 
-//                // sign response
-//                if (null != idpIdentity) {
-//
-//                        BasicX509Credential credential = new BasicX509Credential();
-//                        credential.setPrivateKey(idpIdentity.getPrivateKeyEntry().getPrivateKey());
-//                        credential.setEntityCertificateChain(this.configuration.getIdentityCertificateChain());
-//
-//                        // enable adding the cert.chain as KeyInfo
-//                        X509KeyInfoGeneratorFactory factory =
-//                                (X509KeyInfoGeneratorFactory) Configuration.getGlobalSecurityConfiguration().
-//                                        getKeyInfoGeneratorManager().getDefaultManager().
-//                                        getFactory(credential);
-//                        factory.setEmitEntityCertificateChain(true);
-//
-//                        messageContext.setOutboundSAMLMessageSigningCredential(credential);
-//                }
                 OutTransport outTransport = new HTTPOutTransport(returnResponse);
                 messageContext.setOutboundMessageTransport(outTransport);
 

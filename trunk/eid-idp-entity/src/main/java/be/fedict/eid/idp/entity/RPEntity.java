@@ -63,6 +63,7 @@ public class RPEntity implements Serializable {
         private String name;
 
         private String domain;
+        private String targetURL;
         private byte[] encodedCertificate;
         private boolean requestSigningRequired;
 
@@ -70,12 +71,14 @@ public class RPEntity implements Serializable {
 
         private List<RPAttributeEntity> attributes;
 
-        public RPEntity(String name, String domain, X509Certificate certificate,
+        public RPEntity(String name, String domain, String targetURL,
+                        X509Certificate certificate,
                         boolean requestSigningRequired, String secretKey)
                 throws CertificateEncodingException {
 
                 this.name = name;
                 this.domain = domain;
+                this.targetURL = targetURL;
                 this.encodedCertificate = certificate.getEncoded();
                 this.requestSigningRequired = requestSigningRequired;
                 this.secretKey = secretKey;
@@ -113,6 +116,15 @@ public class RPEntity implements Serializable {
 
         public void setDomain(String domain) {
                 this.domain = domain;
+        }
+
+        @Column(nullable = true)
+        public String getTargetURL() {
+                return targetURL;
+        }
+
+        public void setTargetURL(String targetURL) {
+                this.targetURL = targetURL;
         }
 
         @Column(length = 4 * 1024, nullable = true)

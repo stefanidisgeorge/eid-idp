@@ -32,6 +32,13 @@
                     <h:message for="domain" styleClass="error"/>
                 </s:decorate>
 
+                <h:outputLabel for="targetURL" value="Target URL"/>
+                <s:decorate>
+                    <h:inputText id="targetURL" value="#{selectedRP.targetURL}"
+                                 size="50"/>
+                    <h:message for="targetURL" styleClass="error"/>
+                </s:decorate>
+
                 <h:outputText
                         value="Encryption key (hexadecimal)"/>
                 <h:inputText value="#{selectedRP.secretKey}" size="50"/>
