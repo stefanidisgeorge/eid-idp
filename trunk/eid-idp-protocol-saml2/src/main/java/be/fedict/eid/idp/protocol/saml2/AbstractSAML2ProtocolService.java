@@ -31,6 +31,7 @@ import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
+import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
 import org.opensaml.saml2.core.*;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
@@ -131,8 +132,11 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
                 LOG.debug("handling incoming request");
 
-                if (!request.getMethod().equals("POST")) {
-                        throw new ServletException("Only HTTP POST allowed.");
+                SAMLMessageDecoder decoder;
+                if (request.getMethod().equals("POST")) {
+                	decoder = new HTTPPostDecoder();
+                } else {
+                	decoder = new HTTPRedirectDeflateDecoder();
                 }
 
                 BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
@@ -141,7 +145,6 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                         .setInboundMessageTransport(new HttpServletRequestAdapter(
                                 request));
 
-                SAMLMessageDecoder decoder = new HTTPPostDecoder();
                 decoder.decode(messageContext);
 
                 SAMLObject samlObject = messageContext.getInboundSAMLMessage();
