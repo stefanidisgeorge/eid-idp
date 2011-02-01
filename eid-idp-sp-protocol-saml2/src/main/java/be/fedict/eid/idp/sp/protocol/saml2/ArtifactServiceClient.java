@@ -25,11 +25,24 @@ import be.fedict.eid.idp.saml2.ws.LoggingSoapHandler;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResolveType;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResponseType;
 import oasis.names.tc.saml._2_0.protocol.ObjectFactory;
+import oasis.names.tc.saml._2_0.protocol.ResponseType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opensaml.Configuration;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.io.Unmarshaller;
+import org.opensaml.xml.io.UnmarshallerFactory;
+import org.opensaml.xml.io.UnmarshallingException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
@@ -64,9 +77,9 @@ public class ArtifactServiceClient {
         public void setLogging(boolean logging) {
 
                 if (logging) {
-                        registerLoggerHandler(this.port);
+                        registerLoggerHandler();
                 } else {
-                        removeLoggerHandler(this.port);
+                        removeLoggerHandler();
                 }
         }
 
@@ -102,7 +115,7 @@ public class ArtifactServiceClient {
 
                 if (!response.getStatus().getStatusCode().getValue().equals(
                         StatusCode.SUCCESS_URI)) {
-                        // TODO: handle nicely
+                        // TODO: handle nicely, same for other RuntimeExceptions...
                         throw new RuntimeException("Resolve failed: " +
                                 response.getStatus().getStatusCode().getValue());
                 }
@@ -111,7 +124,53 @@ public class ArtifactServiceClient {
                         throw new RuntimeException("Response not matching resolve?");
                 }
 
-                return null;
+                if (null == response.getAny()) {
+                        throw new RuntimeException("No content in Artifact Response?");
+                }
+
+                if (!(response.getAny() instanceof ResponseType)) {
+                        throw new RuntimeException("Unexpected content in Artifact Response.");
+                }
+
+                ResponseType samlResponseType = (ResponseType) response.getAny();
+
+                return toSAML(samlResponseType);
+        }
+
+        public static Response toSAML(final ResponseType responseType) {
+
+                try {
+                        Document root = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+                        JAXBContext.newInstance(ResponseType.class).
+                                createMarshaller().
+                                marshal(new JAXBElement<ResponseType>(
+                                        Response.DEFAULT_ELEMENT_NAME,
+                                        ResponseType.class, responseType), root);
+
+                        return unmarshall(root.getDocumentElement());
+                } catch (ParserConfigurationException e) {
+                        throw new RuntimeException("Default parser configuration " +
+                                "failed.", e);
+                } catch (JAXBException e) {
+                        throw new RuntimeException("Marshaling to OpenSAML " +
+                                "object failed.", e);
+                }
+        }
+
+        @SuppressWarnings({"unchecked"})
+        public static <X extends XMLObject> X unmarshall(Element xmlElement) {
+
+                UnmarshallerFactory unmarshallerFactory =
+                        Configuration.getUnmarshallerFactory();
+                Unmarshaller unmarshaller = unmarshallerFactory
+                        .getUnmarshaller(xmlElement);
+
+                try {
+                        return (X) unmarshaller.unmarshall(xmlElement);
+                } catch (UnmarshallingException e) {
+                        throw new RuntimeException("opensaml2 unmarshalling " +
+                                "error: " + e.getMessage(), e);
+                }
         }
 
         private void setEndpointAddress(String location) {
@@ -125,12 +184,12 @@ public class ArtifactServiceClient {
                         BindingProvider.ENDPOINT_ADDRESS_PROPERTY, location);
         }
 
-        /**
+        /*
          * Registers the logging SOAP handler on the given JAX-WS port component.
          */
-        protected void registerLoggerHandler(Object port) {
+        protected void registerLoggerHandler() {
 
-                BindingProvider bindingProvider = (BindingProvider) port;
+                BindingProvider bindingProvider = (BindingProvider) this.port;
 
                 Binding binding = bindingProvider.getBinding();
                 @SuppressWarnings("unchecked")
@@ -139,12 +198,12 @@ public class ArtifactServiceClient {
                 binding.setHandlerChain(handlerChain);
         }
 
-        /**
+        /*
          * Unregister possible logging SOAP handlers on the given JAX-WS port component.
          */
-        protected void removeLoggerHandler(Object port) {
+        protected void removeLoggerHandler() {
 
-                BindingProvider bindingProvider = (BindingProvider) port;
+                BindingProvider bindingProvider = (BindingProvider) this.port;
 
                 Binding binding = bindingProvider.getBinding();
                 @SuppressWarnings("unchecked")

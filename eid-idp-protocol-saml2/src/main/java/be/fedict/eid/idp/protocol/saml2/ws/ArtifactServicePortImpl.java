@@ -16,8 +16,9 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.saml2.ws;
+package be.fedict.eid.idp.protocol.saml2.ws;
 
+import be.fedict.eid.idp.saml2.ws.ArtifactServicePortType;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResolveType;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResponseType;
 import org.apache.commons.logging.Log;
@@ -31,7 +32,6 @@ public class ArtifactServicePortImpl implements ArtifactServicePortType {
         private static final Log LOG = LogFactory
                 .getLog(ArtifactServicePortImpl.class);
 
-        @Override
         public ArtifactResponseType resolve(ArtifactResolveType artifactResolve) {
 
                 LOG.debug("Resolve: " + artifactResolve.getArtifact());

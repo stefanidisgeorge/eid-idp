@@ -55,7 +55,7 @@
     <servlet>
         <servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
         <servlet-class>
-            be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseServlet
+            be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseServlet
         </servlet-class>
         <init-param>
             <param-name>ResponseSessionAttribute</param-name>

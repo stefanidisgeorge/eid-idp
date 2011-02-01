@@ -39,7 +39,7 @@ import java.io.IOException;
  * </p>
  * <ul>
  * <li><tt>ResponseSessionAttribute</tt>: indicates the session attribute to
- * store the returned {@link AuthenticationResponse} data object..</li>
+ * store the returned {@link be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse} data object..</li>
  * <li><tt>RedirectPage</tt>: indicates the page where to redirect after
  * successfull authentication.</li>
  * </ul>
@@ -57,12 +57,12 @@ import java.io.IOException;
  * error page.</li>
  * </ul>
  */
-public class AuthenticationResponseServlet extends HttpServlet {
+public abstract class AbstractAuthenticationResponseServlet extends HttpServlet {
 
         private static final long serialVersionUID = 1L;
 
         private static final Log LOG = LogFactory
-                .getLog(AuthenticationResponseServlet.class);
+                .getLog(AbstractAuthenticationResponseServlet.class);
 
         public static final String RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM =
                 "ResponseSessionAttribute";
@@ -78,10 +78,6 @@ public class AuthenticationResponseServlet extends HttpServlet {
         private String errorPage;
         private String errorMessageSessionAttribute;
 
-        private ServiceLocator<AuthenticationResponseService> authenticationResponseServiceServiceLocator;
-        private AuthenticationResponseProcessor authenticationResponseProcessor;
-
-
         @Override
         public void init(ServletConfig config) throws ServletException {
 
@@ -94,11 +90,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 this.errorMessageSessionAttribute = config.getInitParameter(
                         ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM);
 
-                this.authenticationResponseServiceServiceLocator = new
-                        ServiceLocator<AuthenticationResponseService>
-                        ("AuthenticationResponseService", config);
-
-                this.authenticationResponseProcessor = new AuthenticationResponseProcessor();
+                initialize(config);
         }
 
         private String getRequiredInitParameter(String parameterName,
@@ -130,12 +122,12 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 clearAllSessionAttribute(httpSession);
 
                 // process response
+                AbstractAuthenticationResponseProcessor processor =
+                        getAuthenticationResponseProcessor();
+
                 AuthenticationResponse authenticationResponse;
                 try {
-                        authenticationResponse =
-                                this.authenticationResponseProcessor.process(
-                                        this.authenticationResponseServiceServiceLocator.locateService(),
-                                        request);
+                        authenticationResponse = processor.process(request);
                 } catch (AuthenticationResponseProcessorException e) {
                         showErrorPage(e.getMessage(), e, request, response);
                         return;
@@ -173,4 +165,10 @@ public class AuthenticationResponseServlet extends HttpServlet {
 
                 httpSession.removeAttribute(this.responseSessionAttribute);
         }
+
+        protected abstract void initialize(ServletConfig config)
+                throws ServletException;
+
+        protected abstract AbstractAuthenticationResponseProcessor getAuthenticationResponseProcessor()
+                throws ServletException;
 }
