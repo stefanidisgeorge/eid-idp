@@ -70,6 +70,7 @@ public interface IdentityProviderProtocolService {
          * @param httpSession the HTTP session context.
          * @param userId      user ID
          * @param attributes  returned attribute map
+         * @param rpTargetUrl RP target URL, can be <code>null</code>
          * @param request     the HTTP request.
          * @param response    the HTTP response.   @return the response object in case a Browser POST should be constructed.
          *                    <code>null</code> in case this protocol service handles the
@@ -80,6 +81,7 @@ public interface IdentityProviderProtocolService {
          */
         ReturnResponse handleReturnResponse(HttpSession httpSession, String userId,
                                             Map<String, Attribute> attributes,
+                                            String rpTargetUrl,
                                             HttpServletRequest request,
                                             HttpServletResponse response)
                 throws Exception;

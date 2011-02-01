@@ -37,7 +37,6 @@ import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -134,9 +133,9 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
                 SAMLMessageDecoder decoder;
                 if (request.getMethod().equals("POST")) {
-                	decoder = new HTTPPostDecoder();
+                        decoder = new HTTPPostDecoder();
                 } else {
-                	decoder = new HTTPRedirectDeflateDecoder();
+                        decoder = new HTTPRedirectDeflateDecoder();
                 }
 
                 BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
@@ -188,12 +187,17 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
                                                    Map<String, Attribute> attributes,
+                                                   String rpTargetUrl,
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
                 throws Exception {
                 LOG.debug("handle return response");
                 LOG.debug("userId: " + userId);
-                String targetUrl = getTargetUrl(httpSession);
+                String targetUrl = rpTargetUrl;
+                if (null == targetUrl) {
+                        targetUrl = getTargetUrl(httpSession);
+                }
+
                 String relayState = getRelayState(httpSession);
                 String inResponseTo = getInResponseTo(httpSession);
 
