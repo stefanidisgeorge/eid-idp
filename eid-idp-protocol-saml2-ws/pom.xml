@@ -26,6 +26,7 @@
                                 <configuration>
                                         <verbose>true</verbose>
                                         <xdebug>true</xdebug>
+                                        <catalog>${basedir}/src/wsdl/catalog.cat</catalog>
                                         <bindingDirectory>src/wsdl</bindingDirectory>
                                         <bindingFiles>
                                                 <bindingFile>bindings.xml</bindingFile>
