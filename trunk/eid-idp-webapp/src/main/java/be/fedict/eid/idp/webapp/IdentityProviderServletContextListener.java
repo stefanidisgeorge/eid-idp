@@ -250,7 +250,7 @@ public class IdentityProviderServletContextListener implements
                         @SuppressWarnings("unchecked")
                         Dynamic dynamic = servletContext.addServlet("WSServlet",
                                 (Class<? extends Servlet>) wsServletClass);
-                        String urlPattern = WSServletContextListener.WS_CONTEXT_PATH + "/*";
+                        String urlPattern = WS_CONTEXT_PATH + "/*";
                         dynamic.setLoadOnStartup(1);
                         dynamic.addMapping(urlPattern);
 
