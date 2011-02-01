@@ -26,14 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
-import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
 import org.opensaml.saml2.core.*;
 import org.opensaml.security.SAMLSignatureProfileValidator;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
@@ -58,10 +52,10 @@ import java.util.Map;
  *
  * @author Wim Vandenhaute
  */
-public class AuthenticationResponseProcessor {
+public abstract class AbstractAuthenticationResponseProcessor {
 
-        private static final Log LOG = LogFactory
-                .getLog(AuthenticationResponseProcessor.class);
+        protected static final Log LOG = LogFactory
+                .getLog(AbstractAuthenticationResponseProcessor.class);
 
         static {
                 try {
@@ -74,40 +68,15 @@ public class AuthenticationResponseProcessor {
         /**
          * Process the incoming SAML v2.0 response.
          *
-         * @param service optional authentication response service
          * @param request the HTTP servlet request that holds the SAML2 response.
          * @return the SAML2 {@link AuthenticationResponse}
          * @throws AuthenticationResponseProcessorException
          *          case something went wrong
          */
-        public AuthenticationResponse process(AuthenticationResponseService service,
-                                              HttpServletRequest request)
+        public AuthenticationResponse process(HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
 
-                BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject> messageContext =
-                        new BasicSAMLMessageContext<SAMLObject, SAMLObject, SAMLObject>();
-                messageContext
-                        .setInboundMessageTransport(new HttpServletRequestAdapter(
-                                request));
-
-                SAMLMessageDecoder decoder = new HTTPPostDecoder();
-                try {
-                        decoder.decode(messageContext);
-                } catch (MessageDecodingException e) {
-                        throw new AuthenticationResponseProcessorException(
-                                "OpenSAML message decoding error", e);
-                } catch (org.opensaml.xml.security.SecurityException e) {
-                        throw new AuthenticationResponseProcessorException(
-                                "OpenSAML security error: " + e.getMessage(), e);
-                }
-
-                SAMLObject samlObject = messageContext.getInboundSAMLMessage();
-                LOG.debug("SAML object class: " + samlObject.getClass().getName());
-                if (!(samlObject instanceof Response)) {
-                        throw new AuthenticationResponseProcessorException(
-                                "expected a SAML2 Response document");
-                }
-                Response samlResponse = (Response) samlObject;
+                Response samlResponse = getSamlResponse(request);
 
                 // validate status
                 Status status = samlResponse.getStatus();
@@ -149,6 +118,8 @@ public class AuthenticationResponseProcessor {
                 LOG.debug("notOnOrAfter : " + notOnOrAfter.toString());
 
                 int maxOffset = 5;
+                AuthenticationResponseService service =
+                        getAuthenticationResponseService();
                 if (null != service) {
                         maxOffset = service.getMaximumTimeOffset();
                 }
@@ -308,4 +279,9 @@ public class AuthenticationResponseProcessor {
                 return certificate.getIssuerX500Principal().equals(
                         certificate.getSubjectX500Principal());
         }
+
+        protected abstract Response getSamlResponse(HttpServletRequest request)
+                throws AuthenticationResponseProcessorException;
+
+        protected abstract AuthenticationResponseService getAuthenticationResponseService();
 }

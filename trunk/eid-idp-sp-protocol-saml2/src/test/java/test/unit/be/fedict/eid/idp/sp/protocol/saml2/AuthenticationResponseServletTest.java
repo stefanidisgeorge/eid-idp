@@ -18,8 +18,8 @@
 
 package test.unit.be.fedict.eid.idp.sp.protocol.saml2;
 
+import be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseServlet;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
-import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseServlet;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
