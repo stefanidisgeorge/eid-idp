@@ -62,6 +62,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.tidy.Tidy;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -243,6 +244,8 @@ public class SAML2ProtocolServiceTest {
                         .createMock(HttpServletRequest.class);
                 HttpServletResponse mockHttpServletResponse = EasyMock
                         .createMock(HttpServletResponse.class);
+                ServletContext mockServletContext =
+                        EasyMock.createMock(ServletContext.class);
 
                 KeyPair keyPair = generateKeyPair();
                 DateTime notBefore = new DateTime();
@@ -258,6 +261,15 @@ public class SAML2ProtocolServiceTest {
                         .createMock(IdentityProviderConfiguration.class);
 
                 // expectations
+                mockServletContext.setAttribute(
+                        AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE,
+                        mockConfiguration);
+                EasyMock.expect(mockHttpSession.getServletContext())
+                        .andReturn(mockServletContext);
+                EasyMock.expect(mockServletContext.getAttribute(
+                        AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE))
+                        .andReturn(mockConfiguration);
+
                 EasyMock
                         .expect(
                                 mockHttpSession
@@ -280,10 +292,11 @@ public class SAML2ProtocolServiceTest {
                         Collections.singletonList(certificate));
 
                 // prepare
-                EasyMock.replay(mockHttpServletRequest, mockHttpSession, mockConfiguration);
+                EasyMock.replay(mockHttpServletRequest, mockHttpSession,
+                        mockServletContext, mockConfiguration);
 
                 // operate
-                saml2ProtocolService.init(null, mockConfiguration);
+                saml2ProtocolService.init(mockServletContext, mockConfiguration);
                 ReturnResponse returnResponse = saml2ProtocolService
                         .handleReturnResponse(mockHttpSession, userId,
                                 new HashMap<String, Attribute>(), null,
@@ -291,7 +304,8 @@ public class SAML2ProtocolServiceTest {
                                 mockHttpServletResponse);
 
                 // verify
-                EasyMock.verify(mockHttpServletRequest, mockHttpSession, mockConfiguration);
+                EasyMock.verify(mockHttpServletRequest, mockHttpSession,
+                        mockServletContext, mockConfiguration);
                 assertNotNull(returnResponse);
                 assertEquals("http://127.0.0.1", returnResponse.getActionUrl());
                 List<NameValuePair> attributes = returnResponse.getAttributes();

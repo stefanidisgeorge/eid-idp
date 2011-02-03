@@ -7,7 +7,8 @@
 <body>
 <ui:composition template="/WEB-INF/template.xhtml">
 	<ui:define name="body">
-		<h2>#{messages.supportedProtocols}</h2>
+
+        <h2>#{messages.supportedProtocols}</h2>
 		<rich:dataTable value="#{idpProtocolServices}" var="row">
 			<rich:column>
 				<f:facet name="header">#{messages.name}</f:facet>
@@ -18,7 +19,9 @@
 				<h:outputText value="#{row.contextPath}" />
 			</rich:column>
 		</rich:dataTable>
-		<p>#{messages.identityThumbprint} :<h:outputText
+
+
+        <p>#{messages.identityThumbprint} :<h:outputText
 			value="#{idpProtocolService.thumbprint}" /></p>
 	</ui:define>
 </ui:composition>

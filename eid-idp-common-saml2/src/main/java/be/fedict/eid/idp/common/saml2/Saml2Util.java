@@ -178,19 +178,19 @@ public abstract class Saml2Util {
                 }
 
                 // Add a descriptor for our identity services.
-                SPSSODescriptor spssoDescriptor =
-                        Saml2Util.buildXMLObject(SPSSODescriptor.class,
-                                SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-                entityDescriptor.getRoleDescriptors().add(spssoDescriptor);
+                IDPSSODescriptor idpssoDescriptor =
+                        Saml2Util.buildXMLObject(IDPSSODescriptor.class,
+                                IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
+                entityDescriptor.getRoleDescriptors().add(idpssoDescriptor);
 
-                spssoDescriptor.setAuthnRequestsSigned(false);
-                spssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
+                idpssoDescriptor.setWantAuthnRequestsSigned(false);
+                idpssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
 
                 // NameID Format
                 NameIDFormat nameIDFormat = Saml2Util.buildXMLObject(
                         NameIDFormat.class, NameIDFormat.DEFAULT_ELEMENT_NAME);
                 nameIDFormat.setFormat(NameIDType.TRANSIENT);
-                spssoDescriptor.getNameIDFormats().add(nameIDFormat);
+                idpssoDescriptor.getNameIDFormats().add(nameIDFormat);
 
                 // Key descriptor
                 if (null != identity) {
@@ -198,20 +198,17 @@ public abstract class Saml2Util {
                                 Saml2Util.buildXMLObject(KeyDescriptor.class,
                                         KeyDescriptor.DEFAULT_ELEMENT_NAME);
                         keyDescriptor.setKeyInfo(getKeyInfo(identity));
-                        spssoDescriptor.getKeyDescriptors().add(keyDescriptor);
+                        idpssoDescriptor.getKeyDescriptors().add(keyDescriptor);
                 }
 
-                // Assertion consumer service
-                AssertionConsumerService assertionConsumerService = Saml2Util
-                        .buildXMLObject(AssertionConsumerService.class,
-                                AssertionConsumerService.DEFAULT_ELEMENT_NAME);
-                spssoDescriptor.getAssertionConsumerServices()
-                        .add(assertionConsumerService);
+                // SSO services
+                SingleSignOnService ssoService = Saml2Util.buildXMLObject(
+                        SingleSignOnService.class,
+                        SingleSignOnService.DEFAULT_ELEMENT_NAME);
+                idpssoDescriptor.getSingleSignOnServices().add(ssoService);
 
-                assertionConsumerService.setIndex(0);
-                assertionConsumerService.setIsDefault(true);
-                assertionConsumerService.setBinding(binding);
-                assertionConsumerService.setLocation(location);
+                ssoService.setBinding(binding);
+                ssoService.setLocation(location);
 
                 return entityDescriptor;
         }

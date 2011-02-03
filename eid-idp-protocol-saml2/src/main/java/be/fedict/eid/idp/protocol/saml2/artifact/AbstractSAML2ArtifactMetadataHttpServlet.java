@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.ArtifactResolutionService;
 import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -62,9 +62,9 @@ public abstract class AbstractSAML2ArtifactMetadataHttpServlet extends AbstractS
                 artifactResolutionService.setIndex(0);
                 artifactResolutionService.setIsDefault(true);
 
-                SPSSODescriptor spssoDescriptor =
-                        (SPSSODescriptor) entityDescriptor.getRoleDescriptors().get(0);
-                spssoDescriptor.getArtifactResolutionServices().add(artifactResolutionService);
+                IDPSSODescriptor idpssoDescriptor =
+                        (IDPSSODescriptor) entityDescriptor.getRoleDescriptors().get(0);
+                idpssoDescriptor.getArtifactResolutionServices().add(artifactResolutionService);
 
                 return entityDescriptor;
         }

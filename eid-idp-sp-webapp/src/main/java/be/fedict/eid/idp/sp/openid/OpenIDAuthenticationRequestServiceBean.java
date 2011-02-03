@@ -16,20 +16,18 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.sp.saml2;
+package be.fedict.eid.idp.sp.openid;
 
-import be.fedict.eid.idp.sp.PkiServlet;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
+import be.fedict.eid.idp.sp.protocol.openid.spi.AuthenticationRequestService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.security.KeyStore;
-import java.util.Map;
+import java.security.cert.X509Certificate;
 
-public class AuthenticationRequestServiceBean implements AuthenticationRequestService, Serializable {
+public class OpenIDAuthenticationRequestServiceBean implements AuthenticationRequestService, Serializable {
 
-        private static final Log LOG = LogFactory.getLog(AuthenticationRequestServiceBean.class);
+        private static final Log LOG = LogFactory.getLog(OpenIDAuthenticationRequestServiceBean.class);
         private static final long serialVersionUID = 1185931387819658055L;
 
         private String idPEntryPoint;
@@ -43,31 +41,16 @@ public class AuthenticationRequestServiceBean implements AuthenticationRequestSe
         }
 
         @Override
-        public String getIdPDestination() {
+        public String getUserIdentifier() {
 
-                LOG.debug("get IdP destionation: " + this.idPEntryPoint);
+                LOG.debug("get User Identifier: " + this.idPEntryPoint);
                 return this.idPEntryPoint;
         }
 
         @Override
-        public String getRelayState(Map<String, String[]> parameterMap) {
+        public X509Certificate getServerCertificate() {
                 return null;
         }
-
-        @Override
-        public KeyStore.PrivateKeyEntry getSPIdentity() {
-
-                LOG.debug("get SP Identity");
-                try {
-                        KeyStore.PrivateKeyEntry pke = PkiServlet.getPrivateKeyEntry();
-                        LOG.debug("certificate: " + pke.getCertificate());
-                        return pke;
-                } catch (Exception e) {
-                        LOG.error(e);
-                        return null;
-                }
-        }
-
 
         public String getIdPEntryPoint() {
                 return idPEntryPoint;

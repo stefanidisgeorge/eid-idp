@@ -123,12 +123,14 @@
             be.fedict.eid.idp.sp.protocol.openid.AuthenticationRequestServlet
         </servlet-class>
         <init-param>
-            <param-name>ParametersFromRequest</param-name>
+            <param-name>TrustServer</param-name>
             <param-value>true</param-value>
         </init-param>
         <init-param>
-            <param-name>TrustServer</param-name>
-            <param-value>true</param-value>
+            <param-name>AuthenticationRequestService</param-name>
+            <param-value>
+                be/fedict/eid/idp/sp/openid/AuthenticationRequestServiceBean
+            </param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

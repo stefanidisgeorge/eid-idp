@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.sp.protocol.openid;
 
 import be.fedict.eid.idp.common.OpenIDAXConstants;
+import be.fedict.eid.idp.sp.protocol.openid.spi.AuthenticationRequestService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -44,12 +45,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
- * OpenID authentication request servlet.
- *
- * @author Frank Cornelis
+ * Generates and sends out a OpenID Authentication Request.
+ * <p/>
+ * <p/>
+ * Configuration can be provided either by providing:
+ * <ul>
+ * <li><tt>AuthenticationRequestService</tt>: {@link AuthenticationRequestService}
+ * to provide the IdP protocol entry point, SP response handling location,
+ * optional SSL certificate to trust</li>
+ * </ul>
+ * or by provinding:
+ * <ul>
+ * <li><tt>SPDestination</tt> or <tt>SPDestinationPage</tt>: Service Provider
+ * destination that will handle the returned SAML2 response. One of the 2
+ * parameters needs to be specified.</li>
+ * <li><tt>IdPDestination</tt>: SAML2 entry point of the eID IdP.</li>
+ * <li><tt>TrustServer</tt>: optional boolean whether any SSL certificate is
+ * regarded trusted.</li>
+ * </ul>
  */
 public class AuthenticationRequestServlet extends HttpServlet {
 
@@ -58,14 +75,25 @@ public class AuthenticationRequestServlet extends HttpServlet {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationRequestServlet.class);
 
+        private static final String AUTHN_REQUEST_SERVICE_PARAM =
+                "AuthenticationRequestService";
+        private static final String USER_IDENTIFIER_PARAM =
+                "UserIdentifier";
+        private static final String SP_DESTINATION_PARAM =
+                "SPDestination";
+        private static final String SP_DESTINATION_PAGE_PARAM =
+                SP_DESTINATION_PARAM + "Page";
+        private static final String TRUST_SERVER_PARAM = "TrustServer";
+
         public static final String CONSUMER_MANAGER_ATTRIBUTE =
                 AuthenticationRequestServlet.class.getName() + ".ConsumerManager";
 
-        private boolean parametersFromRequest;
-
-        private String spDestination;
-
         private String userIdentifier;
+        private String spDestination;
+        private String spDestinationPage;
+
+        private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;
+
 
         private ConsumerManager consumerManager;
 
@@ -73,29 +101,59 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         @Override
         public void init(ServletConfig config) throws ServletException {
-                String parametersFromRequest = config
-                        .getInitParameter("ParametersFromRequest");
-                if (null != parametersFromRequest) {
-                        this.parametersFromRequest = Boolean
-                                .parseBoolean(parametersFromRequest);
+
+                this.userIdentifier = config.getInitParameter(USER_IDENTIFIER_PARAM);
+                this.spDestination = config.getInitParameter(SP_DESTINATION_PARAM);
+                this.spDestinationPage = config.getInitParameter(SP_DESTINATION_PAGE_PARAM);
+                this.authenticationRequestServiceLocator = new
+                        ServiceLocator<AuthenticationRequestService>
+                        (AUTHN_REQUEST_SERVICE_PARAM, config);
+
+                // validate necessary configuration params
+                if (null == this.userIdentifier
+                        && !this.authenticationRequestServiceLocator.isConfigured()) {
+                        throw new ServletException(
+                                "need to provide either " + USER_IDENTIFIER_PARAM
+                                        + " or " + AUTHN_REQUEST_SERVICE_PARAM +
+                                        "(Class) init-params");
                 }
-                if (!this.parametersFromRequest) {
-                        this.spDestination = getRequiredInitParameter("SPDestination",
-                                config);
-                        this.userIdentifier = getRequiredInitParameter("UserIdentifier",
-                                config);
-                } else {
-                        LOG
-                                .warn("ParametersFromRequest should not be used for production configurations");
+
+                if (null == this.spDestination && null == this.spDestinationPage
+                        && !this.authenticationRequestServiceLocator.isConfigured()) {
+                        throw new ServletException(
+                                "need to provide either " + SP_DESTINATION_PARAM
+                                        + " or " + SP_DESTINATION_PAGE_PARAM +
+                                        " or " + AUTHN_REQUEST_SERVICE_PARAM +
+                                        "(Class) init-param");
                 }
-                String trustServer = config.getInitParameter("TrustServer");
+
+                // SSL configuration
+                String trustServer = config.getInitParameter(TRUST_SERVER_PARAM);
                 if (null != trustServer) {
                         this.trustServer = Boolean.parseBoolean(trustServer);
                 }
+                X509Certificate serverCertificate = null;
+                if (this.authenticationRequestServiceLocator.isConfigured()) {
+                        AuthenticationRequestService service =
+                                this.authenticationRequestServiceLocator.locateService();
+                        serverCertificate = service.getServerCertificate();
+                }
+
                 if (this.trustServer) {
+
                         LOG.warn("Trusting all SSL server certificates!");
                         try {
                                 OpenIDSSLSocketFactory.installAllTrusted();
+                        } catch (Exception e) {
+                                throw new ServletException(
+                                        "could not install OpenID SSL Socket Factory: "
+                                                + e.getMessage(), e);
+                        }
+                } else if (null != serverCertificate) {
+
+                        LOG.info("Trusting specified SSL certificate: " + serverCertificate);
+                        try {
+                                OpenIDSSLSocketFactory.install(serverCertificate);
                         } catch (Exception e) {
                                 throw new ServletException(
                                         "could not install OpenID SSL Socket Factory: "
@@ -106,11 +164,19 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 ServletContext servletContext = config.getServletContext();
                 this.consumerManager = (ConsumerManager) servletContext
                         .getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
+
                 if (null == this.consumerManager) {
                         try {
-                                if (this.trustServer) {
+                                if (this.trustServer || null != serverCertificate) {
+
+                                        TrustManager trustManager;
+                                        if (this.trustServer) {
+                                                trustManager = new OpenIDTrustManager();
+                                        } else {
+                                                trustManager = new OpenIDTrustManager(serverCertificate);
+                                        }
+
                                         SSLContext sslContext = SSLContext.getInstance("SSL");
-                                        TrustManager trustManager = new OpenIDTrustManager();
                                         TrustManager[] trustManagers = {trustManager};
                                         sslContext.init(null, trustManagers, null);
                                         HttpFetcherFactory httpFetcherFactory = new HttpFetcherFactory(
@@ -127,6 +193,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                                                 yadisResolver, xriResolver);
                                         this.consumerManager = new ConsumerManager(realmFactory,
                                                 discovery, httpFetcherFactory);
+
                                 } else {
                                         this.consumerManager = new ConsumerManager();
                                 }
@@ -151,36 +218,31 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 return consumerManager;
         }
 
-        private String getRequiredInitParameter(String parameterName,
-                                                ServletConfig config) throws ServletException {
-                String value = config.getInitParameter(parameterName);
-                if (null == value) {
-                        throw new ServletException(parameterName
-                                + " init-param is required");
-                }
-                return value;
-        }
-
         @Override
         protected void doGet(HttpServletRequest request,
                              HttpServletResponse response) throws ServletException, IOException {
+
                 String spDestination;
                 String userIdentifier;
-                if (this.parametersFromRequest) {
-                        LOG
-                                .warn("Retrieving parameters from the request. Only use for debugging!");
-                        spDestination = request.getParameter("SPDestination");
-                        if (null == spDestination) {
-                                throw new ServletException("SPDestination parameter required");
-                        }
-                        userIdentifier = request.getParameter("UserIdentifier");
-                        if (null == userIdentifier) {
-                                throw new ServletException("UserIdentifier parameter required");
-                        }
+
+                AuthenticationRequestService service =
+                        this.authenticationRequestServiceLocator.locateService();
+                if (null != service) {
+                        userIdentifier = service.getUserIdentifier();
+                        spDestination = service.getSPDestination();
                 } else {
-                        spDestination = this.spDestination;
                         userIdentifier = this.userIdentifier;
+                        if (null != this.spDestination) {
+                                spDestination = this.spDestination;
+                        } else {
+                                spDestination = request.getScheme() + "://"
+                                        + request.getServerName() + ":"
+                                        + request.getServerPort() + request.getContextPath()
+                                        + this.spDestinationPage;
+                        }
                 }
+
+
                 try {
                         LOG.debug("discovering the identity...");
                         LOG.debug("user identifier: " + userIdentifier);
