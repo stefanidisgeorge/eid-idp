@@ -21,8 +21,17 @@ public class ServiceLocator<T> {
 
         public ServiceLocator(String initParam, ServletConfig config)
                 throws ServletException {
+
                 this.jndiLocation = config.getInitParameter(initParam);
                 this.className = config.getInitParameter(initParam + "Class");
+        }
+
+        /**
+         * @return if JNDI or ClassName is specified or not.
+         */
+        public boolean isConfigured() {
+
+                return null != this.jndiLocation || null != this.className;
         }
 
         /**

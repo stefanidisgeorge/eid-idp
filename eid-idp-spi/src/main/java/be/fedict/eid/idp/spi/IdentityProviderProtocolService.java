@@ -33,6 +33,10 @@ import java.util.Map;
  */
 public interface IdentityProviderProtocolService {
 
+        public static final String PROTOCOL_ENDPOINT_PATH = "/protocol";
+        public static final String ENDPOINT_CONTEXT_PATH = "/endpoints";
+        public static final String WS_ENDPOINT_CONTEXT_PATH = "/ws";
+
         /**
          * @return protocol specific ID.
          */
@@ -41,13 +45,11 @@ public interface IdentityProviderProtocolService {
         /**
          * Initializes this protocol service handler.
          *
-         * @param servletContext         servlet context
-         * @param configuration          IdP configuration
-         * @param protocolStorageService protocol storage service
+         * @param servletContext servlet context
+         * @param configuration  IdP configuration
          */
         void init(ServletContext servletContext,
-                  IdentityProviderConfiguration configuration,
-                  ProtocolStorageService protocolStorageService);
+                  IdentityProviderConfiguration configuration);
 
         /**
          * Handles an incoming request for this protocol.

@@ -24,6 +24,7 @@ import be.fedict.eid.idp.protocol.ws_federation.wsfed.*;
 import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
@@ -151,7 +152,8 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
 
                 String location = "https://" + request.getServerName() + ":"
                         + request.getServerPort() + request.getContextPath()
-                        + "/protocol/" + getPath();
+                        + IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH
+                        + "/" + getPath();
                 LOG.debug("location: " + location);
 
                 EntityDescriptor entityDescriptor = Saml2Util.buildXMLObject(EntityDescriptor.class,

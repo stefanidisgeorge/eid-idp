@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2011 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,24 +16,22 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.spi;
+package be.fedict.eid.idp.sp.protocol.saml2.spi.artifact;
 
-import javax.servlet.ServletContext;
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 
 /**
- * Protocol specific storage service.
+ * SPI for authentication response services for SAML v2.0 HTTP Artifact Binding.
  *
- * @author Wim Vandenhaute
+ * @author Wim Vandenhaute.
  */
-public interface ProtocolStorageService {
+public interface ArtifactAuthenticationResponseService extends AuthenticationResponseService {
 
-        void setValue(ServletContext servletContext, String name, Object value,
-                      int validity);
-
-        <T> T findValue(ServletContext servletContext, String name, Class<T> type);
-
-        void removeValue(ServletContext servletContext, String name);
+        /**
+         * Gives back the location of the eID IdP SAML v2.0 Artifact service.
+         *
+         * @return eID IdP SAML v2.0 Artifact Service Location.
+         */
+        String getArtifactServiceLocation();
 
 }
-
-

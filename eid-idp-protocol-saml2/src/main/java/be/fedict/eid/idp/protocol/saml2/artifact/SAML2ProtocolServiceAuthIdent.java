@@ -16,14 +16,24 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.protocol.saml2;
+package be.fedict.eid.idp.protocol.saml2.artifact;
 
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import org.opensaml.saml2.metadata.EntityDescriptor;
 
-public class SAML2BrowserPostProtocolServiceAuthIdent extends AbstractSAML2BrowserPostProtocolService {
+import javax.servlet.http.HttpServletRequest;
 
-    @Override
-    protected IdentityProviderFlow getAuthenticationFlow() {
-        return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
-    }
+public class SAML2ProtocolServiceAuthIdent extends AbstractSAML2ArtifactProtocolService {
+
+        @Override
+        protected IdentityProviderFlow getAuthenticationFlow() {
+                return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
+        }
+
+        @Override
+        protected EntityDescriptor getEntityDescriptor(HttpServletRequest request) {
+
+                return new SAML2MetadataHttpServletAuthIdent()
+                        .getEntityDescriptor(request, null);
+        }
 }

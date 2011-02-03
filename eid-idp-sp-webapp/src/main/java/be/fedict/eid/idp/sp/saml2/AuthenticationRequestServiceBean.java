@@ -14,13 +14,21 @@ public class AuthenticationRequestServiceBean implements AuthenticationRequestSe
         private static final Log LOG = LogFactory.getLog(AuthenticationRequestServiceBean.class);
         private static final long serialVersionUID = 1185931387819658055L;
 
-        private String endpoint;
+        private String idPEntryPoint;
+        private String spResponseEndpoint;
+
+        @Override
+        public String getSPDestination() {
+
+                LOG.debug("get SP destination: " + this.spResponseEndpoint);
+                return this.spResponseEndpoint;
+        }
 
         @Override
         public String getIdPDestination() {
 
-                LOG.debug("get IdP destionation: " + endpoint);
-                return endpoint;
+                LOG.debug("get IdP destionation: " + this.idPEntryPoint);
+                return this.idPEntryPoint;
         }
 
         @Override
@@ -43,11 +51,19 @@ public class AuthenticationRequestServiceBean implements AuthenticationRequestSe
         }
 
 
-        public String getEndpoint() {
-                return endpoint;
+        public String getIdPEntryPoint() {
+                return idPEntryPoint;
         }
 
-        public void setEndpoint(String endpoint) {
-                this.endpoint = endpoint;
+        public void setIdPEntryPoint(String idPEntryPoint) {
+                this.idPEntryPoint = idPEntryPoint;
+        }
+
+        public String getSpResponseEndpoint() {
+                return spResponseEndpoint;
+        }
+
+        public void setSpResponseEndpoint(String spResponseEndpoint) {
+                this.spResponseEndpoint = spResponseEndpoint;
         }
 }

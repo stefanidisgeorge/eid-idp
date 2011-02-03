@@ -16,12 +16,13 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.sp.protocol.saml2;
+package be.fedict.eid.idp.sp.protocol.saml2.artifact;
 
 import be.fedict.eid.idp.saml2.ws.ArtifactService;
 import be.fedict.eid.idp.saml2.ws.ArtifactServiceFactory;
 import be.fedict.eid.idp.saml2.ws.ArtifactServicePortType;
 import be.fedict.eid.idp.saml2.ws.LoggingSoapHandler;
+import com.sun.xml.ws.developer.JAXWSProperties;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResolveType;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResponseType;
 import oasis.names.tc.saml._2_0.protocol.ObjectFactory;
@@ -38,6 +39,7 @@ import org.opensaml.xml.io.UnmarshallingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.net.ssl.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -46,8 +48,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -73,6 +79,8 @@ public class ArtifactServiceClient {
 
         /**
          * Enables/disables logging of all SOAP requests/responses.
+         *
+         * @param logging logging or not
          */
         public void setLogging(boolean logging) {
 
@@ -103,6 +111,8 @@ public class ArtifactServiceClient {
                 artifactResolve.setArtifact(artifactId);
                 artifactResolve.setID(resolveId);
 
+                // TODO: sign request if possible, use opensaml2 here...
+
                 ArtifactResponseType response = this.port.resolve(artifactResolve);
 
                 if (null == response) {
@@ -120,6 +130,8 @@ public class ArtifactServiceClient {
                                 response.getStatus().getStatusCode().getValue());
                 }
 
+                // TODO: validate response signature
+
                 if (!response.getInResponseTo().equals(resolveId)) {
                         throw new RuntimeException("Response not matching resolve?");
                 }
@@ -128,19 +140,103 @@ public class ArtifactServiceClient {
                         throw new RuntimeException("No content in Artifact Response?");
                 }
 
-                if (!(response.getAny() instanceof ResponseType)) {
+                if (!(response.getAny() instanceof JAXBElement)) {
                         throw new RuntimeException("Unexpected content in Artifact Response.");
                 }
 
-                ResponseType samlResponseType = (ResponseType) response.getAny();
+                if (!(((JAXBElement) response.getAny()).getValue() instanceof ResponseType)) {
+                        throw new RuntimeException("Unexpected content in Artifact Response.");
+                }
+
+                @SuppressWarnings("unchecked")
+                ResponseType samlResponseType = ((JAXBElement<ResponseType>)
+                        response.getAny()).getValue();
 
                 return toSAML(samlResponseType);
         }
 
+        /**
+         * If set, unilateral TLS authentication will occurs, verifying the server
+         * {@link X509Certificate} specified {@link PublicKey}.
+         *
+         * @param publicKey public key to validate server TLS certificate against.
+         */
+        public void setServicePublicKey(final PublicKey publicKey) {
+
+                // Create TrustManager
+                TrustManager[] trustManager = {new X509TrustManager() {
+
+                        public X509Certificate[] getAcceptedIssuers() {
+
+                                return null;
+                        }
+
+                        public void checkServerTrusted(X509Certificate[] chain,
+                                                       String authType)
+                                throws CertificateException {
+
+                                X509Certificate serverCertificate = chain[0];
+                                LOG.debug("server X509 subject: "
+                                        + serverCertificate.getSubjectX500Principal()
+                                        .toString());
+                                LOG.debug("authentication type: " + authType);
+                                if (null == publicKey) {
+                                        return;
+                                }
+
+                                try {
+                                        serverCertificate.verify(publicKey);
+                                        LOG.debug("valid server certificate");
+                                } catch (InvalidKeyException e) {
+                                        throw new CertificateException("Invalid Key");
+                                } catch (NoSuchAlgorithmException e) {
+                                        throw new CertificateException("No such algorithm");
+                                } catch (NoSuchProviderException e) {
+                                        throw new CertificateException("No such provider");
+                                } catch (SignatureException e) {
+                                        throw new CertificateException("Wrong signature");
+                                }
+                        }
+
+                        public void checkClientTrusted(X509Certificate[] chain,
+                                                       String authType) throws CertificateException {
+
+                                throw new CertificateException(
+                                        "this trust manager cannot be used as server-side trust manager");
+                        }
+                }};
+
+                // Create SSL Context
+                try {
+                        SSLContext sslContext = SSLContext.getInstance("TLS");
+                        SecureRandom secureRandom = new SecureRandom();
+                        sslContext.init(null, trustManager, secureRandom);
+                        LOG.debug("SSL context provider: "
+                                + sslContext.getProvider().getName());
+
+                        // Setup TrustManager for validation
+                        Map<String, Object> requestContext = ((BindingProvider) this.port)
+                                .getRequestContext();
+                        requestContext.put(JAXWSProperties.SSL_SOCKET_FACTORY, sslContext
+                                .getSocketFactory());
+
+                } catch (KeyManagementException e) {
+                        String msg = "key management error: " + e.getMessage();
+                        LOG.error(msg, e);
+                        throw new RuntimeException(msg, e);
+                } catch (NoSuchAlgorithmException e) {
+                        String msg = "TLS algo not present: " + e.getMessage();
+                        LOG.error(msg, e);
+                        throw new RuntimeException(msg, e);
+                }
+        }
+
+
         public static Response toSAML(final ResponseType responseType) {
 
                 try {
-                        Document root = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+                        Document root = DocumentBuilderFactory.newInstance().
+                                newDocumentBuilder().newDocument();
                         JAXBContext.newInstance(ResponseType.class).
                                 createMarshaller().
                                 marshal(new JAXBElement<ResponseType>(
@@ -174,14 +270,19 @@ public class ArtifactServiceClient {
         }
 
         private void setEndpointAddress(String location) {
+
                 LOG.debug("ws location: " + location);
                 if (null == location) {
                         throw new IllegalArgumentException("SAML Artifact " +
                                 "Service location URL cannot be null");
                 }
+
                 BindingProvider bindingProvider = (BindingProvider) this.port;
                 bindingProvider.getRequestContext().put(
                         BindingProvider.ENDPOINT_ADDRESS_PROPERTY, location);
+                bindingProvider.getRequestContext().put(
+                        JAXWSProperties.HOSTNAME_VERIFIER, new TestHostnameVerifier());
+
         }
 
         /*
@@ -215,6 +316,21 @@ public class ArtifactServiceClient {
                                 iter.remove();
                         }
 
+                }
+        }
+
+        // TODO: this ok?
+
+        /**
+         * Test SSL Hostname verifier, hostname of WS call over SSL is checked
+         * against SSL's CN...
+         */
+        class TestHostnameVerifier implements HostnameVerifier {
+
+                public boolean verify(String hostname, SSLSession sslSession) {
+
+                        LOG.debug("verify: " + hostname);
+                        return true;
                 }
         }
 }

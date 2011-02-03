@@ -68,7 +68,14 @@ public class StartupServletContextListener implements ServletContextListener {
 
         public static AuthenticationRequestServiceBean getSaml2RequestBean() {
 
-                return (AuthenticationRequestServiceBean) getComponent(SAML2_REQUEST_BEAN_JNDI);
+                return (AuthenticationRequestServiceBean)
+                        getComponent(SAML2_REQUEST_BEAN_JNDI);
+        }
+
+        public static AuthenticationResponseServiceBean getSaml2ResponseBean() {
+
+                return (AuthenticationResponseServiceBean)
+                        getComponent(SAML2_RESPONSE_BEAN_JNDI);
         }
 
 

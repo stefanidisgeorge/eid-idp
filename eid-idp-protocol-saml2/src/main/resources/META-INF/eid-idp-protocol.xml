@@ -5,12 +5,12 @@
         <Description>This eID IdP Protocol Service provides a SAML2 Browser POST
             Profile protocol for eID identification purposes.
         </Description>
-        <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2BrowserPostProtocolServiceIdent</ProtocolService>
-        <ContextPath>/saml2-ident</ContextPath>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.post.SAML2ProtocolServiceIdent</ProtocolService>
+        <ContextPath>/saml2/post/ident</ContextPath>
         <Endpoints>
             <Endpoint>
-                <ServletClass>be.fedict.eid.idp.protocol.saml2.SAML2MetadataHttpServletIdent</ServletClass>
-                <ContextPath>/saml2-ident-metadata.xml</ContextPath>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.post.SAML2MetadataHttpServletIdent</ServletClass>
+                <ContextPath>/saml2/post/metadata/ident-metadata.xml</ContextPath>
             </Endpoint>
         </Endpoints>
     </IdentityProviderProtocol>
@@ -19,12 +19,12 @@
         <Description>This eID IdP Protocol Service provides a SAML2 Browser POST
             Profile protocol for eID authentication purposes.
         </Description>
-        <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2BrowserPostProtocolServiceAuth</ProtocolService>
-        <ContextPath>/saml2-auth</ContextPath>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.post.SAML2ProtocolServiceAuth</ProtocolService>
+        <ContextPath>/saml2/post/auth</ContextPath>
         <Endpoints>
             <Endpoint>
-                <ServletClass>be.fedict.eid.idp.protocol.saml2.SAML2MetadataHttpServletAuth</ServletClass>
-                <ContextPath>/saml2-auth-metadata.xml</ContextPath>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.post.SAML2MetadataHttpServletAuth</ServletClass>
+                <ContextPath>/saml2/post/metadata/auth-metadata.xml</ContextPath>
             </Endpoint>
         </Endpoints>
     </IdentityProviderProtocol>
@@ -33,26 +33,73 @@
         <Description>This eID IdP Protocol Service provides a SAML2 Browser POST
             Profile protocol for eID authentication and identification purposes.
         </Description>
-        <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2BrowserPostProtocolServiceAuthIdent</ProtocolService>
-        <ContextPath>/saml2-auth-ident</ContextPath>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.post.SAML2ProtocolServiceAuthIdent</ProtocolService>
+        <ContextPath>/saml2/post/auth-ident</ContextPath>
         <Endpoints>
             <Endpoint>
-                <ServletClass>be.fedict.eid.idp.protocol.saml2.SAML2MetadataHttpServletAuthIdent</ServletClass>
-                <ContextPath>/saml2-auth-ident-metadata.xml</ContextPath>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.post.SAML2MetadataHttpServletAuthIdent</ServletClass>
+                <ContextPath>/saml2/post/metadata/auth-ident-metadata.xml</ContextPath>
             </Endpoint>
         </Endpoints>
+    </IdentityProviderProtocol>
+    <IdentityProviderProtocol>
+        <Name>SAML2 Artifact Binding Protocol Service Identification</Name>
+        <Description>This eID IdP Protocol Service provides a SAML2 Artifact Binding
+            Profile protocol for eID identification purposes.
+        </Description>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.artifact.SAML2ProtocolServiceIdent</ProtocolService>
+        <ContextPath>/saml2/artifact/ident</ContextPath>
+        <Endpoints>
+            <Endpoint>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.artifact.SAML2MetadataHttpServletIdent</ServletClass>
+                <ContextPath>/saml2/artifact/metadata/ident-metadata.xml</ContextPath>
+            </Endpoint>
+        </Endpoints>
+        <WSEndpoints>
+            <WSEndpoint>
+                <WSImplClass>be.fedict.eid.idp.protocol.saml2.artifact.ArtifactServicePortImpl</WSImplClass>
+                <ContextPath>/saml2/artifact</ContextPath>
+            </WSEndpoint>
+        </WSEndpoints>
+    </IdentityProviderProtocol>
+    <IdentityProviderProtocol>
+        <Name>SAML2 Artifact Binding Protocol Service Authentication</Name>
+        <Description>This eID IdP Protocol Service provides a SAML2 Artifact Binding
+            Profile protocol for eID authentication purposes.
+        </Description>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.artifact.SAML2ProtocolServiceAuth</ProtocolService>
+        <ContextPath>/saml2/artifact/auth</ContextPath>
+        <Endpoints>
+            <Endpoint>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.artifact.SAML2MetadataHttpServletAuth</ServletClass>
+                <ContextPath>/saml2/artifact/metadata/auth-metadata.xml</ContextPath>
+            </Endpoint>
+        </Endpoints>
+        <WSEndpoints>
+            <WSEndpoint>
+                <WSImplClass>be.fedict.eid.idp.protocol.saml2.artifact.ArtifactServicePortImpl</WSImplClass>
+                <ContextPath>/saml2/artifact</ContextPath>
+            </WSEndpoint>
+        </WSEndpoints>
     </IdentityProviderProtocol>
     <IdentityProviderProtocol>
         <Name>SAML2 Artifact Binding Protocol Service Authentication and Identification</Name>
         <Description>This eID IdP Protocol Service provides a SAML2 Artifact Binding
             Profile protocol for eID authentication and identification purposes.
         </Description>
-        <ProtocolService>be.fedict.eid.idp.protocol.saml2.SAML2ArtifactProtocolServiceAuthIdent</ProtocolService>
-        <ContextPath>/saml2-artifact-auth-ident</ContextPath>
+        <ProtocolService>be.fedict.eid.idp.protocol.saml2.artifact.SAML2ProtocolServiceAuthIdent</ProtocolService>
+        <ContextPath>/saml2/artifact/auth-ident</ContextPath>
+        <Endpoints>
+            <Endpoint>
+                <ServletClass>be.fedict.eid.idp.protocol.saml2.artifact.SAML2MetadataHttpServletAuthIdent</ServletClass>
+                <ContextPath>/saml2/artifact/metadata/auth-ident-metadata.xml</ContextPath>
+            </Endpoint>
+        </Endpoints>
         <WSEndpoints>
             <WSEndpoint>
-                <WSImplClass>be.fedict.eid.idp.protocol.saml2.ws.ArtifactServicePortImpl</WSImplClass>
-                <ContextPath>/artifact</ContextPath>
+                <WSImplClass>be.fedict.eid.idp.protocol.saml2.artifact.ArtifactServicePortImpl</WSImplClass>
+                <ContextPath>/saml2/artifact</ContextPath>
             </WSEndpoint>
         </WSEndpoints>
-    </IdentityProviderProtocol></IdentityProviderProtocols>
+    </IdentityProviderProtocol>
+</IdentityProviderProtocols>

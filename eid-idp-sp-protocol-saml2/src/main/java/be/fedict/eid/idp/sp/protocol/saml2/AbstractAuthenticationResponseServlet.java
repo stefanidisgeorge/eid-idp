@@ -19,7 +19,6 @@
 package be.fedict.eid.idp.sp.protocol.saml2;
 
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,30 +31,11 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Processes the response of the SAML v2.0 protocol.
+ * Abstract authentication response servlet for several SAML v2.0 bindings.
  * <p/>
- * <p>
- * The following init-params are required:
- * </p>
- * <ul>
- * <li><tt>ResponseSessionAttribute</tt>: indicates the session attribute to
- * store the returned {@link be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse} data object..</li>
- * <li><tt>RedirectPage</tt>: indicates the page where to redirect after
- * successfull authentication.</li>
- * </ul>
- * <p/>
- * <p>
- * The following init-params are optional:
- * </p>
- * <ul>
- * <li><tt>AuthenticationResponseService</tt>: indicates the JNDI location of
- * the {@link AuthenticationResponseService} that can be used optionally for
- * e.g. validation of the certificate chain in the response's signature.</li>
- * <li><tt>ErrorPage</tt>: indicates the page to be shown in case of errors.</li>
- * <li><tt>ErrorMessageSessionAttribute</tt>: indicates which session attribute
- * to use for reporting an error. This session attribute can be used on the
- * error page.</li>
- * </ul>
+ * Passes the incoming HTTP Post to the binding specific authentication response
+ * processor and puts the returned {@link AuthenticationResponse} on the HTTP
+ * Session.
  */
 public abstract class AbstractAuthenticationResponseServlet extends HttpServlet {
 
@@ -93,8 +73,10 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
                 initialize(config);
         }
 
-        private String getRequiredInitParameter(String parameterName,
-                                                ServletConfig config) throws ServletException {
+        protected String getRequiredInitParameter(String parameterName,
+                                                  ServletConfig config)
+                throws ServletException {
+
                 String value = config.getInitParameter(parameterName);
                 if (null == value) {
                         throw new ServletException(parameterName

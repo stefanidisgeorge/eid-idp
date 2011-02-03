@@ -55,51 +55,20 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         private static final Log LOG = LogFactory
                 .getLog(AbstractSAML2ProtocolService.class);
 
-        protected IdentityProviderConfiguration configuration;
-        protected ProtocolStorageService protocolStorageService;
+        public static final String IDP_CONFIG_CONTEXT_ATTRIBUTE =
+                AbstractSAML2ProtocolService.class.getName() + ".IdPConfig";
 
-        public static final String TARGET_URL_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
-                .getName()
-                + ".TargetUrl";
+        public static final String TARGET_URL_SESSION_ATTRIBUTE =
+                AbstractSAML2ProtocolService.class.getName() + ".TargetUrl";
 
-        public static final String RELAY_STATE_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
-                .getName()
-                + ".RelayState";
+        public static final String RELAY_STATE_SESSION_ATTRIBUTE =
+                AbstractSAML2ProtocolService.class.getName() + ".RelayState";
 
-        public static final String IN_RESPONSE_TO_SESSION_ATTRIBUTE = AbstractSAML2ProtocolService.class
-                .getName()
-                + ".InResponseTo";
+        public static final String IN_RESPONSE_TO_SESSION_ATTRIBUTE =
+                AbstractSAML2ProtocolService.class.getName() + ".InResponseTo";
 
-        private void setTargetUrl(String targetUrl, HttpServletRequest request) {
-                HttpSession httpSession = request.getSession();
-                httpSession.setAttribute(TARGET_URL_SESSION_ATTRIBUTE, targetUrl);
-        }
-
-        private String getTargetUrl(HttpSession httpSession) {
-                return (String) httpSession
-                        .getAttribute(TARGET_URL_SESSION_ATTRIBUTE);
-        }
-
-        private void setInResponseTo(String inResponseTo, HttpServletRequest request) {
-                HttpSession httpSession = request.getSession();
-                httpSession
-                        .setAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE, inResponseTo);
-        }
-
-        private String getInResponseTo(HttpSession httpSession) {
-                return (String) httpSession
-                        .getAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE);
-        }
-
-        private void setRelayState(String relayState, HttpServletRequest request) {
-                HttpSession httpSession = request.getSession();
-                httpSession.setAttribute(RELAY_STATE_SESSION_ATTRIBUTE, relayState);
-        }
-
-        private String getRelayState(HttpSession httpSession) {
-                return (String) httpSession
-                        .getAttribute(RELAY_STATE_SESSION_ATTRIBUTE);
-        }
+        public static final String ISSUER_SESSION_ATTRIBUTE =
+                AbstractSAML2ProtocolService.class.getName() + ".ISSUER";
 
         public String getId() {
 
@@ -109,12 +78,11 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
         @SuppressWarnings("unchecked")
         public void init(ServletContext servletContext,
-                         IdentityProviderConfiguration configuration,
-                         ProtocolStorageService protocolStorageService) {
+                         IdentityProviderConfiguration configuration) {
 
                 LOG.debug("init");
-                this.configuration = configuration;
-                this.protocolStorageService = protocolStorageService;
+
+                setIdPConfiguration(servletContext, configuration);
 
                 try {
                         DefaultBootstrap.bootstrap();
@@ -154,8 +122,9 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 }
                 AuthnRequest authnRequest = (AuthnRequest) samlObject;
 
-                // optionally authenticate RP
                 String issuer = authnRequest.getIssuer().getValue();
+                LOG.debug("Issuer: " + issuer);
+                setIssuer(issuer, request);
 
                 String targetUrl = authnRequest.getAssertionConsumerServiceURL();
                 LOG.debug("target URL: " + targetUrl);
@@ -191,6 +160,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
                 throws Exception {
+
                 LOG.debug("handle return response");
                 LOG.debug("userId: " + userId);
                 String targetUrl = rpTargetUrl;
@@ -198,15 +168,18 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                         targetUrl = getTargetUrl(httpSession);
                 }
 
+                IdentityProviderConfiguration configuration =
+                        getIdPConfiguration(httpSession.getServletContext());
+
                 String relayState = getRelayState(httpSession);
                 String inResponseTo = getInResponseTo(httpSession);
 
-                IdPIdentity idpIdentity = this.configuration.findIdentity();
+                IdPIdentity idpIdentity = configuration.findIdentity();
                 String issuerName;
                 if (null != idpIdentity) {
                         issuerName = idpIdentity.getName();
                 } else {
-                        issuerName = this.configuration.getDefaultIssuer();
+                        issuerName = configuration.getDefaultIssuer();
                 }
                 if (null == issuerName) {
                         issuerName = "Default";
@@ -251,8 +224,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                         Saml2Util.sign(samlResponse, idpIdentity.getPrivateKeyEntry());
                 }
 
-                return handleSamlResponse(request.getSession().getServletContext(),
-                        targetUrl, samlResponse, relayState);
+                return handleSamlResponse(request, targetUrl, samlResponse, relayState);
         }
 
         public String findAttributeUri(String uri) {
@@ -291,9 +263,65 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 return null;
         }
 
+        /*
+         * Helper methods for state handling
+         */
+
+        protected void setTargetUrl(String targetUrl, HttpServletRequest request) {
+                HttpSession httpSession = request.getSession();
+                httpSession.setAttribute(TARGET_URL_SESSION_ATTRIBUTE, targetUrl);
+        }
+
+        protected String getTargetUrl(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(TARGET_URL_SESSION_ATTRIBUTE);
+        }
+
+        protected void setInResponseTo(String inResponseTo, HttpServletRequest request) {
+                HttpSession httpSession = request.getSession();
+                httpSession
+                        .setAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE, inResponseTo);
+        }
+
+        protected String getInResponseTo(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(IN_RESPONSE_TO_SESSION_ATTRIBUTE);
+        }
+
+        protected void setRelayState(String relayState, HttpServletRequest request) {
+                HttpSession httpSession = request.getSession();
+                httpSession.setAttribute(RELAY_STATE_SESSION_ATTRIBUTE, relayState);
+        }
+
+        protected String getRelayState(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(RELAY_STATE_SESSION_ATTRIBUTE);
+        }
+
+        protected void setIssuer(String issuer, HttpServletRequest request) {
+                HttpSession httpSession = request.getSession();
+                httpSession.setAttribute(ISSUER_SESSION_ATTRIBUTE, issuer);
+        }
+
+        protected String getIssuer(HttpSession httpSession) {
+                return (String) httpSession.getAttribute(ISSUER_SESSION_ATTRIBUTE);
+        }
+
+        protected void setIdPConfiguration(ServletContext servletContext,
+                                           IdentityProviderConfiguration configuration) {
+                servletContext.setAttribute(IDP_CONFIG_CONTEXT_ATTRIBUTE, configuration);
+        }
+
+        public static IdentityProviderConfiguration getIdPConfiguration(
+                ServletContext servletContext) {
+                return (IdentityProviderConfiguration) servletContext
+                        .getAttribute(IDP_CONFIG_CONTEXT_ATTRIBUTE);
+        }
+
+
         protected abstract IdentityProviderFlow getAuthenticationFlow();
 
-        protected abstract ReturnResponse handleSamlResponse(ServletContext servletContext,
+        protected abstract ReturnResponse handleSamlResponse(HttpServletRequest request,
                                                              String targetUrl,
                                                              Response samlResponse,
                                                              String relayState) throws Exception;

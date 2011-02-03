@@ -111,6 +111,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <scope>provided</scope>
@@ -138,6 +143,11 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openid4java</groupId>
+            <artifactId>openid4java-consumer</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -146,7 +146,7 @@ public class WSFederationProtocolServiceTest {
                         mockIdentityProviderConfiguration);
 
                 // operate
-                testedInstance.init(null, mockIdentityProviderConfiguration, null);
+                testedInstance.init(null, mockIdentityProviderConfiguration);
                 ReturnResponse result = testedInstance.handleReturnResponse(
                         mockHttpSession, userId, new HashMap<String, be.fedict.eid.idp.spi.Attribute>(),
                         null, mockRequest, mockResponse);

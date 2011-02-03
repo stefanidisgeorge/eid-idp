@@ -54,6 +54,8 @@ import java.util.Map;
  */
 public abstract class AbstractAuthenticationResponseProcessor {
 
+        private static final String RELAY_STATE_PARAM = "RelayState";
+
         protected static final Log LOG = LogFactory
                 .getLog(AbstractAuthenticationResponseProcessor.class);
 
@@ -168,7 +170,7 @@ public abstract class AbstractAuthenticationResponseProcessor {
 
                 String identifier = nameId.getValue();
                 Map<String, Object> attributeMap = new HashMap<String, Object>();
-                String relayState = request.getParameter("RelayState");
+                String relayState = request.getParameter(RELAY_STATE_PARAM);
 
                 List<AttributeStatement> attributeStatements = assertion
                         .getAttributeStatements();

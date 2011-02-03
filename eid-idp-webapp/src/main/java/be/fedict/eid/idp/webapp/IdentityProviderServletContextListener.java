@@ -65,7 +65,6 @@ public class IdentityProviderServletContextListener implements
         private static final Log LOG = LogFactory
                 .getLog(IdentityProviderServletContextListener.class);
 
-        private static final String WS_CONTEXT_PATH = "/ws";
         private static final String JAXWS_WSDL_DD_DIR = "WEB-INF/wsdl";
 
         @EJB
@@ -203,7 +202,8 @@ public class IdentityProviderServletContextListener implements
                                         @SuppressWarnings("unchecked")
                                         Dynamic dynamic = servletContext.addServlet(servletName,
                                                 (Class<? extends Servlet>) servletClass);
-                                        String urlPattern = "/endpoints" + contextPath;
+                                        String urlPattern = IdentityProviderProtocolService
+                                                .ENDPOINT_CONTEXT_PATH + contextPath;
                                         dynamic.addMapping(urlPattern);
                                 }
                         }
@@ -250,7 +250,8 @@ public class IdentityProviderServletContextListener implements
                         @SuppressWarnings("unchecked")
                         Dynamic dynamic = servletContext.addServlet("WSServlet",
                                 (Class<? extends Servlet>) wsServletClass);
-                        String urlPattern = WS_CONTEXT_PATH + "/*";
+                        String urlPattern = IdentityProviderProtocolService
+                                .WS_ENDPOINT_CONTEXT_PATH + "/*";
                         dynamic.setLoadOnStartup(1);
                         dynamic.addMapping(urlPattern);
 
@@ -327,7 +328,8 @@ public class IdentityProviderServletContextListener implements
                         throw new RuntimeException("Endpoint is null.");
                 }
                 return adapterFactory.createAdapter(urlPattern,
-                        WS_CONTEXT_PATH + urlPattern, endpoint);
+                        IdentityProviderProtocolService.WS_ENDPOINT_CONTEXT_PATH
+                                + urlPattern, endpoint);
         }
 
         /**

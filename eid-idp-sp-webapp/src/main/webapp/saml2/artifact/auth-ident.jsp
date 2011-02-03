@@ -10,8 +10,10 @@
 
 <jsp:useBean id="saml2" scope="request" class="be.fedict.eid.idp.sp.saml2.Saml2Bean"/>
 <jsp:setProperty name="saml2" property="request" value="<%= request %>"  />
-<jsp:setProperty name="saml2" property="endpoint" value="saml2-ident"  />
-<c:redirect url="saml-request" />
+<jsp:setProperty name="saml2" property="idPEntryPoint" value="saml2/artifact/auth-ident"  />
+<jsp:setProperty name="saml2" property="spResponseEndpoint" value="saml2-artifact-landing"  />
+<jsp:setProperty name="saml2" property="artifactServiceEndpoint" value="" />
+<c:redirect url="../../saml-request" />
 
 </body>
 </html>

@@ -61,7 +61,6 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 .getLog(AbstractOpenIDProtocolService.class);
 
         private IdentityProviderConfiguration configuration;
-        private ProtocolStorageService protocolStorageService;
 
         private String getServiceManagerAttribute() {
 
@@ -100,12 +99,10 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
         }
 
         public void init(ServletContext servletContext,
-                         IdentityProviderConfiguration configuration,
-                         ProtocolStorageService protocolStorageService) {
+                         IdentityProviderConfiguration configuration) {
 
                 LOG.debug("init");
                 this.configuration = configuration;
-                this.protocolStorageService = protocolStorageService;
         }
 
         public IncomingRequest handleIncomingRequest(

@@ -16,14 +16,21 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.protocol.saml2;
+package be.fedict.eid.idp.protocol.saml2.artifact;
 
-public class SAML2MetadataHttpServletIdent extends AbstractSAML2MetadataHttpServlet {
+import org.opensaml.common.xml.SAMLConstants;
 
-        private static final long serialVersionUID = 6349259119875257556L;
+public class SAML2MetadataHttpServletAuth extends AbstractSAML2ArtifactMetadataHttpServlet {
+
+        private static final long serialVersionUID = -1118979011912912662L;
 
         @Override
         protected String getPath() {
-                return "saml2-ident";
+                return "saml2-auth";
+        }
+
+        @Override
+        protected String getBinding() {
+                return SAMLConstants.SAML2_ARTIFACT_BINDING_URI;
         }
 }
