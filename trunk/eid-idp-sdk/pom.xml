@@ -61,6 +61,27 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>unpack-javadoc-openid-spi</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>be.fedict.eid-idp</groupId>
+                                    <artifactId>eid-idp-sp-protocol-openid-spi
+                                    </artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>javadoc</classifier>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/files/javadoc/openid-spi
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>unpack-javadoc-saml2</id>
                         <phase>package</phase>
                         <goals>

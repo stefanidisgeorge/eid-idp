@@ -107,6 +107,14 @@ public class SAML2ArtifactProtocolServiceTest {
                         .createMock(IdentityProviderConfiguration.class);
 
                 // expectations
+                mockServletContext.setAttribute(
+                        AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE,
+                        mockConfiguration);
+                EasyMock.expect(mockHttpSession.getServletContext())
+                        .andReturn(mockServletContext);
+                EasyMock.expect(mockServletContext.getAttribute(
+                        AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE))
+                        .andReturn(mockConfiguration);
                 EasyMock
                         .expect(
                                 mockHttpSession
@@ -152,7 +160,7 @@ public class SAML2ArtifactProtocolServiceTest {
                         mockServletContext, mockConfiguration);
 
                 // operate
-                saml2ProtocolService.init(null, mockConfiguration);
+                saml2ProtocolService.init(mockServletContext, mockConfiguration);
                 ReturnResponse returnResponse = saml2ProtocolService
                         .handleReturnResponse(mockHttpSession, userId,
                                 new HashMap<String, Attribute>(), null,

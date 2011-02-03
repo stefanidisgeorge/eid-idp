@@ -26,7 +26,7 @@ public class SAML2MetadataHttpServletAuth extends AbstractSAML2ArtifactMetadataH
 
         @Override
         protected String getPath() {
-                return "saml2-auth";
+                return "saml2/artifact/auth";
         }
 
         @Override

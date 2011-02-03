@@ -31,6 +31,7 @@
         <module>eid-idp-sp-protocol-saml2</module>
         <module>eid-idp-protocol-saml2</module>
 	<module>eid-idp-protocol-saml2-ws</module>
+	<module>eid-idp-sp-protocol-openid-spi</module>
         <module>eid-idp-sp-protocol-openid</module>
         <module>eid-idp-protocol-openid</module>
         <module>eid-idp-protocol-ws-federation</module>

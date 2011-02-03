@@ -24,7 +24,7 @@ public class OpenIDProtocolServiceIdent extends AbstractOpenIDProtocolService {
 
     @Override
     protected String getPath() {
-        return "openid-identity";
+        return "openid/ident";
     }
 
     @Override

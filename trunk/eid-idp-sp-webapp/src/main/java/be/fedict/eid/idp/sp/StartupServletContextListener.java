@@ -1,5 +1,24 @@
+/*
+ * eID Identity Provider Project.
+ * Copyright (C) 2010 FedICT.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License version
+ * 3.0 as published by the Free Software Foundation.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, see
+ * http://www.gnu.org/licenses/.
+ */
+
 package be.fedict.eid.idp.sp;
 
+import be.fedict.eid.idp.sp.openid.OpenIDAuthenticationRequestServiceBean;
 import be.fedict.eid.idp.sp.saml2.AuthenticationRequestServiceBean;
 import be.fedict.eid.idp.sp.saml2.AuthenticationResponseServiceBean;
 import org.apache.commons.logging.Log;
@@ -20,6 +39,9 @@ public class StartupServletContextListener implements ServletContextListener {
         private static final String SAML2_RESPONSE_BEAN_JNDI =
                 "be/fedict/eid/idp/sp/saml2/AuthenticationResponseServiceBean";
 
+        private static final String OPENID_REQUEST_BEAN_JNDI =
+                "be/fedict/eid/idp/sp/openid/AuthenticationRequestServiceBean";
+
         @Override
         public void contextInitialized(ServletContextEvent sce) {
 
@@ -28,6 +50,8 @@ public class StartupServletContextListener implements ServletContextListener {
                                 new AuthenticationRequestServiceBean());
                         bindComponent(SAML2_RESPONSE_BEAN_JNDI,
                                 new AuthenticationResponseServiceBean());
+                        bindComponent(OPENID_REQUEST_BEAN_JNDI,
+                                new OpenIDAuthenticationRequestServiceBean());
                 } catch (NamingException e) {
                         throw new RuntimeException(e);
                 }
@@ -76,6 +100,12 @@ public class StartupServletContextListener implements ServletContextListener {
 
                 return (AuthenticationResponseServiceBean)
                         getComponent(SAML2_RESPONSE_BEAN_JNDI);
+        }
+
+        public static OpenIDAuthenticationRequestServiceBean getOpenIDRequestBean() {
+
+                return (OpenIDAuthenticationRequestServiceBean)
+                        getComponent(OPENID_REQUEST_BEAN_JNDI);
         }
 
 

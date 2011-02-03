@@ -26,7 +26,7 @@ public class SAML2MetadataHttpServletAuthIdent extends AbstractSAML2ArtifactMeta
 
         @Override
         protected String getPath() {
-                return "saml2-auth-ident";
+                return "saml2/artifact/auth-ident";
         }
 
         @Override

@@ -65,9 +65,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 SP_DESTINATION_PARAM + "Page";
 
         private String idpDestination;
-
         private String spDestination;
-
         private String spDestinationPage;
 
         private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;

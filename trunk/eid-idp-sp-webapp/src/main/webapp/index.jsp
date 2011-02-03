@@ -48,24 +48,19 @@
             </li>
         </ul>
 
-        <h2>OpenID v1.0</h2>
+        <h2>OpenID v2.0</h2>
 
         <ul>
+
             <li>
-                <a href="openid-request?UserIdentifier=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/endpoints/openid-identity SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/openid-landing">
+                <a href="openid/ident.jsp">Identification</a>
+            </li>
+            <li>
+                <a href="openid/auth.jsp">Authentication</a>
+            </li>
+            <li>
+                <a href="openid/auth-ident.jsp">Authentication +
                     Identification
-                </a>
-            </li>
-
-            <li>
-                <a href="openid-request?UserIdentifier=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/endpoints/openid-auth SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/openid-landing">
-                    Authentication
-                </a>
-            </li>
-
-            <li>
-                <a href="openid-request?UserIdentifier=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp/endpoints/openid-auth-identity SPDestination=https://<%=request.getServerName()%>:<%=request.getServerPort()%>/eid-idp-sp/openid-landing">
-                    Authentication + Identification
                 </a>
             </li>
         </ul>
