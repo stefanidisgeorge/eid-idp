@@ -31,6 +31,14 @@ import java.util.Map;
 public interface AuthenticationRequestService {
 
         /**
+         * Gives back the Service Provider destination endpoint that will handle
+         * the returned SAML v2.0 Response.
+         *
+         * @return SP SAML2 response handling location.
+         */
+        String getSPDestination();
+
+        /**
          * Gives back the destination URL of the eID IdP SAML2 protocol entry point.
          *
          * @return eID IdP SAML2 entry point

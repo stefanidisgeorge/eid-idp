@@ -33,23 +33,19 @@ import java.security.KeyStore;
 /**
  * Generates and sends out a SAML v2.0 Authentication Request.
  * <p/>
- * <p>
- * The following init-params are required:
- * </p>
+ * <p/>
+ * Configuration can be provided either by providing:
+ * <ul>
+ * <li><tt>AuthenticationRequestService</tt>: {@link AuthenticationRequestService}
+ * to provide the IdP protocol entry point, SP response handling location,
+ * SP identity for signing the * authentication request, relay state,...</li>
+ * </ul>
+ * or by provinding:
  * <ul>
  * <li><tt>SPDestination</tt> or <tt>SPDestinationPage</tt>: Service Provider
  * destination that will handle the returned SAML2 response. One of the 2
  * parameters needs to be specified.</li>
- * </ul>
- * <p/>
- * <p>
- * The following init-params are optional:
- * </p>
- * <ul>
- * <li><tt>IdPDestination</tt>: optional SAML2 entry point of the eID IdP.</li>
- * <li><tt>AuthenticationRequestService</tt>: optional {@link AuthenticationRequestService}
- * to provide the IdP protocol entry point, SP identity for signing the
- * authentication request, relay state..</li>
+ * <li><tt>IdPDestination</tt>: SAML2 entry point of the eID IdP.</li>
  * </ul>
  */
 public class AuthenticationRequestServlet extends HttpServlet {
@@ -58,6 +54,15 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationRequestServlet.class);
+
+        private static final String AUTHN_REQUEST_SERVICE_PARAM =
+                "AuthenticationRequestService";
+        private static final String IDP_DESTINATION_PARAM =
+                "IdPDestination";
+        private static final String SP_DESTINATION_PARAM =
+                "SPDestination";
+        private static final String SP_DESTINATION_PAGE_PARAM =
+                SP_DESTINATION_PARAM + "Page";
 
         private String idpDestination;
 
@@ -69,24 +74,30 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         @Override
         public void init(ServletConfig config) throws ServletException {
-                this.idpDestination = config.getInitParameter("IdPDestination");
+
+                this.idpDestination = config.getInitParameter(IDP_DESTINATION_PARAM);
+                this.spDestination = config.getInitParameter(SP_DESTINATION_PARAM);
+                this.spDestinationPage = config.getInitParameter(SP_DESTINATION_PAGE_PARAM);
                 this.authenticationRequestServiceLocator = new
                         ServiceLocator<AuthenticationRequestService>
-                        ("AuthenticationRequestService", config);
+                        (AUTHN_REQUEST_SERVICE_PARAM, config);
+
+                // validate necessary configuration params
                 if (null == this.idpDestination
-                        && null == this.authenticationRequestServiceLocator.locateService()) {
+                        && !this.authenticationRequestServiceLocator.isConfigured()) {
                         throw new ServletException(
-                                "need to provide either IdPDestination or " +
-                                        "AuthenticationRequestService(Class) init-params");
+                                "need to provide either " + IDP_DESTINATION_PARAM
+                                        + " or " + AUTHN_REQUEST_SERVICE_PARAM +
+                                        "(Class) init-params");
                 }
 
-                this.spDestination = config.getInitParameter("SPDestination");
-                this.spDestinationPage = config
-                        .getInitParameter("SPDestinationPage");
-                if (null == this.spDestination && null == this.spDestinationPage) {
+                if (null == this.spDestination && null == this.spDestinationPage
+                        && !this.authenticationRequestServiceLocator.isConfigured()) {
                         throw new ServletException(
-                                "need to provide either SPDestination or " +
-                                        "SPDestinationPage init-param");
+                                "need to provide either " + SP_DESTINATION_PARAM
+                                        + " or " + SP_DESTINATION_PAGE_PARAM +
+                                        " or " + AUTHN_REQUEST_SERVICE_PARAM +
+                                        "(Class) init-param");
                 }
         }
 
@@ -107,19 +118,20 @@ public class AuthenticationRequestServlet extends HttpServlet {
                         idpDestination = service.getIdPDestination();
                         relayState = service.getRelayState(request.getParameterMap());
                         spIdentity = service.getSPIdentity();
+                        spDestination = service.getSPDestination();
                 } else {
                         idpDestination = this.idpDestination;
                         relayState = null;
+                        if (null != this.spDestination) {
+                                spDestination = this.spDestination;
+                        } else {
+                                spDestination = request.getScheme() + "://"
+                                        + request.getServerName() + ":"
+                                        + request.getServerPort() + request.getContextPath()
+                                        + this.spDestinationPage;
+                        }
                 }
 
-                if (null != this.spDestination) {
-                        spDestination = this.spDestination;
-                } else {
-                        spDestination = request.getScheme() + "://"
-                                + request.getServerName() + ":"
-                                + request.getServerPort() + request.getContextPath()
-                                + this.spDestinationPage;
-                }
 
                 // generate and send an authentication request
                 AuthenticationRequestUtil.sendRequest(idpDestination, spDestination,

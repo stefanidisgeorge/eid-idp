@@ -167,9 +167,7 @@ public class ProtocolEntryServlet extends HttpServlet {
                                 }
 
                                 protocolService.init(servletContext,
-                                        this.identityService,
-                                        new ProtocolStorageServiceImpl(
-                                                protocolService.getId()));
+                                        this.identityService);
                                 protocolServices.put(contextPath, protocolService);
                         }
                 }

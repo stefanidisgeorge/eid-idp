@@ -25,8 +25,10 @@ import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.SignableSAMLObject;
+import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.metadata.*;
 import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.ws.wstrust.*;
 import org.opensaml.ws.wstrust.impl.*;
@@ -122,6 +124,120 @@ public abstract class Saml2Util {
                 } catch (ConfigurationException e) {
                         throw new RuntimeException("could not bootstrap the OpenSAML2 library", e);
                 }
+        }
+
+        /**
+         * Returns SAML v2.0 Metadata {@link EntityDescriptor} with 1
+         * {@link AssertionConsumerService} at specified location with specified
+         * binding.
+         *
+         * @param location location
+         * @param binding  SAML v2.0 Binding
+         * @param identity optional identity, if present key descriptor will be
+         *                 added.
+         * @return the metadata entity descriptor
+         */
+        public static EntityDescriptor getEntityDescriptor(String location,
+                                                           String binding,
+                                                           KeyStore.PrivateKeyEntry identity) {
+
+                // Add a descriptor for our node (the SAMLv2 Entity).
+                EntityDescriptor entityDescriptor =
+                        Saml2Util.buildXMLObject(EntityDescriptor.class,
+                                EntityDescriptor.DEFAULT_ELEMENT_NAME);
+
+                entityDescriptor.setEntityID(location);
+
+                // signature
+                if (null != identity) {
+                        // Add a signature to the entity descriptor.
+                        Signature signature = Saml2Util.buildXMLObject(Signature.class,
+                                Signature.DEFAULT_ELEMENT_NAME);
+                        entityDescriptor.setSignature(signature);
+
+                        signature.setCanonicalizationAlgorithm(
+                                SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+
+                        // add certificate chain as keyinfo
+                        signature.setKeyInfo(getKeyInfo(identity));
+
+                        BasicX509Credential signingCredential = new BasicX509Credential();
+                        signingCredential.setPrivateKey(identity.getPrivateKey());
+                        signingCredential.setEntityCertificateChain(
+                                getCertificateChain(identity));
+                        signature.setSigningCredential(signingCredential);
+
+                        String algorithm = identity.getPrivateKey().getAlgorithm();
+                        if ("RSA".equals(algorithm)) {
+                                signature.setSignatureAlgorithm(
+                                        SignatureConstants.ALGO_ID_SIGNATURE_RSA);
+                        } else {
+                                signature.setSignatureAlgorithm(
+                                        SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA1);
+                        }
+                }
+
+                // Add a descriptor for our identity services.
+                SPSSODescriptor spssoDescriptor =
+                        Saml2Util.buildXMLObject(SPSSODescriptor.class,
+                                SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+                entityDescriptor.getRoleDescriptors().add(spssoDescriptor);
+
+                spssoDescriptor.setAuthnRequestsSigned(false);
+                spssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
+
+                // NameID Format
+                NameIDFormat nameIDFormat = Saml2Util.buildXMLObject(
+                        NameIDFormat.class, NameIDFormat.DEFAULT_ELEMENT_NAME);
+                nameIDFormat.setFormat(NameIDType.TRANSIENT);
+                spssoDescriptor.getNameIDFormats().add(nameIDFormat);
+
+                // Key descriptor
+                if (null != identity) {
+                        KeyDescriptor keyDescriptor =
+                                Saml2Util.buildXMLObject(KeyDescriptor.class,
+                                        KeyDescriptor.DEFAULT_ELEMENT_NAME);
+                        keyDescriptor.setKeyInfo(getKeyInfo(identity));
+                        spssoDescriptor.getKeyDescriptors().add(keyDescriptor);
+                }
+
+                // Assertion consumer service
+                AssertionConsumerService assertionConsumerService = Saml2Util
+                        .buildXMLObject(AssertionConsumerService.class,
+                                AssertionConsumerService.DEFAULT_ELEMENT_NAME);
+                spssoDescriptor.getAssertionConsumerServices()
+                        .add(assertionConsumerService);
+
+                assertionConsumerService.setIndex(0);
+                assertionConsumerService.setIsDefault(true);
+                assertionConsumerService.setBinding(binding);
+                assertionConsumerService.setLocation(location);
+
+                return entityDescriptor;
+        }
+
+        private static KeyInfo getKeyInfo(KeyStore.PrivateKeyEntry identity) {
+
+                List<X509Certificate> certificateChain = getCertificateChain(identity);
+                KeyInfo keyInfo = Saml2Util.buildXMLObject(KeyInfo.class,
+                        KeyInfo.DEFAULT_ELEMENT_NAME);
+                try {
+                        for (X509Certificate certificate : certificateChain) {
+                                KeyInfoHelper.addCertificate(keyInfo, certificate);
+                        }
+                } catch (CertificateEncodingException e) {
+                        throw new RuntimeException("opensaml2 certificate encoding error: " + e.getMessage(), e);
+                }
+                return keyInfo;
+        }
+
+        private static List<X509Certificate> getCertificateChain(KeyStore.PrivateKeyEntry identity) {
+
+                List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+                for (java.security.cert.Certificate certificate : identity.getCertificateChain()) {
+                        certificateChain.add((X509Certificate) certificate);
+                }
+                return certificateChain;
         }
 
         public static Assertion getAssertion(String issuerName,

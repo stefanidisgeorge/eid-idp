@@ -16,10 +16,11 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.protocol.saml2;
+package be.fedict.eid.idp.protocol.saml2.post;
 
 import java.io.UnsupportedEncodingException;
 
+import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.Init;

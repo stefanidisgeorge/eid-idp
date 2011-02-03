@@ -10,8 +10,9 @@
 
 <jsp:useBean id="saml2" scope="request" class="be.fedict.eid.idp.sp.saml2.Saml2Bean"/>
 <jsp:setProperty name="saml2" property="request" value="<%= request %>"  />
-<jsp:setProperty name="saml2" property="endpoint" value="saml2-auth"  />
-<c:redirect url="saml-request" />
+<jsp:setProperty name="saml2" property="idPEntryPoint" value="saml2/post/auth-ident"  />
+<jsp:setProperty name="saml2" property="spResponseEndpoint" value="saml2-landing"  />
+<c:redirect url="../../saml-request" />
 
 </body>
 </html>

@@ -37,10 +37,6 @@
             be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet
         </servlet-class>
         <init-param>
-            <param-name>SPDestinationPage</param-name>
-            <param-value>/saml2-landing</param-value>
-        </init-param>
-        <init-param>
             <param-name>AuthenticationRequestService</param-name>
             <param-value>
                 be/fedict/eid/idp/sp/saml2/AuthenticationRequestServiceBean
@@ -52,6 +48,7 @@
         <url-pattern>/saml-request</url-pattern>
     </servlet-mapping>
 
+    <!-- SAML2 Browser POST Binding Response Servlet -->
     <servlet>
         <servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
         <servlet-class>
@@ -83,6 +80,40 @@
     <servlet-mapping>
         <servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
         <url-pattern>/saml2-landing</url-pattern>
+    </servlet-mapping>
+
+    <!-- SAML2 Artifact Binding Response Servlet -->
+    <servlet>
+        <servlet-name>SAML2ArtifactAuthenticationResponseServlet</servlet-name>
+        <servlet-class>
+            be.fedict.eid.idp.sp.protocol.saml2.artifact.AuthenticationResponseServlet
+        </servlet-class>
+        <init-param>
+            <param-name>ResponseSessionAttribute</param-name>
+            <param-value>Response</param-value>
+        </init-param>
+        <init-param>
+            <param-name>RedirectPage</param-name>
+            <param-value>/authn-result.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>ArtifactAuthenticationResponseService</param-name>
+            <param-value>
+                be/fedict/eid/idp/sp/saml2/AuthenticationResponseServiceBean
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>ErrorPage</param-name>
+            <param-value>/error.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>ErrorMessageSessionAttribute</param-name>
+            <param-value>ErrorMessage</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SAML2ArtifactAuthenticationResponseServlet</servlet-name>
+        <url-pattern>/saml2-artifact-landing</url-pattern>
     </servlet-mapping>
 
     <!-- OpenID Authentication Protocol -->

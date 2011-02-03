@@ -22,20 +22,12 @@ import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.KeyDescriptor;
-import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
-import org.opensaml.xml.security.x509.BasicX509Credential;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureConstants;
 import org.w3c.dom.Element;
 
 import javax.servlet.ServletException;
@@ -45,11 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.KeyStore;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.LinkedList;
-import java.util.List;
 
 public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
 
@@ -94,74 +82,12 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
 
                 throws ServletException, TransformerException, IOException {
 
-                String location = "https://" + request.getServerName() + ":"
-                        + request.getServerPort() + request.getContextPath()
-                        + "/protocol/" + getPath();
-                LOG.debug("location: " + location);
+
+                IdPIdentity identity = configuration.findIdentity();
 
                 // Add a descriptor for our node (the SAMLv2 Entity).
-                EntityDescriptor entityDescriptor =
-                        Saml2Util.buildXMLObject(EntityDescriptor.class,
-                                EntityDescriptor.DEFAULT_ELEMENT_NAME);
-
-                entityDescriptor.setEntityID(location);
-
-                // signature
-                IdPIdentity identity = configuration.findIdentity();
-                if (null != identity) {
-                        // Add a signature to the entity descriptor.
-                        Signature signature = Saml2Util.buildXMLObject(Signature.class,
-                                Signature.DEFAULT_ELEMENT_NAME);
-                        entityDescriptor.setSignature(signature);
-
-                        signature.setCanonicalizationAlgorithm(
-                                SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
-
-                        // add certificate chain as keyinfo
-                        signature.setKeyInfo(getKeyInfo(identity.getPrivateKeyEntry()));
-
-                        BasicX509Credential signingCredential = new BasicX509Credential();
-                        signingCredential.setPrivateKey(identity.getPrivateKeyEntry().
-                                getPrivateKey());
-                        signingCredential.setEntityCertificateChain(
-                                getCertificateChain(identity.getPrivateKeyEntry()));
-                        signature.setSigningCredential(signingCredential);
-
-                        String algorithm = identity.getPrivateKeyEntry()
-                                .getPrivateKey().getAlgorithm();
-                        if ("RSA".equals(algorithm)) {
-                                signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA);
-                        } else {
-                                signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA1);
-                        }
-                }
-
-                // Add a descriptor for our identity services.
-                IDPSSODescriptor idpSsoDescriptor =
-                        Saml2Util.buildXMLObject(IDPSSODescriptor.class,
-                                IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
-                entityDescriptor.getRoleDescriptors().add(idpSsoDescriptor);
-
-                // TODO: ok?
-                idpSsoDescriptor.setWantAuthnRequestsSigned(false);
-                idpSsoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
-
-                if (null != identity) {
-                        KeyDescriptor keyDescriptor =
-                                Saml2Util.buildXMLObject(KeyDescriptor.class,
-                                        KeyDescriptor.DEFAULT_ELEMENT_NAME);
-                        keyDescriptor.setKeyInfo(getKeyInfo(identity.getPrivateKeyEntry()));
-                        idpSsoDescriptor.getKeyDescriptors().add(keyDescriptor);
-                }
-
-                // Add a descriptor for the authentication service (HTTP-POST).
-                SingleSignOnService ssoServicePost = Saml2Util.buildXMLObject(
-                        SingleSignOnService.class,
-                        SingleSignOnService.DEFAULT_ELEMENT_NAME);
-                idpSsoDescriptor.getSingleSignOnServices().add(ssoServicePost);
-
-                ssoServicePost.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
-                ssoServicePost.setLocation(location);
+                EntityDescriptor entityDescriptor = getEntityDescriptor(request,
+                        identity);
 
                 // Marshall & sign the entity descriptor.
                 Element element;
@@ -181,29 +107,21 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
                 Saml2Util.writeDocument(element.getOwnerDocument(), outputStream);
         }
 
-        private KeyInfo getKeyInfo(KeyStore.PrivateKeyEntry identity) {
+        public EntityDescriptor getEntityDescriptor(HttpServletRequest request,
+                                                    IdPIdentity identity) {
 
-                List<X509Certificate> certificateChain = getCertificateChain(identity);
-                KeyInfo keyInfo = Saml2Util.buildXMLObject(KeyInfo.class,
-                        KeyInfo.DEFAULT_ELEMENT_NAME);
-                try {
-                        for (X509Certificate certificate : certificateChain) {
-                                KeyInfoHelper.addCertificate(keyInfo, certificate);
-                        }
-                } catch (CertificateEncodingException e) {
-                        throw new RuntimeException("opensaml2 certificate encoding error: " + e.getMessage(), e);
-                }
-                return keyInfo;
+                String location = "https://" + request.getServerName() + ":"
+                        + request.getServerPort() + request.getContextPath()
+                        + IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH +
+                        "/" + getPath();
+                LOG.debug("location: " + location);
+
+                return Saml2Util.getEntityDescriptor(location, getBinding(),
+                        null != identity ? identity.getPrivateKeyEntry() : null);
         }
 
-        private List<X509Certificate> getCertificateChain(KeyStore.PrivateKeyEntry identity) {
-
-                List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
-                for (java.security.cert.Certificate certificate : identity.getCertificateChain()) {
-                        certificateChain.add((X509Certificate) certificate);
-                }
-                return certificateChain;
-        }
 
         protected abstract String getPath();
+
+        protected abstract String getBinding();
 }
