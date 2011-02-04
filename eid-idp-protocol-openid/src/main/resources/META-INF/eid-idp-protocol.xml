@@ -9,10 +9,12 @@
         <ContextPath>/openid/ident</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>OpenID Identification Service</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServletIdent</ServletClass>
                 <ContextPath>/openid/ident</ContextPath>
             </Endpoint>
             <Endpoint>
+                <Name>OpenID Identification XRDS</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServletIdent</ServletClass>
                 <ContextPath>/openid/ident/xrds</ContextPath>
             </Endpoint>
@@ -27,10 +29,12 @@
         <ContextPath>/openid/auth</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>OpenID Authentication Service</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServletAuth</ServletClass>
                 <ContextPath>/openid/auth</ContextPath>
             </Endpoint>
             <Endpoint>
+                <Name>OpenID Authentication XRDS</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServletAuth</ServletClass>
                 <ContextPath>/openid/auth/xrds</ContextPath>
             </Endpoint>
@@ -45,10 +49,12 @@
         <ContextPath>/openid/auth-ident</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>OpenID Authentication and Identification Service</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServletAuthIdent</ServletClass>
                 <ContextPath>/openid/auth-ident</ContextPath>
             </Endpoint>
             <Endpoint>
+                <Name>OpenID Authentication and Identification XRDS</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.openid.OpenIDIdentityHttpServletAuthIdent</ServletClass>
                 <ContextPath>/openid/auth-ident/xrds</ContextPath>
             </Endpoint>

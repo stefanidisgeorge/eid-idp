@@ -24,7 +24,8 @@
             <element name="ProtocolService" type="xsd:string"/>
             <element name="ContextPath" type="xsd:string"/>
             <element name="Endpoints" type="tns:EndpointsType" minOccurs="0"/>
-            <element name="WSEndpoints" type="tns:WSEndpointsType" minOccurs="0"/>
+            <element name="WSEndpoints" type="tns:WSEndpointsType"
+                     minOccurs="0"/>
         </sequence>
     </complexType>
     <complexType name="EndpointsType">
@@ -35,9 +36,10 @@
     </complexType>
     <complexType name="EndpointType">
         <sequence>
+            <element name="Name" type="xsd:string"/>
+            <element name="Description" type="xsd:string" minOccurs="0"/>
             <element name="ServletClass" type="xsd:string"/>
             <element name="ContextPath" type="xsd:string"/>
-            <element name="Description" type="xsd:string" minOccurs="0"/>
         </sequence>
     </complexType>
     <complexType name="WSEndpointsType">
@@ -48,9 +50,10 @@
     </complexType>
     <complexType name="WSEndpointType">
         <sequence>
+            <element name="Name" type="xsd:string"/>
+            <element name="Description" type="xsd:string" minOccurs="0"/>
             <element name="WSImplClass" type="xsd:string"/>
             <element name="ContextPath" type="xsd:string"/>
-            <element name="Description" type="xsd:string" minOccurs="0"/>
         </sequence>
     </complexType>
 

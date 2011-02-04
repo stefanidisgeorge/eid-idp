@@ -12,31 +12,28 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, see 
+ * License along with this software; if not, see
  * http://www.gnu.org/licenses/.
  */
 
 package be.fedict.eid.idp.webapp;
 
-import javax.ejb.Local;
+public class ServiceEndpoint {
 
-@Local
-public interface ProtocolService {
+        private final String name;
 
-        /*
-        * Factories.
-        */
-        void initProtocolServices();
+        private final String path;
 
-        void initServiceEndpoints();
+        public ServiceEndpoint(String name, String path) {
+                this.name = name;
+                this.path = path;
+        }
 
-        /*
-        * Lifecycle.
-        */
-        void destroy();
+        public String getName() {
+                return name;
+        }
 
-        /*
-        * Accessors
-        */
-        String getThumbprint();
+        public String getPath() {
+                return path;
+        }
 }

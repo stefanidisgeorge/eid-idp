@@ -21,6 +21,8 @@ package be.fedict.eid.idp.webapp;
 import be.fedict.eid.idp.model.Constants;
 import be.fedict.eid.idp.model.IdentityService;
 import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.protocol.EndpointType;
 import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.annotations.Destroy;
@@ -33,6 +35,7 @@ import org.jboss.seam.log.Log;
 import javax.ejb.EJB;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
+import java.util.LinkedList;
 import java.util.List;
 
 @Stateful
@@ -44,7 +47,10 @@ public class ProtocolServiceBean implements ProtocolService {
         private Log log;
 
         @DataModel
-        private List<IdentityProviderProtocolType> idpProtocolServices;
+        private List<ServiceEndpoint> idpProtocolServices;
+
+        @DataModel
+        private List<ServiceEndpoint> idpServiceEndpoints;
 
         @EJB
         private ProtocolServiceManager protocolServiceManager;
@@ -52,11 +58,41 @@ public class ProtocolServiceBean implements ProtocolService {
         @EJB
         private IdentityService identityService;
 
+        @Override
         @Factory("idpProtocolServices")
         public void initProtocolServices() {
                 this.log.debug("init idpProtocolServices");
-                this.idpProtocolServices = this.protocolServiceManager
-                        .getProtocolServices();
+                this.idpProtocolServices = new LinkedList<ServiceEndpoint>();
+
+                for (IdentityProviderProtocolType protocolService :
+                        this.protocolServiceManager.getProtocolServices()) {
+                        this.idpProtocolServices.add(
+                                new ServiceEndpoint(protocolService.getName(),
+                                        IdentityProviderProtocolService
+                                                .PROTOCOL_ENDPOINT_PATH +
+                                                protocolService.getContextPath()));
+                }
+        }
+
+        @Override
+        @Factory("idpServiceEndpoints")
+        public void initServiceEndpoints() {
+                this.log.debug("init idpServiceEndpoints");
+                this.idpServiceEndpoints = new LinkedList<ServiceEndpoint>();
+
+                for (IdentityProviderProtocolType protocolService :
+                        this.protocolServiceManager.getProtocolServices()) {
+
+                        for (EndpointType endpoint :
+                                protocolService.getEndpoints().getEndpoint()) {
+                                this.idpServiceEndpoints.add(
+                                        new ServiceEndpoint(endpoint.getName(),
+                                                "/eid-idp" +
+                                                        IdentityProviderProtocolService
+                                                                .ENDPOINT_CONTEXT_PATH +
+                                                        endpoint.getContextPath()));
+                        }
+                }
         }
 
         @Remove
