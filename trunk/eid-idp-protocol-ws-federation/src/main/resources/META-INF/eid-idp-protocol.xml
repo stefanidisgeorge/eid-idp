@@ -9,6 +9,7 @@
         <ContextPath>/ws-federation-ident</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>WS-Federation Identification Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServletIdent</ServletClass>
                 <ContextPath>/ws-federation-ident-metadata.xml</ContextPath>
             </Endpoint>
@@ -23,6 +24,7 @@
         <ContextPath>/ws-federation-auth</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>WS-Federation Authentication Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServletAuth</ServletClass>
                 <ContextPath>/ws-federation-auth-metadata.xml</ContextPath>
             </Endpoint>
@@ -37,6 +39,7 @@
         <ContextPath>/ws-federation-auth-ident</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>WS-Federation Authentication and Identification Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServletAuthIdent</ServletClass>
                 <ContextPath>/ws-federation-auth-ident-metadata.xml</ContextPath>
             </Endpoint>

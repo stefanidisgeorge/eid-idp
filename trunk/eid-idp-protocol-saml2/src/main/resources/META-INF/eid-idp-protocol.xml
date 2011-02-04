@@ -9,6 +9,7 @@
         <ContextPath>/saml2/post/ident</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>SAML2 Browser Post Identification Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.saml2.post.SAML2MetadataHttpServletIdent</ServletClass>
                 <ContextPath>/saml2/post/metadata/ident-metadata.xml</ContextPath>
             </Endpoint>
@@ -23,6 +24,7 @@
         <ContextPath>/saml2/post/auth</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>SAML2 Browser Post Authentication Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.saml2.post.SAML2MetadataHttpServletAuth</ServletClass>
                 <ContextPath>/saml2/post/metadata/auth-metadata.xml</ContextPath>
             </Endpoint>
@@ -37,6 +39,7 @@
         <ContextPath>/saml2/post/auth-ident</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>SAML2 Browser Post Authentication and Identification Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.saml2.post.SAML2MetadataHttpServletAuthIdent</ServletClass>
                 <ContextPath>/saml2/post/metadata/auth-ident-metadata.xml</ContextPath>
             </Endpoint>
@@ -51,12 +54,14 @@
         <ContextPath>/saml2/artifact/ident</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>SAML2 Artifact Identification Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.saml2.artifact.SAML2MetadataHttpServletIdent</ServletClass>
                 <ContextPath>/saml2/artifact/metadata/ident-metadata.xml</ContextPath>
             </Endpoint>
         </Endpoints>
         <WSEndpoints>
             <WSEndpoint>
+                <Name>SAML2 Artifact Identification Web Service</Name>
                 <WSImplClass>be.fedict.eid.idp.protocol.saml2.artifact.ArtifactServicePortImpl</WSImplClass>
                 <ContextPath>/saml2/artifact</ContextPath>
             </WSEndpoint>
@@ -71,12 +76,14 @@
         <ContextPath>/saml2/artifact/auth</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>SAML2 Artifact Authentication Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.saml2.artifact.SAML2MetadataHttpServletAuth</ServletClass>
                 <ContextPath>/saml2/artifact/metadata/auth-metadata.xml</ContextPath>
             </Endpoint>
         </Endpoints>
         <WSEndpoints>
             <WSEndpoint>
+                <Name>SAML2 Artifact Authentication Web Service</Name>
                 <WSImplClass>be.fedict.eid.idp.protocol.saml2.artifact.ArtifactServicePortImpl</WSImplClass>
                 <ContextPath>/saml2/artifact</ContextPath>
             </WSEndpoint>
@@ -91,12 +98,14 @@
         <ContextPath>/saml2/artifact/auth-ident</ContextPath>
         <Endpoints>
             <Endpoint>
+                <Name>SAML2 Artifact Authentication and Identification Metadata</Name>
                 <ServletClass>be.fedict.eid.idp.protocol.saml2.artifact.SAML2MetadataHttpServletAuthIdent</ServletClass>
                 <ContextPath>/saml2/artifact/metadata/auth-ident-metadata.xml</ContextPath>
             </Endpoint>
         </Endpoints>
         <WSEndpoints>
             <WSEndpoint>
+                <Name>SAML2 Artifact Authentication and Identification Web Service</Name>
                 <WSImplClass>be.fedict.eid.idp.protocol.saml2.artifact.ArtifactServicePortImpl</WSImplClass>
                 <ContextPath>/saml2/artifact</ContextPath>
             </WSEndpoint>
