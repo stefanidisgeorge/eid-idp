@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.model.applet;
 
 import be.fedict.eid.applet.service.spi.IdentityIntegrityService;
+import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.Constants;
@@ -31,6 +32,10 @@ import org.jboss.ejb3.annotation.LocalBinding;
 import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
+import javax.security.jacc.PolicyContext;
+import javax.security.jacc.PolicyContextException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -61,8 +66,17 @@ public class IdentityIntegrityServiceBean implements IdentityIntegrityService {
                         LOG.error("no XKMS URL configured!");
                         return;
                 }
-                String xkmsTrustDomain = this.configuration.getValue(ConfigProperty.XKMS_IDENT_TRUST_DOMAIN,
-                        String.class);
+
+                RPEntity rp = getRP(getHttpSession());
+                String xkmsTrustDomain;
+                if (null != rp) {
+                        xkmsTrustDomain = rp.getIdentityTrustDomain();
+                } else {
+                        xkmsTrustDomain = this.configuration
+                                .getValue(ConfigProperty.XKMS_IDENT_TRUST_DOMAIN,
+                                        String.class);
+                }
+
                 if (xkmsTrustDomain.trim().isEmpty()) {
                         xkmsTrustDomain = null;
                 }
@@ -94,5 +108,22 @@ public class IdentityIntegrityServiceBean implements IdentityIntegrityService {
                         LOG.warn("eID Trust Service error: " + e.getMessage(), e);
                         throw new SecurityException("eID Trust Service error");
                 }
+        }
+
+        private RPEntity getRP(HttpSession session) {
+                return (RPEntity)
+                        session.getAttribute(Constants.RP_SESSION_ATTRIBUTE);
+        }
+
+        private static HttpSession getHttpSession() {
+                HttpServletRequest httpServletRequest;
+                try {
+                        httpServletRequest = (HttpServletRequest) PolicyContext
+                                .getContext("javax.servlet.http.HttpServletRequest");
+                } catch (PolicyContextException e) {
+                        throw new RuntimeException("JACC error: " + e.getMessage());
+                }
+
+                return httpServletRequest.getSession();
         }
 }

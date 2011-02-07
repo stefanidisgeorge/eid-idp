@@ -40,6 +40,14 @@
                 </s:decorate>
 
                 <h:outputText
+                        value="eID Trust Service Authentication Trust Domain:"/>
+                <h:inputText value="#{selectedRP.authnTrustDomain}"/>
+
+                <h:outputText
+                        value="eID Trust Service Identification (National Registry) Trust Domain:"/>
+                <h:inputText value="#{selectedRP.identityTrustDomain}"/>
+
+                <h:outputText
                         value="HMAC-SHA1 Identifier Secret (hexadecimal)"/>
                 <h:inputText value="#{selectedRP.secretKey}" size="50"/>
 
