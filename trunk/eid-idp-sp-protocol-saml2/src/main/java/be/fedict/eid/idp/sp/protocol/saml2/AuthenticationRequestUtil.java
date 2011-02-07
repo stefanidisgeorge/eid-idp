@@ -78,6 +78,7 @@ public class AuthenticationRequestUtil {
          * Generates a SAML v2.0 Authentication Request and performs a browser
          * POST to the specified idpDestination.
          *
+         * @param issuerName     issuer of the SAML v2.0 AuthnRequest
          * @param idpDestination required eID IdP destination
          * @param spDestination  Service Provider landing URL where the IdP will
          *                       post the SAML2 Response to.
@@ -88,7 +89,8 @@ public class AuthenticationRequestUtil {
          * @throws ServletException something went wrong.
          */
         @SuppressWarnings("unchecked")
-        public static void sendRequest(String idpDestination,
+        public static void sendRequest(String issuerName,
+                                       String idpDestination,
                                        String spDestination,
                                        String relayState,
                                        KeyStore.PrivateKeyEntry spIdentity,
@@ -102,6 +104,7 @@ public class AuthenticationRequestUtil {
                         throw new ServletException("No SP Destination specified");
                 }
 
+                LOG.debug("Issuer: " + issuerName);
                 LOG.debug("IdP destination: " + idpDestination);
                 LOG.debug("SP destination: " + spDestination);
                 LOG.debug("relay state: " + relayState);
@@ -124,7 +127,7 @@ public class AuthenticationRequestUtil {
                 SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory
                         .getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
                 Issuer issuer = issuerBuilder.buildObject();
-                issuer.setValue(spDestination);
+                issuer.setValue(issuerName);
                 authnRequest.setIssuer(issuer);
 
                 SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory

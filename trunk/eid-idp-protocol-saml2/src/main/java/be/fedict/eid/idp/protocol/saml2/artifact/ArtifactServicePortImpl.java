@@ -72,9 +72,24 @@ public class ArtifactServicePortImpl implements ArtifactServicePortType {
 
                 // Add entry if found and remove from map
                 if (null != entry) {
-                        LOG.debug("response found and added");
-                        artifactResponse.setMessage(entry.getSamlMessage());
-                        artifactMap.remove(artifactResolveType.getArtifact());
+
+                        // validate issuer with entry.issuer
+                        if (!entry.getRelyingPartyId().equals(
+                                artifactResolveType.getIssuer().getValue())) {
+                                String message = "ArtifactResolve Issuer (" +
+                                        artifactResolveType.getIssuer().getValue() +
+                                        ") does not match entry RP ID!";
+                                LOG.error(message + " (" + entry.getIssuerId() + ")");
+                                artifactResponse = getArtifactResponse(
+                                        artifactResolveType.getID(),
+                                        StatusCode.REQUEST_DENIED_URI,
+                                        message);
+                        } else {
+
+                                LOG.debug("response found and added");
+                                artifactResponse.setMessage(entry.getSamlMessage());
+                                artifactMap.remove(artifactResolveType.getArtifact());
+                        }
                 }
 
                 return Saml2Util.toJAXB(artifactResponse, ArtifactResponseType.class);

@@ -62,7 +62,7 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
                 LOG.debug("SAML2 Artifact Service: " + location);
                 ArtifactServiceClient client = new ArtifactServiceClient(
                         location, this.service.getServiceHostname(),
-                        this.service.getSPIdentity());
+                        this.service.getSPIdentity(), this.service.getIssuer());
 
                 // client configuration
                 client.setServicePublicKey(this.service.getServicePublicKey());

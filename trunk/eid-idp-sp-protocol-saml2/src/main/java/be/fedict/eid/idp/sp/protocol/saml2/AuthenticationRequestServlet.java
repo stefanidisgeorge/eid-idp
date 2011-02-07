@@ -105,6 +105,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                              HttpServletResponse response) throws ServletException, IOException {
                 LOG.debug("doGet");
 
+                String issuer;
                 String idpDestination;
                 String spDestination;
                 String relayState;
@@ -113,6 +114,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 AuthenticationRequestService service =
                         this.authenticationRequestServiceLocator.locateService();
                 if (null != service) {
+                        issuer = service.getIssuer();
                         idpDestination = service.getIdPDestination();
                         relayState = service.getRelayState(request.getParameterMap());
                         spIdentity = service.getSPIdentity();
@@ -128,11 +130,12 @@ public class AuthenticationRequestServlet extends HttpServlet {
                                         + request.getServerPort() + request.getContextPath()
                                         + this.spDestinationPage;
                         }
+                        issuer = spDestination;
                 }
 
 
                 // generate and send an authentication request
-                AuthenticationRequestUtil.sendRequest(idpDestination, spDestination,
-                        relayState, spIdentity, response);
+                AuthenticationRequestUtil.sendRequest(issuer, idpDestination,
+                        spDestination, relayState, spIdentity, response);
         }
 }
