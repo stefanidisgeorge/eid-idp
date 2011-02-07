@@ -49,6 +49,13 @@
                                      value="Remove"
                                      onclick="Richfaces.showModalPanel('removeConfirm',{width:400, top:200})"/>
                 </h:column>
+
+                <f:facet name="footer">
+                    <rich:datascroller for="data" pageIndexVar="pageIndex"
+                                       pagesVar="pages" fastControls="hide">
+                    </rich:datascroller>
+                </f:facet>
+
             </rich:dataTable>
 
             <p/>
