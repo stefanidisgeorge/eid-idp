@@ -57,17 +57,23 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
                 }
                 LOG.debug("Encoded artifact: " + encodedArtifact);
 
-                // TODO: decode artifact
-                String artifactId = encodedArtifact;
-
+                // construct client
                 String location = this.service.getArtifactServiceLocation();
                 LOG.debug("SAML2 Artifact Service: " + location);
-                ArtifactServiceClient client = new ArtifactServiceClient(location);
-                // TODO: fix me, ability to pass along SSL public key ... for now trust all
-                client.setServicePublicKey(null);
-                client.setLogging(true);
+                ArtifactServiceClient client = new ArtifactServiceClient(
+                        location, this.service.getServiceHostname(),
+                        this.service.getSPIdentity());
 
-                return client.resolve(artifactId);
+                // client configuration
+                client.setServicePublicKey(this.service.getServicePublicKey());
+                client.setLogging(this.service.logSoapMessages());
+                if (null != this.service.getProxyHost()) {
+                        client.setProxy(this.service.getProxyHost(),
+                                this.service.getProxyPort());
+                }
+
+                // resolve
+                return client.resolve(encodedArtifact);
         }
 
         @Override

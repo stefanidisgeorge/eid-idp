@@ -19,11 +19,14 @@
 package be.fedict.eid.idp.sp.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.sp.PkiServlet;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.artifact.ArtifactAuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.security.KeyStore;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -52,6 +55,42 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
         public String getArtifactServiceLocation() {
 
                 return this.artifactServiceLocation;
+        }
+
+        @Override
+        public boolean logSoapMessages() {
+                return true;
+        }
+
+        @Override
+        public PublicKey getServicePublicKey() {
+                return null;
+        }
+
+        @Override
+        public String getServiceHostname() {
+                return null;
+        }
+
+        @Override
+        public String getProxyHost() {
+                return null;
+        }
+
+        @Override
+        public int getProxyPort() {
+                return 0;
+        }
+
+        @Override
+        public KeyStore.PrivateKeyEntry getSPIdentity() {
+
+                try {
+                        return PkiServlet.getPrivateKeyEntry();
+                } catch (Exception e) {
+                        LOG.error(e);
+                        return null;
+                }
         }
 
         public void setArtifactServiceLocation(String artifactServiceLocation) {

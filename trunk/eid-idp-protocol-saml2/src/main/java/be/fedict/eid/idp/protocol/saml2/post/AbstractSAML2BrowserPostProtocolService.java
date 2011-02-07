@@ -18,8 +18,11 @@
 
 package be.fedict.eid.idp.protocol.saml2.post;
 
+import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
+import be.fedict.eid.idp.spi.IdPIdentity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.ReturnResponse;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.Response;
@@ -36,6 +39,24 @@ public abstract class AbstractSAML2BrowserPostProtocolService extends AbstractSA
                                                     Response samlResponse,
                                                     String relayState)
                 throws Exception {
+
+                // sign assertion + response
+                IdentityProviderConfiguration configuration =
+                        getIdPConfiguration(request.getSession().getServletContext());
+                IdPIdentity idpIdentity = configuration.findIdentity();
+
+                // sign assertion
+                if (null != idpIdentity) {
+                        if (!samlResponse.getAssertions().isEmpty()) {
+                                Saml2Util.sign(samlResponse.getAssertions().get(0),
+                                        idpIdentity.getPrivateKeyEntry());
+                        }
+                }
+
+                // sign response
+                if (null != idpIdentity) {
+                        Saml2Util.sign(samlResponse, idpIdentity.getPrivateKeyEntry());
+                }
 
                 ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 

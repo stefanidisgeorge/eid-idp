@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.post;
 
+import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseProcessor;
 import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseProcessorException;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
@@ -28,8 +29,10 @@ import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.xml.validation.ValidationException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.cert.CertificateException;
 
 /**
  * SAML v2.0 Authentication response processor for the Browser HTTP POST binding.
@@ -77,7 +80,28 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
                         throw new AuthenticationResponseProcessorException(
                                 "expected a SAML2 Response document");
                 }
-                return (Response) samlObject;
+                Response response = (Response) samlObject;
+
+                try {
+                        // validate response signature if any
+                        if (null != response.getSignature()) {
+                                Saml2Util.validateSignature(response.getSignature());
+                        }
+
+                        // validate assertion signature if any
+                        if (!response.getAssertions().isEmpty() &&
+                                null != response.getAssertions().get(0).getSignature()) {
+                                Saml2Util.validateSignature(response
+                                        .getAssertions().get(0).getSignature());
+                        }
+
+                } catch (ValidationException e) {
+                        throw new AuthenticationResponseProcessorException(e);
+                } catch (CertificateException e) {
+                        throw new AuthenticationResponseProcessorException(e);
+                }
+
+                return response;
         }
 
         @Override

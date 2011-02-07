@@ -18,36 +18,30 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.artifact;
 
+import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.saml2.ws.ArtifactService;
 import be.fedict.eid.idp.saml2.ws.ArtifactServiceFactory;
 import be.fedict.eid.idp.saml2.ws.ArtifactServicePortType;
 import be.fedict.eid.idp.saml2.ws.LoggingSoapHandler;
+import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseProcessorException;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResolveType;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResponseType;
-import oasis.names.tc.saml._2_0.protocol.ObjectFactory;
 import oasis.names.tc.saml._2_0.protocol.ResponseType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opensaml.Configuration;
+import org.opensaml.saml2.core.Artifact;
+import org.opensaml.saml2.core.ArtifactResolve;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.net.ssl.*;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.soap.SOAPHandler;
+import java.net.ProxySelector;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -68,13 +62,47 @@ public class ArtifactServiceClient {
 
         private final ArtifactServicePortType port;
 
-        public ArtifactServiceClient(String location) {
+        private final String location;
+
+        private static ArtifactProxySelector proxySelector;
+
+        static {
+                ProxySelector defaultProxySelector = ProxySelector.getDefault();
+                ArtifactServiceClient.proxySelector =
+                        new ArtifactProxySelector(defaultProxySelector);
+                ProxySelector.setDefault(ArtifactServiceClient.proxySelector);
+        }
+
+        /**
+         * Main Constructor.
+         * <p/>
+         * The location is the complete WS location of the eID IdP Artifact
+         * Resolution Service.
+         * <p/>
+         * The SSL Hostname is used when sending requests over SSL and JAX-WS's
+         * default hostname verification needs to be overrided. Default it will
+         * validate the location's hostname against the SSL certificates CN,
+         * which can be unwanted behaviour, especially in test environments.
+         * Specifying <code>null</code> will accept any hostname.
+         *
+         * @param location    location of the eID IdP Artifact Resolution Service.
+         * @param sslHostname optional SSL hostname, can be <code>null</code>.
+         * @param spIdentity  optional Service Provider's identity to be used to
+         *                    sign outgoing SAML2 Artifact Resolve requests.
+         */
+        public ArtifactServiceClient(String location, String sslHostname,
+                                     KeyStore.PrivateKeyEntry spIdentity) {
+
+                this.location = location;
 
                 ArtifactService artifactService =
                         ArtifactServiceFactory.getInstance();
                 this.port = artifactService.getArtifactServicePort();
 
-                setEndpointAddress(location);
+                setEndpointAddress(sslHostname);
+
+                // register client SOAP handler
+                registerSoapHandler(new ArtifactServiceClientHandler(spIdentity));
         }
 
         /**
@@ -85,79 +113,109 @@ public class ArtifactServiceClient {
         public void setLogging(boolean logging) {
 
                 if (logging) {
-                        registerLoggerHandler();
+                        registerSoapHandler(new LoggingSoapHandler());
                 } else {
-                        removeLoggerHandler();
+                        removeSoapHandler(LoggingSoapHandler.class);
                 }
+        }
+
+        /**
+         * Proxy configuration setting ( both http as https ).
+         *
+         * @param proxyHost proxy hostname
+         * @param proxyPort proxy port
+         */
+        public void setProxy(String proxyHost, int proxyPort) {
+                ArtifactServiceClient.proxySelector.setProxy(
+                        this.location, proxyHost, proxyPort);
         }
 
         /**
          * Resolve the specified artifact ID via the eID IdP's SAML v2.0
          * Artifact Service
          *
-         * @param artifactId ID of to be resolved SAML v2.0 artifact.
+         * @param artifactId ID off the to be resolved SAML v2.0 artifact.
          * @return SAML v2.0 Response
+         * @throws AuthenticationResponseProcessorException
+         *          something went wrong
          */
-        public Response resolve(String artifactId) {
+        public Response resolve(String artifactId) throws AuthenticationResponseProcessorException {
 
                 LOG.debug("resolve: " + artifactId);
 
-                ObjectFactory objectFactory = new ObjectFactory();
-                ArtifactResolveType artifactResolve =
-                        objectFactory.createArtifactResolveType();
-
                 String resolveId = UUID.randomUUID().toString();
 
-                artifactResolve.setArtifact(artifactId);
+                ArtifactResolve artifactResolve = Saml2Util.buildXMLObject(
+                        ArtifactResolve.class,
+                        ArtifactResolve.DEFAULT_ELEMENT_NAME);
                 artifactResolve.setID(resolveId);
+                LOG.debug("request ID=" + resolveId);
 
-                // TODO: sign request if possible, use opensaml2 here...
+                // TODO: Issuer
+//                artifactResolve.setIssuer();
 
-                ArtifactResponseType response = this.port.resolve(artifactResolve);
+                Artifact artifact = Saml2Util.buildXMLObject(Artifact.class,
+                        Artifact.DEFAULT_ELEMENT_NAME);
+                artifact.setArtifact(artifactId);
+                artifactResolve.setArtifact(artifact);
 
+                // to JAXB
+                ArtifactResolveType artifactResolveType = Saml2Util.toJAXB(
+                        artifactResolve, ArtifactResolveType.class);
+
+                // Resolve
+                ArtifactResponseType response =
+                        this.port.resolve(artifactResolveType);
+
+                // Validate response
                 if (null == response) {
-                        throw new RuntimeException("No Artifact Response returned");
+                        throw new AuthenticationResponseProcessorException
+                                ("No Artifact Response returned");
                 }
 
                 if (null == response.getStatus()) {
-                        throw new RuntimeException("No Status Code in Artifact Response");
+                        throw new AuthenticationResponseProcessorException(
+                                "No Status Code in Artifact Response");
                 }
 
                 if (!response.getStatus().getStatusCode().getValue().equals(
                         StatusCode.SUCCESS_URI)) {
-                        // TODO: handle nicely, same for other RuntimeExceptions...
-                        throw new RuntimeException("Resolve failed: " +
-                                response.getStatus().getStatusCode().getValue());
+                        throw new AuthenticationResponseProcessorException(
+                                "Resolve failed: "
+                                        + response.getStatus().getStatusCode().getValue());
                 }
 
-                // TODO: validate response signature
-
                 if (!response.getInResponseTo().equals(resolveId)) {
-                        throw new RuntimeException("Response not matching resolve?");
+                        throw new AuthenticationResponseProcessorException(
+                                "Response not matching resolve?");
                 }
 
                 if (null == response.getAny()) {
-                        throw new RuntimeException("No content in Artifact Response?");
+                        throw new AuthenticationResponseProcessorException(
+                                "No content in Artifact Response?");
                 }
 
                 if (!(response.getAny() instanceof JAXBElement)) {
-                        throw new RuntimeException("Unexpected content in Artifact Response.");
+                        throw new AuthenticationResponseProcessorException(
+                                "Unexpected content in Artifact Response.");
                 }
 
                 if (!(((JAXBElement) response.getAny()).getValue() instanceof ResponseType)) {
-                        throw new RuntimeException("Unexpected content in Artifact Response.");
+                        throw new AuthenticationResponseProcessorException(
+                                "Unexpected content in Artifact Response.");
                 }
 
                 @SuppressWarnings("unchecked")
                 ResponseType samlResponseType = ((JAXBElement<ResponseType>)
                         response.getAny()).getValue();
 
-                return toSAML(samlResponseType);
+                return Saml2Util.toSAML(samlResponseType, ResponseType.class,
+                        Response.DEFAULT_ELEMENT_NAME);
         }
 
         /**
-         * If set, unilateral TLS authentication will occurs, verifying the server
-         * {@link X509Certificate} specified {@link PublicKey}.
+         * If set, unilateral TLS authentication will occur, verifying the server
+         * {@link X509Certificate} specified against the {@link PublicKey}.
          *
          * @param publicKey public key to validate server TLS certificate against.
          */
@@ -231,45 +289,7 @@ public class ArtifactServiceClient {
                 }
         }
 
-
-        public static Response toSAML(final ResponseType responseType) {
-
-                try {
-                        Document root = DocumentBuilderFactory.newInstance().
-                                newDocumentBuilder().newDocument();
-                        JAXBContext.newInstance(ResponseType.class).
-                                createMarshaller().
-                                marshal(new JAXBElement<ResponseType>(
-                                        Response.DEFAULT_ELEMENT_NAME,
-                                        ResponseType.class, responseType), root);
-
-                        return unmarshall(root.getDocumentElement());
-                } catch (ParserConfigurationException e) {
-                        throw new RuntimeException("Default parser configuration " +
-                                "failed.", e);
-                } catch (JAXBException e) {
-                        throw new RuntimeException("Marshaling to OpenSAML " +
-                                "object failed.", e);
-                }
-        }
-
-        @SuppressWarnings({"unchecked"})
-        public static <X extends XMLObject> X unmarshall(Element xmlElement) {
-
-                UnmarshallerFactory unmarshallerFactory =
-                        Configuration.getUnmarshallerFactory();
-                Unmarshaller unmarshaller = unmarshallerFactory
-                        .getUnmarshaller(xmlElement);
-
-                try {
-                        return (X) unmarshaller.unmarshall(xmlElement);
-                } catch (UnmarshallingException e) {
-                        throw new RuntimeException("opensaml2 unmarshalling " +
-                                "error: " + e.getMessage(), e);
-                }
-        }
-
-        private void setEndpointAddress(String location) {
+        private void setEndpointAddress(String sslHostname) {
 
                 LOG.debug("ws location: " + location);
                 if (null == location) {
@@ -281,28 +301,30 @@ public class ArtifactServiceClient {
                 bindingProvider.getRequestContext().put(
                         BindingProvider.ENDPOINT_ADDRESS_PROPERTY, location);
                 bindingProvider.getRequestContext().put(
-                        JAXWSProperties.HOSTNAME_VERIFIER, new TestHostnameVerifier());
+                        JAXWSProperties.HOSTNAME_VERIFIER,
+                        new CustomHostnameVerifier(sslHostname));
 
         }
 
         /*
-         * Registers the logging SOAP handler on the given JAX-WS port component.
+         * Registers the specifed SOAP handler on the given JAX-WS port component.
          */
-        protected void registerLoggerHandler() {
+        protected void registerSoapHandler(SOAPHandler soapHandler) {
 
                 BindingProvider bindingProvider = (BindingProvider) this.port;
 
                 Binding binding = bindingProvider.getBinding();
                 @SuppressWarnings("unchecked")
                 List<Handler> handlerChain = binding.getHandlerChain();
-                handlerChain.add(new LoggingSoapHandler());
+                handlerChain.add(soapHandler);
                 binding.setHandlerChain(handlerChain);
         }
 
         /*
-         * Unregister possible logging SOAP handlers on the given JAX-WS port component.
+         * Unregister possible SOAP handlers of specified typeon the given
+         * JAX-WS port component.
          */
-        protected void removeLoggerHandler() {
+        protected void removeSoapHandler(Class<? extends SOAPHandler> soapHandlerClass) {
 
                 BindingProvider bindingProvider = (BindingProvider) this.port;
 
@@ -312,25 +334,29 @@ public class ArtifactServiceClient {
                 Iterator<Handler> iter = handlerChain.iterator();
                 while (iter.hasNext()) {
                         Handler handler = iter.next();
-                        if (handler instanceof LoggingSoapHandler) {
+                        if (handler.getClass().isAssignableFrom(soapHandlerClass)) {
                                 iter.remove();
                         }
 
                 }
         }
 
-        // TODO: this ok?
-
         /**
-         * Test SSL Hostname verifier, hostname of WS call over SSL is checked
+         * SSL Hostname verifier, hostname of WS call over SSL is checked
          * against SSL's CN...
          */
-        class TestHostnameVerifier implements HostnameVerifier {
+        class CustomHostnameVerifier implements HostnameVerifier {
+
+                private final String hostname;
+
+                public CustomHostnameVerifier(String hostname) {
+                        this.hostname = hostname;
+                }
 
                 public boolean verify(String hostname, SSLSession sslSession) {
 
                         LOG.debug("verify: " + hostname);
-                        return true;
+                        return null == this.hostname || this.hostname.equals(hostname);
                 }
         }
 }
