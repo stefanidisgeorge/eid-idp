@@ -27,6 +27,10 @@ public class AuthenticationResponseProcessorException extends Exception {
                 super(message, cause);
         }
 
+        public AuthenticationResponseProcessorException(Throwable cause) {
+                super(cause);
+        }
+
         public AuthenticationResponseProcessorException(String message) {
                 super(message);
         }

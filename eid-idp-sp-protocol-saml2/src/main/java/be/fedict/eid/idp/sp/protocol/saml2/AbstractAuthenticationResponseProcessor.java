@@ -27,18 +27,13 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.*;
-import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
 import org.opensaml.xml.schema.XSInteger;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
-import org.opensaml.xml.security.x509.BasicX509Credential;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.util.Base64;
-import org.opensaml.xml.validation.ValidationException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.CertificateException;
@@ -103,12 +98,6 @@ public abstract class AbstractAuthenticationResponseProcessor {
                                 "missing SAML authn statement");
                 }
 
-                // validate assertion signature if any
-                if (null != assertion.getSignature()) {
-                        LOG.debug("validate assertion signature");
-                        validateSignature(assertion.getSignature());
-                }
-
                 // validate assertion conditions
                 DateTime now = new DateTime();
                 Conditions conditions = assertion.getConditions();
@@ -158,11 +147,21 @@ public abstract class AbstractAuthenticationResponseProcessor {
                         SamlAuthenticationPolicy.getAuthenticationPolicy(
                                 authnContextClassRef.getAuthnContextClassRef());
 
-
-                // Response signature validation
+                // get signature cert.chain if any and pass along to service
                 if (null != samlResponse.getSignature()) {
-                        validateSignature(service, samlResponse.getSignature(),
-                                authenticationPolicy);
+
+                        try {
+                                List<X509Certificate> certChain =
+                                        KeyInfoHelper.getCertificates(samlResponse
+                                                .getSignature().getKeyInfo());
+
+                                if (null != service) {
+                                        service.validateServiceCertificate(
+                                                authenticationPolicy, certChain);
+                                }
+                        } catch (CertificateException e) {
+                                throw new AuthenticationResponseProcessorException(e);
+                        }
                 }
 
                 Subject subject = assertion.getSubject();
@@ -219,67 +218,6 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 return new AuthenticationResponse(authenticationTime,
                         identifier, authenticationPolicy, attributeMap,
                         relayState, assertion);
-        }
-
-        private void validateSignature(AuthenticationResponseService service,
-                                       Signature signature,
-                                       SamlAuthenticationPolicy authenticationPolicy)
-                throws AuthenticationResponseProcessorException {
-
-                List<X509Certificate> certChain = validateSignature(signature);
-                // validation of the certificate chain in the SAML response's signature.
-                if (null != service) {
-                        service.validateServiceCertificate(authenticationPolicy, certChain);
-                }
-        }
-
-        private List<X509Certificate> validateSignature(Signature signature)
-                throws AuthenticationResponseProcessorException {
-
-                try {
-                        List<X509Certificate> certChain =
-                                KeyInfoHelper.getCertificates(signature.getKeyInfo());
-
-                        SAMLSignatureProfileValidator pv =
-                                new SAMLSignatureProfileValidator();
-                        pv.validate(signature);
-                        BasicX509Credential credential = new BasicX509Credential();
-                        credential.setPublicKey(getEndCertificate(certChain).getPublicKey());
-                        SignatureValidator sigValidator = new SignatureValidator(credential);
-                        sigValidator.validate(signature);
-
-                        return certChain;
-                } catch (ValidationException e) {
-
-                        throw new AuthenticationResponseProcessorException(
-                                "SAML response signature validation error: "
-                                        + e.getMessage(), e);
-                } catch (CertificateException e) {
-
-                        throw new AuthenticationResponseProcessorException(
-                                "Failed to get certificates from SAML signature: "
-                                        + e.getMessage(), e);
-                }
-        }
-
-        private X509Certificate getEndCertificate(List<X509Certificate> certChain) {
-
-                if (certChain.size() == 1) {
-                        return certChain.get(0);
-                }
-
-                if (isSelfSigned(certChain.get(0))) {
-                        return certChain.get(certChain.size() - 1);
-                } else {
-                        return certChain.get(0);
-                }
-
-        }
-
-        private boolean isSelfSigned(X509Certificate certificate) {
-
-                return certificate.getIssuerX500Principal().equals(
-                        certificate.getSubjectX500Principal());
         }
 
         protected abstract Response getSamlResponse(HttpServletRequest request)

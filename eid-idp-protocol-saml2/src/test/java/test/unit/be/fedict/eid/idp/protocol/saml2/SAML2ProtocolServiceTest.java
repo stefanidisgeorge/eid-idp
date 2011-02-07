@@ -20,7 +20,6 @@ package test.unit.be.fedict.eid.idp.protocol.saml2;
 
 import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.protocol.saml2.post.SAML2ProtocolServiceAuthIdent;
 import be.fedict.eid.idp.spi.*;
@@ -51,7 +50,6 @@ import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.binding.encoding.HTTPPostEncoder;
-import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.Endpoint;
@@ -286,6 +284,11 @@ public class SAML2ProtocolServiceTest {
                                 + ".InResponseTo")).andStubReturn(
                         "a77a1c87-e590-47d7-a3e0-afea455ebc01");
 
+                EasyMock.expect(mockHttpServletRequest.getSession()).andReturn(mockHttpSession);
+                EasyMock.expect(mockHttpSession.getServletContext()).andReturn(mockServletContext);
+                EasyMock.expect(mockServletContext.getAttribute(
+                        AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE))
+                        .andReturn(mockConfiguration);
                 EasyMock.expect(mockConfiguration.findIdentity()).andStubReturn(
                         idpIdentity);
                 EasyMock.expect(mockConfiguration.getIdentityCertificateChain()).andStubReturn(
@@ -333,47 +336,6 @@ public class SAML2ProtocolServiceTest {
                 File tmpFile = File.createTempFile("saml-response-", ".xml");
                 FileUtils.writeStringToFile(tmpFile, samlResponse);
                 LOG.debug("tmp file: " + tmpFile.getAbsolutePath());
-        }
-
-        @Test
-        public void testAssertionSigning() throws Exception {
-
-                // Setup
-                DateTime notBefore = new DateTime();
-                DateTime notAfter = notBefore.plusMonths(1);
-
-                KeyPair rootKeyPair = generateKeyPair();
-                X509Certificate rootCertificate = generateSelfSignedCertificate(
-                        rootKeyPair, "CN=TestRoot", notBefore, notAfter);
-
-                KeyPair endKeyPair = generateKeyPair();
-                X509Certificate endCertificate = generateCertificate(
-                        endKeyPair.getPublic(), "CN=Test", notBefore, notAfter,
-                        rootCertificate, rootKeyPair.getPrivate());
-
-                Certificate[] certChain = {endCertificate, rootCertificate};
-
-                KeyStore.PrivateKeyEntry idpIdentity =
-                        new KeyStore.PrivateKeyEntry(endKeyPair.getPrivate(),
-                                certChain);
-
-                // Operate: sign
-                Assertion assertion = Saml2Util.getAssertion("test-issuer",
-                        "test-in-response-to", "test-audience", new DateTime(),
-                        IdentityProviderFlow.AUTHENTICATION,
-                        UUID.randomUUID().toString(), new HashMap<String, Attribute>());
-                Assertion signedAssertion = (Assertion) Saml2Util.sign(assertion,
-                        idpIdentity);
-
-                // Verify
-                String result = Saml2Util.domToString(Saml2Util.marshall(signedAssertion), true);
-                LOG.debug("DOM signed assertion: " + result);
-                String result2 = Saml2Util.domToString(Saml2Util.marshall(assertion), true);
-                LOG.debug("signed assertion: " + result2);
-                assertEquals(result, result2);
-
-                // Operate: validate
-                Saml2Util.validateSignature(signedAssertion.getSignature());
         }
 
         private KeyPair generateKeyPair() throws Exception {

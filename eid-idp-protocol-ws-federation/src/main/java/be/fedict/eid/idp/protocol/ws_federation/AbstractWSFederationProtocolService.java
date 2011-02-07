@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSession;
 import javax.xml.transform.TransformerException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 
 /**
@@ -195,10 +194,9 @@ public abstract class AbstractWSFederationProtocolService implements
                 if (null != idpIdentity) {
 
                         LOG.debug("sign assertion");
-                        element = Saml2Util.signAsElement(requestSecurityTokenResponseCollection,
-                                assertion, (X509Certificate) idpIdentity.
-                                        getPrivateKeyEntry().getCertificate(),
-                                idpIdentity.getPrivateKeyEntry().getPrivateKey());
+                        element = Saml2Util.signAsElement(
+                                requestSecurityTokenResponseCollection,
+                                assertion, idpIdentity.getPrivateKeyEntry());
                 } else {
 
                         LOG.warn("assertion NOT signed!");

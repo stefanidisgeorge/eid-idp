@@ -20,6 +20,10 @@ package be.fedict.eid.idp.common.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import com.sun.org.apache.xpath.internal.XPathAPI;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.xml.security.utils.Constants;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
@@ -36,15 +40,11 @@ import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallerFactory;
-import org.opensaml.xml.io.MarshallingException;
+import org.opensaml.xml.io.*;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
 import org.opensaml.xml.schema.XSInteger;
 import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
@@ -56,15 +56,27 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.*;
+import javax.xml.crypto.dsig.dom.DOMSignContext;
+import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
+import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
+import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
-import java.security.PrivateKey;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -74,6 +86,8 @@ import java.util.*;
  * Utility class for SAML v2.0
  */
 public abstract class Saml2Util {
+
+        private static final Log LOG = LogFactory.getLog(Saml2Util.class);
 
         static {
                 /*
@@ -228,7 +242,13 @@ public abstract class Saml2Util {
                 return keyInfo;
         }
 
-        private static List<X509Certificate> getCertificateChain(KeyStore.PrivateKeyEntry identity) {
+        /**
+         * Return the {@link X509Certificate} chain for specified identity
+         *
+         * @param identity identity to get chain from
+         * @return the certificate chain.
+         */
+        public static List<X509Certificate> getCertificateChain(KeyStore.PrivateKeyEntry identity) {
 
                 List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
                 for (java.security.cert.Certificate certificate : identity.getCertificateChain()) {
@@ -237,6 +257,18 @@ public abstract class Saml2Util {
                 return certificateChain;
         }
 
+        /**
+         * Construct an unsigned SAML v2.0 Assertion
+         *
+         * @param issuerName         assertion issuer
+         * @param inResponseTo       optional inResponseTo
+         * @param audienceUri        audience
+         * @param issueInstant       time of issuance
+         * @param authenticationFlow authentication flow
+         * @param userId             user ID
+         * @param attributes         map of user's attributes
+         * @return the unsigned SAML v2.0 assertion.
+         */
         public static Assertion getAssertion(String issuerName,
                                              String inResponseTo,
                                              String audienceUri,
@@ -451,6 +483,15 @@ public abstract class Saml2Util {
                 attribute.getAttributeValues().add(xmlAttributeValue);
         }
 
+        /**
+         * Construct an opensaml SAML object of specified class type and
+         * element name
+         *
+         * @param clazz       opensaml class type
+         * @param objectQName QName
+         * @param <T>         opensaml object type
+         * @return opensaml object.
+         */
         @SuppressWarnings("unused")
         public static <T extends XMLObject> T buildXMLObject(Class<T> clazz, QName objectQName) {
 
@@ -463,52 +504,43 @@ public abstract class Saml2Util {
                 return builder.buildObject(objectQName);
         }
 
+        /**
+         * Sign specified signable SAML object and return marshalled element.
+         *
+         * @param xmlObject          opensaml XML object where object to be signed
+         *                           resides in, this can be equal to the object
+         *                           to sign
+         * @param signableSAMLObject opensaml object to sign
+         * @param privateKeyEntry    key entry used to sign
+         * @return marshalled, signed xml element.
+         */
         public static Element signAsElement(XMLObject xmlObject,
                                             SignableSAMLObject signableSAMLObject,
-                                            X509Certificate certificate,
-                                            PrivateKey privateKey) {
+                                            KeyStore.PrivateKeyEntry privateKeyEntry) {
 
-                XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
-                SignatureBuilder signatureBuilder = (SignatureBuilder) builderFactory.getBuilder(Signature.DEFAULT_ELEMENT_NAME);
-                Signature signature = signatureBuilder.buildObject();
-                signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+                XMLObject returnedXmlObject
+                        = sign(xmlObject, signableSAMLObject, privateKeyEntry);
 
-                String algorithm = privateKey.getAlgorithm();
-                if ("RSA".equals(algorithm)) {
-                        signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA);
-                } else if ("DSA".equals(algorithm)) {
-                        signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_DSA);
-                }
-
-                // add certificate as keyinfo
-                KeyInfo keyInfo = buildXMLObject(KeyInfo.class, KeyInfo.DEFAULT_ELEMENT_NAME);
-                try {
-                        KeyInfoHelper.addCertificate(keyInfo, certificate);
-                } catch (CertificateEncodingException e) {
-                        throw new RuntimeException("opensaml2 certificate encoding error: " + e.getMessage(), e);
-                }
-                signature.setKeyInfo(keyInfo);
-
-                BasicCredential signingCredential =
-                        SecurityHelper.getSimpleCredential(certificate, privateKey);
-                signature.setSigningCredential(signingCredential);
-                signableSAMLObject.setSignature(signature);
-
-                // Marshall so it has an XML representation.
-                Element xmlElement = marshall(xmlObject);
-
-                // Sign after marshaling so we can add a signature to the XML representation.
-                try {
-                        Signer.signObject(signature);
-                } catch (SignatureException e) {
-                        throw new RuntimeException("opensaml2 signing error: " + e.getMessage(), e);
-                }
-                return xmlElement;
+                return marshall(returnedXmlObject);
         }
 
-        public static SignableSAMLObject sign(SignableSAMLObject signableSAMLObject,
-                                              KeyStore.PrivateKeyEntry privateKeyEntry) {
+        /**
+         * Sign specified opensaml signable object with specifiied key entry.
+         *
+         * @param signableSAMLObject saml object to sign
+         * @param privateKeyEntry    key entry to sign with
+         * @return signed saml object
+         */
+        public static XMLObject sign(SignableSAMLObject signableSAMLObject,
+                                     KeyStore.PrivateKeyEntry privateKeyEntry) {
 
+                return sign(signableSAMLObject, signableSAMLObject, privateKeyEntry);
+
+        }
+
+        private static XMLObject sign(XMLObject xmlObject,
+                                      SignableSAMLObject signableSAMLObject,
+                                      KeyStore.PrivateKeyEntry privateKeyEntry) {
                 XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
                 SignatureBuilder signatureBuilder = (SignatureBuilder) builderFactory.getBuilder(Signature.DEFAULT_ELEMENT_NAME);
                 Signature signature = signatureBuilder.buildObject();
@@ -553,7 +585,7 @@ public abstract class Saml2Util {
                 signableSAMLObject.setSignature(signature);
 
                 // Marshall so it has an XML representation.
-                marshall(signableSAMLObject);
+                marshall(xmlObject);
 
                 // Sign after marshaling so we can add a signature to the XML representation.
                 try {
@@ -561,9 +593,18 @@ public abstract class Saml2Util {
                 } catch (SignatureException e) {
                         throw new RuntimeException("opensaml2 signing error: " + e.getMessage(), e);
                 }
-                return signableSAMLObject;
+                return xmlObject;
         }
 
+        /**
+         * Validate the specified opensaml XML Signature
+         *
+         * @param signature the XML signature
+         * @return list of {@link X509Certificate}'s in the XML signature
+         * @throws CertificateException something went wrong extracting the
+         *                              certificates from the XML Signature.
+         * @throws ValidationException  validation failed
+         */
         public static List<X509Certificate> validateSignature(Signature signature)
                 throws CertificateException, ValidationException {
 
@@ -581,6 +622,12 @@ public abstract class Saml2Util {
                 return certChain;
         }
 
+        /**
+         * Get end {@link X509Certificate} from specified chain.
+         *
+         * @param certChain the {@link X509Certificate} chain.
+         * @return the end {@link X509Certificate}.
+         */
         public static X509Certificate getEndCertificate(List<X509Certificate> certChain) {
 
                 if (certChain.size() == 1) {
@@ -602,6 +649,12 @@ public abstract class Saml2Util {
         }
 
 
+        /**
+         * Marhsall the opensaml {@link XMLObject} to a DOM {@link Element}
+         *
+         * @param xmlObject the XML object
+         * @return marshalled DOM element
+         */
         public static Element marshall(XMLObject xmlObject) {
 
                 MarshallerFactory marshallerFactory = Configuration.getMarshallerFactory();
@@ -614,6 +667,16 @@ public abstract class Saml2Util {
                 }
         }
 
+        /**
+         * Write the DOM {@link Document} to specified {@link OutputStream}
+         *
+         * @param document             DOM document
+         * @param documentOutputStream output stream
+         * @throws TransformerFactoryConfigurationError
+         *                              transformer config error
+         * @throws TransformerException transformer error
+         * @throws IOException          IO error
+         */
         public static void writeDocument(Document document,
                                          OutputStream documentOutputStream)
                 throws TransformerFactoryConfigurationError, TransformerException,
@@ -625,6 +688,13 @@ public abstract class Saml2Util {
         }
 
 
+        /**
+         * Convert specified DOM {@link Node} to a string representation
+         *
+         * @param domNode the DOM node
+         * @param indent  indent or not
+         * @return the string representation of the DOM node
+         */
         public static String domToString(Node domNode, boolean indent) {
 
                 try {
@@ -644,6 +714,191 @@ public abstract class Saml2Util {
                 } catch (TransformerException e) {
                         throw new RuntimeException(e);
                 }
+        }
+
+        /**
+         * Convert specified opensaml {@link XMLObject} to specified JAXB type.
+         *
+         * @param openSAMLObject the opensaml XML object.
+         * @param wsType         the JAXB class
+         * @param <T>            the JAXB type
+         * @return JAXB representation of the opensaml xml object.
+         */
+        @SuppressWarnings("unchecked")
+        public static <T> T toJAXB(final XMLObject openSAMLObject, Class<T> wsType) {
+
+                try {
+                        Element element = Configuration.getMarshallerFactory()
+                                .getMarshaller(openSAMLObject)
+                                .marshall(openSAMLObject);
+
+                        return ((JAXBElement<T>) JAXBContext
+                                .newInstance(wsType)
+                                .createUnmarshaller()
+                                .unmarshal(element)).getValue();
+                } catch (MarshallingException e) {
+                        throw new RuntimeException("Marshaling from OpenSAML object failed.", e);
+                } catch (JAXBException e) {
+                        throw new RuntimeException("Unmarshaling to JAXB object failed.", e);
+                }
+        }
+
+        /**
+         * Convert specified JAXB object to an opensaml XML object
+         *
+         * @param wsObject        JAXB object
+         * @param wsType          JAXB class
+         * @param samlElementName opensaml QName
+         * @param <F>             JAXB type
+         * @param <T>             opensaml type
+         * @return opensaml {@link XMLObject}
+         */
+        @SuppressWarnings({"unchecked"})
+        public static <F, T extends XMLObject> T toSAML(final F wsObject,
+                                                        Class<F> wsType,
+                                                        QName samlElementName) {
+
+                try {
+                        Document root = DocumentBuilderFactory
+                                .newInstance()
+                                .newDocumentBuilder()
+                                .newDocument();
+                        JAXBContext.newInstance(wsType)
+                                .createMarshaller()
+                                .marshal(new JAXBElement<F>(samlElementName,
+                                        wsType, wsObject), root);
+
+                        return (T) unmarshall(root.getDocumentElement());
+                } catch (ParserConfigurationException e) {
+                        throw new RuntimeException("Default parser " +
+                                "configuration failed.", e);
+                } catch (JAXBException e) {
+                        throw new RuntimeException("Marshaling to OpenSAML " +
+                                "object failed.", e);
+                }
+        }
+
+        /**
+         * Unmarshall specified DOM {@link Element} to an opensaml
+         * {@link XMLObject}
+         *
+         * @param xmlElement DOM element
+         * @param <X>        opensaml type
+         * @return the opensaml object.
+         */
+        @SuppressWarnings({"unchecked"})
+        public static <X extends XMLObject> X unmarshall(Element xmlElement) {
+
+                UnmarshallerFactory unmarshallerFactory =
+                        Configuration.getUnmarshallerFactory();
+                Unmarshaller unmarshaller =
+                        unmarshallerFactory.getUnmarshaller(xmlElement);
+
+                try {
+                        return (X) unmarshaller.unmarshall(xmlElement);
+                } catch (UnmarshallingException e) {
+                        throw new RuntimeException("opensaml2 unmarshalling " +
+                                "error: " + e.getMessage(), e);
+                }
+        }
+
+        /**
+         * Find {@link Node} specified with XPath expression in {@link Document}
+         *
+         * @param document document to search
+         * @param xpath    XPath to to be found Node
+         * @return Node or <code>null</code> if not found.
+         */
+        public static Node find(Document document, String xpath) {
+
+                try {
+                        return XPathAPI.selectSingleNode(document, xpath, getNSElement(document));
+                } catch (TransformerException e) {
+                        throw new RuntimeException("XPath error: " + e.getMessage());
+                }
+        }
+
+        private static Element getNSElement(Document document) {
+
+                Element nsElement = document.createElement("nsElement");
+                nsElement.setAttributeNS(Constants.NamespaceSpecNS, "xmlns:soap",
+                        "http://schemas.xmlsoap.org/soap/envelope/");
+                nsElement.setAttributeNS(Constants.NamespaceSpecNS, "xmlns:ds",
+                        "http://www.w3.org/2000/09/xmldsig#");
+                nsElement.setAttributeNS(Constants.NamespaceSpecNS, "xmlns:samlp",
+                        "urn:oasis:names:tc:SAML:2.0:protocol");
+                nsElement.setAttributeNS(Constants.NamespaceSpecNS, "xmlns:saml",
+                        "urn:oasis:names:tc:SAML:2.0:assertion");
+
+                return nsElement;
+        }
+
+        /**
+         * Sign DOM document
+         *
+         * @param documentElement document to be signed
+         * @param nextSibling     next sibling in document, dsig is added before this one
+         * @param identity        Identity to sign with
+         * @throws NoSuchAlgorithmException signing algorithm not found
+         * @throws InvalidAlgorithmParameterException
+         *                                  invalid signing algo param
+         * @throws MarshalException         error marshalling signature
+         * @throws XMLSignatureException    error during signing
+         */
+        public static void signDocument(Element documentElement, Node nextSibling,
+                                        KeyStore.PrivateKeyEntry identity)
+                throws NoSuchAlgorithmException,
+                InvalidAlgorithmParameterException, MarshalException,
+                XMLSignatureException {
+
+                // get document ID
+                String documentId = documentElement.getAttribute("ID");
+                LOG.debug("document ID=" + documentId);
+
+                XMLSignatureFactory signatureFactory = XMLSignatureFactory.getInstance(
+                        "DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
+
+                XMLSignContext signContext = new DOMSignContext(identity.getPrivateKey(),
+                        documentElement, nextSibling);
+                signContext.putNamespacePrefix(
+                        javax.xml.crypto.dsig.XMLSignature.XMLNS, "ds");
+                javax.xml.crypto.dsig.DigestMethod digestMethod = signatureFactory.newDigestMethod(
+                        javax.xml.crypto.dsig.DigestMethod.SHA1, null);
+
+                List<javax.xml.crypto.dsig.Transform> transforms = new LinkedList<javax.xml.crypto.dsig.Transform>();
+                transforms.add(signatureFactory.newTransform(javax.xml.crypto.dsig.Transform.ENVELOPED,
+                        (TransformParameterSpec) null));
+                javax.xml.crypto.dsig.Transform exclusiveTransform = signatureFactory
+                        .newTransform(CanonicalizationMethod.EXCLUSIVE,
+                                (TransformParameterSpec) null);
+                transforms.add(exclusiveTransform);
+
+                Reference reference = signatureFactory.newReference("#" + documentId,
+                        digestMethod, transforms, null, null);
+
+                SignatureMethod signatureMethod = signatureFactory.newSignatureMethod(
+                        SignatureMethod.RSA_SHA1, null);
+                CanonicalizationMethod canonicalizationMethod = signatureFactory
+                        .newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE,
+                                (C14NMethodParameterSpec) null);
+                SignedInfo signedInfo = signatureFactory.newSignedInfo(
+                        canonicalizationMethod, signatureMethod, Collections
+                        .singletonList(reference));
+
+                List<Object> keyInfoContent = new LinkedList<Object>();
+                KeyInfoFactory keyInfoFactory = KeyInfoFactory.getInstance();
+                List<Object> x509DataObjects = new LinkedList<Object>();
+
+                for (X509Certificate certificate : Saml2Util.getCertificateChain(identity)) {
+                        x509DataObjects.add(certificate);
+                }
+                javax.xml.crypto.dsig.keyinfo.X509Data x509Data = keyInfoFactory.newX509Data(x509DataObjects);
+                keyInfoContent.add(x509Data);
+                javax.xml.crypto.dsig.keyinfo.KeyInfo keyInfo = keyInfoFactory.newKeyInfo(keyInfoContent);
+
+                javax.xml.crypto.dsig.XMLSignature xmlSignature = signatureFactory
+                        .newXMLSignature(signedInfo, keyInfo);
+                xmlSignature.sign(signContext);
         }
 
 }

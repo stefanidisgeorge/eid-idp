@@ -70,10 +70,6 @@ public abstract class AbstractSAML2ArtifactProtocolService extends AbstractSAML2
 
                 messageEncoder.encode(messageContext);
                 return returnResponse;
-
-//                temp store SAML response
-//                this.protocolStorageService.setValue(servletContext,
-//                        artifactId, samlResponse, 5 * 60); // TODO: configurable, see SAML2Util
         }
 
         public static SAMLArtifactMap getArtifactMap(ServletContext context) {

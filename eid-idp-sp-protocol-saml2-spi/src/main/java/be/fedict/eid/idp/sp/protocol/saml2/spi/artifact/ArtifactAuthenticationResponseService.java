@@ -20,6 +20,9 @@ package be.fedict.eid.idp.sp.protocol.saml2.spi.artifact;
 
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 
+import java.security.KeyStore;
+import java.security.PublicKey;
+
 /**
  * SPI for authentication response services for SAML v2.0 HTTP Artifact Binding.
  *
@@ -34,4 +37,56 @@ public interface ArtifactAuthenticationResponseService extends AuthenticationRes
          */
         String getArtifactServiceLocation();
 
+        /**
+         * Whether or not SOAP messages should be logged.
+         *
+         * @return log SOAP messages or not.
+         */
+        boolean logSoapMessages();
+
+        /**
+         * If set, unilateral TLS authentication will occur, verifying the server
+         * {@link java.security.cert.X509Certificate} against the specified
+         * {@link PublicKey}.
+         * <p/>
+         * Returning <code>null</code> will trust all.
+         *
+         * @return the SSL {@link} PublicKey.
+         */
+        PublicKey getServicePublicKey();
+
+        /**
+         * If set, SSL hostname verification will be done against specified
+         * hostname for the WS call to the eID IdP Artifact Resolution Service.
+         * By default JAX-WS will validate the hostname against the SSL
+         * certificate's CN.
+         * Returning null will turn of this validation.
+         *
+         * @return the SSL hostname or <code>null</code> if SSL hostname
+         *         verification needs to be switched off.
+         */
+        String getServiceHostname();
+
+        /**
+         * Optional Proxy Hostname. <code>null</code> if not needed.
+         *
+         * @return the proxy hostname.
+         */
+        String getProxyHost();
+
+        /**
+         * Optional Proxy Port. <code>null</code> if not needed.
+         *
+         * @return the proxy port.
+         */
+        int getProxyPort();
+
+        /**
+         * Gives back the optional Service Provider's identity to be used to
+         * sign outgoing SAML2 Artifact Resolve requests.
+         *
+         * @return private key entry of the SP or <code>null</code> if no
+         *         signing is needed.
+         */
+        KeyStore.PrivateKeyEntry getSPIdentity();
 }

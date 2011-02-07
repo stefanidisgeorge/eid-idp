@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.cert.X509Certificate;
 
 public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
 
@@ -95,9 +94,7 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
 
                         LOG.debug("sign SAML2 Metadata");
                         element = Saml2Util.signAsElement(entityDescriptor, entityDescriptor,
-                                (X509Certificate) identity.getPrivateKeyEntry().
-                                        getCertificate(),
-                                identity.getPrivateKeyEntry().getPrivateKey());
+                                identity.getPrivateKeyEntry());
                 } else {
 
                         LOG.warn("SAML2 Metadata NOT signed!");

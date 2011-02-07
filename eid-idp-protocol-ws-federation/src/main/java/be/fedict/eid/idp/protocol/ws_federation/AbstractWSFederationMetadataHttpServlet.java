@@ -280,10 +280,8 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
                 if (null != identity) {
 
                         LOG.debug("sign WS-Federation Metadata");
-                        element = Saml2Util.signAsElement(entityDescriptor, entityDescriptor,
-                                (X509Certificate) identity.getPrivateKeyEntry()
-                                        .getCertificate(),
-                                identity.getPrivateKeyEntry().getPrivateKey());
+                        element = Saml2Util.signAsElement(entityDescriptor,
+                                entityDescriptor, identity.getPrivateKeyEntry());
                 } else {
 
                         // TODO: explode here? will fail at RP for sure if not signed so ...

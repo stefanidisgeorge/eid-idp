@@ -19,35 +19,29 @@
 package be.fedict.eid.idp.protocol.saml2.artifact;
 
 import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.saml2.ws.ArtifactServicePortType;
-import be.fedict.eid.idp.spi.IdPIdentity;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResolveType;
 import oasis.names.tc.saml._2_0.protocol.ArtifactResponseType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
-import org.opensaml.Configuration;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.saml2.core.ArtifactResponse;
 import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.xml.io.MarshallingException;
-import org.w3c.dom.Element;
+import org.opensaml.saml2.core.StatusMessage;
 
 import javax.annotation.Resource;
+import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.servlet.ServletContext;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 import java.util.UUID;
 
 @WebService(endpointInterface = "be.fedict.eid.idp.saml2.ws.ArtifactServicePortType")
+@HandlerChain(file = "ws-handlers.xml")
 public class ArtifactServicePortImpl implements ArtifactServicePortType {
 
         private static final Log LOG = LogFactory
@@ -56,44 +50,45 @@ public class ArtifactServicePortImpl implements ArtifactServicePortType {
         @Resource
         private WebServiceContext context;
 
-        public ArtifactResponseType resolve(ArtifactResolveType artifactResolve) {
+        public ArtifactResponseType resolve(ArtifactResolveType artifactResolveType) {
 
-                LOG.debug("Resolve: " + artifactResolve.getArtifact());
+                LOG.debug("Resolve: " + artifactResolveType.getArtifact());
 
-                // get SAML Artifact Map
                 ServletContext servletContext =
                         (ServletContext) context.getMessageContext()
                                 .get(MessageContext.SERVLET_CONTEXT);
+
+                // construct successfull artifact response
+                ArtifactResponse artifactResponse = getArtifactResponse(
+                        artifactResolveType.getID());
+
+                // get SAML Artifact Map
                 SAMLArtifactMap artifactMap =
                         AbstractSAML2ArtifactProtocolService.getArtifactMap(
                                 servletContext);
 
                 SAMLArtifactMap.SAMLArtifactMapEntry entry =
-                        artifactMap.get(artifactResolve.getArtifact());
-
-                // Construct response
-                ArtifactResponse artifactResponse = getArtifactResponse(
-                        artifactResolve.getID());
+                        artifactMap.get(artifactResolveType.getArtifact());
 
                 // Add entry if found and remove from map
                 if (null != entry) {
                         LOG.debug("response found and added");
                         artifactResponse.setMessage(entry.getSamlMessage());
-                        artifactMap.remove(artifactResolve.getArtifact());
+                        artifactMap.remove(artifactResolveType.getArtifact());
                 }
 
-                // Sign response if an IdP Identity exists
-                IdentityProviderConfiguration configuration =
-                        AbstractSAML2ProtocolService.getIdPConfiguration(servletContext);
-                IdPIdentity idpIdentity = configuration.findIdentity();
-                if (null != idpIdentity) {
-                        Saml2Util.sign(artifactResponse, idpIdentity.getPrivateKeyEntry());
-                }
-
-                return toJAXB(artifactResponse);
+                return Saml2Util.toJAXB(artifactResponse, ArtifactResponseType.class);
         }
 
         private ArtifactResponse getArtifactResponse(String inResponseTo) {
+
+                return getArtifactResponse(inResponseTo, StatusCode.SUCCESS_URI,
+                        null);
+        }
+
+        private ArtifactResponse getArtifactResponse(String inResponseTo,
+                                                     String statusCodeValue,
+                                                     String statusMessageValue) {
 
                 ArtifactResponse artifactResponse = Saml2Util.buildXMLObject(
                         ArtifactResponse.class, ArtifactResponse.DEFAULT_ELEMENT_NAME);
@@ -109,29 +104,15 @@ public class ArtifactServicePortImpl implements ArtifactServicePortType {
                 StatusCode statusCode = Saml2Util.buildXMLObject(StatusCode.class,
                         StatusCode.DEFAULT_ELEMENT_NAME);
                 status.setStatusCode(statusCode);
-                statusCode.setValue(StatusCode.SUCCESS_URI);
-
-                return artifactResponse;
-        }
-
-        @SuppressWarnings("unchecked")
-        private ArtifactResponseType toJAXB(ArtifactResponse artifactResponse) {
-
-                try {
-                        Element element = Configuration.getMarshallerFactory()
-                                .getMarshaller(artifactResponse)
-                                .marshall(artifactResponse);
-                        return ((JAXBElement<ArtifactResponseType>) JAXBContext
-                                .newInstance(ArtifactResponseType.class)
-                                .createUnmarshaller()
-                                .unmarshal(element)).getValue();
-
-
-                } catch (MarshallingException e) {
-                        throw new RuntimeException(e);
-                } catch (JAXBException e) {
-                        throw new RuntimeException(e);
+                statusCode.setValue(statusCodeValue);
+                if (null != statusMessageValue) {
+                        StatusMessage statusMessage = Saml2Util.buildXMLObject(
+                                StatusMessage.class,
+                                StatusMessage.DEFAULT_ELEMENT_NAME);
+                        statusMessage.setMessage(statusMessageValue);
+                        status.setStatusMessage(statusMessage);
                 }
 
+                return artifactResponse;
         }
 }
