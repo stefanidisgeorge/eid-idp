@@ -181,6 +181,17 @@ public class ProtocolExitServlet extends HttpServlet {
                         * This means that the protocol service wants us to construct some
                         * Browser POST response towards the Service Provider landing site.
                         */
+                        if (null == returnResponse.getActionUrl()) {
+
+                                LOG.error("No action URL specified");
+                                httpSession.setAttribute(
+                                        this.protocolErrorMessageSessionAttributeInitParam,
+                                        "No action URL specified");
+                                response.sendRedirect(request.getContextPath()
+                                        + this.protocolErrorPageInitParam);
+                                return;
+                        }
+
                         LOG.debug("constructing generic Browser POST response...");
                         httpSession.setAttribute(
                                 this.responseActionSessionAttributeInitParam,
