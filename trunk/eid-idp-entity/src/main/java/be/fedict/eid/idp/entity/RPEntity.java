@@ -67,6 +67,9 @@ public class RPEntity implements Serializable {
         private byte[] encodedCertificate;
         private boolean requestSigningRequired;
 
+        private String authnTrustDomain;
+        private String identityTrustDomain;
+
         private String secretKey;
 
         private List<RPAttributeEntity> attributes;
@@ -120,7 +123,7 @@ public class RPEntity implements Serializable {
 
         @Column(nullable = true)
         public String getTargetURL() {
-                return targetURL;
+                return this.targetURL;
         }
 
         public void setTargetURL(String targetURL) {
@@ -177,6 +180,24 @@ public class RPEntity implements Serializable {
 
         public void setRequestSigningRequired(boolean requestSigningRequired) {
                 this.requestSigningRequired = requestSigningRequired;
+        }
+
+        @Column(nullable = true)
+        public String getAuthnTrustDomain() {
+                return this.authnTrustDomain;
+        }
+
+        public void setAuthnTrustDomain(String authnTrustDomain) {
+                this.authnTrustDomain = authnTrustDomain;
+        }
+
+        @Column(nullable = true)
+        public String getIdentityTrustDomain() {
+                return this.identityTrustDomain;
+        }
+
+        public void setIdentityTrustDomain(String identityTrustDomain) {
+                this.identityTrustDomain = identityTrustDomain;
         }
 
         @Column(nullable = true)
