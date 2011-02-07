@@ -32,8 +32,17 @@ public class AuthenticationRequestServiceBean implements AuthenticationRequestSe
         private static final Log LOG = LogFactory.getLog(AuthenticationRequestServiceBean.class);
         private static final long serialVersionUID = 1185931387819658055L;
 
+        public static final String ISSUER = "TestSP";
+
         private String idPEntryPoint;
         private String spResponseEndpoint;
+
+        @Override
+        public String getIssuer() {
+
+                LOG.debug("get issuer");
+                return ISSUER;
+        }
 
         @Override
         public String getSPDestination() {

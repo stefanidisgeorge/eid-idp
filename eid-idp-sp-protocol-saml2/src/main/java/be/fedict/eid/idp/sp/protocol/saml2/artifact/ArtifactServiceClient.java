@@ -30,10 +30,7 @@ import oasis.names.tc.saml._2_0.protocol.ArtifactResponseType;
 import oasis.names.tc.saml._2_0.protocol.ResponseType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opensaml.saml2.core.Artifact;
-import org.opensaml.saml2.core.ArtifactResolve;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.saml2.core.*;
 
 import javax.net.ssl.*;
 import javax.xml.bind.JAXBElement;
@@ -63,6 +60,7 @@ public class ArtifactServiceClient {
         private final ArtifactServicePortType port;
 
         private final String location;
+        private final String issuerName;
 
         private static ArtifactProxySelector proxySelector;
 
@@ -89,11 +87,14 @@ public class ArtifactServiceClient {
          * @param sslHostname optional SSL hostname, can be <code>null</code>.
          * @param spIdentity  optional Service Provider's identity to be used to
          *                    sign outgoing SAML2 Artifact Resolve requests.
+         * @param issuer      issuer of the ArtifactResolve request
          */
         public ArtifactServiceClient(String location, String sslHostname,
-                                     KeyStore.PrivateKeyEntry spIdentity) {
+                                     KeyStore.PrivateKeyEntry spIdentity,
+                                     String issuer) {
 
                 this.location = location;
+                this.issuerName = issuer;
 
                 ArtifactService artifactService =
                         ArtifactServiceFactory.getInstance();
@@ -151,8 +152,11 @@ public class ArtifactServiceClient {
                 artifactResolve.setID(resolveId);
                 LOG.debug("request ID=" + resolveId);
 
-                // TODO: Issuer
-//                artifactResolve.setIssuer();
+                // Issuer
+                Issuer issuer = Saml2Util.buildXMLObject(Issuer.class,
+                        Issuer.DEFAULT_ELEMENT_NAME);
+                issuer.setValue(this.issuerName);
+                artifactResolve.setIssuer(issuer);
 
                 Artifact artifact = Saml2Util.buildXMLObject(Artifact.class,
                         Artifact.DEFAULT_ELEMENT_NAME);

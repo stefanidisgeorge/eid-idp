@@ -31,6 +31,14 @@ import java.security.PublicKey;
 public interface ArtifactAuthenticationResponseService extends AuthenticationResponseService {
 
         /**
+         * Gives back the Issuer of the constructed SAML v2.0 ArtifactResolve
+         * request.
+         *
+         * @return the ArtifactResolve request issuer.
+         */
+        String getIssuer();
+
+        /**
          * Gives back the location of the eID IdP SAML v2.0 Artifact service.
          *
          * @return eID IdP SAML v2.0 Artifact Service Location.

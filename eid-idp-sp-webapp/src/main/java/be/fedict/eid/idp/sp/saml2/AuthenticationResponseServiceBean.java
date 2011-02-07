@@ -52,6 +52,11 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
         }
 
         @Override
+        public String getIssuer() {
+                return AuthenticationRequestServiceBean.ISSUER;
+        }
+
+        @Override
         public String getArtifactServiceLocation() {
 
                 return this.artifactServiceLocation;

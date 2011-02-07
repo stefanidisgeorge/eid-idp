@@ -31,6 +31,16 @@ import java.util.Map;
 public interface AuthenticationRequestService {
 
         /**
+         * Gives back the Issuer of the constructed SAML v2.0 AuthnRequest.
+         * The issuer will be used to optionally identity a configured Relying
+         * Party at the eID IdP side. If not specified (<code>null</code>
+         * returned) the {@link #getSPDestination()} will be used as Issuer.
+         *
+         * @return the AuthnRequest issuer.
+         */
+        String getIssuer();
+
+        /**
          * Gives back the Service Provider destination endpoint that will handle
          * the returned SAML v2.0 Response.
          *
