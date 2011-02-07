@@ -35,6 +35,13 @@
             <h:outputText
                     value="#{idpProtocolService.thumbprint}"/>
         </p>
+
+        <p>
+            <h:outputLink value="./identity">
+                <h:outputText value="#{messages.identityCertificateChain}"/>
+            </h:outputLink>
+        </p>
+
     </ui:define>
 </ui:composition>
 </body>

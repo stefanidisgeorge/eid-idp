@@ -186,6 +186,16 @@
         <url-pattern>/applet-authentication-service</url-pattern>
     </servlet-mapping>
 
+    <!-- eID Identity Servlet -->
+    <servlet>
+        <servlet-name>IdentityServlet</servlet-name>
+        <servlet-class>be.fedict.eid.idp.webapp.IdentityServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>IdentityServlet</servlet-name>
+        <url-pattern>/identity</url-pattern>
+    </servlet-mapping>
+
     <!-- HTTP session logging -->
     <filter>
         <filter-name>SessionLoggingFilter</filter-name>
