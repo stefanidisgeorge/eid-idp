@@ -21,7 +21,6 @@ package test.unit.be.fedict.eid.idp.protocol.saml2;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.spi.Attribute;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import oasis.names.tc.saml._2_0.assertion.AssertionType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -100,57 +99,6 @@ public class SAML2Test {
 
                 // Operate: validate
                 Saml2Util.validateSignature(signedAssertion.getSignature());
-        }
-
-//        @Test
-        public void testAssertionSigningOverSOAP() throws Exception {
-
-                // Setup
-                DateTime notBefore = new DateTime();
-                DateTime notAfter = notBefore.plusMonths(1);
-
-                KeyPair rootKeyPair = generateKeyPair();
-                X509Certificate rootCertificate = generateSelfSignedCertificate(
-                        rootKeyPair, "CN=TestRoot", notBefore, notAfter);
-
-                KeyPair endKeyPair = generateKeyPair();
-                X509Certificate endCertificate = generateCertificate(
-                        endKeyPair.getPublic(), "CN=Test", notBefore, notAfter,
-                        rootCertificate, rootKeyPair.getPrivate());
-
-                Certificate[] certChain = {endCertificate, rootCertificate};
-
-                KeyStore.PrivateKeyEntry idpIdentity =
-                        new KeyStore.PrivateKeyEntry(endKeyPair.getPrivate(),
-                                certChain);
-
-                // Operate: sign
-                Assertion assertion = Saml2Util.getAssertion("test-issuer",
-                        "test-in-response-to", "test-audience", new DateTime(),
-                        IdentityProviderFlow.AUTHENTICATION,
-                        UUID.randomUUID().toString(), new HashMap<String, Attribute>());
-                Assertion signedAssertion = (Assertion) Saml2Util.sign(assertion,
-                        idpIdentity);
-
-                // Verify
-                String result = Saml2Util.domToString(Saml2Util.marshall(signedAssertion), true);
-                LOG.debug("DOM signed assertion: " + result);
-                String result2 = Saml2Util.domToString(Saml2Util.marshall(assertion), true);
-                LOG.debug("signed assertion: " + result2);
-                assertEquals(result, result2);
-
-                // Operate: validate
-                Saml2Util.validateSignature(signedAssertion.getSignature());
-
-                // Operate: marshall: -> JAXB -> SAML2
-                AssertionType assertionType = Saml2Util.toJAXB(signedAssertion, AssertionType.class);
-                Assertion resultAssertion = Saml2Util.toSAML(assertionType, AssertionType.class, Assertion.DEFAULT_ELEMENT_NAME);
-                String result3 = Saml2Util.domToString(Saml2Util.marshall(resultAssertion), true);
-                LOG.debug("assertion after JAXB: " + result3);
-
-                // Operate: validate
-                Saml2Util.validateSignature(resultAssertion.getSignature());
-
         }
 
         private KeyPair generateKeyPair() throws Exception {

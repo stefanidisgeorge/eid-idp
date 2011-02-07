@@ -20,8 +20,8 @@ package be.fedict.eid.idp.protocol.saml2.artifact;
 
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.saml2.ws.ArtifactServicePortType;
-import oasis.names.tc.saml._2_0.protocol.ArtifactResolveType;
-import oasis.names.tc.saml._2_0.protocol.ArtifactResponseType;
+import be.fedict.eid.idp.saml2.ws.jaxb.ArtifactResolveType;
+import be.fedict.eid.idp.saml2.ws.jaxb.ArtifactResponseType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
