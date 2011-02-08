@@ -25,10 +25,6 @@ import org.jboss.ejb3.annotation.LocalBinding;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
-import javax.security.jacc.PolicyContext;
-import javax.security.jacc.PolicyContextException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 @Stateless
 @Local(be.fedict.eid.applet.service.spi.IdentityService.class)
@@ -38,13 +34,12 @@ public class AppletIdentityServiceBean implements be.fedict.eid.applet.service.s
         @Override
         public IdentityRequest getIdentityRequest() {
 
-                HttpSession httpSession = getHttpSession();
-
                 boolean includeIdentity = false;
                 boolean includeAddress = false;
                 boolean includePhoto = false;
                 boolean includeCertificates = true;
-                IdentityProviderFlow idpFlow = getIdpFlow(httpSession);
+                IdentityProviderFlow idpFlow = AppletUtil
+                        .getSessionAttribute(Constants.IDP_FLOW_SESSION_ATTRIBUTE);
                 switch (idpFlow) {
 
 
@@ -63,22 +58,4 @@ public class AppletIdentityServiceBean implements be.fedict.eid.applet.service.s
                 return new IdentityRequest(includeIdentity, includeAddress,
                         includePhoto, includeCertificates);
         }
-
-        private IdentityProviderFlow getIdpFlow(HttpSession session) {
-                return (IdentityProviderFlow)
-                        session.getAttribute(Constants.IDP_FLOW_SESSION_ATTRIBUTE);
-        }
-
-        private static HttpSession getHttpSession() {
-                HttpServletRequest httpServletRequest;
-                try {
-                        httpServletRequest = (HttpServletRequest) PolicyContext
-                                .getContext("javax.servlet.http.HttpServletRequest");
-                } catch (PolicyContextException e) {
-                        throw new RuntimeException("JACC error: " + e.getMessage());
-                }
-
-                return httpServletRequest.getSession();
-        }
-
 }
