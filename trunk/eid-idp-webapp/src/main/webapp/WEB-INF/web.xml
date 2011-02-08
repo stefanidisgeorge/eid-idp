@@ -72,11 +72,11 @@
         </servlet-class>
         <init-param>
             <param-name>UnknownProtocolPage</param-name>
-            <param-value>/unknown-protocol.seam</param-value>
+            <param-value>/unknown-protocol</param-value>
         </init-param>
         <init-param>
             <param-name>ProtocolErrorPage</param-name>
-            <param-value>/protocol-error.seam</param-value>
+            <param-value>/protocol-error</param-value>
         </init-param>
         <init-param>
             <param-name>ProtocolErrorMessageSessionAttribute</param-name>
@@ -84,11 +84,11 @@
         </init-param>
         <init-param>
             <param-name>IdentificationPage</param-name>
-            <param-value>/identification.seam</param-value>
+            <param-value>/identification</param-value>
         </init-param>
         <init-param>
             <param-name>AuthenticationPage</param-name>
-            <param-value>/authentication.seam</param-value>
+            <param-value>/authentication</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
@@ -103,7 +103,7 @@
         </servlet-class>
         <init-param>
             <param-name>ProtocolErrorPage</param-name>
-            <param-value>/protocol-error.seam</param-value>
+            <param-value>/protocol-error</param-value>
         </init-param>
         <init-param>
             <param-name>ProtocolErrorMessageSessionAttribute</param-name>
@@ -111,7 +111,7 @@
         </init-param>
         <init-param>
             <param-name>ProtocolResponsePostPage</param-name>
-            <param-value>/protocol-response-post.seam</param-value>
+            <param-value>/protocol-response-post</param-value>
         </init-param>
         <init-param>
             <param-name>ResponseActionSessionAttribute</param-name>
