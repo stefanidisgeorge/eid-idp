@@ -32,10 +32,6 @@ import org.jboss.ejb3.annotation.LocalBinding;
 import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
-import javax.security.jacc.PolicyContext;
-import javax.security.jacc.PolicyContextException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -67,19 +63,22 @@ public class IdentityIntegrityServiceBean implements IdentityIntegrityService {
                         return;
                 }
 
-                RPEntity rp = getRP(getHttpSession());
-                String xkmsTrustDomain;
+                RPEntity rp = AppletUtil.getSessionAttribute(Constants.RP_SESSION_ATTRIBUTE);
+                String xkmsTrustDomain = null;
                 if (null != rp) {
                         xkmsTrustDomain = rp.getIdentityTrustDomain();
-                } else {
+                }
+                if (null == xkmsTrustDomain || xkmsTrustDomain.trim().isEmpty()) {
                         xkmsTrustDomain = this.configuration
                                 .getValue(ConfigProperty.XKMS_IDENT_TRUST_DOMAIN,
                                         String.class);
                 }
-
-                if (xkmsTrustDomain.trim().isEmpty()) {
-                        xkmsTrustDomain = null;
+                if (null != xkmsTrustDomain) {
+                        if (xkmsTrustDomain.trim().isEmpty()) {
+                                xkmsTrustDomain = null;
+                        }
                 }
+                LOG.debug("Trust domain=" + xkmsTrustDomain);
 
                 XKMS2Client xkms2Client = new XKMS2Client(xkmsUrl);
 
@@ -108,22 +107,5 @@ public class IdentityIntegrityServiceBean implements IdentityIntegrityService {
                         LOG.warn("eID Trust Service error: " + e.getMessage(), e);
                         throw new SecurityException("eID Trust Service error");
                 }
-        }
-
-        private RPEntity getRP(HttpSession session) {
-                return (RPEntity)
-                        session.getAttribute(Constants.RP_SESSION_ATTRIBUTE);
-        }
-
-        private static HttpSession getHttpSession() {
-                HttpServletRequest httpServletRequest;
-                try {
-                        httpServletRequest = (HttpServletRequest) PolicyContext
-                                .getContext("javax.servlet.http.HttpServletRequest");
-                } catch (PolicyContextException e) {
-                        throw new RuntimeException("JACC error: " + e.getMessage());
-                }
-
-                return httpServletRequest.getSession();
         }
 }
