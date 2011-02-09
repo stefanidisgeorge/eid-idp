@@ -1,5 +1,5 @@
 /*
- * eID Identity Provider Project.
+ * eID Digital Signature Service Project.
  * Copyright (C) 2010 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -12,26 +12,32 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, see 
+ * License along with this software; if not, see
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model;
+package be.fedict.eid.idp.model.exception;
 
-import be.fedict.eid.idp.entity.RPEntity;
-import be.fedict.eid.idp.model.exception.KeyLoadException;
+import javax.ejb.ApplicationException;
 
-import javax.ejb.Local;
-import java.util.List;
+@ApplicationException(rollback = true)
+public class KeyLoadException extends Exception {
 
-@Local
-public interface RPService {
+    private static final long serialVersionUID = 1L;
 
-        List<RPEntity> listRPs();
+    public KeyLoadException(String message) {
 
-        void remove(RPEntity rp);
+        super(message);
+    }
 
-        RPEntity save(RPEntity rp) throws KeyLoadException;
+    public KeyLoadException(Throwable cause) {
 
-        RPEntity find(String domain);
+        super(cause);
+    }
+
+    public KeyLoadException(String message, Throwable cause) {
+
+        super(message, cause);
+    }
+
 }

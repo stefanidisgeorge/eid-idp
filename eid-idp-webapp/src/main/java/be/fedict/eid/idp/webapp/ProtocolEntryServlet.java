@@ -259,6 +259,8 @@ public class ProtocolEntryServlet extends HttpServlet {
                 LOG.debug("request context path: " + request.getContextPath());
                 LOG.debug("request query string: " + request.getQueryString());
                 LOG.debug("request path translated: " + request.getPathTranslated());
+                LOG.debug("user agent: " + request.getHeader("User-Agent"));
+
                 String protocolServiceContextPath = request.getPathInfo();
                 setProtocolServiceContextPath(protocolServiceContextPath, request);
 

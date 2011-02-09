@@ -30,6 +30,16 @@
         <url-pattern>/pki</url-pattern>
     </servlet-mapping>
 
+    <!-- PrivateKey servlet -->
+    <servlet>
+        <servlet-name>PrivateKeyServlet</servlet-name>
+        <servlet-class>be.fedict.eid.idp.sp.PrivateKeyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PrivateKeyServlet</servlet-name>
+        <url-pattern>/private</url-pattern>
+    </servlet-mapping>
+
     <!-- SAML2 Authentication Protocol -->
     <servlet>
         <servlet-name>SAML2AuthenticationRequestServlet</servlet-name>
