@@ -237,7 +237,7 @@ public class ProtocolExitServlet extends HttpServlet {
 
                 String uniqueId = userId;
 
-                byte[] hmacSecret = getHmacSecret(rp);
+                byte[] hmacSecret = getIdentifierSecret(rp);
 
                 if (null != hmacSecret) {
                         SecretKey macKey = new SecretKeySpec(hmacSecret, "HmacSHA1");
@@ -262,17 +262,17 @@ public class ProtocolExitServlet extends HttpServlet {
                 return uniqueId;
         }
 
-        private byte[] getHmacSecret(RPEntity rp) {
+        private byte[] getIdentifierSecret(RPEntity rp) {
 
                 if (null == rp ||
-                        null == rp.getSecretKey() ||
-                        rp.getSecretKey().trim().isEmpty()) {
+                        null == rp.getIdentifierSecretKey() ||
+                        rp.getIdentifierSecretKey().trim().isEmpty()) {
                         // RP dont have one, go to IdP default
                         return this.identityService.getHmacSecret();
                 }
 
                 try {
-                        return Hex.decodeHex(rp.getSecretKey().toCharArray());
+                        return Hex.decodeHex(rp.getIdentifierSecretKey().toCharArray());
                 } catch (DecoderException e) {
                         throw new RuntimeException("HEX decoder error: " + e.getMessage(),
                                 e);

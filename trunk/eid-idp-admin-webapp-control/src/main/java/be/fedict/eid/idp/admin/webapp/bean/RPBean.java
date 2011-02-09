@@ -23,8 +23,11 @@ import be.fedict.eid.idp.admin.webapp.RP;
 import be.fedict.eid.idp.entity.AttributeEntity;
 import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.entity.SecretKeyAlgorithm;
 import be.fedict.eid.idp.model.AttributeService;
+import be.fedict.eid.idp.model.PkiUtil;
 import be.fedict.eid.idp.model.RPService;
+import be.fedict.eid.idp.model.exception.KeyLoadException;
 import org.apache.commons.io.FileUtils;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.ScopeType;
@@ -40,11 +43,10 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
-import java.io.ByteArrayInputStream;
+import javax.faces.model.SelectItem;
 import java.io.IOException;
+import java.security.PrivateKey;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -56,6 +58,7 @@ public class RPBean implements RP {
         private static final String RP_LIST_NAME = "idpRPList";
         private static final String SELECTED_RP = "selectedRP";
         private static final String UPLOADED_CERTIFICATE = "uploadedCertificate";
+        private static final String UPLOADED_ATTRIBUTE_SECRET = "uploadedAttributeSecret";
 
         @Logger
         private Log log;
@@ -83,8 +86,20 @@ public class RPBean implements RP {
         @Out(value = UPLOADED_CERTIFICATE, required = false, scope = ScopeType.CONVERSATION)
         private byte[] certificateBytes;
 
+//        @In(value = UPLOADED_ATTRIBUTE_SECRET, required = false)
+//        @Out(value = UPLOADED_ATTRIBUTE_SECRET, required = false, scope = ScopeType.CONVERSATION)
+//        private byte[] attributeSecretBytes;
+
+        @In(value = "selectedTab", required = false)
+        @Out(value = "selectedTab", required = false, scope = ScopeType.CONVERSATION)
+        private String selectedTab = null;
+
         private List<String> sourceAttributes;
         private List<String> selectedAttributes;
+
+        enum ConfigurationTab {
+                tab_config, tab_pki, tab_secret, tab_signing, tab_attributes
+        }
 
         @Override
         @PostConstruct
@@ -105,6 +120,17 @@ public class RPBean implements RP {
         public void rpListFactory() {
 
                 this.rpList = this.rpService.listRPs();
+        }
+
+        @Override
+        @Factory("secretAlgorithms")
+        public List<SelectItem> secretAlgorithmsFactory() {
+
+                List<SelectItem> secretAlgorithms = new LinkedList<SelectItem>();
+                for (SecretKeyAlgorithm algorithm : SecretKeyAlgorithm.values()) {
+                        secretAlgorithms.add(new SelectItem(algorithm.name(), algorithm.name()));
+                }
+                return secretAlgorithms;
         }
 
         @Override
@@ -133,7 +159,13 @@ public class RPBean implements RP {
         public String save() {
 
                 this.log.debug("save RP: #0", this.selectedRP.getName());
-                this.rpService.save(this.selectedRP);
+                try {
+                        this.rpService.save(this.selectedRP);
+                } catch (KeyLoadException e) {
+                        this.facesMessages.addToControl("attr_secret_sym",
+                                "Key load failed: " + e.getMessage());
+                        return null;
+                }
                 rpListFactory();
                 return "success";
         }
@@ -194,6 +226,7 @@ public class RPBean implements RP {
         @Override
         @Begin(join = true)
         public void uploadListener(UploadEvent event) throws IOException {
+
                 UploadItem item = event.getUploadItem();
                 this.log.debug(item.getContentType());
                 this.log.debug(item.getFileSize());
@@ -207,19 +240,39 @@ public class RPBean implements RP {
                 }
 
                 try {
-                        this.selectedRP.setCertificate(getCertificate(this.certificateBytes));
+                        this.selectedRP.setCertificate(
+                                PkiUtil.getCertificate(this.certificateBytes));
                 } catch (CertificateException e) {
                         this.facesMessages.addToControl("upload", "Invalid certificate");
                 }
         }
 
-        private X509Certificate getCertificate(byte[] certificateBytes)
-                throws CertificateException {
+        @Override
+        @Begin(join = true)
+        public void uploadListenerSecret(UploadEvent event) throws IOException {
 
-                CertificateFactory certificateFactory = CertificateFactory
-                        .getInstance("X.509");
-                return (X509Certificate) certificateFactory
-                        .generateCertificate(new ByteArrayInputStream(certificateBytes));
+                UploadItem item = event.getUploadItem();
+                this.log.debug(item.getContentType());
+                this.log.debug(item.getFileSize());
+                this.log.debug(item.getFileName());
+
+                byte[] attributeSecretBytes;
+                if (null == item.getData()) {
+                        // meaning createTempFiles is set to true in the SeamFilter
+                        attributeSecretBytes = FileUtils.readFileToByteArray(item
+                                .getFile());
+                } else {
+                        attributeSecretBytes = item.getData();
+                }
+
+                try {
+                        this.selectedRP.setAttributeAssymetricSecret(
+                                PkiUtil.getPrivateFromPem(attributeSecretBytes));
+                        this.log.debug("Attribute secret: " + this.selectedRP.getAttributeAsymmetricSecretKey().length);
+                } catch (KeyLoadException e) {
+                        this.log.error(e);
+                        this.facesMessages.addToControl("upload_secret", "Failed to load key");
+                }
         }
 
         @Override
@@ -255,4 +308,27 @@ public class RPBean implements RP {
                 this.selectedAttributes = selectedAttributes;
         }
 
+        @Override
+        public String getSelectedTab() {
+                return this.selectedTab;
+        }
+
+        @Override
+        public void setSelectedTab(String selectedTab) {
+                this.selectedTab = selectedTab;
+        }
+
+        @Override
+        public PrivateKey getAttributeAssymetricSecret() {
+
+                if (null == this.selectedRP.getAttributeAsymmetricSecretKey()) {
+                        return null;
+                }
+                try {
+                        return PkiUtil.getPrivate(
+                                this.selectedRP.getAttributeAsymmetricSecretKey());
+                } catch (KeyLoadException e) {
+                        throw new RuntimeException(e);
+                }
+        }
 }

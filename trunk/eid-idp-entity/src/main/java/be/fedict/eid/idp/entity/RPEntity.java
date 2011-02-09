@@ -22,6 +22,7 @@ import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -41,8 +42,13 @@ import java.util.List;
  * the protocol) used for verification of the signed authentication request
  * token.
  * <p/>
- * The secret key is used for encryption of the user identifier and attributes
- * if needed.
+ * The identifier secret key is used for encryption of the user identifier.
+ * <p/>
+ * <p/>
+ * The attribute secret is used for encryption of the attributes if needed.
+ * Both symmetric as assymetric encryption is supported. The list of supported
+ * algorithms can be found @ {@link SecretKeyAlgorithm}.
+ * <p/>
  * <p/>
  * The attributes is the custom set of attributes related to this RP.
  */
@@ -60,23 +66,37 @@ public class RPEntity implements Serializable {
 
         private long id;
 
+        // configurations
         private String name;
-
         private String domain;
         private String targetURL;
+
+        // signing
         private byte[] encodedCertificate;
         private boolean requestSigningRequired;
 
+        // pki
         private String authnTrustDomain;
         private String identityTrustDomain;
 
-        private String secretKey;
+        // identifier secret
+        private String identifierSecretKey;
 
+        // attribute secret
+        private SecretKeyAlgorithm attributeSecretAlgorithm;
+        private String attributeSymmetricSecretKey;
+        private byte[] attributeAsymmetricSecretKey;
+
+        // attributes
         private List<RPAttributeEntity> attributes;
 
         public RPEntity(String name, String domain, String targetURL,
                         X509Certificate certificate,
-                        boolean requestSigningRequired, String secretKey)
+                        boolean requestSigningRequired,
+                        String identifierSecretKey,
+                        SecretKeyAlgorithm attributeSecretAlgorithm,
+                        String attributeSymmetricSecretKey,
+                        byte[] attributeAsymmetricSecretKey)
                 throws CertificateEncodingException {
 
                 this.name = name;
@@ -84,7 +104,10 @@ public class RPEntity implements Serializable {
                 this.targetURL = targetURL;
                 this.encodedCertificate = certificate.getEncoded();
                 this.requestSigningRequired = requestSigningRequired;
-                this.secretKey = secretKey;
+                this.identifierSecretKey = identifierSecretKey;
+                this.attributeSecretAlgorithm = attributeSecretAlgorithm;
+                this.attributeSymmetricSecretKey = attributeSymmetricSecretKey;
+                this.attributeAsymmetricSecretKey = attributeAsymmetricSecretKey;
                 this.attributes = new LinkedList<RPAttributeEntity>();
         }
 
@@ -146,6 +169,7 @@ public class RPEntity implements Serializable {
                 if (null == this.encodedCertificate) {
                         return null;
                 }
+
                 try {
                         CertificateFactory certificateFactory = CertificateFactory
                                 .getInstance("X.509");
@@ -201,12 +225,47 @@ public class RPEntity implements Serializable {
         }
 
         @Column(nullable = true)
-        public String getSecretKey() {
-                return this.secretKey;
+        public String getIdentifierSecretKey() {
+                return this.identifierSecretKey;
         }
 
-        public void setSecretKey(String secretKey) {
-                this.secretKey = secretKey;
+        public void setIdentifierSecretKey(String identifierSecretKey) {
+                this.identifierSecretKey = identifierSecretKey;
+        }
+
+        @Column(nullable = false)
+        @Enumerated(EnumType.STRING)
+        public SecretKeyAlgorithm getAttributeSecretAlgorithm() {
+                return this.attributeSecretAlgorithm;
+        }
+
+        public void setAttributeSecretAlgorithm(SecretKeyAlgorithm attributeSecretAlgorithm) {
+                this.attributeSecretAlgorithm = attributeSecretAlgorithm;
+        }
+
+        @Column(nullable = true)
+        public String getAttributeSymmetricSecretKey() {
+                return this.attributeSymmetricSecretKey;
+        }
+
+        public void setAttributeSymmetricSecretKey(String attributeSymmetricSecretKey) {
+                this.attributeSymmetricSecretKey = attributeSymmetricSecretKey;
+        }
+
+        @Column(length = 4 * 1024, nullable = true)
+        @Basic(fetch = FetchType.EAGER)
+        public byte[] getAttributeAsymmetricSecretKey() {
+                return this.attributeAsymmetricSecretKey;
+        }
+
+        public void setAttributeAsymmetricSecretKey(byte[] attributeAsymmetricSecretKey) {
+                this.attributeAsymmetricSecretKey = attributeAsymmetricSecretKey;
+        }
+
+        @Transient
+        public void setAttributeAssymetricSecret(PrivateKey privateKey) {
+
+                this.attributeAsymmetricSecretKey = privateKey.getEncoded();
         }
 
         @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE,

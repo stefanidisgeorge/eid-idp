@@ -69,5 +69,9 @@
         <p>Download the Test Service Provider's Certificate
             <a href="./pki">here</a>
         </p>
+
+        <p>Download the Test Service Provider's Private Key
+            <a href="./private">here</a>
+        </p>
     </body>
 </html>

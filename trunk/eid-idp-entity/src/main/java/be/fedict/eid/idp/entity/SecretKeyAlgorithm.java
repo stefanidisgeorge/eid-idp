@@ -12,26 +12,21 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, see 
+ * License along with this software; if not, see
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.model;
+package be.fedict.eid.idp.entity;
 
-import be.fedict.eid.idp.entity.RPEntity;
-import be.fedict.eid.idp.model.exception.KeyLoadException;
+/**
+ * Enum listing supported secret key algorithms.
+ */
+public enum SecretKeyAlgorithm {
 
-import javax.ejb.Local;
-import java.util.List;
-
-@Local
-public interface RPService {
-
-        List<RPEntity> listRPs();
-
-        void remove(RPEntity rp);
-
-        RPEntity save(RPEntity rp) throws KeyLoadException;
-
-        RPEntity find(String domain);
+        NONE,
+        PKI_DSA,
+        PKI_RSA,
+        AES_128,
+        AES_192,
+        AES_256
 }

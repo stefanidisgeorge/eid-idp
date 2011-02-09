@@ -21,7 +21,9 @@ package be.fedict.eid.idp.admin.webapp;
 import org.richfaces.event.UploadEvent;
 
 import javax.ejb.Local;
+import javax.faces.model.SelectItem;
 import java.io.IOException;
+import java.security.PrivateKey;
 import java.util.List;
 
 @Local
@@ -38,15 +40,25 @@ public interface RP {
 
         void setSelectedAttributes(List<String> selectedAttributes);
 
+        String getSelectedTab();
+
+        void setSelectedTab(String selectedTab);
+
+        PrivateKey getAttributeAssymetricSecret();
+
         /*
         * Listeners.
         */
         void uploadListener(UploadEvent event) throws IOException;
 
+        void uploadListenerSecret(UploadEvent event) throws IOException;
+
         /*
         * Factories
         */
         void rpListFactory();
+
+        List<SelectItem> secretAlgorithmsFactory();
 
         /*
         * Actions.
