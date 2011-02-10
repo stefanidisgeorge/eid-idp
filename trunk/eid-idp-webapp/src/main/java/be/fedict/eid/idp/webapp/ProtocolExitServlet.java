@@ -24,10 +24,7 @@ import be.fedict.eid.applet.service.impl.handler.AuthenticationDataMessageHandle
 import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
 import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
-import be.fedict.eid.idp.model.AttributeService;
-import be.fedict.eid.idp.model.AttributeServiceManager;
-import be.fedict.eid.idp.model.Constants;
-import be.fedict.eid.idp.model.IdentityService;
+import be.fedict.eid.idp.model.*;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -36,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.ejb.EJB;
 import javax.security.auth.x500.X500Principal;
 import javax.servlet.ServletConfig;
@@ -47,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -150,6 +146,38 @@ public class ProtocolExitServlet extends HttpServlet {
                         attributes = filterAttributes(rp, attributes);
                 }
 
+                // get RP SecretKey and/or PublicKey
+                SecretKey secretKey = null;
+                PublicKey publicKey = null;
+                if (null != rp) {
+
+                        try {
+                                if (null != rp.getAttributeSecretKey()) {
+                                        secretKey = CryptoUtil.getSecretKey(
+                                                rp.getAttributeSecretAlgorithm(),
+                                                rp.getAttributeSecretKey());
+                                }
+
+                                if (null != rp.getAttributePublicKey()) {
+                                        publicKey = CryptoUtil.getPublicKey(
+                                                rp.getAttributePublicKey());
+                                }
+                        } catch (Exception e) {
+                                LOG.error("protocol error: " + e.getMessage(), e);
+                                httpSession.setAttribute(
+                                        this.protocolErrorMessageSessionAttributeInitParam, e
+                                        .getMessage());
+                                response.sendRedirect(request.getContextPath()
+                                        + this.protocolErrorPageInitParam);
+                                return;
+                        }
+                }
+
+                // set encryption info if needed
+                if (null != rp) {
+                        setEncryptionInfo(rp, attributes);
+                }
+
                 // set protocol specific URIs if possible
                 for (Attribute attribute : attributes.values()) {
                         attribute.setUri(getUri(protocolService.getId(),
@@ -165,8 +193,8 @@ public class ProtocolExitServlet extends HttpServlet {
                 ReturnResponse returnResponse;
                 try {
                         returnResponse = protocolService.handleReturnResponse(
-                                httpSession, userId, attributes, targetURL,
-                                request, response);
+                                httpSession, userId, attributes, secretKey,
+                                publicKey, targetURL, request, response);
                 } catch (Exception e) {
                         LOG.error("protocol error: " + e.getMessage(), e);
                         httpSession.setAttribute(
@@ -211,9 +239,25 @@ public class ProtocolExitServlet extends HttpServlet {
         }
 
         /*
+         * Encrypt attributes configured so in the RP.
+         */
+        private void setEncryptionInfo(RPEntity rp,
+                                       Map<String, Attribute> attributes) {
+
+                // encrypt when needed
+                for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
+
+                        attributes.get(
+                                rpAttribute.getAttribute().getUri())
+                                .setEncrypted(rpAttribute.isEncrypted());
+                }
+        }
+
+        /*
          * Filter out attributes not specified in the RP's configuration
          */
-        private Map<String, Attribute> filterAttributes(RPEntity rp, Map<String, Attribute> attributes) {
+        private Map<String, Attribute> filterAttributes(RPEntity rp,
+                                                        Map<String, Attribute> attributes) {
 
                 Map<String, Attribute> filteredAttributes = new HashMap<String, Attribute>();
                 for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
@@ -240,19 +284,12 @@ public class ProtocolExitServlet extends HttpServlet {
                 byte[] hmacSecret = getIdentifierSecret(rp);
 
                 if (null != hmacSecret) {
-                        SecretKey macKey = new SecretKeySpec(hmacSecret, "HmacSHA1");
+
                         Mac mac;
                         try {
-                                mac = Mac.getInstance(macKey.getAlgorithm());
-                        } catch (NoSuchAlgorithmException e) {
-                                throw new RuntimeException("HMAC algo not available: "
-                                        + e.getMessage());
-                        }
-                        try {
-                                mac.init(macKey);
+                                mac = CryptoUtil.getMac(hmacSecret);
                         } catch (InvalidKeyException e) {
-                                LOG.error("invalid secret key: " + e.getMessage(), e);
-                                throw new RuntimeException("invalid secret");
+                                throw new RuntimeException("Invalid key", e);
                         }
                         mac.update(uniqueId.getBytes());
                         byte[] resultHMac = mac.doFinal();

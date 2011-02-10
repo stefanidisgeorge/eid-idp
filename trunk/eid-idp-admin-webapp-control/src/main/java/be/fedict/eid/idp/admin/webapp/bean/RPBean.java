@@ -25,9 +25,10 @@ import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.entity.SecretKeyAlgorithm;
 import be.fedict.eid.idp.model.AttributeService;
-import be.fedict.eid.idp.model.PkiUtil;
+import be.fedict.eid.idp.model.CryptoUtil;
 import be.fedict.eid.idp.model.RPService;
 import be.fedict.eid.idp.model.exception.KeyLoadException;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.io.FileUtils;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.ScopeType;
@@ -45,7 +46,8 @@ import javax.ejb.Remove;
 import javax.ejb.Stateful;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
-import java.security.PrivateKey;
+import java.security.InvalidKeyException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.LinkedList;
 import java.util.List;
@@ -159,13 +161,26 @@ public class RPBean implements RP {
         public String save() {
 
                 this.log.debug("save RP: #0", this.selectedRP.getName());
-                try {
-                        this.rpService.save(this.selectedRP);
-                } catch (KeyLoadException e) {
-                        this.facesMessages.addToControl("attr_secret_sym",
-                                "Key load failed: " + e.getMessage());
-                        return null;
+
+                // check identifier secret if any
+                if (null != this.selectedRP.getIdentifierSecretKey() &&
+                        !this.selectedRP.getIdentifierSecretKey().trim().isEmpty()) {
+                        try {
+                                CryptoUtil.getMac(this.selectedRP.getIdentifierSecretKey());
+                        } catch (DecoderException e) {
+                                this.log.error("Failed to decode HMac: " + e.getMessage(), e);
+                                this.facesMessages.addToControl("identifier_secret",
+                                        "Failed to decode secret");
+                                return null;
+                        } catch (InvalidKeyException e) {
+                                this.log.error("Invalid HMac: " + e.getMessage(), e);
+                                this.facesMessages.addToControl("identifier_secret",
+                                        "Invalid secret: " + e.getMessage());
+                                return null;
+                        }
                 }
+
+                this.rpService.save(this.selectedRP);
                 rpListFactory();
                 return "success";
         }
@@ -241,7 +256,7 @@ public class RPBean implements RP {
 
                 try {
                         this.selectedRP.setCertificate(
-                                PkiUtil.getCertificate(this.certificateBytes));
+                                CryptoUtil.getCertificate(this.certificateBytes));
                 } catch (CertificateException e) {
                         this.facesMessages.addToControl("upload", "Invalid certificate");
                 }
@@ -249,29 +264,29 @@ public class RPBean implements RP {
 
         @Override
         @Begin(join = true)
-        public void uploadListenerSecret(UploadEvent event) throws IOException {
+        public void uploadListenerPublic(UploadEvent event) throws IOException {
 
                 UploadItem item = event.getUploadItem();
                 this.log.debug(item.getContentType());
                 this.log.debug(item.getFileSize());
                 this.log.debug(item.getFileName());
 
-                byte[] attributeSecretBytes;
+                byte[] attributePublicKeyBytes;
                 if (null == item.getData()) {
                         // meaning createTempFiles is set to true in the SeamFilter
-                        attributeSecretBytes = FileUtils.readFileToByteArray(item
-                                .getFile());
+                        attributePublicKeyBytes = FileUtils
+                                .readFileToByteArray(item.getFile());
                 } else {
-                        attributeSecretBytes = item.getData();
+                        attributePublicKeyBytes = item.getData();
                 }
 
                 try {
-                        this.selectedRP.setAttributeAssymetricSecret(
-                                PkiUtil.getPrivateFromPem(attributeSecretBytes));
-                        this.log.debug("Attribute secret: " + this.selectedRP.getAttributeAsymmetricSecretKey().length);
+                        this.selectedRP.setAttributePublicKey(
+                                CryptoUtil.getPublicFromPem(attributePublicKeyBytes));
                 } catch (KeyLoadException e) {
                         this.log.error(e);
-                        this.facesMessages.addToControl("upload_secret", "Failed to load key");
+                        this.facesMessages.addToControl("upload_secret",
+                                "Failed to load key");
                 }
         }
 
@@ -319,14 +334,14 @@ public class RPBean implements RP {
         }
 
         @Override
-        public PrivateKey getAttributeAssymetricSecret() {
+        public PublicKey getAttributePublicKey() {
 
-                if (null == this.selectedRP.getAttributeAsymmetricSecretKey()) {
+                if (null == this.selectedRP.getAttributePublicKey()) {
                         return null;
                 }
                 try {
-                        return PkiUtil.getPrivate(
-                                this.selectedRP.getAttributeAsymmetricSecretKey());
+                        return CryptoUtil.getPublicKey(
+                                this.selectedRP.getAttributePublicKey());
                 } catch (KeyLoadException e) {
                         throw new RuntimeException(e);
                 }

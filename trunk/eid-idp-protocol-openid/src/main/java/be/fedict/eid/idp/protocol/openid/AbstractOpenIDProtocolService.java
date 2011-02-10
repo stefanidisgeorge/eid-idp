@@ -20,7 +20,6 @@ package be.fedict.eid.idp.protocol.openid;
 
 import be.fedict.eid.idp.common.OpenIDAXConstants;
 import be.fedict.eid.idp.spi.*;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.discovery.UrlIdentifier;
@@ -33,9 +32,7 @@ import org.openid4java.server.InMemoryServerAssociationStore;
 import org.openid4java.server.RealmVerifier;
 import org.openid4java.server.ServerManager;
 
-import javax.crypto.Mac;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -43,8 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -197,6 +193,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
                                                    Map<String, Attribute> attributes,
+                                                   SecretKey secretKey, PublicKey publicKey,
                                                    String rpTargetUrl,
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
@@ -214,29 +211,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                         + "/eid-idp/endpoints/" + getPath();
 
 
-                String uniqueId = userId;
-                byte[] hmacSecret = this.configuration.getHmacSecret();
-                if (null != hmacSecret) {
-                        SecretKey macKey = new SecretKeySpec(hmacSecret, "HmacSHA1");
-                        Mac mac;
-                        try {
-                                mac = Mac.getInstance(macKey.getAlgorithm());
-                        } catch (NoSuchAlgorithmException e) {
-                                throw new RuntimeException("HMAC algo not available: "
-                                        + e.getMessage());
-                        }
-                        try {
-                                mac.init(macKey);
-                        } catch (InvalidKeyException e) {
-                                LOG.error("invalid secret key: " + e.getMessage(), e);
-                                throw new RuntimeException("invalid secret");
-                        }
-                        mac.update(uniqueId.getBytes());
-                        byte[] resultHMac = mac.doFinal();
-                        uniqueId = new String(Hex.encodeHex(resultHMac))
-                                .toUpperCase();
-                }
-                String userIdentifier = location + "?" + uniqueId;
+                String userIdentifier = location + "?" + userId;
                 LOG.debug("user identifier: " + userIdentifier);
                 UrlIdentifier urlIdentifier = new UrlIdentifier(userIdentifier);
                 userIdentifier = urlIdentifier.getIdentifier();

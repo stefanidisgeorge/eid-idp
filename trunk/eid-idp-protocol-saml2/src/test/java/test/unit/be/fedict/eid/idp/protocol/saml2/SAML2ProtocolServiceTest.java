@@ -302,8 +302,8 @@ public class SAML2ProtocolServiceTest {
                 saml2ProtocolService.init(mockServletContext, mockConfiguration);
                 ReturnResponse returnResponse = saml2ProtocolService
                         .handleReturnResponse(mockHttpSession, userId,
-                                new HashMap<String, Attribute>(), null,
-                                mockHttpServletRequest,
+                                new HashMap<String, Attribute>(), null, null,
+                                null, mockHttpServletRequest,
                                 mockHttpServletResponse);
 
                 // verify

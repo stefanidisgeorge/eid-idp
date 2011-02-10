@@ -18,10 +18,12 @@
 
 package be.fedict.eid.idp.spi;
 
+import javax.crypto.SecretKey;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.security.PublicKey;
 import java.util.Map;
 
 /**
@@ -72,6 +74,8 @@ public interface IdentityProviderProtocolService {
          * @param httpSession the HTTP session context.
          * @param userId      user ID
          * @param attributes  returned attribute map
+         * @param secretKey   optional symmetric SecretKey used for encryption
+         * @param publicKey   optional RSA PublicKey used for encryption
          * @param rpTargetUrl RP target URL, can be <code>null</code>
          * @param request     the HTTP request.
          * @param response    the HTTP response.   @return the response object in case a Browser POST should be constructed.
@@ -83,6 +87,7 @@ public interface IdentityProviderProtocolService {
          */
         ReturnResponse handleReturnResponse(HttpSession httpSession, String userId,
                                             Map<String, Attribute> attributes,
+                                            SecretKey secretKey, PublicKey publicKey,
                                             String rpTargetUrl,
                                             HttpServletRequest request,
                                             HttpServletResponse response)

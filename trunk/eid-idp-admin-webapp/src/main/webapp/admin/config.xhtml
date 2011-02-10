@@ -25,7 +25,11 @@
 
                         <h:outputText
                                 value="Default HMAC-SHA1 identifier secret (hexadecimal):"/>
-                        <h:inputText value="#{idpConfig.hmacSecret}" size="50"/>
+                        <s:decorate>
+                            <h:inputText value="#{idpConfig.hmacSecret}"
+                                         id="hmacsecret" size="50"/>
+                            <h:message for="hmacsecret" styleClass="error"/>
+                        </s:decorate>
                     </h:panelGrid>
                     <h:commandButton value="Save"
                                      action="#{idpConfig.saveIdP}"/>

@@ -36,10 +36,12 @@ import org.opensaml.saml2.core.*;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 
+import javax.crypto.SecretKey;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -156,6 +158,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
                                                    Map<String, Attribute> attributes,
+                                                   SecretKey secretKey, PublicKey publicKey,
                                                    String rpTargetUrl,
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
@@ -210,7 +213,8 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 // generate assertion
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
                         inResponseTo, targetUrl, issueInstant,
-                        getAuthenticationFlow(), userId, attributes);
+                        getAuthenticationFlow(), userId, attributes, secretKey,
+                        publicKey);
                 samlResponse.getAssertions().add(assertion);
 
                 return handleSamlResponse(request, targetUrl, samlResponse, relayState);

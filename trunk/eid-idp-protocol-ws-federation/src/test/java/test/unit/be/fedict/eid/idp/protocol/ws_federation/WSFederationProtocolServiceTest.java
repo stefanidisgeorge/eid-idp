@@ -148,8 +148,9 @@ public class WSFederationProtocolServiceTest {
                 // operate
                 testedInstance.init(null, mockIdentityProviderConfiguration);
                 ReturnResponse result = testedInstance.handleReturnResponse(
-                        mockHttpSession, userId, new HashMap<String, be.fedict.eid.idp.spi.Attribute>(),
-                        null, mockRequest, mockResponse);
+                        mockHttpSession, userId,
+                        new HashMap<String, be.fedict.eid.idp.spi.Attribute>(),
+                        null, null, null, mockRequest, mockResponse);
 
                 // verify
                 EasyMock.verify(mockHttpSession, mockRequest, mockResponse,

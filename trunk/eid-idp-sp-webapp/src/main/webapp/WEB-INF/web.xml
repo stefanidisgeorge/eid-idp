@@ -32,12 +32,12 @@
 
     <!-- PrivateKey servlet -->
     <servlet>
-        <servlet-name>PrivateKeyServlet</servlet-name>
-        <servlet-class>be.fedict.eid.idp.sp.PrivateKeyServlet</servlet-class>
+        <servlet-name>PublicKeyServlet</servlet-name>
+        <servlet-class>be.fedict.eid.idp.sp.PublicKeyServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>PrivateKeyServlet</servlet-name>
-        <url-pattern>/private</url-pattern>
+        <servlet-name>PublicKeyServlet</servlet-name>
+        <url-pattern>/public</url-pattern>
     </servlet-mapping>
 
     <!-- SAML2 Authentication Protocol -->

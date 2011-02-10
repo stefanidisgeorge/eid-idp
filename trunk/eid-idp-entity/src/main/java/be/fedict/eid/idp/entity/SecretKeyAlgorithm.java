@@ -24,9 +24,5 @@ package be.fedict.eid.idp.entity;
 public enum SecretKeyAlgorithm {
 
         NONE,
-        PKI_DSA,
-        PKI_RSA,
-        AES_128,
-        AES_192,
-        AES_256
+        AES_128
 }

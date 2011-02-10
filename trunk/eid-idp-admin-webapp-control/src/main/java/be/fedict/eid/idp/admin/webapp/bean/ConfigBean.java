@@ -24,6 +24,8 @@ import be.fedict.eid.idp.entity.AppletConfigEntity;
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.KeyStoreType;
+import be.fedict.eid.idp.model.CryptoUtil;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.io.FileUtils;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.ScopeType;
@@ -40,6 +42,7 @@ import javax.ejb.Stateful;
 import javax.faces.model.SelectItem;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -149,6 +152,22 @@ public class ConfigBean implements Config {
                 // IdP Config
                 this.configuration.setValue(ConfigProperty.DEFAULT_ISSUER,
                         this.defaultIssuer);
+
+                // check valid secret
+                try {
+                        CryptoUtil.getMac(this.hmacSecret);
+                } catch (DecoderException e) {
+                        this.log.error("Failed to decode HMac: " + e.getMessage(), e);
+                        this.facesMessages.addToControl("hmacsecret",
+                                "Failed to decode secret");
+                        return null;
+                } catch (InvalidKeyException e) {
+                        this.log.error("Invalid HMac: " + e.getMessage(), e);
+                        this.facesMessages.addToControl("hmacsecret",
+                                "Invalid secret: " + e.getMessage());
+                        return null;
+                }
+
                 this.configuration.setValue(ConfigProperty.HMAC_SECRET,
                         this.hmacSecret);
 

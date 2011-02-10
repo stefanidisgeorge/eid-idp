@@ -19,7 +19,6 @@
 package be.fedict.eid.idp.model;
 
 import be.fedict.eid.idp.entity.RPEntity;
-import be.fedict.eid.idp.model.exception.KeyLoadException;
 
 import javax.ejb.Local;
 import java.util.List;
@@ -31,7 +30,7 @@ public interface RPService {
 
         void remove(RPEntity rp);
 
-        RPEntity save(RPEntity rp) throws KeyLoadException;
+        RPEntity save(RPEntity rp);
 
         RPEntity find(String domain);
 }
