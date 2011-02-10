@@ -122,7 +122,10 @@ public class IdentityProviderServletContextListener implements
         private void initAttributes() {
 
                 for (DefaultAttribute defaultAttribute : DefaultAttribute.values()) {
-                        this.attributeService.saveAttribute(defaultAttribute.getUri());
+                        this.attributeService.saveAttribute(
+                                defaultAttribute.getName(),
+                                defaultAttribute.getDescription(),
+                                defaultAttribute.getUri());
                 }
         }
 
@@ -155,10 +158,13 @@ public class IdentityProviderServletContextListener implements
                 for (IdentityProviderAttributeType identityProviderAttributeType :
                         identityProviderAttributeTypes) {
 
+                        String name = identityProviderAttributeType.getName();
+                        String description = identityProviderAttributeType
+                                .getDescription();
                         String uri = identityProviderAttributeType.getURI();
 
-                        LOG.debug("initializating attribute service for: " + uri);
-                        this.attributeService.saveAttribute(uri);
+                        LOG.debug("initializating attribute service for: " + name);
+                        this.attributeService.saveAttribute(name, description, uri);
                 }
         }
 

@@ -48,13 +48,14 @@ public class AttributeServiceBean implements AttributeService {
         }
 
         @Override
-        public AttributeEntity saveAttribute(String uri) {
+        public AttributeEntity saveAttribute(String name, String description,
+                                             String uri) {
 
                 AttributeEntity attribute = this.entityManager.find(
                         AttributeEntity.class, uri);
                 if (null == attribute) {
                         LOG.debug("Add attribute : " + uri);
-                        attribute = new AttributeEntity(uri);
+                        attribute = new AttributeEntity(name, description, uri);
                         this.entityManager.persist(attribute);
                 }
                 return attribute;

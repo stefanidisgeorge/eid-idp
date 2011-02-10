@@ -34,13 +34,17 @@ public class AttributeEntity implements Serializable {
         public static final String LIST_ALL = "idp.attr.all";
 
         private String uri;
+        private String name;
+        private String description;
         private Set<AttributeProtocolUriEntity> protocolUris;
 
         public AttributeEntity() {
                 super();
         }
 
-        public AttributeEntity(String uri) {
+        public AttributeEntity(String name, String description, String uri) {
+                this.name = name;
+                this.description = description;
                 this.uri = uri;
         }
 
@@ -51,6 +55,23 @@ public class AttributeEntity implements Serializable {
 
         public void setUri(String uri) {
                 this.uri = uri;
+        }
+
+        public String getName() {
+                return name;
+        }
+
+        public void setName(String name) {
+                this.name = name;
+        }
+
+        @Column(nullable = true)
+        public String getDescription() {
+                return description;
+        }
+
+        public void setDescription(String description) {
+                this.description = description;
         }
 
         @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE,

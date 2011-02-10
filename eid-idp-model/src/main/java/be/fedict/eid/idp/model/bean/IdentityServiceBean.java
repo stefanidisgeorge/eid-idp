@@ -18,11 +18,10 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.model.ConfigProperty;
-import be.fedict.eid.idp.model.Configuration;
-import be.fedict.eid.idp.model.IdPIdentityConfig;
-import be.fedict.eid.idp.model.IdentityService;
+import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.model.*;
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
+import be.fedict.eid.idp.spi.AttributeConfig;
 import be.fedict.eid.idp.spi.IdPIdentity;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -44,6 +43,9 @@ public class IdentityServiceBean implements IdentityService {
 
         @EJB
         private Configuration configuration;
+
+        @EJB
+        private AttributeService attributeService;
 
         /**
          * {@inheritDoc}
@@ -161,6 +163,20 @@ public class IdentityServiceBean implements IdentityService {
 
                 return this.configuration.getValue(ConfigProperty.DEFAULT_ISSUER,
                         String.class);
+        }
+
+        @Override
+        public List<AttributeConfig> getAttributes(String protocolId) {
+
+                List<AttributeConfig> attributes = new LinkedList<AttributeConfig>();
+                for (AttributeEntity attribute : this.attributeService.listAttributes()) {
+
+                        attributes.add(new AttributeConfig(attribute.getName(),
+                                attribute.getDescription(),
+                                this.attributeService.getUri(protocolId,
+                                        attribute.getUri())));
+                }
+                return attributes;
         }
 
         /**
