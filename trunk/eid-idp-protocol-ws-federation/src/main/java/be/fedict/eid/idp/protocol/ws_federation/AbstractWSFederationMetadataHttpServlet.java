@@ -18,13 +18,9 @@
 
 package be.fedict.eid.idp.protocol.ws_federation;
 
-import be.fedict.eid.idp.common.AttributeConstants;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.protocol.ws_federation.wsfed.*;
-import be.fedict.eid.idp.spi.IdPIdentity;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
@@ -218,64 +214,11 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
 
                 List<ClaimType> claimTypes = claimTypesOffered.getClaimTypes();
 
-                addClaimType(AttributeConstants.NAME_CLAIM_TYPE_URI,
-                        "Name", "The name of the Subject.", claimTypes);
-                addClaimType(AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI,
-                        "FirstName", "Preferred name or first name of a Subject.",
-                        claimTypes);
-                addClaimType(AttributeConstants.LAST_NAME_CLAIM_TYPE_URI,
-                        "LastName", "Surname or family name of a Subject.",
-                        claimTypes);
-                addClaimType(AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI,
-                        "StreetAddress",
-                        "Street address component of a Subject's address information.",
-                        claimTypes);
-                addClaimType(
-                        AttributeConstants.LOCALITY_CLAIM_TYPE_URI,
-                        "Locality",
-                        "This attribute contains the name of a locality, such as a city, county or other geographic region.",
-                        claimTypes);
-                addClaimType(
-                        AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI,
-                        "PostalCode",
-                        "The postal code attribute type specifies the postal code of the named object.",
-                        claimTypes);
-                addClaimType(AttributeConstants.COUNTRY_CLAIM_TYPE_URI, "Country",
-                        "This attribute contains a two-letter ISO 3166 country code.",
-                        claimTypes);
-                addClaimType(
-                        AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI,
-                        "DateOfBirth",
-                        "The date of birth of a Subject in a form allowed by the xs:date data type.",
-                        claimTypes);
-                addClaimType(
-                        AttributeConstants.GENDER_CLAIM_TYPE_URI,
-                        "Gender",
-                        "Gender of a Subject that can have any of these exact string values – '0' (meaning unspecified), '1' (meaning Male) or '2' (meaning Female). Using these values allows them to be language neutral.",
-                        claimTypes);
-                addClaimType(
-                        AttributeConstants.PPID_CLAIM_TYPE_URI,
-                        "PPID",
-                        "A private personal identifier (PPID) that identifies the Subject to a Relying Party.",
-                        claimTypes);
-
-                addClaimType(
-                        AttributeConstants.NATIONALITY_CLAIM_TYPE_URI,
-                        "Nationality",
-                        "The nationality of the named object.",
-                        claimTypes);
-
-                addClaimType(
-                        AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI,
-                        "PlaceOfBirth",
-                        "The place of birth of the named object.",
-                        claimTypes);
-
-                addClaimType(
-                        AttributeConstants.PHOTO_CLAIM_TYPE_URI,
-                        "Photo",
-                        "Base64 encoded photo of the named object.",
-                        claimTypes);
+                for (AttributeConfig attribute : configuration.getAttributes(
+                        AbstractWSFederationProtocolService.WS_FED_PROTOCOL_ID)) {
+                        addClaimType(attribute.getUri(), attribute.getName(),
+                                attribute.getDescription(), claimTypes);
+                }
 
                 Element element;
                 if (null != identity) {

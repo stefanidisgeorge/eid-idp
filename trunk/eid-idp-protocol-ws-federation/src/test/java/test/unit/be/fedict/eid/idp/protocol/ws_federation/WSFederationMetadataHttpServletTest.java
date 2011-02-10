@@ -19,7 +19,9 @@
 package test.unit.be.fedict.eid.idp.protocol.ws_federation;
 
 import be.fedict.eid.applet.service.signer.KeyInfoKeySelector;
+import be.fedict.eid.idp.protocol.ws_federation.AbstractWSFederationProtocolService;
 import be.fedict.eid.idp.protocol.ws_federation.WSFederationMetadataHttpServletAuthIdent;
+import be.fedict.eid.idp.spi.AttributeConfig;
 import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
@@ -63,6 +65,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -80,6 +84,7 @@ public class WSFederationMetadataHttpServletTest {
 
         @Before
         public void setUp() throws Exception {
+
                 KeyPair keyPair = generateKeyPair();
                 DateTime notBefore = new DateTime();
                 DateTime notAfter = notBefore.plusMonths(1);
@@ -89,6 +94,10 @@ public class WSFederationMetadataHttpServletTest {
                 IdPIdentity identity = new IdPIdentity("test",
                         new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),
                                 new Certificate[]{certificate}));
+
+                List<AttributeConfig> attributes = new LinkedList<AttributeConfig>();
+                attributes.add(new AttributeConfig("test", "description",
+                        "uri"));
 
                 ServletTester servletTester = new ServletTester();
                 servletTester.setContextPath("/eid-idp");
@@ -100,6 +109,9 @@ public class WSFederationMetadataHttpServletTest {
                         .createMock(IdentityProviderConfiguration.class);
                 EasyMock.expect(mockConfiguration.findIdentity()).andStubReturn(
                         identity);
+                EasyMock.expect(mockConfiguration.getAttributes(
+                        AbstractWSFederationProtocolService.WS_FED_PROTOCOL_ID))
+                        .andReturn(attributes);
                 EasyMock.replay(mockConfiguration);
                 servletTester.start();
                 servletHolder

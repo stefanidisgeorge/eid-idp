@@ -50,6 +50,12 @@ public interface IdentityProviderConfiguration {
          *         or <code>null</code> if not set.
          */
         String getDefaultIssuer();
+
+        /**
+         * @param protocolId protocol ID
+         * @return list of all configured eID IdP Attributes.
+         */
+        List<AttributeConfig> getAttributes(String protocolId);
 }
 
 

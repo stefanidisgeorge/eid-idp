@@ -52,6 +52,8 @@ public abstract class AbstractWSFederationProtocolService implements
         private static final Log LOG = LogFactory
                 .getLog(AbstractWSFederationProtocolService.class);
 
+        public static final String WS_FED_PROTOCOL_ID = "WS-Federation";
+
         public static final String WCTX_SESSION_ATTRIBUTE =
                 AbstractWSFederationProtocolService.class.getName() + ".wctx";
 
@@ -83,7 +85,7 @@ public abstract class AbstractWSFederationProtocolService implements
         public String getId() {
 
                 LOG.debug("get ID");
-                return "WS-Federation";
+                return WS_FED_PROTOCOL_ID;
         }
 
         @Override

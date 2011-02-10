@@ -32,7 +32,7 @@ public interface AttributeService {
 
         List<AttributeProtocolUriEntity> listAttributeUris();
 
-        AttributeEntity saveAttribute(String name);
+        AttributeEntity saveAttribute(String name, String description, String uri);
 
         RPEntity setAttributes(RPEntity rp, List<String> attributes);
 
