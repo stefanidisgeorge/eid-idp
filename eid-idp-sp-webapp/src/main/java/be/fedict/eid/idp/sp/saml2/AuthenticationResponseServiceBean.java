@@ -20,12 +20,15 @@ package be.fedict.eid.idp.sp.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.sp.PkiServlet;
+import be.fedict.eid.idp.sp.SPBean;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.artifact.ArtifactAuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.crypto.SecretKey;
 import java.io.Serializable;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -49,6 +52,22 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
         @Override
         public int getMaximumTimeOffset() {
                 return 5;
+        }
+
+        @Override
+        public SecretKey getAttributeSecretKey() {
+
+                return SPBean.aes128SecretKey;
+        }
+
+        @Override
+        public PrivateKey getAttributePrivateKey() {
+
+                try {
+                        return PkiServlet.getPrivateKeyEntry().getPrivateKey();
+                } catch (Exception e) {
+                        throw new RuntimeException(e);
+                }
         }
 
         @Override

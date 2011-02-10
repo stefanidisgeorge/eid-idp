@@ -20,6 +20,8 @@ package be.fedict.eid.idp.sp.protocol.saml2.spi;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 
+import javax.crypto.SecretKey;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -48,4 +50,18 @@ public interface AuthenticationResponseService {
          *         fields.
          */
         int getMaximumTimeOffset();
+
+        /**
+         * @return the optional symmetric {@link SecretKey} used to decrypt
+         *         attributes if configured so. Return <code>null</code>
+         *         if not applicable.
+         */
+        SecretKey getAttributeSecretKey();
+
+        /**
+         * @return the optional asymmetric {@link PrivateKey} used to decrypt
+         *         attributes if configured so. Return <code>null</code> if not
+         *         applicable.
+         */
+        PrivateKey getAttributePrivateKey();
 }

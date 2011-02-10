@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.sp.protocol.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;
@@ -27,7 +28,9 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
 import org.opensaml.xml.schema.XSInteger;
@@ -35,7 +38,9 @@ import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 import org.opensaml.xml.util.Base64;
 
+import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
+import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -180,48 +185,101 @@ public abstract class AbstractAuthenticationResponseProcessor {
                         // normal attributes
                         List<Attribute> attributes = attributeStatement.getAttributes();
                         for (Attribute attribute : attributes) {
-                                String attributeName = attribute.getName();
 
-                                if (attribute.getAttributeValues().get(0) instanceof XSString) {
+                                processAttribute(attribute, attributeMap);
+                        }
 
-                                        XSString attributeValue = (XSString) attribute
-                                                .getAttributeValues().get(0);
-                                        attributeMap.put(attributeName, attributeValue.getValue());
+                        // encrypted attributes
+                        if (!attributeStatement.getEncryptedAttributes().isEmpty()) {
 
-                                } else if (attribute.getAttributeValues().get(0) instanceof XSInteger) {
+                                Decrypter decrypter = getDecrypter();
 
-                                        XSInteger attributeValue = (XSInteger) attribute
-                                                .getAttributeValues().get(0);
-                                        attributeMap.put(attributeName, attributeValue.getValue());
+                                for (EncryptedAttribute encryptedAttribute :
+                                        attributeStatement.getEncryptedAttributes()) {
 
-                                } else if (attribute.getAttributeValues().get(0) instanceof XSDateTime) {
+                                        try {
+                                                Attribute attribute =
+                                                        decrypter.decrypt(encryptedAttribute);
+                                                LOG.debug("decrypted attribute: "
+                                                        + attribute.getName());
+                                                processAttribute(attribute, attributeMap);
 
-                                        XSDateTime attributeValue = (XSDateTime) attribute
-                                                .getAttributeValues().get(0);
-                                        attributeMap.put(attributeName, attributeValue.getValue()
-                                                .toDateTime(DateTimeZone.getDefault()));
-
-                                } else if (attribute.getAttributeValues().get(0) instanceof XSBase64Binary) {
-
-                                        XSBase64Binary attributeValue = (XSBase64Binary) attribute
-                                                .getAttributeValues().get(0);
-                                        attributeMap.put(attributeName,
-                                                Base64.decode(attributeValue.getValue()));
-
-                                } else {
-                                        throw new AuthenticationResponseProcessorException(
-                                                "Unsupported attribute of " +
-                                                        "type: " + attribute.getAttributeValues().get(0)
-                                                        .getClass().getName());
+                                        } catch (DecryptionException e) {
+                                                throw new
+                                                        AuthenticationResponseProcessorException(e);
+                                        }
                                 }
                         }
 
-                        // TODO: encrypted attributes
+
                 }
 
                 return new AuthenticationResponse(authenticationTime,
                         identifier, authenticationPolicy, attributeMap,
                         relayState, assertion);
+        }
+
+        private void processAttribute(Attribute attribute,
+                                      Map<String, Object> attributeMap)
+                throws AuthenticationResponseProcessorException {
+
+                String attributeName = attribute.getName();
+
+                if (attribute.getAttributeValues().get(0) instanceof XSString) {
+
+                        XSString attributeValue = (XSString) attribute
+                                .getAttributeValues().get(0);
+                        attributeMap.put(attributeName, attributeValue.getValue());
+
+                } else if (attribute.getAttributeValues().get(0) instanceof XSInteger) {
+
+                        XSInteger attributeValue = (XSInteger) attribute
+                                .getAttributeValues().get(0);
+                        attributeMap.put(attributeName, attributeValue.getValue());
+
+                } else if (attribute.getAttributeValues().get(0) instanceof XSDateTime) {
+
+                        XSDateTime attributeValue = (XSDateTime) attribute
+                                .getAttributeValues().get(0);
+                        attributeMap.put(attributeName, attributeValue.getValue()
+                                .toDateTime(DateTimeZone.getDefault()));
+
+                } else if (attribute.getAttributeValues().get(0) instanceof XSBase64Binary) {
+
+                        XSBase64Binary attributeValue = (XSBase64Binary) attribute
+                                .getAttributeValues().get(0);
+                        attributeMap.put(attributeName,
+                                Base64.decode(attributeValue.getValue()));
+
+                } else {
+                        throw new AuthenticationResponseProcessorException(
+                                "Unsupported attribute of " +
+                                        "type: " + attribute.getAttributeValues().get(0)
+                                        .getClass().getName());
+                }
+        }
+
+        private Decrypter getDecrypter()
+                throws AuthenticationResponseProcessorException {
+
+                SecretKey secretKey =
+                        getAuthenticationResponseService()
+                                .getAttributeSecretKey();
+                PrivateKey privateKey =
+                        getAuthenticationResponseService()
+                                .getAttributePrivateKey();
+
+                if (null == secretKey && null == privateKey) {
+                        throw new AuthenticationResponseProcessorException(
+                                "Encrypted attributes were returned but " +
+                                        "no decryption keys were specified.");
+                }
+
+                if (null != privateKey) {
+                        return Saml2Util.getDecrypter(privateKey);
+                }
+
+                return Saml2Util.getDecrypter(secretKey);
         }
 
         protected abstract Response getSamlResponse(HttpServletRequest request)
