@@ -33,7 +33,7 @@ public class SPBean {
 
         private HttpServletRequest request;
 
-        private static SecretKey aes128SecretKey;
+        public static SecretKey aes128SecretKey;
 
         static {
 
