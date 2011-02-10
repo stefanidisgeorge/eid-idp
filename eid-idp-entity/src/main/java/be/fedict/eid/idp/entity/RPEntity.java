@@ -22,7 +22,7 @@ import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -84,8 +84,8 @@ public class RPEntity implements Serializable {
 
         // attribute secret
         private SecretKeyAlgorithm attributeSecretAlgorithm;
-        private String attributeSymmetricSecretKey;
-        private byte[] attributeAsymmetricSecretKey;
+        private String attributeSecretKey;
+        private byte[] attributePublicKey;
 
         // attributes
         private List<RPAttributeEntity> attributes;
@@ -95,8 +95,8 @@ public class RPEntity implements Serializable {
                         boolean requestSigningRequired,
                         String identifierSecretKey,
                         SecretKeyAlgorithm attributeSecretAlgorithm,
-                        String attributeSymmetricSecretKey,
-                        byte[] attributeAsymmetricSecretKey)
+                        String attributeSecretKey,
+                        byte[] attributePublicKey)
                 throws CertificateEncodingException {
 
                 this.name = name;
@@ -106,8 +106,8 @@ public class RPEntity implements Serializable {
                 this.requestSigningRequired = requestSigningRequired;
                 this.identifierSecretKey = identifierSecretKey;
                 this.attributeSecretAlgorithm = attributeSecretAlgorithm;
-                this.attributeSymmetricSecretKey = attributeSymmetricSecretKey;
-                this.attributeAsymmetricSecretKey = attributeAsymmetricSecretKey;
+                this.attributeSecretKey = attributeSecretKey;
+                this.attributePublicKey = attributePublicKey;
                 this.attributes = new LinkedList<RPAttributeEntity>();
         }
 
@@ -244,28 +244,28 @@ public class RPEntity implements Serializable {
         }
 
         @Column(nullable = true)
-        public String getAttributeSymmetricSecretKey() {
-                return this.attributeSymmetricSecretKey;
+        public String getAttributeSecretKey() {
+                return this.attributeSecretKey;
         }
 
-        public void setAttributeSymmetricSecretKey(String attributeSymmetricSecretKey) {
-                this.attributeSymmetricSecretKey = attributeSymmetricSecretKey;
+        public void setAttributeSecretKey(String attributeSecretKey) {
+                this.attributeSecretKey = attributeSecretKey;
         }
 
         @Column(length = 4 * 1024, nullable = true)
         @Basic(fetch = FetchType.EAGER)
-        public byte[] getAttributeAsymmetricSecretKey() {
-                return this.attributeAsymmetricSecretKey;
+        public byte[] getAttributePublicKey() {
+                return this.attributePublicKey;
         }
 
-        public void setAttributeAsymmetricSecretKey(byte[] attributeAsymmetricSecretKey) {
-                this.attributeAsymmetricSecretKey = attributeAsymmetricSecretKey;
+        public void setAttributePublicKey(byte[] attributePublicKey) {
+                this.attributePublicKey = attributePublicKey;
         }
 
         @Transient
-        public void setAttributeAssymetricSecret(PrivateKey privateKey) {
+        public void setAttributePublicKey(PublicKey publicKey) {
 
-                this.attributeAsymmetricSecretKey = privateKey.getEncoded();
+                this.attributePublicKey = publicKey.getEncoded();
         }
 
         @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE,

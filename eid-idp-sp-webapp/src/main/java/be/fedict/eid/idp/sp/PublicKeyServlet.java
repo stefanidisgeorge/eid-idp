@@ -31,11 +31,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class PrivateKeyServlet extends HttpServlet {
+public class PublicKeyServlet extends HttpServlet {
 
         private static final long serialVersionUID = 1L;
 
-        private static final Log LOG = LogFactory.getLog(PrivateKeyServlet.class);
+        private static final Log LOG = LogFactory.getLog(PublicKeyServlet.class);
 
         @Override
         protected void doGet(HttpServletRequest request,
@@ -44,7 +44,8 @@ public class PrivateKeyServlet extends HttpServlet {
                 LOG.debug("doGet");
                 String pemPrivate;
                 try {
-                        pemPrivate = toPem(PkiServlet.getPrivateKeyEntry().getPrivateKey());
+                        pemPrivate = toPem(PkiServlet.getPrivateKeyEntry().
+                                getCertificate().getPublicKey());
                 } catch (Exception e) {
                         LOG.error(e);
                         return;

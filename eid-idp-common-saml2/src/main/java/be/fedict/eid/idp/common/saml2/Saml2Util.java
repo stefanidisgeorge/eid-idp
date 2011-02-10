@@ -32,6 +32,9 @@ import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.encryption.Decrypter;
+import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
+import org.opensaml.saml2.encryption.Encrypter;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.ws.wstrust.*;
@@ -40,15 +43,23 @@ import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.encryption.EncryptionConstants;
+import org.opensaml.xml.encryption.EncryptionException;
+import org.opensaml.xml.encryption.EncryptionParameters;
+import org.opensaml.xml.encryption.KeyEncryptionParameters;
 import org.opensaml.xml.io.*;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
 import org.opensaml.xml.schema.XSInteger;
 import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
+import org.opensaml.xml.security.credential.BasicCredential;
+import org.opensaml.xml.security.keyinfo.*;
 import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 import org.opensaml.xml.signature.*;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.SignatureException;
+import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.validation.ValidationException;
@@ -56,6 +67,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.crypto.SecretKey;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -74,9 +86,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -267,6 +277,9 @@ public abstract class Saml2Util {
          * @param authenticationFlow authentication flow
          * @param userId             user ID
          * @param attributes         map of user's attributes
+         * @param secretKey          optional symmetric SecretKey used for
+         *                           encryption
+         * @param publicKey          optional RSA public key used for encryption
          * @return the unsigned SAML v2.0 assertion.
          */
         public static Assertion getAssertion(String issuerName,
@@ -275,7 +288,8 @@ public abstract class Saml2Util {
                                              DateTime issueInstant,
                                              IdentityProviderFlow authenticationFlow,
                                              String userId,
-                                             Map<String, be.fedict.eid.idp.spi.Attribute> attributes) {
+                                             Map<String, be.fedict.eid.idp.spi.Attribute> attributes,
+                                             SecretKey secretKey, PublicKey publicKey) {
 
                 Assertion assertion = buildXMLObject(Assertion.class,
                         Assertion.DEFAULT_ELEMENT_NAME);
@@ -369,56 +383,112 @@ public abstract class Saml2Util {
                                 AttributeStatement.DEFAULT_ELEMENT_NAME);
                 attributeStatements.add(attributeStatement);
 
+                // get encryptor if needed
+                Encrypter encrypter = getEncrypter(secretKey, publicKey);
+
                 for (Map.Entry<String, be.fedict.eid.idp.spi.Attribute> attributeEntry
                         : attributes.entrySet()) {
 
-                        addAttribute(attributeEntry.getValue(), attributeStatement);
+                        addAttribute(attributeEntry.getValue(),
+                                attributeStatement, encrypter);
                 }
 
                 return assertion;
         }
 
-        private static void addAttribute(be.fedict.eid.idp.spi.Attribute attribute,
-                                         AttributeStatement attributeStatement) {
+        private static Encrypter getEncrypter(SecretKey secretKey, PublicKey publicKey) {
 
+                if (null != publicKey) {
+
+                        return getEncrypter(getAlgorithm(secretKey), secretKey,
+                                publicKey);
+
+                } else if (null != secretKey) {
+
+                        return getEncrypter(getAlgorithm(secretKey), secretKey);
+
+                } else {
+                        return null;
+                }
+        }
+
+        private static String getAlgorithm(SecretKey secretKey) {
+
+                if (null == secretKey) {
+                        return null;
+                }
+
+                if (secretKey.getAlgorithm().equals("AES")) {
+                        return EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128;
+                } else {
+                        throw new RuntimeException("SecretKey algorithm: " +
+                                secretKey.getAlgorithm() + " not supported.");
+                }
+
+        }
+
+        private static void addAttribute(be.fedict.eid.idp.spi.Attribute attribute,
+                                         AttributeStatement attributeStatement,
+                                         Encrypter encrypter) {
+
+                Attribute samlAttribute;
                 switch (attribute.getAttributeType()) {
 
                         case STRING:
-                                addAttribute(attribute.getUri(),
-                                        (String) attribute.getValue(),
-                                        attributeStatement);
-                                return;
+                                samlAttribute = getAttribute(attribute.getUri(),
+                                        (String) attribute.getValue());
+                                break;
                         case INTEGER:
-                                addAttribute(attribute.getUri(),
-                                        (Integer) attribute.getValue(),
-                                        attributeStatement);
-                                return;
+                                samlAttribute = getAttribute(attribute.getUri(),
+                                        (Integer) attribute.getValue());
+                                break;
                         case DATE:
-                                addAttribute(attribute.getUri(),
-                                        (GregorianCalendar) attribute.getValue(),
-                                        attributeStatement);
-                                return;
+                                samlAttribute = getAttribute(attribute.getUri(),
+                                        (GregorianCalendar) attribute.getValue());
+                                break;
                         case BINARY:
-                                addAttribute(attribute.getUri(),
-                                        (byte[]) attribute.getValue(),
-                                        attributeStatement);
-                                return;
+                                samlAttribute = getAttribute(attribute.getUri(),
+                                        (byte[]) attribute.getValue());
+                                break;
+                        default:
+                                throw new RuntimeException("Attribute " +
+                                        attribute.getUri() + " of type \"" +
+                                        attribute.getAttributeType().getType() +
+                                        " not supported!");
                 }
 
-                throw new RuntimeException("Attribute " + attribute.getUri() +
-                        " of type \"" + attribute.getAttributeType().getType() +
-                        " not supported!");
+                if (attribute.isEncrypted()) {
+
+                        // encrypted
+                        if (null == encrypter) {
+                                throw new RuntimeException("Encrypted attribute " +
+                                        "needed but no encryption info was provided.");
+                        }
+
+                        if (null != attribute) {
+                                try {
+                                        attributeStatement
+                                                .getEncryptedAttributes()
+                                                .add(encrypter.encrypt(samlAttribute));
+                                } catch (EncryptionException e) {
+                                        throw new RuntimeException(e);
+                                }
+                        }
+
+                } else {
+
+                        if (null != attribute) {
+                                attributeStatement.getAttributes().add(samlAttribute);
+                        }
+                }
         }
 
         @SuppressWarnings("unchecked")
-        private static void addAttribute(String attributeName, String attributeValue,
-                                         AttributeStatement attributeStatement) {
-
-                List<Attribute> attributes = attributeStatement.getAttributes();
+        private static Attribute getAttribute(String attributeName,
+                                              String attributeValue) {
 
                 Attribute attribute = buildXMLObject(Attribute.class, Attribute.DEFAULT_ELEMENT_NAME);
                 attribute.setName(attributeName);
-                attributes.add(attribute);
 
                 XMLObjectBuilder<XSString> builder =
                         Configuration.getBuilderFactory().getBuilder(XSString.TYPE_NAME);
@@ -426,17 +496,15 @@ public abstract class Saml2Util {
                         AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
                 xmlAttributeValue.setValue(attributeValue);
                 attribute.getAttributeValues().add(xmlAttributeValue);
+                return attribute;
         }
 
         @SuppressWarnings("unchecked")
-        private static void addAttribute(String attributeName, Integer attributeValue,
-                                         AttributeStatement attributeStatement) {
-
-                List<Attribute> attributes = attributeStatement.getAttributes();
+        private static Attribute getAttribute(String attributeName,
+                                              Integer attributeValue) {
 
                 Attribute attribute = buildXMLObject(Attribute.class, Attribute.DEFAULT_ELEMENT_NAME);
                 attribute.setName(attributeName);
-                attributes.add(attribute);
 
                 XMLObjectBuilder<XSInteger> builder =
                         Configuration.getBuilderFactory().getBuilder(XSInteger.TYPE_NAME);
@@ -444,18 +512,15 @@ public abstract class Saml2Util {
                         AttributeValue.DEFAULT_ELEMENT_NAME, XSInteger.TYPE_NAME);
                 xmlAttributeValue.setValue(attributeValue);
                 attribute.getAttributeValues().add(xmlAttributeValue);
+                return attribute;
         }
 
         @SuppressWarnings("unchecked")
-        private static void addAttribute(String attributeName,
-                                         GregorianCalendar attributeValue,
-                                         AttributeStatement attributeStatement) {
-
-                List<Attribute> attributes = attributeStatement.getAttributes();
+        private static Attribute getAttribute(String attributeName,
+                                              GregorianCalendar attributeValue) {
 
                 Attribute attribute = buildXMLObject(Attribute.class, Attribute.DEFAULT_ELEMENT_NAME);
                 attribute.setName(attributeName);
-                attributes.add(attribute);
 
                 XMLObjectBuilder<XSDateTime> builder =
                         Configuration.getBuilderFactory().getBuilder(XSDateTime.TYPE_NAME);
@@ -463,17 +528,15 @@ public abstract class Saml2Util {
                         AttributeValue.DEFAULT_ELEMENT_NAME, XSDateTime.TYPE_NAME);
                 xmlAttributeValue.setValue(new DateTime(attributeValue.getTime()));
                 attribute.getAttributeValues().add(xmlAttributeValue);
+                return attribute;
         }
 
         @SuppressWarnings("unchecked")
-        private static void addAttribute(String attributeName, byte[] attributeValue,
-                                         AttributeStatement attributeStatement) {
-
-                List<Attribute> attributes = attributeStatement.getAttributes();
+        private static Attribute getAttribute(String attributeName,
+                                              byte[] attributeValue) {
 
                 Attribute attribute = buildXMLObject(Attribute.class, Attribute.DEFAULT_ELEMENT_NAME);
                 attribute.setName(attributeName);
-                attributes.add(attribute);
 
                 XMLObjectBuilder<XSBase64Binary> builder =
                         Configuration.getBuilderFactory().getBuilder(XSBase64Binary.TYPE_NAME);
@@ -481,6 +544,124 @@ public abstract class Saml2Util {
                         AttributeValue.DEFAULT_ELEMENT_NAME, XSBase64Binary.TYPE_NAME);
                 xmlAttributeValue.setValue(Base64.encodeBytes(attributeValue));
                 attribute.getAttributeValues().add(xmlAttributeValue);
+                return attribute;
+        }
+
+        /**
+         * Returns a SAML v2.0 XML {@link Encrypter} for symmetric keys
+         *
+         * @param algorithm secret key algorithm
+         * @param secretKey the symmetric secret key
+         * @return the encrypter
+         */
+        public static Encrypter getEncrypter(String algorithm,
+                                             SecretKey secretKey) {
+
+                LOG.debug("get encrypter: secret.algo=" + algorithm);
+
+                KeyInfo keyInfo = buildXMLObject(KeyInfo.class,
+                        KeyInfo.DEFAULT_ELEMENT_NAME);
+
+                BasicCredential encryptionCredential = new BasicCredential();
+                encryptionCredential.setSecretKey(secretKey);
+
+                EncryptionParameters encParams = new EncryptionParameters();
+                encParams.setKeyInfoGenerator(new StaticKeyInfoGenerator(keyInfo));
+                encParams.setAlgorithm(algorithm);
+                encParams.setEncryptionCredential(encryptionCredential);
+
+                List<KeyEncryptionParameters> kekParamsList =
+                        new ArrayList<KeyEncryptionParameters>();
+
+
+                return new Encrypter(encParams, kekParamsList);
+        }
+
+        /**
+         * Returns a SAML v2.0 XML {@link Decrypter} for symmetric keys
+         *
+         * @param secretKey the symmetric secret key
+         * @return the decrypter
+         */
+        public static Decrypter getDecrypter(SecretKey secretKey) {
+
+                BasicCredential encryptionCredential = new BasicCredential();
+                encryptionCredential.setSecretKey(secretKey);
+
+                KeyInfoCredentialResolver keyResolver =
+                        new StaticKeyInfoCredentialResolver(encryptionCredential);
+
+                return new Decrypter(keyResolver, null, null);
+        }
+
+        /**
+         * Returns a SAML v2.0 XML {@link Encrypter} using symmetric keys
+         * transported using an asymmetric key.
+         * <p/>
+         * The symmetric key is auto-generated AES-128 if not specified
+         *
+         * @param algorithm secret key algorithm
+         * @param secretKey the symmetric secret key or <code>null</code>
+         * @param kekPublic the Key Encrypting RSA PublicKey
+         * @return the encrypter
+         */
+        public static Encrypter getEncrypter(String algorithm,
+                                             SecretKey secretKey,
+                                             PublicKey kekPublic) {
+
+                LOG.debug("get encrypter: secret.algo=" + algorithm +
+                        " public: " + kekPublic);
+                BasicCredential keyEncryptionCredential = new BasicCredential();
+                keyEncryptionCredential.setPublicKey(kekPublic);
+
+                EncryptionParameters encParams = new EncryptionParameters();
+                encParams.setAlgorithm(EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128);
+                if (null != secretKey) {
+
+                        BasicCredential encryptionCredential = new BasicCredential();
+                        encryptionCredential.setSecretKey(secretKey);
+
+                        KeyInfo keyInfo = buildXMLObject(KeyInfo.class,
+                                KeyInfo.DEFAULT_ELEMENT_NAME);
+
+                        encParams.setKeyInfoGenerator(new StaticKeyInfoGenerator(keyInfo));
+                        encParams.setAlgorithm(algorithm);
+                        encParams.setEncryptionCredential(encryptionCredential);
+                }
+
+                KeyEncryptionParameters kekParams = new KeyEncryptionParameters();
+                kekParams.setEncryptionCredential(keyEncryptionCredential);
+                kekParams.setAlgorithm(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15);
+                KeyInfoGeneratorFactory kigf =
+                        Configuration.getGlobalSecurityConfiguration()
+                                .getKeyInfoGeneratorManager().getDefaultManager()
+                                .getFactory(keyEncryptionCredential);
+                kekParams.setKeyInfoGenerator(kigf.newInstance());
+
+                Encrypter encrypter = new Encrypter(encParams, kekParams);
+                encrypter.setKeyPlacement(Encrypter.KeyPlacement.PEER);
+
+                return encrypter;
+        }
+
+        /**
+         * Returns a SAML v2.0 XML {@link Decrypter} for symmetric keys
+         * transported using an asymmetric key.
+         *
+         * @param privateKey the RSA private key
+         * @return the decrypter
+         */
+        public static Decrypter getDecrypter(PrivateKey privateKey) {
+
+                BasicCredential decryptCredential = new BasicCredential();
+                decryptCredential.setPrivateKey(privateKey);
+
+                StaticKeyInfoCredentialResolver skicr =
+                        new StaticKeyInfoCredentialResolver(decryptCredential);
+
+                return new Decrypter(
+                        null, skicr, new EncryptedElementTypeEncryptedKeyResolver());
+
         }
 
         /**

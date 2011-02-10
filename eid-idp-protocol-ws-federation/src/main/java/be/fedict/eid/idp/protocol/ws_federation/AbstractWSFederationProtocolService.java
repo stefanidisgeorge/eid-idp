@@ -28,6 +28,7 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.ws.wstrust.*;
 import org.w3c.dom.Element;
 
+import javax.crypto.SecretKey;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +37,7 @@ import javax.servlet.http.HttpSession;
 import javax.xml.transform.TransformerException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.Map;
 
 /**
@@ -112,6 +114,7 @@ public abstract class AbstractWSFederationProtocolService implements
         public ReturnResponse handleReturnResponse(HttpSession httpSession,
                                                    String userId,
                                                    Map<String, Attribute> attributes,
+                                                   SecretKey secretKey, PublicKey publicKey,
                                                    String rpTargetUrl,
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
@@ -128,13 +131,15 @@ public abstract class AbstractWSFederationProtocolService implements
                 String wctx = retrieveWctx(httpSession);
                 returnResponse.addAttribute("wctx", wctx);
 
-                String wresult = getWResult(wctx, wtrealm, userId, attributes);
+                String wresult = getWResult(wctx, wtrealm, userId, attributes,
+                        secretKey, publicKey);
                 returnResponse.addAttribute("wresult", wresult);
                 return returnResponse;
         }
 
         private String getWResult(String wctx, String wtrealm,
-                                  String userId, Map<String, Attribute> attributes)
+                                  String userId, Map<String, Attribute> attributes,
+                                  SecretKey secretKey, PublicKey publicKey)
                 throws TransformerException, IOException {
 
                 RequestSecurityTokenResponseCollection requestSecurityTokenResponseCollection =
@@ -186,7 +191,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 DateTime issueInstantDateTime = new DateTime();
                 Assertion assertion = Saml2Util.getAssertion(issuerName, null,
                         wtrealm, issueInstantDateTime, getAuthenticationFlow(),
-                        userId, attributes);
+                        userId, attributes, secretKey, publicKey);
 
                 requestedSecurityToken.setUnknownXMLObject(assertion);
 

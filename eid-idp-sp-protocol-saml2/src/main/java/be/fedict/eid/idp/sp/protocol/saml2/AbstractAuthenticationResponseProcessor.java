@@ -176,6 +176,8 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 if (!attributeStatements.isEmpty()) {
 
                         AttributeStatement attributeStatement = attributeStatements.get(0);
+
+                        // normal attributes
                         List<Attribute> attributes = attributeStatement.getAttributes();
                         for (Attribute attribute : attributes) {
                                 String attributeName = attribute.getName();
@@ -213,6 +215,8 @@ public abstract class AbstractAuthenticationResponseProcessor {
                                                         .getClass().getName());
                                 }
                         }
+
+                        // TODO: encrypted attributes
                 }
 
                 return new AuthenticationResponse(authenticationTime,

@@ -24,6 +24,7 @@ import javax.ejb.Local;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.List;
 
 @Local
@@ -44,14 +45,14 @@ public interface RP {
 
         void setSelectedTab(String selectedTab);
 
-        PrivateKey getAttributeAssymetricSecret();
+        PublicKey getAttributePublicKey();
 
         /*
         * Listeners.
         */
         void uploadListener(UploadEvent event) throws IOException;
 
-        void uploadListenerSecret(UploadEvent event) throws IOException;
+        void uploadListenerPublic(UploadEvent event) throws IOException;
 
         /*
         * Factories

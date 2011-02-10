@@ -67,8 +67,13 @@
 
                         <h:outputText
                                 value="HMAC-SHA1 Identifier Secret (hexadecimal)"/>
-                        <h:inputText value="#{selectedRP.identifierSecretKey}"
-                                     size="50"/>
+                        <s:decorate>
+                            <h:inputText
+                                    value="#{selectedRP.identifierSecretKey}"
+                                    id="identifier_secret" size="50"/>
+                            <h:message for="identifier_secret"
+                                       styleClass="error"/>
+                        </s:decorate>
 
                         <h:outputText value="Attribute Secret Algorithm"/>
                         <h:selectOneMenu
@@ -80,30 +85,28 @@
                                 value="Attribute Secret (hexadecimal)"/>
                         <s:decorate>
                             <h:inputText
-                                    value="#{selectedRP.attributeSymmetricSecretKey}"
-                                    id="attr_secret_sym" size="50"/>
-                            <h:message for="attr_secret_sym"
-                                       styleClass="error"/>
+                                    value="#{selectedRP.attributeSecretKey}"
+                                    id="attr_secret" size="50"/>
+                            <h:message for="attr_secret" styleClass="error"/>
                         </s:decorate>
 
-                        <h:outputLabel for="upload_secret"
-                                       value="Attribute Secret Private Key"/>
+                        <h:outputLabel for="upload_public"
+                                       value="Attribute Public Key"/>
                         <rich:fileUpload
-                                fileUploadListener="#{idpRP.uploadListenerSecret}"
-                                id="upload_secret" immediateUpload="true">
+                                fileUploadListener="#{idpRP.uploadListenerPublic}"
+                                id="upload_public" immediateUpload="true">
                         </rich:fileUpload>
-                        <h:message for="upload_secret"
-                                   styleClass="error"/>
+                        <h:message for="upload_public" styleClass="error"/>
 
                     </h:panelGrid>
 
                     <p>
                         <rich:simpleTogglePanel switchType="client"
                                                 opened="false"
-                                                rendered="#{idpRP.attributeAssymetricSecret != null}"
-                                                label="Attribute Secret Private Key">
+                                                rendered="#{idpRP.attributePublicKey != null}"
+                                                label="Attribute Public Key">
                             <h:outputText styleClass="text block"
-                                          value="#{idpRP.attributeAssymetricSecret}"/>
+                                          value="#{idpRP.attributePublicKey}"/>
                         </rich:simpleTogglePanel>
                     </p>
 

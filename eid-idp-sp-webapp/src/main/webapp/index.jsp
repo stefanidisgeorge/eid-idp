@@ -65,13 +65,22 @@
             </li>
         </ul>
 
+        <h2>SP Identity</h2>
 
         <p>Download the Test Service Provider's Certificate
             <a href="./pki">here</a>
         </p>
 
-        <p>Download the Test Service Provider's Private Key
-            <a href="./private">here</a>
+        <p>Download the Test Service Provider's Public Key
+            <a href="./public">here</a>
         </p>
+
+        <jsp:useBean id="sp" scope="request"
+                     class="be.fedict.eid.idp.sp.SPBean"/>
+        <p>
+            AES-128 secret:
+            <jsp:getProperty name="sp" property="aes128SecretKey"/>
+        </p>
+
     </body>
 </html>
