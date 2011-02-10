@@ -185,20 +185,21 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
                 endpoint.setAddress(address);
                 address.setValue(location);
 
-                KeyDescriptor keyDescriptor =
-                        Saml2Util.buildXMLObject(KeyDescriptor.class,
-                                KeyDescriptor.DEFAULT_ELEMENT_NAME);
-                securityTokenService.getKeyDescriptors().add(keyDescriptor);
-                keyDescriptor.setUse(UsageType.SIGNING);
-
-                org.opensaml.xml.signature.KeyInfo keyInfo =
-                        Saml2Util.buildXMLObject(org.opensaml.xml.signature.KeyInfo.class,
-                                org.opensaml.xml.signature.KeyInfo.DEFAULT_ELEMENT_NAME);
-                keyDescriptor.setKeyInfo(keyInfo);
-
                 IdPIdentity identity = configuration.findIdentity();
                 try {
                         if (null != identity) {
+
+                                KeyDescriptor keyDescriptor =
+                                        Saml2Util.buildXMLObject(KeyDescriptor.class,
+                                                KeyDescriptor.DEFAULT_ELEMENT_NAME);
+                                securityTokenService.getKeyDescriptors().add(keyDescriptor);
+                                keyDescriptor.setUse(UsageType.SIGNING);
+
+                                org.opensaml.xml.signature.KeyInfo keyInfo =
+                                        Saml2Util.buildXMLObject(org.opensaml.xml.signature.KeyInfo.class,
+                                                org.opensaml.xml.signature.KeyInfo.DEFAULT_ELEMENT_NAME);
+                                keyDescriptor.setKeyInfo(keyInfo);
+
                                 KeyInfoHelper.addCertificate(keyInfo,
                                         (X509Certificate) identity.
                                                 getPrivateKeyEntry().
@@ -284,7 +285,6 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
                                 entityDescriptor, identity.getPrivateKeyEntry());
                 } else {
 
-                        // TODO: explode here? will fail at RP for sure if not signed so ...
                         LOG.warn("WS-Federation Metadata NOT signed!");
                         element = Saml2Util.marshall(entityDescriptor);
                 }

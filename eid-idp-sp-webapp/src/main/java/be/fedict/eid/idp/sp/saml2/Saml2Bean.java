@@ -56,11 +56,6 @@ public class Saml2Bean {
 
                 LOG.debug("set SAML2 Artifact Service endpoint");
 
-//                TODO: SSL ...
-//                StartupServletContextListener.getSaml2ResponseBean().
-//                        setArtifactServiceLocation("http://" +
-//                                this.request.getServerName() + ":8080" +
-//                                "/eid-idp/ws/saml2/artifact");
                 StartupServletContextListener.getSaml2ResponseBean().
                         setArtifactServiceLocation("https://" +
                                 this.request.getServerName() + ':' +
