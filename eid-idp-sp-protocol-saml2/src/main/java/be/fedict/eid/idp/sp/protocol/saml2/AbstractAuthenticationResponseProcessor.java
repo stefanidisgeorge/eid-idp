@@ -70,15 +70,29 @@ public abstract class AbstractAuthenticationResponseProcessor {
         /**
          * Process the incoming SAML v2.0 response.
          *
-         * @param request the HTTP servlet request that holds the SAML2 response.
+         * @param requestId  AuthnRequest.ID, should match response's InResponseTo
+         * @param recipient  recipient, should match response's
+         *                   Subject.SubjectConfirmation.Recipient
+         * @param relayState optional expected relay state
+         * @param request    the HTTP servlet request that holds the SAML2 response.
          * @return the SAML2 {@link AuthenticationResponse}
          * @throws AuthenticationResponseProcessorException
          *          case something went wrong
          */
-        public AuthenticationResponse process(HttpServletRequest request)
+        public AuthenticationResponse process(String requestId, String recipient,
+                                              String relayState,
+                                              HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
 
                 Response samlResponse = getSamlResponse(request);
+                DateTime now = new DateTime();
+
+                // validate InResponseTo
+                if (!samlResponse.getInResponseTo().equals(requestId)) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "SAML Response not belonging to AuthnRequest!");
+                }
 
                 // validate status
                 Status status = samlResponse.getStatus();
@@ -104,34 +118,7 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 }
 
                 // validate assertion conditions
-                DateTime now = new DateTime();
-                Conditions conditions = assertion.getConditions();
-                DateTime notBefore = conditions.getNotBefore();
-                DateTime notOnOrAfter = conditions.getNotOnOrAfter();
-
-                LOG.debug("now: " + now.toString());
-                LOG.debug("notBefore: " + notBefore.toString());
-                LOG.debug("notOnOrAfter : " + notOnOrAfter.toString());
-
-                int maxOffset = 5;
-                AuthenticationResponseService service =
-                        getAuthenticationResponseService();
-                if (null != service) {
-                        maxOffset = service.getMaximumTimeOffset();
-                }
-                if (maxOffset >= 0) {
-                        if (now.isBefore(notBefore)) {
-                                // time skew
-                                if (now.plusMinutes(maxOffset).isBefore(notBefore) ||
-                                        now.minusMinutes(maxOffset).isAfter(notOnOrAfter)) {
-                                        throw new AuthenticationResponseProcessorException(
-                                                "SAML2 assertion validation: invalid SAML message timeframe");
-                                }
-                        } else if (now.isBefore(notBefore) || now.isAfter(notOnOrAfter)) {
-                                throw new AuthenticationResponseProcessorException(
-                                        "SAML2 assertion validation: invalid SAML message timeframe");
-                        }
-                }
+                validateConditions(now, assertion.getConditions(), recipient);
 
                 // validate authn statement
                 AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
@@ -160,9 +147,11 @@ public abstract class AbstractAuthenticationResponseProcessor {
                                         KeyInfoHelper.getCertificates(samlResponse
                                                 .getSignature().getKeyInfo());
 
-                                if (null != service) {
-                                        service.validateServiceCertificate(
-                                                authenticationPolicy, certChain);
+                                if (null != getAuthenticationResponseService()) {
+                                        getAuthenticationResponseService().
+                                                validateServiceCertificate(
+                                                        authenticationPolicy,
+                                                        certChain);
                                 }
                         } catch (CertificateException e) {
                                 throw new AuthenticationResponseProcessorException(e);
@@ -172,9 +161,25 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 Subject subject = assertion.getSubject();
                 NameID nameId = subject.getNameID();
 
+                // validate subject confirmation
+                validateSubjectConfirmation(subject, requestId, recipient, now);
+
+                // validate optional relaystate
+                String returnedRelayState = request.getParameter(RELAY_STATE_PARAM);
+                if (null != relayState) {
+                        if (!relayState.equals(returnedRelayState)) {
+                                throw new AuthenticationResponseProcessorException(
+                                        "Returned RelayState does not match original RelayState");
+                        }
+                } else {
+                        if (null != returnedRelayState) {
+                                throw new AuthenticationResponseProcessorException(
+                                        "Did not expect RelayState to be returned.");
+                        }
+                }
+
                 String identifier = nameId.getValue();
                 Map<String, Object> attributeMap = new HashMap<String, Object>();
-                String relayState = request.getParameter(RELAY_STATE_PARAM);
 
                 List<AttributeStatement> attributeStatements = assertion
                         .getAttributeStatements();
@@ -217,6 +222,123 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 return new AuthenticationResponse(authenticationTime,
                         identifier, authenticationPolicy, attributeMap,
                         relayState, assertion);
+        }
+
+        private void validateConditions(DateTime now, Conditions conditions,
+                                        String recipient)
+                throws AuthenticationResponseProcessorException {
+
+                // time validation
+                validateTime(now, conditions.getNotBefore(),
+                        conditions.getNotOnOrAfter());
+
+                // audience restriction
+                if (conditions.getAudienceRestrictions().isEmpty() ||
+                        conditions.getAudienceRestrictions().size() != 1) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "Expect exactly 1 audience restriction but got " +
+                                        "0 or more");
+                }
+                AudienceRestriction audienceRestriction =
+                        conditions.getAudienceRestrictions().get(0);
+                if (audienceRestriction.getAudiences().isEmpty() ||
+                        audienceRestriction.getAudiences().size() != 1) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "Expect exactly 1 audience but got 0 or more");
+                }
+
+                Audience audience = audienceRestriction.getAudiences().get(0);
+                if (!audience.getAudienceURI().equals(recipient)) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "AudienceURI does not match expected recipient");
+                }
+
+                // OneTimeUse
+                if (null == conditions.getOneTimeUse()) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "Assertion is not one-time-use.");
+                }
+        }
+
+        private void validateSubjectConfirmation(Subject subject,
+                                                 String requestId,
+                                                 String recipient,
+                                                 DateTime now)
+                throws AuthenticationResponseProcessorException {
+
+                if (subject.getSubjectConfirmations().isEmpty() ||
+                        subject.getSubjectConfirmations().size() != 1) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "Expected exactly 1 SubjectConfirmation but got 0 or more");
+                }
+                SubjectConfirmation subjectConfirmation =
+                        subject.getSubjectConfirmations().get(0);
+
+                // method
+                if (!subjectConfirmation.getMethod().equals(SubjectConfirmation.METHOD_BEARER)) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "Subjectconfirmation method: " +
+                                        subjectConfirmation.getMethod() +
+                                        " is not supported.");
+                }
+
+                SubjectConfirmationData subjectConfirmationData =
+                        subjectConfirmation.getSubjectConfirmationData();
+
+                // InResponseTo
+                if (!subjectConfirmationData.getInResponseTo().equals(requestId)) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "SubjectConfirmationData not belonging to " +
+                                        "AuthnRequest!");
+                }
+
+                // recipient
+                if (!subjectConfirmationData.getRecipient().equals(recipient)) {
+
+                        throw new AuthenticationResponseProcessorException(
+                                "SubjectConfirmationData recipient does not " +
+                                        "match expected recipient");
+                }
+
+                // time validation
+                validateTime(now, subjectConfirmationData.getNotBefore(),
+                        subjectConfirmationData.getNotOnOrAfter());
+        }
+
+        private void validateTime(DateTime now, DateTime notBefore,
+                                  DateTime notOnOrAfter)
+                throws AuthenticationResponseProcessorException {
+
+                LOG.debug("now: " + now.toString());
+                LOG.debug("notBefore: " + notBefore.toString());
+                LOG.debug("notOnOrAfter : " + notOnOrAfter.toString());
+
+                int maxOffset = 5;
+                AuthenticationResponseService service =
+                        getAuthenticationResponseService();
+                if (null != service) {
+                        maxOffset = service.getMaximumTimeOffset();
+                }
+                if (maxOffset >= 0) {
+                        if (now.isBefore(notBefore)) {
+                                // time skew
+                                if (now.plusMinutes(maxOffset).isBefore(notBefore) ||
+                                        now.minusMinutes(maxOffset).isAfter(notOnOrAfter)) {
+                                        throw new AuthenticationResponseProcessorException(
+                                                "SAML2 assertion validation: invalid SAML message timeframe");
+                                }
+                        } else if (now.isBefore(notBefore) || now.isAfter(notOnOrAfter)) {
+                                throw new AuthenticationResponseProcessorException(
+                                        "SAML2 assertion validation: invalid SAML message timeframe");
+                        }
+                }
         }
 
         private void processAttribute(Attribute attribute,

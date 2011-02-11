@@ -32,6 +32,7 @@ import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
 import org.opensaml.saml2.encryption.Encrypter;
@@ -268,6 +269,43 @@ public abstract class Saml2Util {
         }
 
         /**
+         * Constructs a bare SAML v2.0 {@link Response} with status Success.
+         *
+         * @param inResponseTo response inresponse to request.ID
+         * @param targetUrl    targetURL
+         * @param issuerName   issuer of the response
+         * @return SAML v2.0 Response
+         */
+        public static Response getResponse(String inResponseTo,
+                                           String targetUrl,
+                                           String issuerName) {
+
+                Response response = Saml2Util.buildXMLObject(Response.class,
+                        Response.DEFAULT_ELEMENT_NAME);
+                DateTime issueInstant = new DateTime();
+                response.setIssueInstant(issueInstant);
+                response.setVersion(SAMLVersion.VERSION_20);
+                response.setDestination(targetUrl);
+                String samlResponseId = "saml-response-" + UUID.randomUUID().toString();
+                response.setID(samlResponseId);
+                response.setInResponseTo(inResponseTo);
+
+                Issuer issuer = Saml2Util.buildXMLObject(Issuer.class,
+                        Issuer.DEFAULT_ELEMENT_NAME);
+                issuer.setValue(issuerName);
+                response.setIssuer(issuer);
+
+                Status status = Saml2Util.buildXMLObject(Status.class,
+                        Status.DEFAULT_ELEMENT_NAME);
+                response.setStatus(status);
+                StatusCode statusCode = Saml2Util.buildXMLObject(StatusCode.class,
+                        StatusCode.DEFAULT_ELEMENT_NAME);
+                status.setStatusCode(statusCode);
+                statusCode.setValue(StatusCode.SUCCESS_URI);
+                return response;
+        }
+
+        /**
          * Construct an unsigned SAML v2.0 Assertion
          *
          * @param issuerName         assertion issuer
@@ -298,10 +336,12 @@ public abstract class Saml2Util {
                 assertion.setID(assertionId);
                 assertion.setIssueInstant(issueInstant);
 
+                // issuer
                 Issuer issuer = buildXMLObject(Issuer.class, Issuer.DEFAULT_ELEMENT_NAME);
                 assertion.setIssuer(issuer);
                 issuer.setValue(issuerName);
 
+                // conditions
                 Conditions conditions =
                         buildXMLObject(Conditions.class, Conditions.DEFAULT_ELEMENT_NAME);
                 assertion.setConditions(conditions);
@@ -309,6 +349,11 @@ public abstract class Saml2Util {
                 DateTime notAfter = issueInstant.plusMinutes(5); // TODO: configurable
                 conditions.setNotBefore(notBefore);
                 conditions.setNotOnOrAfter(notAfter);
+
+                conditions.getConditions().add(Saml2Util.buildXMLObject(
+                        OneTimeUse.class, OneTimeUse.DEFAULT_ELEMENT_NAME));
+
+                // audience restriction
                 List<AudienceRestriction> audienceRestrictionList = conditions
                         .getAudienceRestrictions();
                 AudienceRestriction audienceRestriction =
@@ -321,19 +366,22 @@ public abstract class Saml2Util {
                 audiences.add(audience);
                 audience.setAudienceURI(audienceUri);
 
+                // subject
                 Subject subject = buildXMLObject(Subject.class,
                         Subject.DEFAULT_ELEMENT_NAME);
                 assertion.setSubject(subject);
                 NameID nameId = buildXMLObject(NameID.class, NameID.DEFAULT_ELEMENT_NAME);
                 subject.setNameID(nameId);
                 nameId.setValue(userId);
+
+                // subject confirmation
                 List<SubjectConfirmation> subjectConfirmations = subject
                         .getSubjectConfirmations();
                 SubjectConfirmation subjectConfirmation =
                         buildXMLObject(SubjectConfirmation.class,
                                 SubjectConfirmation.DEFAULT_ELEMENT_NAME);
                 subjectConfirmations.add(subjectConfirmation);
-                subjectConfirmation.setMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer");
+                subjectConfirmation.setMethod(SubjectConfirmation.METHOD_BEARER);
                 if (null != inResponseTo) {
                         SubjectConfirmationData subjectConfirmationData =
                                 buildXMLObject(SubjectConfirmationData.class,
@@ -345,6 +393,7 @@ public abstract class Saml2Util {
                         subjectConfirmationData.setNotOnOrAfter(notAfter);
                 }
 
+                // authentication statement
                 List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
                 AuthnStatement authnStatement =
                         buildXMLObject(AuthnStatement.class, AuthnStatement.DEFAULT_ELEMENT_NAME);
@@ -376,6 +425,7 @@ public abstract class Saml2Util {
 
                 authnContext.setAuthnContextClassRef(authnContextClassRef);
 
+                // attribute statement
                 List<AttributeStatement> attributeStatements = assertion
                         .getAttributeStatements();
                 AttributeStatement attributeStatement =

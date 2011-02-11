@@ -86,15 +86,16 @@ public class AuthenticationRequestUtil {
          * @param spIdentity     optional Service Provider Identity. If specified
          *                       the authentication request will be signed.
          * @param response       response used for posting the request to the IdP
+         * @return the SAML v2.0 AuthnRequest just sent over.
          * @throws ServletException something went wrong.
          */
         @SuppressWarnings("unchecked")
-        public static void sendRequest(String issuerName,
-                                       String idpDestination,
-                                       String spDestination,
-                                       String relayState,
-                                       KeyStore.PrivateKeyEntry spIdentity,
-                                       HttpServletResponse response)
+        public static AuthnRequest sendRequest(String issuerName,
+                                               String idpDestination,
+                                               String spDestination,
+                                               String relayState,
+                                               KeyStore.PrivateKeyEntry spIdentity,
+                                               HttpServletResponse response)
                 throws ServletException {
 
                 if (null == idpDestination) {
@@ -192,5 +193,6 @@ public class AuthenticationRequestUtil {
                                 "SAML encoding error: " + e.getMessage(), e);
                 }
 
+                return authnRequest;
         }
 }

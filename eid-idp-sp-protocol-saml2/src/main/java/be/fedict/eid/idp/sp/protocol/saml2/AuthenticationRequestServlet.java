@@ -21,12 +21,14 @@ package be.fedict.eid.idp.sp.protocol.saml2;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opensaml.saml2.core.AuthnRequest;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.KeyStore;
 
@@ -54,6 +56,13 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationRequestServlet.class);
+
+        public static final String REQUEST_ID_SESSION_ATTRIBUTE =
+                AuthenticationRequestServlet.class.getName() + ".RequestID";
+        public static final String RECIPIENT_SESSION_ATTRIBUTE =
+                AuthenticationRequestServlet.class.getName() + ".Recipient";
+        public static final String RELAY_STATE_SESSION_ATTRIBUTE =
+                AuthenticationRequestServlet.class.getName() + ".RelayState";
 
         private static final String AUTHN_REQUEST_SERVICE_PARAM =
                 "AuthenticationRequestService";
@@ -135,7 +144,46 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
 
                 // generate and send an authentication request
-                AuthenticationRequestUtil.sendRequest(issuer, idpDestination,
-                        spDestination, relayState, spIdentity, response);
+                AuthnRequest authnRequest =
+                        AuthenticationRequestUtil.sendRequest(issuer,
+                                idpDestination, spDestination, relayState,
+                                spIdentity, response);
+
+                // save state on session
+                setRequestId(authnRequest.getID(), request.getSession());
+                setRecipient(authnRequest.getAssertionConsumerServiceURL(),
+                        request.getSession());
+                setRelayState(relayState, request.getSession());
         }
+
+        /*
+         * State handling
+         */
+        private void setRequestId(String requestId, HttpSession session) {
+                session.setAttribute(REQUEST_ID_SESSION_ATTRIBUTE, requestId);
+        }
+
+        public static String getRequestId(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(REQUEST_ID_SESSION_ATTRIBUTE);
+        }
+
+        private void setRecipient(String recipient, HttpSession session) {
+                session.setAttribute(RECIPIENT_SESSION_ATTRIBUTE, recipient);
+        }
+
+        public static String getRecipient(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(RECIPIENT_SESSION_ATTRIBUTE);
+        }
+
+        private void setRelayState(String relayState, HttpSession session) {
+                session.setAttribute(RELAY_STATE_SESSION_ATTRIBUTE, relayState);
+        }
+
+        public static String getRelayState(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(RELAY_STATE_SESSION_ATTRIBUTE);
+        }
+
 }

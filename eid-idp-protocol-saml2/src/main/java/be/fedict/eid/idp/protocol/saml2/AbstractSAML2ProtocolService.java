@@ -20,19 +20,18 @@ package be.fedict.eid.idp.protocol.saml2;
 
 import be.fedict.eid.idp.common.AttributeConstants;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.spi.Attribute;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
-import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
 import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
-import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.Response;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 
@@ -45,7 +44,6 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * SAML2 Browser POST Profile protocol service.
@@ -188,31 +186,12 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                         issuerName = "Default";
                 }
 
-                Response samlResponse = Saml2Util.buildXMLObject(Response.class,
-                        Response.DEFAULT_ELEMENT_NAME);
-                DateTime issueInstant = new DateTime();
-                samlResponse.setIssueInstant(issueInstant);
-                samlResponse.setVersion(SAMLVersion.VERSION_20);
-                samlResponse.setDestination(targetUrl);
-                String samlResponseId = "saml-response-" + UUID.randomUUID().toString();
-                samlResponse.setID(samlResponseId);
-
-                Issuer issuer = Saml2Util.buildXMLObject(Issuer.class,
-                        Issuer.DEFAULT_ELEMENT_NAME);
-                issuer.setValue(issuerName);
-                samlResponse.setIssuer(issuer);
-
-                Status status = Saml2Util.buildXMLObject(Status.class,
-                        Status.DEFAULT_ELEMENT_NAME);
-                samlResponse.setStatus(status);
-                StatusCode statusCode = Saml2Util.buildXMLObject(StatusCode.class,
-                        StatusCode.DEFAULT_ELEMENT_NAME);
-                status.setStatusCode(statusCode);
-                statusCode.setValue(StatusCode.SUCCESS_URI);
+                Response samlResponse = Saml2Util.getResponse(inResponseTo,
+                        targetUrl, issuerName);
 
                 // generate assertion
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
-                        inResponseTo, targetUrl, issueInstant,
+                        inResponseTo, targetUrl, samlResponse.getIssueInstant(),
                         getAuthenticationFlow(), userId, attributes, secretKey,
                         publicKey);
                 samlResponse.getAssertions().add(assertion);
