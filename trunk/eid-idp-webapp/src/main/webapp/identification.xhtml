@@ -17,34 +17,41 @@
                            rendered="#{idpSP.rp != null}"/>
         </p>
 
-        <p>#{messages.attributeInfo}</p>
-        <rich:dataTable id="data" var="item"
-                        value="#{idpRPAttributes}">
-
-            <h:column>
-                <h:outputText value="#{item.uri}"/>
-            </h:column>
-        </rich:dataTable>
-
         <script src="https://www.java.com/js/deployJava.js"></script>
         <script>
             var attributes = {
-                code :'be.fedict.eid.applet.Applet.class',
-                archive :'eid-applet-package-${eid-applet.version}.jar',
-                width :600,
-                height :300
+            code :'be.fedict.eid.applet.Applet.class',
+            archive :'eid-applet-package-${eid-applet.version}.jar',
+            width :600,
+            height :300
             };
             var parameters = {
-                TargetPage :'protocol-exit',
-                AppletService :'applet-identification-service',
-                Language :'#{localeSelector.language}',
-                NavigatorUserAgent : navigator.userAgent,
-                NavigatorAppName : navigator.appName,
-                NavigatorAppVersion : navigator.appVersion
+            TargetPage :'protocol-exit',
+            AppletService :'applet-identification-service',
+            Language :'#{localeSelector.language}',
+            NavigatorUserAgent : navigator.userAgent,
+            NavigatorAppName : navigator.appName,
+            NavigatorAppVersion : navigator.appVersion
             };
             var version = '1.6';
             deployJava.runApplet(attributes, parameters, version);
         </script>
+
+        <rich:simpleTogglePanel switchType="client"
+                                opened="false"
+                                label="#{messages.privacyDetails}">
+
+            <p>#{messages.attributeInfo}</p>
+            <rich:dataTable id="data" var="item"
+                            value="#{idpRPAttributes}">
+
+                <h:column>
+                    <h:outputText value="#{item.uri}"/>
+                </h:column>
+            </rich:dataTable>
+
+        </rich:simpleTogglePanel>
+
     </ui:define>
 </ui:composition>
 </body>
