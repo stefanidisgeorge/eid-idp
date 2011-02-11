@@ -247,9 +247,11 @@ public class ProtocolExitServlet extends HttpServlet {
                 // encrypt when needed
                 for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
 
-                        attributes.get(
-                                rpAttribute.getAttribute().getUri())
-                                .setEncrypted(rpAttribute.isEncrypted());
+                        Attribute attribute = attributes.get(
+                                rpAttribute.getAttribute().getUri());
+                        if (null != attribute) {
+                                attribute.setEncrypted(rpAttribute.isEncrypted());
+                        }
                 }
         }
 
