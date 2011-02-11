@@ -74,6 +74,10 @@ public interface RP {
 
         String remove();
 
+        String removeAttributePublic();
+
+        String removeCertificate();
+
         String back();
 
         String selectAttributes();

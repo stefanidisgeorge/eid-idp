@@ -91,15 +91,18 @@
                         </s:decorate>
 
                         <h:outputLabel for="upload_public"
-                                       value="Attribute Public Key"/>
+                                       value="Attribute Public Key (RSA)"/>
                         <rich:fileUpload
                                 fileUploadListener="#{idpRP.uploadListenerPublic}"
                                 id="upload_public" immediateUpload="true">
                         </rich:fileUpload>
                         <h:message for="upload_public" styleClass="error"/>
 
-                    </h:panelGrid>
+                        <h:commandButton value="Remove attribute public key"
+                                         action="#{idpRP.removeAttributePublic}"
+                                         rendered="#{idpRP.attributePublicKey != null}"/>
 
+                    </h:panelGrid>
                     <p>
                         <rich:simpleTogglePanel switchType="client"
                                                 opened="false"
@@ -133,6 +136,10 @@
                         <h:message for="upload"
                                    styleClass="error"/>
 
+                        <h:commandButton value="Remove certificate"
+                                         action="#{idpRP.removeCertificate}"
+                                         rendered="#{idpRP.attributePublicKey != null}"/>
+
                     </h:panelGrid>
 
                     <p>
@@ -148,39 +155,37 @@
                 </rich:tab>
 
                 <rich:tab name="tab_attributes" label="Attributes">
-                    <h:panelGrid columns="2" border="0">
 
-                        <h:outputLabel value="Attributes"/>
-                        <rich:dataTable id="data" var="item"
-                                        value="#{selectedRP.attributes}"
-                                        rowClasses="listingTable_Row1,listingTable_Row2"
-                                        rendered="#{selectedRP.attributes != null}">
+                    <rich:dataTable id="data" var="item"
+                                    value="#{selectedRP.attributes}"
+                                    rowClasses="listingTable_Row1,listingTable_Row2"
+                                    rendered="#{selectedRP.attributes != null}">
 
-                            <h:column>
-                                <f:facet name="header">Attribute</f:facet>
-                                <h:outputText value="#{item.attribute.uri}"/>
-                            </h:column>
-                            <h:column>
-                                <f:facet name="header">Encrypted?</f:facet>
-                                <h:selectBooleanCheckbox
-                                        value="#{item.encrypted}"/>
-                            </h:column>
+                        <h:column>
+                            <f:facet name="header">Attribute</f:facet>
+                            <h:outputText value="#{item.attribute.uri}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Encrypted?</f:facet>
+                            <h:selectBooleanCheckbox
+                                    value="#{item.encrypted}"/>
+                        </h:column>
 
-                        </rich:dataTable>
-                    </h:panelGrid>
+                    </rich:dataTable>
+
+                    <h:commandButton action="#{idpRP.selectAttributes}"
+                                     id="select_attributes"
+                                     value="Select Attributes"
+                                     rendered="#{selectedRP.attributes != null}"/>
 
                 </rich:tab>
 
             </rich:tabPanel>
 
-            <h:panelGrid columns="3" border="0">
+            <h:panelGrid columns="2" border="0">
 
                 <h:commandButton action="#{idpRP.save}" id="save"
                                  value="Save"/>
-                <h:commandButton action="#{idpRP.selectAttributes}"
-                                 id="select_attributes"
-                                 value="Select Attributes"
-                                 rendered="#{selectedRP.attributes != null}"/>
                 <h:commandButton action="#{idpRP.back}" id="back"
                                  value="Back"
                                  immediate="true"/>
