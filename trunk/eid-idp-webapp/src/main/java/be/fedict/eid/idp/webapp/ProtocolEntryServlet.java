@@ -79,6 +79,9 @@ public class ProtocolEntryServlet extends HttpServlet {
         IdentityService identityService;
 
         @EJB
+        AccountingService accountingService;
+
+        @EJB
         RPService rpService;
 
         private String unknownProtocolPageInitParam;
@@ -286,15 +289,12 @@ public class ProtocolEntryServlet extends HttpServlet {
                         }
 
                         // optionally authenticate RP
-                        if (null != incomingRequest.getSpDomain()) {
+                        LOG.debug("SP Domain: " + incomingRequest.getSpDomain());
+                        RPEntity rp = this.rpService.find(incomingRequest.getSpDomain());
+                        if (null != rp) {
 
-                                LOG.debug("SP Domain: " + incomingRequest.getSpDomain());
-                                RPEntity rp = this.rpService.find(incomingRequest.getSpDomain());
-                                if (null != rp) {
-
-                                        if (!isValid(rp, incomingRequest, request, response)) {
-                                                return;
-                                        }
+                                if (!isValid(rp, incomingRequest, request, response)) {
+                                        return;
                                 }
                         }
 
@@ -316,6 +316,10 @@ public class ProtocolEntryServlet extends HttpServlet {
                                         throw new RuntimeException("cannot handle " +
                                                 "IdP flow: " + incomingRequest.getIdpFlow());
                         }
+
+                        // accounting
+                        accountingService.addRequest(incomingRequest.getSpDomain());
+
                 } catch (Exception e) {
                         LOG.error("protocol error: " + e.getMessage(), e);
                         HttpSession httpSession = request.getSession();
