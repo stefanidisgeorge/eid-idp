@@ -99,6 +99,14 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
                               HttpServletResponse response) throws ServletException, IOException {
                 LOG.debug("doPost");
 
+                // get request state
+                String requestId = AuthenticationRequestServlet.getRequestId(
+                        request.getSession());
+                String recipient = AuthenticationRequestServlet.getRecipient(
+                        request.getSession());
+                String relayState = AuthenticationRequestServlet.getRelayState(
+                        request.getSession());
+
                 // clear old session attributes
                 HttpSession httpSession = request.getSession();
                 clearAllSessionAttribute(httpSession);
@@ -109,7 +117,8 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
 
                 AuthenticationResponse authenticationResponse;
                 try {
-                        authenticationResponse = processor.process(request);
+                        authenticationResponse = processor.process(requestId,
+                                recipient, relayState, request);
                 } catch (AuthenticationResponseProcessorException e) {
                         showErrorPage(e.getMessage(), e, request, response);
                         return;
