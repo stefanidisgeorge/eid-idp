@@ -206,6 +206,24 @@ public class RPBean implements RP {
         }
 
         @Override
+        public String removeAttributePublic() {
+
+                this.log.debug("remove rp.attribute public");
+                this.selectedRP.setAttributePublicKey((byte[]) null);
+                this.rpService.save(this.selectedRP);
+                return "success";
+        }
+
+        @Override
+        public String removeCertificate() {
+
+                this.log.debug("remove rp.certificate");
+                this.selectedRP.setEncodedCertificate(null);
+                this.rpService.save(this.selectedRP);
+                return "success";
+        }
+
+        @Override
         @End
         public String back() {
                 return "back";
