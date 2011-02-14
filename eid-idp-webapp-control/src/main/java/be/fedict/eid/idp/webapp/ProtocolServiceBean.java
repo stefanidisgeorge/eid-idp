@@ -68,13 +68,13 @@ public class ProtocolServiceBean implements ProtocolService {
                         this.protocolServiceManager.getProtocolServices()) {
                         this.idpProtocolServices.add(
                                 new ServiceEndpoint(protocolService.getName(),
-                                        IdentityProviderProtocolService
-                                                .PROTOCOL_ENDPOINT_PATH +
+                                        "/eid-idp" +
+                                                IdentityProviderProtocolService
+                                                        .PROTOCOL_ENDPOINT_PATH +
                                                 protocolService.getContextPath()));
                 }
         }
 
-        @Override
         @Factory("idpServiceEndpoints")
         public void initServiceEndpoints() {
                 this.log.debug("init idpServiceEndpoints");
