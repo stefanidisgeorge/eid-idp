@@ -69,15 +69,15 @@
 
         Download the Test Service Provider's Certificate
         <a href="./pki">here</a>
-        <br/>
+        <br/><br/>
         Download the Test Service Provider's Public Key
         <a href="./public">here</a>
-        <br/>
+        <br/><br/>
         <jsp:useBean id="sp" scope="request"
                      class="be.fedict.eid.idp.sp.SPBean"/>
         AES-128 secret:
         <jsp:getProperty name="sp" property="aes128SecretKey"/>
-        <br/>
+        <br/><br/>
 
     </body>
 </html>
