@@ -203,7 +203,8 @@ public abstract class AbstractWSFederationProtocolService implements
 
                 DateTime issueInstantDateTime = new DateTime();
                 Assertion assertion = Saml2Util.getAssertion(issuerName, null,
-                        wtrealm, issueInstantDateTime, getAuthenticationFlow(),
+                        wtrealm, configuration.getResponseTokenValidity(),
+                        issueInstantDateTime, getAuthenticationFlow(),
                         userId, attributes, secretKey, publicKey);
 
                 requestedSecurityToken.setUnknownXMLObject(assertion);

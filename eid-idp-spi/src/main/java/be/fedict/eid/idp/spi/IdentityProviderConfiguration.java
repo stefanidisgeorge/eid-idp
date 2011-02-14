@@ -56,6 +56,12 @@ public interface IdentityProviderConfiguration {
          * @return list of all configured eID IdP Attributes.
          */
         List<AttributeConfig> getAttributes(String protocolId);
+
+        /**
+         * @return validity time in minutes of the returned authentication
+         *         response token.
+         */
+        Integer getResponseTokenValidity();
 }
 
 

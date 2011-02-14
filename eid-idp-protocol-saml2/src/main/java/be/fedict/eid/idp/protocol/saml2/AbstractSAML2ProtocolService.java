@@ -200,8 +200,10 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
                 // generate assertion
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
-                        inResponseTo, targetUrl, samlResponse.getIssueInstant(),
-                        getAuthenticationFlow(), userId, attributes, secretKey,
+                        inResponseTo, targetUrl,
+                        configuration.getResponseTokenValidity(),
+                        samlResponse.getIssueInstant(), getAuthenticationFlow(),
+                        userId, attributes, secretKey,
                         publicKey);
                 samlResponse.getAssertions().add(assertion);
 

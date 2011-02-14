@@ -311,6 +311,7 @@ public abstract class Saml2Util {
          * @param issuerName         assertion issuer
          * @param inResponseTo       optional inResponseTo
          * @param audienceUri        audience
+         * @param tokenValidity      valitity in minutes of the assertion
          * @param issueInstant       time of issuance
          * @param authenticationFlow authentication flow
          * @param userId             user ID
@@ -323,11 +324,17 @@ public abstract class Saml2Util {
         public static Assertion getAssertion(String issuerName,
                                              String inResponseTo,
                                              String audienceUri,
+                                             Integer tokenValidity,
                                              DateTime issueInstant,
                                              IdentityProviderFlow authenticationFlow,
                                              String userId,
                                              Map<String, be.fedict.eid.idp.spi.Attribute> attributes,
                                              SecretKey secretKey, PublicKey publicKey) {
+
+                int validity = 5;
+                if (null != tokenValidity && tokenValidity > 0) {
+                        validity = tokenValidity;
+                }
 
                 Assertion assertion = buildXMLObject(Assertion.class,
                         Assertion.DEFAULT_ELEMENT_NAME);
@@ -346,7 +353,7 @@ public abstract class Saml2Util {
                         buildXMLObject(Conditions.class, Conditions.DEFAULT_ELEMENT_NAME);
                 assertion.setConditions(conditions);
                 DateTime notBefore = issueInstant;
-                DateTime notAfter = issueInstant.plusMinutes(5); // TODO: configurable
+                DateTime notAfter = issueInstant.plusMinutes(validity);
                 conditions.setNotBefore(notBefore);
                 conditions.setNotOnOrAfter(notAfter);
 

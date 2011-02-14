@@ -20,6 +20,7 @@ package be.fedict.eid.idp.protocol.saml2.artifact;
 
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.ReturnResponse;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.artifact.BasicSAMLArtifactMap;
@@ -77,11 +78,23 @@ public abstract class AbstractSAML2ArtifactProtocolService extends AbstractSAML2
                 BasicSAMLArtifactMap artifactMap =
                         (BasicSAMLArtifactMap)
                                 context.getAttribute(ARTIFACT_MAP_ATTRIBUTE);
+
+
                 if (null == artifactMap) {
+
+                        IdentityProviderConfiguration configuration =
+                                getIdPConfiguration(context);
+
+                        int validity = 5;
+                        if (null != configuration.getResponseTokenValidity() &&
+                                configuration.getResponseTokenValidity() > 0) {
+                                validity = configuration.getResponseTokenValidity();
+                        }
+
                         artifactMap = new BasicSAMLArtifactMap(
                                 new MapBasedStorageService<String,
                                         SAMLArtifactMap.SAMLArtifactMapEntry>(),
-                                5 * 60 * 1000); // TODO: configurable, see SAML2Util
+                                validity * 60 * 1000);
                         context.setAttribute(ARTIFACT_MAP_ATTRIBUTE, artifactMap);
                 }
                 return artifactMap;

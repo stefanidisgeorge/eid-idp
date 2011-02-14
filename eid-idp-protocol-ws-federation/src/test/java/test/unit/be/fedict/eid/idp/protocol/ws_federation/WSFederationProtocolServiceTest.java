@@ -140,6 +140,8 @@ public class WSFederationProtocolServiceTest {
                         .andStubReturn("some-context-identifier");
                 EasyMock.expect(mockIdentityProviderConfiguration.findIdentity())
                         .andStubReturn(idPIdentity);
+                EasyMock.expect(mockIdentityProviderConfiguration.getResponseTokenValidity())
+                        .andStubReturn(5);
 
                 // prepare
                 EasyMock.replay(mockHttpSession, mockRequest, mockResponse,
