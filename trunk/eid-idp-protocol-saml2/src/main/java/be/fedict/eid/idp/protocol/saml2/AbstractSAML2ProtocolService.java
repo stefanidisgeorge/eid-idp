@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +70,8 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
         public static final String ISSUER_SESSION_ATTRIBUTE =
                 AbstractSAML2ProtocolService.class.getName() + ".ISSUER";
+
+        public static final String LANGUAGE_PARAM = "language";
 
         public String getId() {
 
@@ -98,6 +101,12 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 throws Exception {
 
                 LOG.debug("handling incoming request");
+
+                // get language param if any
+                String language = null;
+                if (null != request.getParameter(LANGUAGE_PARAM)) {
+                        language = request.getParameter(LANGUAGE_PARAM);
+                }
 
                 SAMLMessageDecoder decoder;
                 if (request.getMethod().equals("POST")) {
@@ -149,7 +158,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 }
 
                 return new IncomingRequest(getAuthenticationFlow(), issuer,
-                        certificate, null);
+                        certificate, Collections.singletonList(language));
 
         }
 

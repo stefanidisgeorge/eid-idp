@@ -72,10 +72,13 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 "SPDestination";
         private static final String SP_DESTINATION_PAGE_PARAM =
                 SP_DESTINATION_PARAM + "Page";
+        private static final String LANGUAGE_PARAM =
+                "Language";
 
         private String idpDestination;
         private String spDestination;
         private String spDestinationPage;
+        private String language;
 
         private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;
 
@@ -85,6 +88,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 this.idpDestination = config.getInitParameter(IDP_DESTINATION_PARAM);
                 this.spDestination = config.getInitParameter(SP_DESTINATION_PARAM);
                 this.spDestinationPage = config.getInitParameter(SP_DESTINATION_PAGE_PARAM);
+                this.language = config.getInitParameter(LANGUAGE_PARAM);
                 this.authenticationRequestServiceLocator = new
                         ServiceLocator<AuthenticationRequestService>
                         (AUTHN_REQUEST_SERVICE_PARAM, config);
@@ -119,6 +123,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 String spDestination;
                 String relayState;
                 KeyStore.PrivateKeyEntry spIdentity = null;
+                String language;
 
                 AuthenticationRequestService service =
                         this.authenticationRequestServiceLocator.locateService();
@@ -128,6 +133,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                         relayState = service.getRelayState(request.getParameterMap());
                         spIdentity = service.getSPIdentity();
                         spDestination = service.getSPDestination();
+                        language = service.getLanguage();
                 } else {
                         idpDestination = this.idpDestination;
                         relayState = null;
@@ -140,6 +146,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                                         + this.spDestinationPage;
                         }
                         issuer = spDestination;
+                        language = this.language;
                 }
 
 
@@ -147,7 +154,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 AuthnRequest authnRequest =
                         AuthenticationRequestUtil.sendRequest(issuer,
                                 idpDestination, spDestination, relayState,
-                                spIdentity, response);
+                                spIdentity, response, language);
 
                 // save state on session
                 setRequestId(authnRequest.getID(), request.getSession());

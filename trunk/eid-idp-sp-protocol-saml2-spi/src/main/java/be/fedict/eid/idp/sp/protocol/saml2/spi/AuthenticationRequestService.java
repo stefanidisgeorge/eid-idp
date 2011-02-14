@@ -72,4 +72,12 @@ public interface AuthenticationRequestService {
          *         signing is needed.
          */
         KeyStore.PrivateKeyEntry getSPIdentity();
+
+        /**
+         * Language hint for the eID IdP webapp. Return <code>null</code> if the
+         * browser's locale is ok.
+         *
+         * @return language hint for the eID IdP webapp.
+         */
+        String getLanguage();
 }

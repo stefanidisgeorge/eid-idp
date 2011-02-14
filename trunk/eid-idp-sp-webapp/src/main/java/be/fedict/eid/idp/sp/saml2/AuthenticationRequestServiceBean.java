@@ -77,6 +77,11 @@ public class AuthenticationRequestServiceBean implements AuthenticationRequestSe
                 }
         }
 
+        @Override
+        public String getLanguage() {
+                return "nl";
+        }
+
 
         public String getIdPEntryPoint() {
                 return idPEntryPoint;
