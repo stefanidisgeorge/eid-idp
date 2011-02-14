@@ -52,6 +52,12 @@ public class OpenIDAuthenticationRequestServiceBean implements AuthenticationReq
                 return null;
         }
 
+        @Override
+        public String getPreferredLanguages() {
+
+                return "nl";
+        }
+
         public String getIdPEntryPoint() {
                 return idPEntryPoint;
         }

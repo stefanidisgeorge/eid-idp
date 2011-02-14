@@ -50,4 +50,13 @@ public interface AuthenticationRequestService {
          * @return the trusted eID IdP TLS certificate
          */
         X509Certificate getServerCertificate();
+
+        /**
+         * Optional comma-seperated list of preferred languages.
+         * Will be communicated and if available used by the eID IdP pages.
+         *
+         * @return preferred languages or <code>null</code> if browser locale
+         *         is ok.
+         */
+        String getPreferredLanguages();
 }

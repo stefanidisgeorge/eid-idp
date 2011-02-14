@@ -149,7 +149,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 }
 
                 return new IncomingRequest(getAuthenticationFlow(), issuer,
-                        certificate);
+                        certificate, null);
 
         }
 

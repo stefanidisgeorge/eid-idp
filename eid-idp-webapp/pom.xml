@@ -91,6 +91,13 @@
         </dependency>
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>
+            <artifactId>eid-idp-webapp-control</artifactId>
+            <version>${project.version}</version>
+            <type>ejb-client</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-model</artifactId>
             <version>${project.version}</version>
             <type>ejb-client</type>
