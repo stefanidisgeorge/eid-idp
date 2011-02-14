@@ -293,6 +293,8 @@ public class SAML2ProtocolServiceTest {
                 EasyMock.expect(mockServletContext.getAttribute(
                         AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE))
                         .andReturn(mockConfiguration);
+                EasyMock.expect(mockConfiguration.getResponseTokenValidity())
+                        .andStubReturn(5);
                 EasyMock.expect(mockConfiguration.findIdentity()).andStubReturn(
                         idpIdentity);
                 EasyMock.expect(mockConfiguration.getIdentityCertificateChain()).andStubReturn(

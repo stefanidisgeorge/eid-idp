@@ -23,8 +23,8 @@ import be.fedict.eid.idp.admin.webapp.Config;
 import be.fedict.eid.idp.entity.AppletConfigEntity;
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
-import be.fedict.eid.idp.model.KeyStoreType;
 import be.fedict.eid.idp.model.CryptoUtil;
+import be.fedict.eid.idp.model.KeyStoreType;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.io.FileUtils;
 import org.jboss.ejb3.annotation.LocalBinding;
@@ -77,6 +77,7 @@ public class ConfigBean implements Config {
 
         private String defaultIssuer;
         private String hmacSecret;
+        private Integer tokenValidity;
 
         private String xkmsUrl;
         private String xkmsAuthTrustDomain;
@@ -96,8 +97,10 @@ public class ConfigBean implements Config {
                 // IdP Config
                 this.defaultIssuer = this.configuration.getValue(
                         ConfigProperty.DEFAULT_ISSUER, String.class);
-                this.hmacSecret = this.configuration.getValue(ConfigProperty.HMAC_SECRET,
-                        String.class);
+                this.hmacSecret = this.configuration.getValue(
+                        ConfigProperty.HMAC_SECRET, String.class);
+                this.tokenValidity = this.configuration.getValue(
+                        ConfigProperty.TOKEN_VALIDITY, Integer.class);
 
                 // XKMS Config
                 this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
@@ -152,20 +155,24 @@ public class ConfigBean implements Config {
                 // IdP Config
                 this.configuration.setValue(ConfigProperty.DEFAULT_ISSUER,
                         this.defaultIssuer);
+                this.configuration.setValue(ConfigProperty.TOKEN_VALIDITY,
+                        this.tokenValidity);
 
                 // check valid secret
-                try {
-                        CryptoUtil.getMac(this.hmacSecret);
-                } catch (DecoderException e) {
-                        this.log.error("Failed to decode HMac: " + e.getMessage(), e);
-                        this.facesMessages.addToControl("hmacsecret",
-                                "Failed to decode secret");
-                        return null;
-                } catch (InvalidKeyException e) {
-                        this.log.error("Invalid HMac: " + e.getMessage(), e);
-                        this.facesMessages.addToControl("hmacsecret",
-                                "Invalid secret: " + e.getMessage());
-                        return null;
+                if (null != this.hmacSecret && !this.hmacSecret.trim().isEmpty()) {
+                        try {
+                                CryptoUtil.getMac(this.hmacSecret);
+                        } catch (DecoderException e) {
+                                this.log.error("Failed to decode HMac: " + e.getMessage(), e);
+                                this.facesMessages.addToControl("hmacsecret",
+                                        "Failed to decode secret");
+                                return null;
+                        } catch (InvalidKeyException e) {
+                                this.log.error("Invalid HMac: " + e.getMessage(), e);
+                                this.facesMessages.addToControl("hmacsecret",
+                                        "Invalid secret: " + e.getMessage());
+                                return null;
+                        }
                 }
 
                 this.configuration.setValue(ConfigProperty.HMAC_SECRET,
@@ -337,6 +344,16 @@ public class ConfigBean implements Config {
         @Override
         public void setSelectedTab(String selectedTab) {
                 this.selectedTab = selectedTab;
+        }
+
+        @Override
+        public Integer getTokenValidity() {
+                return this.tokenValidity;
+        }
+
+        @Override
+        public void setTokenValidity(Integer tokenValidity) {
+                this.tokenValidity = tokenValidity;
         }
 
         @Override

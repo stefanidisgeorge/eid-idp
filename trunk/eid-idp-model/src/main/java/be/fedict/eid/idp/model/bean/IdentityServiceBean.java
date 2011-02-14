@@ -179,6 +179,13 @@ public class IdentityServiceBean implements IdentityService {
                 return attributes;
         }
 
+        @Override
+        public Integer getResponseTokenValidity() {
+
+                return this.configuration.getValue(ConfigProperty.TOKEN_VALIDITY,
+                        Integer.class);
+        }
+
         /**
          * {@inheritDoc}
          */

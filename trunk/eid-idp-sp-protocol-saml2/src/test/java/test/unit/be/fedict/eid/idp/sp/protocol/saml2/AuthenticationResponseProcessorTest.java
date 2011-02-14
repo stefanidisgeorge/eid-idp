@@ -82,7 +82,7 @@ public class AuthenticationResponseProcessorTest {
                         recipient, issuerName);
 
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
-                        requestId, recipient, samlResponse.getIssueInstant(),
+                        requestId, recipient, 5, samlResponse.getIssueInstant(),
                         IdentityProviderFlow.IDENTIFICATION, userId,
                         attributes, null, null);
                 samlResponse.getAssertions().add(assertion);

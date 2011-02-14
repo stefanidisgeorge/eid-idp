@@ -72,6 +72,10 @@ public interface Config {
 
         void setSelectedTab(String selectedTab);
 
+        Integer getTokenValidity();
+
+        void setTokenValidity(Integer tokenValidity);
+
         /*
         * Listeners.
         */

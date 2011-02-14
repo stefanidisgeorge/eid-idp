@@ -114,7 +114,7 @@ public class SAML2ArtifactProtocolServiceTest {
                         .andReturn(mockServletContext);
                 EasyMock.expect(mockServletContext.getAttribute(
                         AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE))
-                        .andReturn(mockConfiguration);
+                        .andReturn(mockConfiguration).times(2);
                 EasyMock
                         .expect(
                                 mockHttpSession
@@ -131,6 +131,8 @@ public class SAML2ArtifactProtocolServiceTest {
                                 + ".InResponseTo")).andStubReturn(
                         "a77a1c87-e590-47d7-a3e0-afea455ebc01");
 
+                EasyMock.expect(mockConfiguration.getResponseTokenValidity())
+                        .andStubReturn(5);
                 EasyMock.expect(mockConfiguration.findIdentity()).andStubReturn(
                         idpIdentity);
                 EasyMock.expect(mockConfiguration.getIdentityCertificateChain()).andStubReturn(

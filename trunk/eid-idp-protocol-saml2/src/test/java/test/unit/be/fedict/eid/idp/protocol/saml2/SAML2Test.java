@@ -305,7 +305,7 @@ public class SAML2Test {
 
                 // Operate: sign
                 Assertion assertion = Saml2Util.getAssertion("test-issuer",
-                        "test-in-response-to", "test-audience", new DateTime(),
+                        "test-in-response-to", "test-audience", 5, new DateTime(),
                         IdentityProviderFlow.AUTHENTICATION,
                         UUID.randomUUID().toString(),
                         new HashMap<String, be.fedict.eid.idp.spi.Attribute>(),

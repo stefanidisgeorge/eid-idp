@@ -30,6 +30,10 @@
                                          id="hmacsecret" size="50"/>
                             <h:message for="hmacsecret" styleClass="error"/>
                         </s:decorate>
+
+                        <h:outputText value="Response token validity (minutes): "/>
+                        <h:inputText value="#{idpConfig.tokenValidity}"
+                                     size="10"/>
                     </h:panelGrid>
                     <h:commandButton value="Save"
                                      action="#{idpConfig.saveIdP}"/>
