@@ -18,8 +18,8 @@
 
 package be.fedict.eid.idp.attribute.age;
 
-import be.fedict.eid.idp.spi.Attribute;
-import be.fedict.eid.idp.spi.AttributeType;
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.common.AttributeType;
 import be.fedict.eid.idp.spi.DefaultAttribute;
 import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
 import org.apache.commons.logging.Log;

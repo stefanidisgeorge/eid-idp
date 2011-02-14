@@ -18,14 +18,13 @@
 
 package test.unit.be.fedict.eid.idp.sp.protocol.saml2;
 
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.common.AttributeType;
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseProcessor;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
-import be.fedict.eid.idp.spi.Attribute;
-import be.fedict.eid.idp.spi.AttributeType;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import org.apache.xml.security.utils.Base64;
 import org.junit.After;
 import org.junit.Before;
@@ -83,7 +82,7 @@ public class AuthenticationResponseProcessorTest {
 
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
                         requestId, recipient, 5, samlResponse.getIssueInstant(),
-                        IdentityProviderFlow.IDENTIFICATION, userId,
+                        SamlAuthenticationPolicy.IDENTIFICATION, userId,
                         attributes, null, null);
                 samlResponse.getAssertions().add(assertion);
 

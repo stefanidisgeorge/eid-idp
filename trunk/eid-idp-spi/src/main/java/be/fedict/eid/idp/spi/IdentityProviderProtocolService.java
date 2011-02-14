@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.spi;
 
+import be.fedict.eid.idp.common.Attribute;
+
 import javax.crypto.SecretKey;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;

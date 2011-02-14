@@ -19,7 +19,6 @@
 package be.fedict.eid.idp.common.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import com.sun.org.apache.xpath.internal.XPathAPI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -308,17 +307,17 @@ public abstract class Saml2Util {
         /**
          * Construct an unsigned SAML v2.0 Assertion
          *
-         * @param issuerName         assertion issuer
-         * @param inResponseTo       optional inResponseTo
-         * @param audienceUri        audience
-         * @param tokenValidity      valitity in minutes of the assertion
-         * @param issueInstant       time of issuance
-         * @param authenticationFlow authentication flow
-         * @param userId             user ID
-         * @param attributes         map of user's attributes
-         * @param secretKey          optional symmetric SecretKey used for
-         *                           encryption
-         * @param publicKey          optional RSA public key used for encryption
+         * @param issuerName           assertion issuer
+         * @param inResponseTo         optional inResponseTo
+         * @param audienceUri          audience
+         * @param tokenValidity        valitity in minutes of the assertion
+         * @param issueInstant         time of issuance
+         * @param authenticationPolicy authentication policy
+         * @param userId               user ID
+         * @param attributes           map of user's attributes
+         * @param secretKey            optional symmetric SecretKey used for
+         *                             encryption
+         * @param publicKey            optional RSA public key used for encryption
          * @return the unsigned SAML v2.0 assertion.
          */
         public static Assertion getAssertion(String issuerName,
@@ -326,9 +325,9 @@ public abstract class Saml2Util {
                                              String audienceUri,
                                              Integer tokenValidity,
                                              DateTime issueInstant,
-                                             IdentityProviderFlow authenticationFlow,
+                                             SamlAuthenticationPolicy authenticationPolicy,
                                              String userId,
-                                             Map<String, be.fedict.eid.idp.spi.Attribute> attributes,
+                                             Map<String, be.fedict.eid.idp.common.Attribute> attributes,
                                              SecretKey secretKey, PublicKey publicKey) {
 
                 int validity = 5;
@@ -415,23 +414,7 @@ public abstract class Saml2Util {
                 AuthnContextClassRef authnContextClassRef =
                         buildXMLObject(AuthnContextClassRef.class,
                                 AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
-
-                switch (authenticationFlow) {
-
-                        case IDENTIFICATION:
-                                authnContextClassRef.setAuthnContextClassRef(
-                                        SamlAuthenticationPolicy.IDENTIFICATION.getUri());
-                                break;
-                        case AUTHENTICATION:
-                                authnContextClassRef.setAuthnContextClassRef(
-                                        SamlAuthenticationPolicy.AUTHENTICATION.getUri());
-                                break;
-                        case AUTHENTICATION_WITH_IDENTIFICATION:
-                                authnContextClassRef.setAuthnContextClassRef(
-                                        SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION.getUri());
-                                break;
-                }
-
+                authnContextClassRef.setAuthnContextClassRef(authenticationPolicy.getUri());
                 authnContext.setAuthnContextClassRef(authnContextClassRef);
 
                 // attribute statement
@@ -445,7 +428,7 @@ public abstract class Saml2Util {
                 // get encryptor if needed
                 Encrypter encrypter = getEncrypter(secretKey, publicKey);
 
-                for (Map.Entry<String, be.fedict.eid.idp.spi.Attribute> attributeEntry
+                for (Map.Entry<String, be.fedict.eid.idp.common.Attribute> attributeEntry
                         : attributes.entrySet()) {
 
                         addAttribute(attributeEntry.getValue(),
@@ -486,7 +469,7 @@ public abstract class Saml2Util {
 
         }
 
-        private static void addAttribute(be.fedict.eid.idp.spi.Attribute attribute,
+        private static void addAttribute(be.fedict.eid.idp.common.Attribute attribute,
                                          AttributeStatement attributeStatement,
                                          Encrypter encrypter) {
 

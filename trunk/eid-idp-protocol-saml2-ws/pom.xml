@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>be.fedict</groupId>
@@ -13,49 +16,44 @@
     <packaging>jar</packaging>
     <build>
         <plugins>
-                        <plugin>
-                                <groupId>org.codehaus.mojo</groupId>
-                                <artifactId>jaxws-maven-plugin</artifactId>
-                                <executions>
-                                        <execution>
-                                                <goals>
-                                                        <goal>wsimport</goal>
-                                                </goals>
-                                        </execution>
-                                </executions>
-                                <configuration>
-                                        <verbose>true</verbose>
-                                        <xdebug>true</xdebug>
-                                        <catalog>${basedir}/src/wsdl/catalog.cat</catalog>
-                                        <bindingDirectory>src/wsdl</bindingDirectory>
-                                        <bindingFiles>
-                                                <bindingFile>bindings.xml</bindingFile>
-                                        </bindingFiles>
-                                </configuration>
-                                <dependencies>
-                                        <dependency>
-                                                <groupId>com.sun.xml.ws</groupId>
-                                                <artifactId>jaxws-tools</artifactId>
-                                                <version>2.1.7</version>
-                                        </dependency>
-                                </dependencies>
-                        </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <verbose>true</verbose>
+                    <xdebug>true</xdebug>
+                    <catalog>${basedir}/src/wsdl/catalog.cat</catalog>
+                    <bindingDirectory>src/wsdl</bindingDirectory>
+                    <bindingFiles>
+                        <bindingFile>bindings.xml</bindingFile>
+                    </bindingFiles>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.sun.xml.ws</groupId>
+                        <artifactId>jaxws-tools</artifactId>
+                        <version>2.1.7</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
-                <resources>
-                        <resource>
-                                <directory>src/wsdl</directory>
-                        </resource>
-                        <resource>
-                                <directory>src/main/resources</directory>
-                        </resource>
-                </resources>
+        <resources>
+            <resource>
+                <directory>src/wsdl</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>be.fedict.eid-idp</groupId>
-            <artifactId>eid-idp-spi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-common</artifactId>

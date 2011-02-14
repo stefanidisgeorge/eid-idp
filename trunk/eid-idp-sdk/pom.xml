@@ -198,6 +198,12 @@
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-sp-protocol-saml2</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>

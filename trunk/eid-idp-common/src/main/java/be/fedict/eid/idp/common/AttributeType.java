@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.spi;
+package be.fedict.eid.idp.common;
 
 import java.util.GregorianCalendar;
 
