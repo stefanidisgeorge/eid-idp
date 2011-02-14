@@ -22,6 +22,6 @@ public class WSFederationMetadataHttpServletAuthIdent extends AbstractWSFederati
 
     @Override
     protected String getPath() {
-        return "ws-federation-auth-ident";
+        return "ws-federation/auth-ident";
     }
 }

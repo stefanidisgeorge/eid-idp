@@ -22,6 +22,6 @@ public class WSFederationMetadataHttpServletAuth extends AbstractWSFederationMet
 
     @Override
     protected String getPath() {
-        return "ws-federation-auth";
+        return "ws-federation/auth";
     }
 }

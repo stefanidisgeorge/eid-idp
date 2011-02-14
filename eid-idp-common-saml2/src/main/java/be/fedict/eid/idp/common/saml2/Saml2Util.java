@@ -350,8 +350,10 @@ public abstract class Saml2Util {
                 conditions.setNotBefore(notBefore);
                 conditions.setNotOnOrAfter(notAfter);
 
-                conditions.getConditions().add(Saml2Util.buildXMLObject(
-                        OneTimeUse.class, OneTimeUse.DEFAULT_ELEMENT_NAME));
+                if (null != inResponseTo) {
+                        conditions.getConditions().add(Saml2Util.buildXMLObject(
+                                OneTimeUse.class, OneTimeUse.DEFAULT_ELEMENT_NAME));
+                }
 
                 // audience restriction
                 List<AudienceRestriction> audienceRestrictionList = conditions
