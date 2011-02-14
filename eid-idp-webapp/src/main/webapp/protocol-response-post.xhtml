@@ -7,9 +7,8 @@
 <body>
 <ui:composition template="/WEB-INF/template.xhtml">
 	<ui:define name="body">
-		<h2>Navigating back to web application...</h2>
-		<p>This page will automatically navigate you back to your web
-		application.</p>
+		<h2>#{messages.navigatingBack}</h2>
+		<p>#{messages.navigatingBackInfo}</p>
 		<form id="response-form" method="post" action="#{idpResponseAction}">
 			<ui:repeat value="#{idpResponseAttributes}" var="item">
 				<input type="hidden" name="#{item.name}" value="#{item.value}" />
