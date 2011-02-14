@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.spi;
 
+import be.fedict.eid.idp.common.Attribute;
+
 import javax.servlet.ServletContext;
 import java.util.Map;
 

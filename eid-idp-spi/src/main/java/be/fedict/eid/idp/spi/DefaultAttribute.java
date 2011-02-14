@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.spi;
 
+import be.fedict.eid.idp.common.AttributeType;
+
 /**
  * Enumeration of all default eID Attributes.
  *

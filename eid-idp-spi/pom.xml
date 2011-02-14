@@ -65,6 +65,11 @@
 		</plugins>
 	</build>
 	<dependencies>
+        <dependency>
+            <groupId>be.fedict.eid-idp</groupId>
+            <artifactId>eid-idp-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging-api</artifactId>

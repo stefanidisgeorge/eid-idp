@@ -18,7 +18,9 @@
 
 package be.fedict.eid.idp.protocol.ws_federation;
 
+import be.fedict.eid.idp.common.Attribute;
 import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
@@ -204,7 +206,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 DateTime issueInstantDateTime = new DateTime();
                 Assertion assertion = Saml2Util.getAssertion(issuerName, null,
                         wtrealm, configuration.getResponseTokenValidity(),
-                        issueInstantDateTime, getAuthenticationFlow(),
+                        issueInstantDateTime, getAuthenticationPolicy(),
                         userId, attributes, secretKey, publicKey);
 
                 requestedSecurityToken.setUnknownXMLObject(assertion);
@@ -270,6 +272,23 @@ public abstract class AbstractWSFederationProtocolService implements
                         }
                 }
                 return null;
+        }
+
+        private SamlAuthenticationPolicy getAuthenticationPolicy() {
+
+                IdentityProviderFlow authenticationFlow = getAuthenticationFlow();
+                switch (authenticationFlow) {
+
+                        case IDENTIFICATION:
+                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                        case AUTHENTICATION:
+                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                        case AUTHENTICATION_WITH_IDENTIFICATION:
+                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                }
+
+                throw new RuntimeException("Unsupported authentication flow: "
+                        + authenticationFlow);
         }
 
         protected abstract IdentityProviderFlow getAuthenticationFlow();

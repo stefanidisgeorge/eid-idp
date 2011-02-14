@@ -20,6 +20,7 @@ package test.unit.be.fedict.eid.idp.protocol.saml2;
 
 import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.idp.common.Attribute;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.protocol.saml2.artifact.AbstractSAML2ArtifactProtocolService;
 import be.fedict.eid.idp.protocol.saml2.artifact.SAML2ProtocolServiceAuthIdent;

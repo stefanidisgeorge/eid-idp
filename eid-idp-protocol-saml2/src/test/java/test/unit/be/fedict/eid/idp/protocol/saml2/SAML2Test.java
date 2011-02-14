@@ -18,8 +18,8 @@
 
 package test.unit.be.fedict.eid.idp.protocol.saml2;
 
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -306,9 +306,9 @@ public class SAML2Test {
                 // Operate: sign
                 Assertion assertion = Saml2Util.getAssertion("test-issuer",
                         "test-in-response-to", "test-audience", 5, new DateTime(),
-                        IdentityProviderFlow.AUTHENTICATION,
+                        SamlAuthenticationPolicy.AUTHENTICATION,
                         UUID.randomUUID().toString(),
-                        new HashMap<String, be.fedict.eid.idp.spi.Attribute>(),
+                        new HashMap<String, be.fedict.eid.idp.common.Attribute>(),
                         null, null);
                 Assertion signedAssertion = (Assertion) Saml2Util.sign(assertion,
                         idpIdentity);

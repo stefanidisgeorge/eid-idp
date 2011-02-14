@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.protocol.openid;
 
+import be.fedict.eid.idp.common.Attribute;
 import be.fedict.eid.idp.common.OpenIDAXConstants;
 import be.fedict.eid.idp.sp.protocol.openid.UserInterfaceMessage;
 import be.fedict.eid.idp.spi.*;

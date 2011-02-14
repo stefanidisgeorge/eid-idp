@@ -18,7 +18,9 @@
 
 package be.fedict.eid.idp.protocol.saml2;
 
+import be.fedict.eid.idp.common.Attribute;
 import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
@@ -202,7 +204,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
                         inResponseTo, targetUrl,
                         configuration.getResponseTokenValidity(),
-                        samlResponse.getIssueInstant(), getAuthenticationFlow(),
+                        samlResponse.getIssueInstant(), getAuthenticationPolicy(),
                         userId, attributes, secretKey,
                         publicKey);
                 samlResponse.getAssertions().add(assertion);
@@ -299,6 +301,23 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 ServletContext servletContext) {
                 return (IdentityProviderConfiguration) servletContext
                         .getAttribute(IDP_CONFIG_CONTEXT_ATTRIBUTE);
+        }
+
+        private SamlAuthenticationPolicy getAuthenticationPolicy() {
+
+                IdentityProviderFlow authenticationFlow = getAuthenticationFlow();
+                switch (authenticationFlow) {
+
+                        case IDENTIFICATION:
+                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                        case AUTHENTICATION:
+                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                        case AUTHENTICATION_WITH_IDENTIFICATION:
+                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                }
+
+                throw new RuntimeException("Unsupported authentication flow: "
+                        + authenticationFlow);
         }
 
 
