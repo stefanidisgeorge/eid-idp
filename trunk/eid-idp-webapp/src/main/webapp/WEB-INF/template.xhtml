@@ -11,6 +11,10 @@
 		<title>#{messages.title}</title>
 		<link rel="stylesheet" type="text/css"
 			href="#{facesContext.externalContext.requestContextPath}/style.css" />
+
+        <!-- Seems to resolve deployJava.js/Chrome issue ... -->
+        <f:view contentType="text/html"/>
+
 	</head>
 
 	<body>
