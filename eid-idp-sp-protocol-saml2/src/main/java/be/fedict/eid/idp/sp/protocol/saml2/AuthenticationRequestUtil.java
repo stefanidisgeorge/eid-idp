@@ -86,6 +86,7 @@ public class AuthenticationRequestUtil {
          * @param spIdentity     optional Service Provider Identity. If specified
          *                       the authentication request will be signed.
          * @param response       response used for posting the request to the IdP
+         * @param language       optional language hint
          * @return the SAML v2.0 AuthnRequest just sent over.
          * @throws ServletException something went wrong.
          */
@@ -95,7 +96,8 @@ public class AuthenticationRequestUtil {
                                                String spDestination,
                                                String relayState,
                                                KeyStore.PrivateKeyEntry spIdentity,
-                                               HttpServletResponse response)
+                                               HttpServletResponse response,
+                                               String language)
                 throws ServletException {
 
                 if (null == idpDestination) {
@@ -110,6 +112,11 @@ public class AuthenticationRequestUtil {
                 LOG.debug("SP destination: " + spDestination);
                 LOG.debug("relay state: " + relayState);
                 LOG.debug("SP identity: " + spIdentity);
+
+                String idpEndpoint = idpDestination;
+                if (null != language) {
+                        idpEndpoint += "?language=" + language;
+                }
 
                 XMLObjectBuilderFactory builderFactory = Configuration
                         .getBuilderFactory();
@@ -134,7 +141,7 @@ public class AuthenticationRequestUtil {
                 SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
                         .getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
                 Endpoint samlEndpoint = endpointBuilder.buildObject();
-                samlEndpoint.setLocation(idpDestination);
+                samlEndpoint.setLocation(idpEndpoint);
                 samlEndpoint.setResponseLocation(spDestination);
 
                 OutTransport outTransport = new HttpServletResponseAdapter(response,

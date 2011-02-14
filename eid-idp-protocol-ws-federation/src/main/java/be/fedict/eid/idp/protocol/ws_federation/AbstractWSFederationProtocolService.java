@@ -38,6 +38,7 @@ import javax.xml.transform.TransformerException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.PublicKey;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -59,6 +60,8 @@ public abstract class AbstractWSFederationProtocolService implements
 
         public static final String WTREALM_SESSION_ATTRIBUTE =
                 AbstractWSFederationProtocolService.class.getName() + ".wtrealm";
+
+        public static final String LANGUAGE_PARAM = "language";
 
         private IdentityProviderConfiguration configuration;
 
@@ -109,8 +112,15 @@ public abstract class AbstractWSFederationProtocolService implements
                 String wctx = request.getParameter("wctx");
                 LOG.debug("wctx: " + wctx);
                 storeWCtx(wctx, request);
+
+                // get optional language hint
+                String language = null;
+                if (null != request.getParameter(LANGUAGE_PARAM)) {
+                        language = request.getParameter(LANGUAGE_PARAM);
+                }
+
                 return new IncomingRequest(getAuthenticationFlow(), wtrealm,
-                        null, null);
+                        null, Collections.singletonList(language));
         }
 
         @Override

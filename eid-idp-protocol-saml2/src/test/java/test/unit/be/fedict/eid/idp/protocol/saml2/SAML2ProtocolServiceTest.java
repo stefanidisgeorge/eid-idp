@@ -189,7 +189,11 @@ public class SAML2ProtocolServiceTest {
                 byte[] encodedSamlRequest = Base64.encodeBase64(samlRequest);
 
                 // expectations
-                EasyMock.expect(mockHttpServletRequest.getMethod()).andReturn("POST").times(2);
+                EasyMock.expect(mockHttpServletRequest.getMethod())
+                        .andReturn("POST").times(2);
+                EasyMock.expect(mockHttpServletRequest.getParameter(
+                        AbstractSAML2ProtocolService.LANGUAGE_PARAM))
+                        .andReturn(null);
                 EasyMock.expect(mockHttpServletRequest.getParameter("RelayState"))
                         .andStubReturn(null);
                 EasyMock.expect(mockHttpServletRequest.getParameter("SAMLRequest"))
