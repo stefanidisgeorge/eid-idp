@@ -23,18 +23,26 @@ import javax.ejb.Local;
 @Local
 public interface SP {
 
+        public static final String LANGUAGE_LIST_SESSION_ATTRIBUTE =
+                "LanguageList";
+
         /*
-        * Lifecycle.
-        */
+         * Lifecycle.
+         */
         void destroy();
 
         /*
-        * Accessors
-        */
+         * Accessors
+         */
         String getRp();
 
         /*
-        * Factories
-        */
+         * Factories
+         */
         void attributeFactory();
+
+        /*
+         * Actions
+         */
+        void initLanguage();
 }

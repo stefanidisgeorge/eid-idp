@@ -298,6 +298,15 @@ public class ProtocolEntryServlet extends HttpServlet {
                                 }
                         }
 
+                        // set preferred language if possible
+                        LOG.debug("Languages: " + incomingRequest.getLanguages());
+                        if (null != incomingRequest.getLanguages() &&
+                                !incomingRequest.getLanguages().isEmpty()) {
+                                request.getSession().setAttribute(
+                                        SP.LANGUAGE_LIST_SESSION_ATTRIBUTE,
+                                        incomingRequest.getLanguages());
+                        }
+
                         request.getSession().setAttribute(
                                 Constants.IDP_FLOW_SESSION_ATTRIBUTE,
                                 incomingRequest.getIdpFlow());

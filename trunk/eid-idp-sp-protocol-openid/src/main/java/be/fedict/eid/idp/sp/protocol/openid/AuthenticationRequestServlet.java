@@ -83,6 +83,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 "SPDestination";
         private static final String SP_DESTINATION_PAGE_PARAM =
                 SP_DESTINATION_PARAM + "Page";
+        private static final String LANGUAGES_PARAM = "Language";
+
+
         private static final String TRUST_SERVER_PARAM = "TrustServer";
 
         public static final String CONSUMER_MANAGER_ATTRIBUTE =
@@ -91,6 +94,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
         private String userIdentifier;
         private String spDestination;
         private String spDestinationPage;
+        private String languages;
 
         private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;
 
@@ -105,6 +109,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 this.userIdentifier = config.getInitParameter(USER_IDENTIFIER_PARAM);
                 this.spDestination = config.getInitParameter(SP_DESTINATION_PARAM);
                 this.spDestinationPage = config.getInitParameter(SP_DESTINATION_PAGE_PARAM);
+                this.languages = config.getInitParameter(LANGUAGES_PARAM);
                 this.authenticationRequestServiceLocator = new
                         ServiceLocator<AuthenticationRequestService>
                         (AUTHN_REQUEST_SERVICE_PARAM, config);
@@ -224,12 +229,14 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
                 String spDestination;
                 String userIdentifier;
+                String languages;
 
                 AuthenticationRequestService service =
                         this.authenticationRequestServiceLocator.locateService();
                 if (null != service) {
                         userIdentifier = service.getUserIdentifier();
                         spDestination = service.getSPDestination();
+                        languages = service.getPreferredLanguages();
                 } else {
                         userIdentifier = this.userIdentifier;
                         if (null != this.spDestination) {
@@ -240,6 +247,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
                                         + request.getServerPort() + request.getContextPath()
                                         + this.spDestinationPage;
                         }
+                        languages = this.languages;
                 }
 
 
@@ -276,6 +284,14 @@ public class AuthenticationRequestServlet extends HttpServlet {
                         fetchRequest.addAttribute(OpenIDAXConstants.AX_BIRTHDATE_TYPE, false);
 
                         authRequest.addExtension(fetchRequest);
+
+                        /*
+                        * Piggy back UI Extension if any languages were specified
+                        */
+                        UserInterfaceMessage uiMessage = new UserInterfaceMessage();
+                        uiMessage.setLanguages(languages);
+
+                        authRequest.addExtension(uiMessage);
 
                         LOG.debug("redirecting to producer with authn request...");
                         response.sendRedirect(authRequest.getDestinationUrl(true));

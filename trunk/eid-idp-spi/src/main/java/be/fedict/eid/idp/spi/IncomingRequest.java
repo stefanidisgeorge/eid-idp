@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.spi;
 
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * The incoming request. This is used to specify the wanted authentication flow
@@ -31,6 +32,7 @@ public class IncomingRequest {
         private final IdentityProviderFlow idpFlow;
         private final String spDomain;
         private final X509Certificate spCertificate;
+        private final List<String> languages;
 
         /**
          * Main constructor
@@ -39,12 +41,16 @@ public class IncomingRequest {
          * @param spDomain      optional SP domain, <code>null</code> if empty
          * @param spCertificate optional SP certificate, <code>null</code> if
          *                      empty
+         * @param languages     list of preferred languages if any,
+         *                      <code>null</code> or empty list if none.
          */
         public IncomingRequest(IdentityProviderFlow idpFlow, String spDomain,
-                               X509Certificate spCertificate) {
+                               X509Certificate spCertificate,
+                               List<String> languages) {
                 this.idpFlow = idpFlow;
                 this.spDomain = spDomain;
                 this.spCertificate = spCertificate;
+                this.languages = languages;
         }
 
         public IdentityProviderFlow getIdpFlow() {
@@ -57,5 +63,9 @@ public class IncomingRequest {
 
         public X509Certificate getSpCertificate() {
                 return spCertificate;
+        }
+
+        public List<String> getLanguages() {
+                return languages;
         }
 }

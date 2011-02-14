@@ -54,6 +54,10 @@
             <artifactId>ejb-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.faces</groupId>
+            <artifactId>jsf-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.ejb3</groupId>
             <artifactId>jboss-ejb3-ext-api</artifactId>
         </dependency>

@@ -24,17 +24,22 @@ import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.AttributeService;
 import be.fedict.eid.idp.model.Constants;
 import org.jboss.ejb3.annotation.LocalBinding;
+import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.datamodel.DataModel;
 import org.jboss.seam.contexts.SessionContext;
 import org.jboss.seam.faces.FacesMessages;
+import org.jboss.seam.international.LocaleSelector;
 import org.jboss.seam.log.Log;
 
 import javax.ejb.EJB;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
+import javax.faces.context.FacesContext;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 @Stateful
 @Name("idpSP")
@@ -51,6 +56,12 @@ public class SPBean implements SP {
 
         @In(create = true)
         FacesMessages facesMessages;
+
+        @In
+        private LocaleSelector localeSelector;
+
+        @In(value = SP.LANGUAGE_LIST_SESSION_ATTRIBUTE, scope = ScopeType.SESSION, required = false)
+        private List<String> languages;
 
         @EJB
         AttributeService attributeService;
@@ -90,6 +101,32 @@ public class SPBean implements SP {
                         }
                 } else {
                         this.attributeList = this.attributeService.listAttributes();
+                }
+        }
+
+        @Override
+        public void initLanguage() {
+                this.log.debug("languages: #0", this.languages);
+                if (null != this.languages) {
+
+                        Iterator<Locale> supportedLocales =
+                                FacesContext.getCurrentInstance()
+                                        .getApplication().getSupportedLocales();
+
+                        for (String language : this.languages) {
+
+                                while (supportedLocales.hasNext()) {
+                                        Locale locale = supportedLocales.next();
+                                        this.log.debug("language: " + language +
+                                                " supportedLocale: " + locale.getLanguage());
+                                        if (locale.getLanguage().equals(language)) {
+                                                // we got a winner
+                                                this.localeSelector.setLocale(locale);
+                                                this.localeSelector.select();
+                                                return;
+                                        }
+                                }
+                        }
                 }
         }
 

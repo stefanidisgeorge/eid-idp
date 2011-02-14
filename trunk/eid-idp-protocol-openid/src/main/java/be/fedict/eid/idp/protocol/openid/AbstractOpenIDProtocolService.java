@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.protocol.openid;
 
 import be.fedict.eid.idp.common.OpenIDAXConstants;
+import be.fedict.eid.idp.sp.protocol.openid.UserInterfaceMessage;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +45,7 @@ import java.security.PublicKey;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,6 +101,13 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
 
                 LOG.debug("init");
                 this.configuration = configuration;
+
+                // add UI Extension message
+                try {
+                        Message.addExtensionFactory(UserInterfaceMessage.class);
+                } catch (MessageException e) {
+                        throw new RuntimeException(e);
+                }
         }
 
         public IncomingRequest handleIncomingRequest(
@@ -129,14 +138,33 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
 
                 LOG.debug("checkid_setup");
                 RealmVerifier realmVerifier = serverManager.getRealmVerifier();
-                AuthRequest.createAuthRequest(parameterList, realmVerifier);
+                AuthRequest authRequest =
+                        AuthRequest.createAuthRequest(parameterList, realmVerifier);
                 // cannot store authRequest since it's not serializable.
                 HttpSession httpSession = request.getSession();
                 storeParameterList(parameterList, httpSession);
 
+                // check for UI Extension
+                List<String> languages = null;
+                if (authRequest.hasExtension(UserInterfaceMessage.OPENID_NS_UI)) {
+
+                        MessageExtension messageExtension = authRequest
+                                .getExtension(UserInterfaceMessage.OPENID_NS_UI);
+
+                        if (messageExtension instanceof UserInterfaceMessage) {
+
+                                UserInterfaceMessage uiMessage =
+                                        (UserInterfaceMessage) messageExtension;
+
+                                languages = uiMessage.getLanguages();
+                        }
+
+                }
+
                 String openidRealm = parameterList.getParameterValue("openid.realm");
 
-                return new IncomingRequest(getAuthenticationFlow(), openidRealm, null);
+                return new IncomingRequest(getAuthenticationFlow(), openidRealm,
+                        null, languages);
         }
 
         private static final String OPENID_PARAMETER_LIST_SESSION_ATTRIBUTE =
@@ -224,6 +252,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                         AuthSuccess authSuccess = (AuthSuccess) message;
 
 
+                        // Attribute Exchange Extension
                         if (authRequest.hasExtension(AxMessage.OPENID_NS_AX)) {
 
                                 MessageExtension messageExtension = authRequest
@@ -278,6 +307,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                                 }
                         }
 
+                        // PaPe extension
                         PapeResponse papeResponse = PapeResponse.createPapeResponse();
                         papeResponse.setAuthTime(new Date());
 
