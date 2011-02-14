@@ -12,9 +12,6 @@
 		<link rel="stylesheet" type="text/css"
 			href="#{facesContext.externalContext.requestContextPath}/style.css" />
 
-        <!-- Seems to resolve deployJava.js/Chrome issue ... -->
-        <f:view contentType="text/html"/>
-
 	</head>
 
 	<body>
@@ -25,7 +22,8 @@
             <h1>#{messages.title}</h1>
 		</div>
 
-		<f:view>
+        <!-- Seems to resolve deployJava.js/Chrome issue ... -->
+		<f:view contentType="text/html">
 			<div id="content">
 				<ui:insert name="body">
 					<p>Default Body</p>

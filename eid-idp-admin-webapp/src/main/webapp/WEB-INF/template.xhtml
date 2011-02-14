@@ -16,9 +16,6 @@
     <title>eID Identity Provider Administrator Console</title>
     <link rel="stylesheet" type="text/css"
           href="#{facesContext.externalContext.requestContextPath}/style.css"/>
-
-    <!-- Seems to resolve deployJava.js/Chrome issue ... -->
-    <f:view contentType="text/html"/>
 </head>
 
 <body>
@@ -29,7 +26,9 @@
     <h1>eID Identity Provider Administrator Console</h1>
 </div>
 
-<f:view>
+<!-- Seems to resolve deployJava.js/Chrome issue ... -->
+<f:view contentType="text/html">
+
     <h:form>
         <div id="menu">
             <div id="menu-content">
