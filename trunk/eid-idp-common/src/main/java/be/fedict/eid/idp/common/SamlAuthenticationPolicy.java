@@ -18,6 +18,9 @@
 
 package be.fedict.eid.idp.common;
 
+/**
+ * Enumeration of the SAML v2.0 Authentication Policies.
+ */
 public enum SamlAuthenticationPolicy {
 
         IDENTIFICATION("urn:be:fedict:eid:idp:Identification"),

@@ -19,6 +19,14 @@ public class ServiceLocator<T> {
 
         private final String className;
 
+        /**
+         * Main Constructor
+         *
+         * @param initParam servlet initialization parameter
+         * @param config    ServletConfig
+         * @throws ServletException something went wrong fetching the init
+         *                          parameter
+         */
         public ServiceLocator(String initParam, ServletConfig config)
                 throws ServletException {
 
@@ -39,7 +47,8 @@ public class ServiceLocator<T> {
          * corresponding <code>init-param</code> was not set.
          *
          * @return the service <T> or <code>null</code> if not set.
-         * @throws javax.servlet.ServletException
+         * @throws ServletException something went wrong trying to resolve the
+         *                          service
          */
         @SuppressWarnings("unchecked")
         public T locateService() throws ServletException {

@@ -29,9 +29,10 @@ import java.util.List;
 /**
  * OpenID User Interface Extension v1.0
  * <p/>
- * http://svn.openid.net/repos/specifications/user_interface/1.0/trunk/openid-user-interface-extension-1_0.html
  *
  * @author Wim Vandenhaute
+ * @see <a href="http://svn.openid.net/repos/specifications/user_interface/1.0/trunk/openid-user-interface-extension-1_0.html">
+ *      OpenID User Interface Extension v1.0</a>
  */
 public class UserInterfaceMessage implements MessageExtension,
         MessageExtensionFactory, Iterable<String> {
@@ -43,11 +44,17 @@ public class UserInterfaceMessage implements MessageExtension,
 
         private ParameterList parameters;
 
+        /**
+         * {@inheritDoc}
+         */
         public UserInterfaceMessage() {
 
                 parameters = new ParameterList();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public UserInterfaceMessage(ParameterList parameterList) {
 
                 parameters = parameterList;
@@ -152,6 +159,9 @@ public class UserInterfaceMessage implements MessageExtension,
                 return new UserInterfaceMessage(parameterList);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public Iterator<String> iterator() {
 
                 return new AbstractIterator<String>() {
