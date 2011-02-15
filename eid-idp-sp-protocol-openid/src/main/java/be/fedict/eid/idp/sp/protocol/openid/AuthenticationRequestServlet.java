@@ -56,7 +56,7 @@ import java.util.List;
  * <ul>
  * <li><tt>AuthenticationRequestService</tt>: {@link AuthenticationRequestService}
  * to provide the IdP protocol entry point, SP response handling location,
- * optional SSL certificate to trust</li>
+ * optional SSL certificate to trust, optional list of preferred languages</li>
  * </ul>
  * or by provinding:
  * <ul>
@@ -66,6 +66,9 @@ import java.util.List;
  * <li><tt>IdPDestination</tt>: SAML2 entry point of the eID IdP.</li>
  * <li><tt>TrustServer</tt>: optional boolean whether any SSL certificate is
  * regarded trusted.</li>
+ * <li><tt>Language</tt>: optional comma-seperated list of preferred languages
+ * to display the eID IdP webapp in (e.g.: "en,nl,fr"). If not specified, the
+ * browsers's locale will be used.</li>
  * </ul>
  */
 public class AuthenticationRequestServlet extends HttpServlet {
@@ -103,6 +106,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         private boolean trustServer;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void init(ServletConfig config) throws ServletException {
 
@@ -211,6 +217,14 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 }
         }
 
+        /**
+         * Used by the {@link AuthenticationResponseServlet} for processing the
+         * returned OpenID response
+         *
+         * @param request HTTP Servlet Request, used to get the OpenID
+         *                {@link ConsumerManager} from the {@link ServletContext}
+         * @return the OpenID {@link ConsumerManager}
+         */
         public static ConsumerManager getConsumerManager(HttpServletRequest request) {
                 HttpSession httpSession = request.getSession();
                 ServletContext servletContext = httpSession.getServletContext();
@@ -223,6 +237,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 return consumerManager;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected void doGet(HttpServletRequest request,
                              HttpServletResponse response) throws ServletException, IOException {

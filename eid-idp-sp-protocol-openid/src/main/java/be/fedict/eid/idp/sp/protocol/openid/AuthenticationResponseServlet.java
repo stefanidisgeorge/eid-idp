@@ -42,6 +42,22 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * OpenID Authentication Response Servlet.
+ * <p/>
+ * This servlet will process the incoming OpenID "ID Resolution" and construct
+ * a {@link OpenIDAuthenticationResponse} from it, putting on the requested
+ * HTTP Session parameter. After this it will redirect to the configured
+ * redirect page
+ * <p/>
+ * Required intialization parameters are:
+ * <ul>
+ * <li><tt>ResponseSessionAttribute</tt>: HTTP Session Attribute on which the
+ * {@link OpenIDAuthenticationResponse} will be set.</li>
+ * <li><tt>RedirectPage</tt>: Page to redirect to after having processed the
+ * OpenID ID Resolution response</li>
+ * </ul>
+ */
 public class AuthenticationResponseServlet extends HttpServlet {
 
         private static final long serialVersionUID = 1L;
@@ -53,6 +69,9 @@ public class AuthenticationResponseServlet extends HttpServlet {
 
         private String redirectPage;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void init(ServletConfig config) throws ServletException {
                 this.responseSessionAttribute = getRequiredInitParameter(
@@ -70,6 +89,9 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 return value;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected void doGet(HttpServletRequest request,
                              HttpServletResponse response) throws ServletException, IOException {
