@@ -31,7 +31,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Abstract authentication response servlet for several SAML v2.0 bindings.
+ * Abstract authentication response servlet for SAML v2.0 bindings.
  * <p/>
  * Passes the incoming HTTP Post to the binding specific authentication response
  * processor and puts the returned {@link AuthenticationResponse} on the HTTP
@@ -58,6 +58,9 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
         private String errorPage;
         private String errorMessageSessionAttribute;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void init(ServletConfig config) throws ServletException {
 
@@ -73,6 +76,14 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
                 initialize(config);
         }
 
+        /**
+         * Get the required servlet init param
+         *
+         * @param parameterName parameter name
+         * @param config        Servlet Config
+         * @return the required param value
+         * @throws ServletException no value was found.
+         */
         protected String getRequiredInitParameter(String parameterName,
                                                   ServletConfig config)
                 throws ServletException {
@@ -85,6 +96,9 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
                 return value;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected void doGet(HttpServletRequest request,
                              HttpServletResponse response)
@@ -94,6 +108,9 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
                         request, response);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected void doPost(HttpServletRequest request,
                               HttpServletResponse response) throws ServletException, IOException {
@@ -157,9 +174,19 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
                 httpSession.removeAttribute(this.responseSessionAttribute);
         }
 
+        /**
+         * Servlet initialization callback
+         *
+         * @param config the ServletConfig
+         * @throws ServletException something went wrong
+         */
         protected abstract void initialize(ServletConfig config)
                 throws ServletException;
 
+        /**
+         * @return the {@link AbstractAuthenticationResponseProcessor} to be used
+         * @throws ServletException something went wrong
+         */
         protected abstract AbstractAuthenticationResponseProcessor getAuthenticationResponseProcessor()
                 throws ServletException;
 }

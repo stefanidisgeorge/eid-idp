@@ -28,6 +28,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * HTTP Proxy Selector used by the HTTP-Artifact WS Client
+ * {@link ArtifactServiceClient} for running behind a proxy (both HTTP as HTTPS)
+ *
+ * @author Wim Vandenhaute
+ */
 public class ArtifactProxySelector extends ProxySelector {
 
         private static final Log LOG = LogFactory.getLog(ArtifactProxySelector.class);
@@ -36,11 +42,19 @@ public class ArtifactProxySelector extends ProxySelector {
 
         private final Map<String, Proxy> proxies;
 
+        /**
+         * Main constructor
+         *
+         * @param proxySelector proxy selector to use
+         */
         public ArtifactProxySelector(ProxySelector proxySelector) {
                 this.defaultProxySelector = proxySelector;
                 this.proxies = new HashMap<String, Proxy>();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public List<Proxy> select(URI uri) {
                 LOG.debug("select: " + uri);
@@ -53,6 +67,9 @@ public class ArtifactProxySelector extends ProxySelector {
                 return this.defaultProxySelector.select(uri);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
                 this.defaultProxySelector.connectFailed(uri, sa, ioe);

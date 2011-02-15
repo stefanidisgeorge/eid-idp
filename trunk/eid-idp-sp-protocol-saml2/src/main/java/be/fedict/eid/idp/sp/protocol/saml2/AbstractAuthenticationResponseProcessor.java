@@ -48,7 +48,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Processor for SAML v2.0 Responses
+ * Processor for SAML v2.0 Responses, used by
+ * {@link AbstractAuthenticationResponseServlet}
+ * <p/>
+ * Will process the SAML v2.0 Response returned by the HTTP-POST
+ * {@link be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseProcessor}
+ * and HTTP-Arfifact
+ * {@link be.fedict.eid.idp.sp.protocol.saml2.artifact.AuthenticationResponseProcessor}
+ * implementations of this processor.
+ * <p/>
+ * On complete of this response, will returned an {@link AuthenticationResponse}
+ * containing all available details of the authenticated subject.
  *
  * @author Wim Vandenhaute
  */
@@ -404,8 +414,20 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 return Saml2Util.getDecrypter(secretKey);
         }
 
+        /**
+         * @param request HTTP Servlet Request
+         * @return the SAML v2.0 Response
+         * @throws AuthenticationResponseProcessorException
+         *          something went wrong
+         *          getting the SAML v2.0 Response
+         */
         protected abstract Response getSamlResponse(HttpServletRequest request)
                 throws AuthenticationResponseProcessorException;
 
+        /**
+         * @return the (optional for HTTP-POST)
+         *         {@link AuthenticationResponseService} used for e.g.
+         *         validation of the optional signature on the response, ...
+         */
         protected abstract AuthenticationResponseService getAuthenticationResponseService();
 }

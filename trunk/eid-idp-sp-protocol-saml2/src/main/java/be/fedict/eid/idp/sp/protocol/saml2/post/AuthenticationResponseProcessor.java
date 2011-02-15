@@ -53,6 +53,16 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
                 this.service = service;
         }
 
+        /**
+         * Parses the SAML v2.0 Authentication Response out of the HTTP Servlet
+         * Request and validates any signatures on it.
+         *
+         * @param request HTTP Servlet Request
+         * @return the SAML v2.0 Authentication Response
+         * @throws AuthenticationResponseProcessorException
+         *          something went wrong getting or validating the SAML v2.0
+         *          Authentication Response.
+         */
         @Override
         protected Response getSamlResponse(HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
@@ -104,6 +114,9 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
                 return response;
         }
 
+        /**
+         * @return the optional {@link AuthenticationResponseService}
+         */
         @Override
         protected AuthenticationResponseService getAuthenticationResponseService() {
 

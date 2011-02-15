@@ -40,7 +40,7 @@ import java.security.KeyStore;
  * <ul>
  * <li><tt>AuthenticationRequestService</tt>: {@link AuthenticationRequestService}
  * to provide the IdP protocol entry point, SP response handling location,
- * SP identity for signing the * authentication request, relay state,...</li>
+ * SP identity for signing the authentication request, relay state, language</li>
  * </ul>
  * or by provinding:
  * <ul>
@@ -48,6 +48,8 @@ import java.security.KeyStore;
  * destination that will handle the returned SAML2 response. One of the 2
  * parameters needs to be specified.</li>
  * <li><tt>IdPDestination</tt>: SAML2 entry point of the eID IdP.</li>
+ * <li><tt>Language</tt>: optional language to display the eID IdP webapp in
+ * (if available, else the browser's locale will be used).</li>
  * </ul>
  */
 public class AuthenticationRequestServlet extends HttpServlet {
@@ -82,6 +84,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void init(ServletConfig config) throws ServletException {
 
@@ -112,6 +117,9 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @SuppressWarnings("unchecked")
         @Override
         protected void doGet(HttpServletRequest request,
@@ -170,6 +178,13 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 session.setAttribute(REQUEST_ID_SESSION_ATTRIBUTE, requestId);
         }
 
+        /**
+         * Used by the {@link AbstractAuthenticationResponseServlet} for
+         * validation of the SAML v2.0 Response <tt>InResponseTo</tt> field.
+         *
+         * @param httpSession the HTTP Session
+         * @return the SAML v2.0 Authentication Request ID.
+         */
         public static String getRequestId(HttpSession httpSession) {
                 return (String) httpSession
                         .getAttribute(REQUEST_ID_SESSION_ATTRIBUTE);
@@ -179,6 +194,14 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 session.setAttribute(RECIPIENT_SESSION_ATTRIBUTE, recipient);
         }
 
+        /**
+         * Used by the {@link AbstractAuthenticationResponseServlet} for
+         * validation of the SAML v2.0 Response <tt>AudienceRestriction</tt>.
+         *
+         * @param httpSession the HTTP Session
+         * @return the SAML v2.0 Authentication Request
+         *         AssertionConsumerServiceURL
+         */
         public static String getRecipient(HttpSession httpSession) {
                 return (String) httpSession
                         .getAttribute(RECIPIENT_SESSION_ATTRIBUTE);
@@ -188,6 +211,14 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 session.setAttribute(RELAY_STATE_SESSION_ATTRIBUTE, relayState);
         }
 
+        /**
+         * Used by the {@link AbstractAuthenticationResponseServlet} for
+         * validation of the SAML v2.0 Response <tt>RelayState</tt>.
+         *
+         * @param httpSession the HTTP Session
+         * @return optional RelayState sent along with the SAML v2.0
+         *         Authentication Request
+         */
         public static String getRelayState(HttpSession httpSession) {
                 return (String) httpSession
                         .getAttribute(RELAY_STATE_SESSION_ATTRIBUTE);

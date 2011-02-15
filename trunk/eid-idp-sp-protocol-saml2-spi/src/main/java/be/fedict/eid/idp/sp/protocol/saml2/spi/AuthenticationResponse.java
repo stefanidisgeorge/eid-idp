@@ -26,7 +26,10 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * SAML2 Authentication Response DO.
+ * SAML2 Authentication Response DO containing all available information of the
+ * authenticated subject.
+ *
+ * @author Wim Vandenhaute
  */
 public class AuthenticationResponse implements Serializable {
 
@@ -53,26 +56,44 @@ public class AuthenticationResponse implements Serializable {
                 this.assertion = assertion;
         }
 
+        /**
+         * @return the identifier of the authenticated subject
+         */
         public String getIdentifier() {
                 return identifier;
         }
 
+        /**
+         * @return Map of available eID attribute of the authenticated subject
+         */
         public Map<String, Object> getAttributeMap() {
                 return attributeMap;
         }
 
+        /**
+         * @return optional RelayState passed along during authentication
+         */
         public String getRelayState() {
                 return relayState;
         }
 
+        /**
+         * @return time of authentication
+         */
         public DateTime getAuthenticationTime() {
                 return authenticationTime;
         }
 
+        /**
+         * @return used SAML Authentication Policy
+         */
         public SamlAuthenticationPolicy getAuthenticationPolicy() {
                 return authenticationPolicy;
         }
 
+        /**
+         * @return the SAML v2.0 Assertion.
+         */
         public Assertion getAssertion() {
                 return assertion;
         }

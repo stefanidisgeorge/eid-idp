@@ -18,6 +18,12 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
+/**
+ * Exception thrown when sonething went wrong processing the SAML v2.0
+ * Authentication Response
+ *
+ * @author Wim Vandenhaute
+ */
 public class AuthenticationResponseProcessorException extends Exception {
 
         private static final long serialVersionUID = 1L;
