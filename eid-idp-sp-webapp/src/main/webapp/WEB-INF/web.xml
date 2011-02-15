@@ -166,4 +166,22 @@
         <servlet-name>OpenIDAuthenticationResponseServlet</servlet-name>
         <url-pattern>/openid-landing</url-pattern>
     </servlet-mapping>
+
+    <!-- WS-Federation Authentication Protocol -->
+    <servlet>
+        <servlet-name>WSFederationAuthenticationRequestServlet</servlet-name>
+        <servlet-class>
+            be.fedict.eid.idp.sp.protocol.ws_federation.AuthenticationRequestServlet
+        </servlet-class>
+        <init-param>
+            <param-name>AuthenticationRequestService</param-name>
+            <param-value>
+                be/fedict/eid/idp/sp/wsfed/AuthenticationRequestServiceBean
+            </param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>WSFederationAuthenticationRequestServlet</servlet-name>
+        <url-pattern>/wsfed-request</url-pattern>
+    </servlet-mapping>
 </web-app>

@@ -48,6 +48,21 @@
             </li>
         </ul>
 
+        <h2>WS-Federation</h2>
+        <ul>
+            <li>
+                <a href="ws-federation/ident.jsp">Identification</a>
+            </li>
+            <li>
+                <a href="ws-federation/auth.jsp">Authentication</a>
+            </li>
+            <li>
+                <a href="ws-federation/auth-ident.jsp">Authentication +
+                    Identification
+                </a>
+            </li>
+        </ul>
+
         <h2>OpenID v2.0</h2>
 
         <ul>
@@ -69,15 +84,18 @@
 
         Download the Test Service Provider's Certificate
         <a href="./pki">here</a>
-        <br/><br/>
+        <br/>
+        <br/>
         Download the Test Service Provider's Public Key
         <a href="./public">here</a>
-        <br/><br/>
+        <br/>
+        <br/>
         <jsp:useBean id="sp" scope="request"
                      class="be.fedict.eid.idp.sp.SPBean"/>
         AES-128 secret:
         <jsp:getProperty name="sp" property="aes128SecretKey"/>
-        <br/><br/>
+        <br/>
+        <br/>
 
     </body>
 </html>

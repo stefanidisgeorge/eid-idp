@@ -21,6 +21,7 @@ package be.fedict.eid.idp.sp;
 import be.fedict.eid.idp.sp.openid.OpenIDAuthenticationRequestServiceBean;
 import be.fedict.eid.idp.sp.saml2.AuthenticationRequestServiceBean;
 import be.fedict.eid.idp.sp.saml2.AuthenticationResponseServiceBean;
+import be.fedict.eid.idp.sp.wsfed.WSFedAuthenticationRequestServiceBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,6 +43,9 @@ public class StartupServletContextListener implements ServletContextListener {
         private static final String OPENID_REQUEST_BEAN_JNDI =
                 "be/fedict/eid/idp/sp/openid/AuthenticationRequestServiceBean";
 
+        private static final String WS_FED_REQUEST_BEAN_JNDI =
+                "be/fedict/eid/idp/sp/wsfed/AuthenticationRequestServiceBean";
+
         @Override
         public void contextInitialized(ServletContextEvent sce) {
 
@@ -52,6 +56,8 @@ public class StartupServletContextListener implements ServletContextListener {
                                 new AuthenticationResponseServiceBean());
                         bindComponent(OPENID_REQUEST_BEAN_JNDI,
                                 new OpenIDAuthenticationRequestServiceBean());
+                        bindComponent(WS_FED_REQUEST_BEAN_JNDI,
+                                new WSFedAuthenticationRequestServiceBean());
                 } catch (NamingException e) {
                         throw new RuntimeException(e);
                 }
@@ -106,6 +112,12 @@ public class StartupServletContextListener implements ServletContextListener {
 
                 return (OpenIDAuthenticationRequestServiceBean)
                         getComponent(OPENID_REQUEST_BEAN_JNDI);
+        }
+
+        public static WSFedAuthenticationRequestServiceBean getWSFedRequestBean() {
+
+                return (WSFedAuthenticationRequestServiceBean)
+                        getComponent(WS_FED_REQUEST_BEAN_JNDI);
         }
 
 
