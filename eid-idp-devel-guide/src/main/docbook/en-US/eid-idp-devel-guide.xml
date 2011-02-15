@@ -32,14 +32,15 @@
         <title>Introduction</title>
         <para>
             The FedICT eID Identity Provider (eID IdP) is an identity provider
-            which makes us of the FedICT eID Applet for authenticating users.
+            which makes use of the FedICT eID Applet for authenticating users.
             The main goal of the eID Identity Provider is to ease the
             integration
             of eID in web applications of a Service Provider. It makes use of
             the FedICT eID Trust Service for validation of the eID certificates.
         </para>
         <para>
-            The FedICT eID Identity Provider is not a complete IAM solution. Following
+            The FedICT eID Identity Provider is not a complete IAM solution.
+            Following
             is out-of-scope:
             <itemizedlist>
                 <listitem>
@@ -85,9 +86,7 @@
                 Following is an example of such a SAML v2.0 authentication
                 request:
                 <programlisting role="XML">
-
                     <![CDATA[
-
 <saml2p:AuthnRequest xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
     AssertionConsumerServiceURL="https://192.168.1.101:443/eid-idp-sp/saml2-landing"
     Destination="https://192.168.1.101:443/eid-idp/protocol/saml2"
@@ -109,8 +108,32 @@
                 <title>Java SDK</title>
                 <para>
                     The FedICT eID Identity Provider Java SDK provides a servlet
-                    which will generate and send out such a request.
-                    The servlet takes following init parameters:
+                    (
+                    <code>
+                        be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet
+                    </code>
+                    ) which will generate and send out such a request.
+
+                    Configuration of the servlet can be acheived either by
+                    providing:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                <code>AuthenticationRequestService(Class)</code>
+                                Optional JNDI location (or Class reference) of
+                                an implementation of the
+                                AuthenticationRequestService interface. This
+                                implementation can provide an optional SP
+                                identity used for signing the authentication
+                                request, issuer of the authentication request,
+                                optional relay state, IdP destination,
+                                SP destination and optional language to display
+                                the FedICT eID IdP webapp in.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+
+                    or by providing following init parameters:
                     <itemizedlist>
                         <listitem>
                             <para>
@@ -139,13 +162,11 @@
                         </listitem>
                         <listitem>
                             <para>
-                                <code>AuthenticationRequestService</code>
-                                Optional JNDI location of an implementation of
-                                the AuthenticationRequestService interface. This
-                                implementation can provide an optional SP
-                                identity used for signing the authentication
-                                request, optional relay state and the IdP
-                                destination.
+                                <code>Language</code>
+                                Optional language to display the FedICT eID IdP
+                                webapp in. Available locales are<code>nl, fr,
+                                en, de</code>. If an unsupported locale is used,
+                                the browsers' default locale will be used.
                             </para>
                         </listitem>
                     </itemizedlist>
@@ -163,10 +184,6 @@
         <servlet-class>
             be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet
         </servlet-class>
-        <init-param>
-            <param-name>SPDestinationPage</param-name>
-            <param-value>/saml2-landing</param-value>
-        </init-param>
         <init-param>
             <param-name>AuthenticationRequestService</param-name>
             <param-value>
@@ -198,7 +215,7 @@
                 The FedICT Identity Provider will return a (Base64 encoded)
                 SAML v2.0 authentication response using an HTTP Post
                 via the web browser of the client. The POST parameter used for
-                that is <emphasis>SAMLResponse</emphasis>.
+                that is<emphasis>SAMLResponse</emphasis>.
             </para>
             <para>
                 Following is an example of such a SAML v2.0 authentication
@@ -273,8 +290,12 @@
                 <title>Java SDK</title>
                 <para>
                     The FedICT eID Identity Provider Java SDK provides a servlet
-                    which will handle the incoming SAML Authentication Response.
-                    The servlet takes following init parameters:
+                    (
+                    <code>
+                        be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseServlet
+                    </code>
+                    ) which will handle the incoming SAML Authentication
+                    Response. The servlet takes following init parameters:
                     <itemizedlist>
                         <listitem>
                             <para>
@@ -373,22 +394,241 @@
                 <para>
                     For processing the SAML v2.0 Authentication response outside
                     a servlet context ( e.g. JSF lifecycle components ) one can
-                    use the<code>AuthenticationResponseProcessor</code>.
+                    use the
+                    <code>
+                        be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseProcessor
+                    </code>
+                    .
                 </para>
             </section>
         </section>
+    </section>
+    <section>
+        <title>SAML v2.0 Artifact Binding</title>
+        <para>
+            Support for the SAML v2.0 Artifact Binding is available but only
+            applicable to the Authentication Responses. Sending the SAML v2.0
+            Authentication Request can be done similar to the HTTP-POST or
+            HTTP-Redirect binding but to the eID IdP Artifact Binding protocol
+            entry point. Hence please refer to those bindings' sections for more
+            information on sending this authentication request.
+        </para>
         <section>
-            <title>Future work</title>
+            <title>Authentication Response</title>
             <para>
-                In later releases support for the SAML v2.0 Artifact Profile
-                will be
-                added and a SAML v2.0 Metadata document will be available to
-                publish
-                the SAML v2.0 services.
+                In the HTTP Artifact binding, the SAML Authentication Response
+                is transmitted by reference using an<code>Artifact</code>. A
+                seperate synchronous binding, SOAP, is used to exchange the
+                artifact for the actual SAML v2.0 Authentication Response using
+                the Artifact Resolution Web Service.
+            </para>
+            <para>
+                Following is an example of a SAML v2.0 Artifact response:
+                <programlisting role="XML">
+                    <![CDATA[
+HTTP/1.1 302 Object Moved
+Date: 21 Jan 2004 07:00:49 GMT
+Location: https://www.rp.com/SAML?SAMLart=AAQAADWNEw5VT47wcO4z
+X%2FiEzMmFQvGknDfws2ZtqSGdkNSbsW1cmVR0bzU%
+3D&RelayState=0043bfc1bc45110dae17004005b13a2b
+Content-Type: text/html; charset=iso-8859-1
+                            ]]>
+                </programlisting>
+                The Relying Party will response with an Artifact Resolve Request
+                sent to the eID IdP SAML v2.0 Artifact Resolution Web Service
+                over SOAP. Following is an example of such a request:
+                <programlisting role="XML">
+                    <![CDATA[
+POST /SAML/Artifact/Resolve HTTP/1.1
+Host: eid-idp.be
+Content-Type: text/xml
+Content-Length: nnn
+SOAPAction: http://www.oasis-open.org/committees/security
+<SOAP-ENV:Envelope
+    xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Body>
+        <samlp:ArtifactResolve
+            xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+            xmlns="urn:oasis:names:tc:SAML:2.0:assertion"
+            ID="_6c3a4f8b9c2d" Version="2.0"
+            IssueInstant="2004-01-21T19:00:49Z">
+            <Issuer>https://www.rp.com/SAML</Issuer>
+            <Artifact>
+                AAQAADWNEw5VT47wcO4zX/iEzMmFQvGknDfws2ZtqSGdkNSbsW1cmVR0bzU=
+            </Artifact>
+        </samlp:ArtifactResolve>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+                            ]]>
+                </programlisting>
+                The resolution service will response to this request (if valid)
+                with an ArtifactResponse message, containing the SAML v2.0
+                Authentication Response. Following is an example of such a
+                response:
+                <programlisting role="XML">
+                    <![CDATA[
+HTTP/1.1 200 OK
+Date: 21 Jan 2004 07:00:49 GMT
+Content-Type: text/xml
+Content-Length: nnnn
+<SOAP-ENV:Envelope
+    xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Body>
+        <samlp:ArtifactResponse
+            xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+            xmlns="urn:oasis:names:tc:SAML:2.0:assertion"
+            ID="_FQvGknDfws2Z" Version="2.0"
+            InResponseTo="_6c3a4f8b9c2d"
+            IssueInstant="2004-01-21T19:00:49Z">
+            <Issuer>https://eid-idp.be/SAML</Issuer>
+            <samlp:Status>
+                <samlp:StatusCode
+                    Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
+            </samlp:Status>
+            <saml2p:Response ...>
+                ...
+            </samlp:Response>
+        </samlp:ArtifactResponse>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+                            ]]>
+                </programlisting>
+            </para>
+            <section>
+                <title>Java SDK</title>
+                <para>
+                    The FedICT eID Identity Provider Java SDK provides a servlet
+                    (
+                    <code>
+                        be.fedict.eid.idp.sp.protocol.saml2.artifact.AuthenticationResponseServlet
+                    </code>
+                    ) which will handle the incoming SAML Authentication
+                    Response. The servlet takes following init parameters:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                <code>ResponseSessionAttribute</code>
+                                HTTP Session attribute on which a returned
+                                AuthenticationResponse object will be pushed
+                                after a successfull authentication. This object
+                                contains the user identifier, authentication
+                                time, map of returned attributes, authentication
+                                policy and relay state.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>
+                                    ArtifactAuthenticationResponseService(Class)
+                                </code>
+                                required JNDI location (or class reference )of
+                                an implementation of the
+                                ArtifactAuthenticationResponseService interface.
+                                This is required to provide location of the eID
+                                IdP Artifact Resolution Web Service,
+                                configuration of the WS Client (Proxy, SSL,
+                                ...),
+                                validation of the certificate chain in signature
+                                of the SAML v2.0 authentication response, ....
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>RedirectPage</code>
+                                Page to redirect to after a successfull
+                                authentication.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>ErrorPage</code>
+                                Page to redirect to if something went wrong
+                                processing the authentication response.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>ErrorMessageSessionAttribute</code>
+                                HTTP Session attribute on which more info will
+                                be pushed if something went wrong processing the
+                                authentication response.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+        </section>
+    </section>
+    <section>
+        <title>SAML v2.0 Browser Redirect</title>
+        <para>
+            Support for the SAML v2.0 HTTP-Redirect binding is available for
+            incoming authentication requests. This has been added for support
+            for libraries like
+            <code>SimpleSAMLphp</code>
+            or
+            <code>mod_mellon</code>. The SAML v2.0 Authentication Response will
+            be sent using the Browser POST or Artifact Binding, according to the
+            used eID IdP protocol entry point.
+        </para>
+        <section>
+            <title>Java SDK</title>
+            <para>
+                The
+                <code>AuthenticationRequestServlet</code>
+                as described in the SAML v2.0 Browser Post binding can be used
+                for this.
             </para>
         </section>
+    </section>
+    <section>
+        <title>SAML v2.0 Metadata</title>
+        <para>
+            For each SAML v2.0 eID IdP protocol entry point, a SAML v2.0
+            Metadata document is available to publish the SAML v2.0 services.
+            This is added for libraries like
+            <code>SimpleSAMLphp</code>
+            or
+            <code>mod_mellon</code>
+            which require this.
+        </para>
+        <para>
+            Following is an example of such a SAML v2.0 Metadata document:
+            <programlisting role="XML">
+                <![CDATA[
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+    entityID="https://eid-idp.be/eid-idp/protocol/saml2/post/auth">
 
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        ...
+    </ds:Signature>
 
+    <md:IDPSSODescriptor WantAuthnRequestsSigned="false"
+        protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+
+        <md:KeyDescriptor>
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509Certificate>
+                        ...
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+
+        <md:NameIDFormat>
+            urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+        </md:NameIDFormat>
+
+        <md:SingleSignOnService
+            Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            Location="https://eid-idp.be/eid-idp/protocol/saml2/post/auth"/>
+
+    </md:IDPSSODescriptor>
+</md:EntityDescriptor>
+                        ]]>
+            </programlisting>
+        </para>
     </section>
     <section>
         <title>OpenID v2.0</title>
@@ -410,6 +650,11 @@
             Authentication Policy Extension 1.0 ( OpenID PAPE ) for
             communicating the authentication policy between the eID IdP and the
             SP.
+        </para>
+        <para>
+            The FedICT eID Identity Provider supports the OpenID User Interface
+            Extension 1.0 ( OpenID UI ) for communicating a list of preferred
+            languages to display the IdP in.
         </para>
         <section>
             <title>OpenID Protocol</title>
@@ -1029,6 +1274,13 @@ openid.return_to:https://localhost:48745/consumer
                         <entry>28 Dec 2010</entry>
                         <entry>Wim Vandenhaute</entry>
                         <entry>Initial version.</entry>
+                    </row>
+                    <row>
+                        <entry>15 Fed 2010</entry>
+                        <entry>Wim Vandenhaute</entry>
+                        <entry>Add SAML Redirect/Artifact binding, OpenID UI
+                            documentation.
+                        </entry>
                     </row>
                 </tbody>
             </tgroup>
