@@ -17,7 +17,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>PhotoServlet</servlet-name>
-        <url-pattern>/photo</url-pattern>
+        <url-pattern>/photo.jpg</url-pattern>
     </servlet-mapping>
 
     <!-- PKI servlet -->
