@@ -46,6 +46,18 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
                 this.service = service;
         }
 
+        /**
+         * Used the <tt>SAMLArt</tt> parameter in the HTTP Servlet Request and
+         * makes a call used the Artifact Web Service to resolve the SAML v2.0
+         * Authentication Response using the WS Client
+         * {@link ArtifactServiceClient}
+         *
+         * @param request HTTP Servlet Request
+         * @return the SAML v2.0 Authentication Response
+         * @throws AuthenticationResponseProcessorException
+         *          something went wrong trying to resolve the SAML v2.0
+         *          Authentication Response.
+         */
         @Override
         protected Response getSamlResponse(HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
@@ -76,6 +88,9 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
                 return client.resolve(encodedArtifact);
         }
 
+        /**
+         * @return the required {@link ArtifactAuthenticationResponseService}.
+         */
         @Override
         protected AuthenticationResponseService getAuthenticationResponseService() {
 

@@ -45,7 +45,7 @@ import java.util.Set;
 /**
  * Client SOAP handler for the SAML v2.0 Artifact Binding Service.
  * <p/>
- * Used for signing the SAML v2.0 Artifact Resolve request.
+ * Used for optionally signing the SAML v2.0 Artifact Resolve request.
  *
  * @author Wim Vandenhaute
  */
@@ -81,10 +81,16 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                 this.spIdentity = spIdentity;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public Set<QName> getHeaders() {
                 return new HashSet<QName>();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public boolean handleMessage(SOAPMessageContext soapMessageContext) {
 
                 Boolean outbound = (Boolean) soapMessageContext
@@ -190,10 +196,16 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                 }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public boolean handleFault(SOAPMessageContext soapMessageContext) {
                 return true;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public void close(MessageContext messageContext) {
                 // empty
         }

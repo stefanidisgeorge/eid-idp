@@ -48,7 +48,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Client for the SAML v2.0 Artifact Binding Service.
+ * Client for the SAML v2.0 HTTP-Artifact Binding Web Service.
  *
  * @author Wim Vandenhaute
  */
