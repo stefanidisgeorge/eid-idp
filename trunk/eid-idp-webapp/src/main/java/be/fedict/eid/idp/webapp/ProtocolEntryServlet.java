@@ -86,6 +86,8 @@ public class ProtocolEntryServlet extends HttpServlet {
 
         private String unknownProtocolPageInitParam;
 
+        private String unsupportedBrowserPageInitParam;
+
         private String protocolErrorPageInitParam;
 
         private String protocolErrorMessageSessionAttributeInitParam;
@@ -139,6 +141,8 @@ public class ProtocolEntryServlet extends HttpServlet {
                 */
                 this.unknownProtocolPageInitParam = getRequiredInitParameter(config,
                         "UnknownProtocolPage");
+                this.unsupportedBrowserPageInitParam = getRequiredInitParameter(
+                        config, "UnsupportedBrowserPage");
                 this.protocolErrorPageInitParam = getRequiredInitParameter(config,
                         "ProtocolErrorPage");
                 this.protocolErrorMessageSessionAttributeInitParam = getRequiredInitParameter(
@@ -262,7 +266,14 @@ public class ProtocolEntryServlet extends HttpServlet {
                 LOG.debug("request context path: " + request.getContextPath());
                 LOG.debug("request query string: " + request.getQueryString());
                 LOG.debug("request path translated: " + request.getPathTranslated());
-                LOG.debug("user agent: " + request.getHeader("User-Agent"));
+
+                String userAgent = request.getHeader("User-Agent");
+                if (invalidUserAgent(userAgent)) {
+                        LOG.warn("unsupported user agent: " + userAgent);
+                        response.sendRedirect(request.getContextPath()
+                                + this.unsupportedBrowserPageInitParam);
+                        return;
+                }
 
                 String protocolServiceContextPath = request.getPathInfo();
                 setProtocolServiceContextPath(protocolServiceContextPath, request);
@@ -384,5 +395,11 @@ public class ProtocolEntryServlet extends HttpServlet {
                 request.getSession().setAttribute(
                         Constants.RP_SESSION_ATTRIBUTE, rp);
                 return true;
+        }
+
+        private boolean invalidUserAgent(String userAgent) {
+
+                LOG.debug("User-Agent: " + userAgent);
+                return UserAgentUtil.isSmartPhone(userAgent);
         }
 }

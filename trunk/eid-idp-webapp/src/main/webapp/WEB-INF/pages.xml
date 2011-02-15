@@ -26,6 +26,10 @@
         <rewrite pattern="/unknown-protocol"/>
     </page>
 
+    <page view-id="/unsupported-browser.seam">
+        <rewrite pattern="/unsupported-browser"/>
+    </page>
+
     <page view-id="/protocol-response-post.seam">
         <rewrite pattern="/protocol-response-post"/>
     </page>

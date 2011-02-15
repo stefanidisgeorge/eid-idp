@@ -80,6 +80,10 @@
             <param-value>/unknown-protocol</param-value>
         </init-param>
         <init-param>
+            <param-name>UnsupportedBrowserPage</param-name>
+            <param-value>/unsupported-browser</param-value>
+        </init-param>
+        <init-param>
             <param-name>ProtocolErrorPage</param-name>
             <param-value>/protocol-error</param-value>
         </init-param>
