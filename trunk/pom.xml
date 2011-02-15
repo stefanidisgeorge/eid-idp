@@ -35,6 +35,8 @@
         <module>eid-idp-sp-protocol-openid</module>
         <module>eid-idp-protocol-openid</module>
         <module>eid-idp-protocol-ws-federation</module>
+	<module>eid-idp-sp-protocol-ws-federation</module>
+        <module>eid-idp-sp-protocol-ws-federation-spi</module>
         <module>eid-idp-entity</module>
         <module>eid-idp-sql-ddl</module>
         <module>eid-idp-model</module>

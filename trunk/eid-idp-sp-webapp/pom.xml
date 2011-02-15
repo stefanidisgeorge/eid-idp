@@ -70,6 +70,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>be.fedict.eid-idp</groupId>
+            <artifactId>eid-idp-sp-protocol-ws-federation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>be.fedict.eid-applet</groupId>
             <artifactId>eid-applet-service</artifactId>
             <version>${eid-applet.version}</version>

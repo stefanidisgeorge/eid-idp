@@ -1,0 +1,142 @@
+/*
+ * eID Identity Provider Project.
+ * Copyright (C) 2010 FedICT.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License version
+ * 3.0 as published by the Free Software Foundation.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, see
+ * http://www.gnu.org/licenses/.
+ */
+
+package be.fedict.eid.idp.sp.protocol.ws_federation;
+
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationRequestService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+/**
+ * Generates and sends out a WS-Federation SignIn request.
+ */
+public class AuthenticationRequestServlet extends HttpServlet {
+        private static final long serialVersionUID = -2118698465810671071L;
+
+        private static final Log LOG = LogFactory
+                .getLog(AuthenticationRequestServlet.class);
+
+        private static final String AUTHN_REQUEST_SERVICE_PARAM =
+                "AuthenticationRequestService";
+        private static final String IDP_DESTINATION_PARAM =
+                "IdPDestination";
+        private static final String SP_DESTINATION_PARAM =
+                "SPDestination";
+        private static final String SP_DESTINATION_PAGE_PARAM =
+                SP_DESTINATION_PARAM + "Page";
+        private static final String LANGUAGE_PARAM =
+                "Language";
+
+        private String idpDestination;
+        private String spDestination;
+        private String spDestinationPage;
+        private String language;
+
+        private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void init(ServletConfig config) throws ServletException {
+
+                this.idpDestination = config.getInitParameter(IDP_DESTINATION_PARAM);
+                this.spDestination = config.getInitParameter(SP_DESTINATION_PARAM);
+                this.spDestinationPage = config.getInitParameter(SP_DESTINATION_PAGE_PARAM);
+                this.language = config.getInitParameter(LANGUAGE_PARAM);
+                this.authenticationRequestServiceLocator = new
+                        ServiceLocator<AuthenticationRequestService>
+                        (AUTHN_REQUEST_SERVICE_PARAM, config);
+
+                // validate necessary configuration params
+                if (null == this.idpDestination
+                        && !this.authenticationRequestServiceLocator.isConfigured()) {
+                        throw new ServletException(
+                                "need to provide either " + IDP_DESTINATION_PARAM
+                                        + " or " + AUTHN_REQUEST_SERVICE_PARAM +
+                                        "(Class) init-params");
+                }
+
+                if (null == this.spDestination && null == this.spDestinationPage
+                        && !this.authenticationRequestServiceLocator.isConfigured()) {
+                        throw new ServletException(
+                                "need to provide either " + SP_DESTINATION_PARAM
+                                        + " or " + SP_DESTINATION_PAGE_PARAM +
+                                        " or " + AUTHN_REQUEST_SERVICE_PARAM +
+                                        "(Class) init-param");
+                }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void doGet(HttpServletRequest request,
+                             HttpServletResponse response)
+                throws ServletException, IOException {
+
+                LOG.debug("doGet");
+
+                String idpDestination;
+                String spDestination;
+                String context;
+                String language;
+
+                AuthenticationRequestService service =
+                        this.authenticationRequestServiceLocator.locateService();
+                if (null != service) {
+                        idpDestination = service.getIdPDestination();
+                        context = service.getContext(request.getParameterMap());
+                        spDestination = service.getSPDestination();
+                        language = service.getLanguage();
+                } else {
+                        idpDestination = this.idpDestination;
+                        context = null;
+                        if (null != this.spDestination) {
+                                spDestination = this.spDestination;
+                        } else {
+                                spDestination = request.getScheme() + "://"
+                                        + request.getServerName() + ":"
+                                        + request.getServerPort() + request.getContextPath()
+                                        + this.spDestinationPage;
+                        }
+                        language = this.language;
+                }
+
+                String targetUrl = idpDestination + "?wa=wsignin1.0" +
+                        "&wtrealm=" + spDestination;
+
+                if (null != language && !language.trim().isEmpty()) {
+                        targetUrl += "&language=" + language;
+                }
+                if (null != context && !context.trim().isEmpty()) {
+                        targetUrl += "&wctx=" + context;
+                }
+
+                LOG.debug("targetURL: " + targetUrl);
+                response.sendRedirect(targetUrl);
+        }
+}
