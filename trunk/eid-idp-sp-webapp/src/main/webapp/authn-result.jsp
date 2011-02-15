@@ -20,7 +20,12 @@
     <h1>Authentication Results</h1>
 
     <p>Authentication Policy: ${auth_response.policy}</p>
-    <img src="photo"/>
+
+    <c:if test="${sessionScope.Photo != null}">
+        <img src="photo.jpg"/>
+    </c:if>
+
+
     <table>
         <tr>
             <th>Identifier</th>
