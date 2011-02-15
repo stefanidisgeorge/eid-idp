@@ -184,4 +184,24 @@
         <servlet-name>WSFederationAuthenticationRequestServlet</servlet-name>
         <url-pattern>/wsfed-request</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>WSFederationAuthenticationResponseServlet</servlet-name>
+        <servlet-class>
+            be.fedict.eid.idp.sp.protocol.ws_federation.AuthenticationResponseServlet
+        </servlet-class>
+        <init-param>
+            <param-name>ResponseSessionAttribute</param-name>
+            <param-value>Response</param-value>
+        </init-param>
+        <init-param>
+            <param-name>RedirectPage</param-name>
+            <param-value>/authn-result.jsp</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>WSFederationAuthenticationResponseServlet</servlet-name>
+        <url-pattern>/wsfed-landing</url-pattern>
+    </servlet-mapping>
+
 </web-app>

@@ -26,6 +26,7 @@ import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
+import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.ws.wstrust.*;
 import org.w3c.dom.Element;
@@ -173,7 +174,7 @@ public abstract class AbstractWSFederationProtocolService implements
 
                 TokenType tokenType = Saml2Util.buildXMLObject(TokenType.class,
                         TokenType.ELEMENT_NAME);
-                tokenType.setValue("urn:oasis:names:tc:SAML:2.0:assertion");
+                tokenType.setValue(SAMLConstants.SAML20_NS);
 
                 RequestType requestType = Saml2Util.buildXMLObject(RequestType.class,
                         RequestType.ELEMENT_NAME);
@@ -280,9 +281,9 @@ public abstract class AbstractWSFederationProtocolService implements
                 switch (authenticationFlow) {
 
                         case IDENTIFICATION:
-                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                                return SamlAuthenticationPolicy.IDENTIFICATION;
                         case AUTHENTICATION:
-                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                                return SamlAuthenticationPolicy.AUTHENTICATION;
                         case AUTHENTICATION_WITH_IDENTIFICATION:
                                 return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
                 }

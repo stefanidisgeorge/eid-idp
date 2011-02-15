@@ -21,8 +21,6 @@ package be.fedict.eid.idp.sp.protocol.saml2.post;
 import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseProcessor;
 import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseServlet;
 import be.fedict.eid.idp.sp.protocol.saml2.ServiceLocator;
-import be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseProcessor;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 
 import javax.servlet.ServletConfig;
@@ -36,7 +34,7 @@ import javax.servlet.ServletException;
  * </p>
  * <ul>
  * <li><tt>ResponseSessionAttribute</tt>: indicates the session attribute to
- * store the returned {@link AuthenticationResponse} data object..</li>
+ * store the returned {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse} data object..</li>
  * <li><tt>RedirectPage</tt>: indicates the page where to redirect after
  * successfull authentication.</li>
  * </ul>

@@ -21,9 +21,9 @@ package test.unit.be.fedict.eid.idp.sp.protocol.saml2;
 import be.fedict.eid.idp.common.Attribute;
 import be.fedict.eid.idp.common.AttributeType;
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseProcessor;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import org.apache.xml.security.utils.Base64;
 import org.junit.After;
@@ -105,7 +105,11 @@ public class AuthenticationResponseProcessorTest {
                         andReturn(new StringBuffer(recipient));
 
                 expect(mockAuthenticationResponseService.getMaximumTimeOffset())
-                        .andReturn(5).times(2);
+                        .andReturn(5);
+                expect(mockAuthenticationResponseService.getAttributeSecretKey())
+                        .andReturn(null);
+                expect(mockAuthenticationResponseService.getAttributePrivateKey())
+                        .andReturn(null);
 
                 replay(mockAuthenticationResponseService, mockHttpServletRequest);
 

@@ -20,7 +20,7 @@ package be.fedict.eid.idp.sp;
 
 import be.fedict.eid.idp.common.AttributeConstants;
 import be.fedict.eid.idp.sp.protocol.openid.OpenIDAuthenticationResponse;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse;
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
