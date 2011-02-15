@@ -27,6 +27,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -37,6 +38,11 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationRequestServlet.class);
+
+        public static final String CONTEXT_SESSION_ATTRIBUTE =
+                AuthenticationRequestServlet.class.getName() + ".Context";
+        public static final String RECIPIENT_SESSION_ATTRIBUTE =
+                AuthenticationRequestServlet.class.getName() + ".Recipient";
 
         private static final String AUTHN_REQUEST_SERVICE_PARAM =
                 "AuthenticationRequestService";
@@ -138,5 +144,43 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
                 LOG.debug("targetURL: " + targetUrl);
                 response.sendRedirect(targetUrl);
+
+                // save state on session
+                setRecipient(spDestination, request.getSession());
+                setContext(context, request.getSession());
+        }
+
+        private void setContext(String context, HttpSession session) {
+                session.setAttribute(CONTEXT_SESSION_ATTRIBUTE, context);
+        }
+
+        /**
+         * Used by the {@link AuthenticationResponseServlet} for
+         * validation of the WS-Federation Response <tt>ctx</tt>.
+         *
+         * @param httpSession the HTTP Session
+         * @return optional context sent along with the WS-Federation
+         *         Authentication Request
+         */
+        public static String getContext(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(CONTEXT_SESSION_ATTRIBUTE);
+        }
+
+        private void setRecipient(String recipient, HttpSession session) {
+                session.setAttribute(RECIPIENT_SESSION_ATTRIBUTE, recipient);
+        }
+
+        /**
+         * Used by the {@link AuthenticationResponseServlet} for
+         * validation of the SAML v2.0 Response <tt>AudienceRestriction</tt>.
+         *
+         * @param httpSession the HTTP Session
+         * @return the SAML v2.0 Authentication Request
+         *         AssertionConsumerServiceURL
+         */
+        public static String getRecipient(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(RECIPIENT_SESSION_ATTRIBUTE);
         }
 }

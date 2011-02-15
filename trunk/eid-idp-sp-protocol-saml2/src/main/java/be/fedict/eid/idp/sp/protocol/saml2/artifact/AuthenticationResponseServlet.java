@@ -34,7 +34,7 @@ import javax.servlet.ServletException;
  * </p>
  * <ul>
  * <li><tt>ResponseSessionAttribute</tt>: indicates the session attribute to
- * store the returned {@link be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponse} data object..</li>
+ * store the returned {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse} data object..</li>
  * <li><tt>RedirectPage</tt>: indicates the page where to redirect after
  * successfull authentication.</li>
  * <li><tt>ArtifactAuthenticationResponseService</tt>: indicates the JNDI

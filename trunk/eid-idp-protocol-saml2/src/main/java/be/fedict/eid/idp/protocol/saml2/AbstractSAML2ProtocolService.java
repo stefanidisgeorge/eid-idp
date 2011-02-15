@@ -309,9 +309,9 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 switch (authenticationFlow) {
 
                         case IDENTIFICATION:
-                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                                return SamlAuthenticationPolicy.IDENTIFICATION;
                         case AUTHENTICATION:
-                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+                                return SamlAuthenticationPolicy.AUTHENTICATION;
                         case AUTHENTICATION_WITH_IDENTIFICATION:
                                 return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
                 }

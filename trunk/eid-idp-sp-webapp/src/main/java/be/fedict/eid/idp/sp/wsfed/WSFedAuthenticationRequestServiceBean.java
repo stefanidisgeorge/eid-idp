@@ -49,12 +49,12 @@ public class WSFedAuthenticationRequestServiceBean implements AuthenticationRequ
 
         @Override
         public String getContext(Map<String, String[]> parameterMap) {
-                return null;
+                return "some-context";
         }
 
         @Override
         public String getLanguage() {
-                return "nl";
+                return "en";
         }
 
 

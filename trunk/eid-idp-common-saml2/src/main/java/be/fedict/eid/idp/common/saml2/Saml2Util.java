@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.utils.Constants;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
@@ -43,10 +44,7 @@ import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.encryption.EncryptionConstants;
-import org.opensaml.xml.encryption.EncryptionException;
-import org.opensaml.xml.encryption.EncryptionParameters;
-import org.opensaml.xml.encryption.KeyEncryptionParameters;
+import org.opensaml.xml.encryption.*;
 import org.opensaml.xml.io.*;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.schema.XSDateTime;
@@ -66,6 +64,8 @@ import org.opensaml.xml.validation.ValidationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.crypto.SecretKey;
 import javax.xml.bind.JAXBContext;
@@ -78,6 +78,7 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
@@ -85,6 +86,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -707,6 +709,281 @@ public abstract class Saml2Util {
         }
 
         /**
+         * Validate specified SAML v2.0 Assertion
+         *
+         * @param assertion     the assertion to validate
+         * @param now           current time, for validation of conditions
+         * @param maxTimeOffset maximum time offset for assertion's conditions
+         * @param recipient     recipient
+         * @param requestId     optional request ID
+         * @param secretKey     optional symmetric secret if encryption was used
+         * @param privateKey    optional asymmetric private key if encryption was used
+         * @return {@link AuthenticationResponse} DO containing all available
+         *         info on the authenticated subject.
+         * @throws AssertionValidationException validation failed for some reason
+         */
+        public static AuthenticationResponse validateAssertion(Assertion assertion,
+                                                               DateTime now,
+                                                               int maxTimeOffset,
+                                                               String recipient,
+                                                               String requestId,
+                                                               SecretKey secretKey,
+                                                               PrivateKey privateKey)
+                throws AssertionValidationException {
+
+                LOG.debug("issuer: " + assertion.getIssuer().getValue());
+                List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
+                if (authnStatements.isEmpty()) {
+                        throw new AssertionValidationException(
+                                "missing SAML authn statement");
+                }
+
+                // validate assertion conditions
+                validateConditions(now, maxTimeOffset,
+                        assertion.getConditions(), recipient);
+
+                // validate authn statement
+                AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
+                DateTime authenticationTime = authnStatement.getAuthnInstant();
+                AuthnContext authnContext = authnStatement.getAuthnContext();
+                if (null == authnContext) {
+                        throw new AssertionValidationException(
+                                "missing SAML authn context");
+                }
+                AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
+                if (null == authnContextClassRef) {
+                        throw new AssertionValidationException(
+                                "missing SAML authn context ref");
+                }
+
+                // get authentication policy
+                SamlAuthenticationPolicy authenticationPolicy =
+                        SamlAuthenticationPolicy.getAuthenticationPolicy(
+                                authnContextClassRef.getAuthnContextClassRef());
+
+                Subject subject = assertion.getSubject();
+                NameID nameId = subject.getNameID();
+
+                // validate subject confirmation
+                validateSubjectConfirmation(subject, requestId, recipient, now,
+                        maxTimeOffset);
+
+                String identifier = nameId.getValue();
+                Map<String, Object> attributeMap = new HashMap<String, Object>();
+
+                List<AttributeStatement> attributeStatements = assertion
+                        .getAttributeStatements();
+                if (!attributeStatements.isEmpty()) {
+
+                        AttributeStatement attributeStatement = attributeStatements.get(0);
+
+                        // normal attributes
+                        List<Attribute> attributes = attributeStatement.getAttributes();
+                        for (Attribute attribute : attributes) {
+
+                                processAttribute(attribute, attributeMap);
+                        }
+
+                        // encrypted attributes
+                        if (!attributeStatement.getEncryptedAttributes().isEmpty()) {
+
+                                Decrypter decrypter = getDecrypter(secretKey,
+                                        privateKey);
+
+                                for (EncryptedAttribute encryptedAttribute :
+                                        attributeStatement.getEncryptedAttributes()) {
+
+                                        try {
+                                                Attribute attribute =
+                                                        decrypter.decrypt(encryptedAttribute);
+                                                LOG.debug("decrypted attribute: "
+                                                        + attribute.getName());
+                                                processAttribute(attribute, attributeMap);
+
+                                        } catch (DecryptionException e) {
+                                                throw new AssertionValidationException(e);
+                                        }
+                                }
+                        }
+
+
+                }
+
+                return new AuthenticationResponse(authenticationTime,
+                        identifier, authenticationPolicy, attributeMap,
+                        assertion);
+        }
+
+        private static void validateConditions(DateTime now, int maxTimeOffset,
+                                               Conditions conditions, String recipient)
+                throws AssertionValidationException {
+
+                // time validation
+                validateTime(now, conditions.getNotBefore(),
+                        conditions.getNotOnOrAfter(), maxTimeOffset);
+
+                // audience restriction
+                if (conditions.getAudienceRestrictions().isEmpty() ||
+                        conditions.getAudienceRestrictions().size() != 1) {
+
+                        throw new AssertionValidationException(
+                                "Expect exactly 1 audience restriction but got " +
+                                        "0 or more");
+                }
+                AudienceRestriction audienceRestriction =
+                        conditions.getAudienceRestrictions().get(0);
+                if (audienceRestriction.getAudiences().isEmpty() ||
+                        audienceRestriction.getAudiences().size() != 1) {
+
+                        throw new AssertionValidationException(
+                                "Expect exactly 1 audience but got 0 or more");
+                }
+
+                Audience audience = audienceRestriction.getAudiences().get(0);
+                if (!audience.getAudienceURI().equals(recipient)) {
+
+                        throw new AssertionValidationException(
+                                "AudienceURI does not match expected recipient");
+                }
+
+                // OneTimeUse
+                if (null == conditions.getOneTimeUse()) {
+
+                        throw new AssertionValidationException(
+                                "Assertion is not one-time-use.");
+                }
+        }
+
+        private static void validateSubjectConfirmation(Subject subject,
+                                                        String requestId,
+                                                        String recipient,
+                                                        DateTime now, int maxTimeOffset)
+                throws AssertionValidationException {
+
+                if (subject.getSubjectConfirmations().isEmpty() ||
+                        subject.getSubjectConfirmations().size() != 1) {
+
+                        throw new AssertionValidationException(
+                                "Expected exactly 1 SubjectConfirmation but got 0 or more");
+                }
+                SubjectConfirmation subjectConfirmation =
+                        subject.getSubjectConfirmations().get(0);
+
+                // method
+                if (!subjectConfirmation.getMethod().equals(SubjectConfirmation.METHOD_BEARER)) {
+
+                        throw new AssertionValidationException(
+                                "Subjectconfirmation method: " +
+                                        subjectConfirmation.getMethod() +
+                                        " is not supported.");
+                }
+
+                if (null != requestId) {
+                        SubjectConfirmationData subjectConfirmationData =
+                                subjectConfirmation.getSubjectConfirmationData();
+
+                        // InResponseTo
+                        if (!subjectConfirmationData.getInResponseTo().equals(requestId)) {
+
+                                throw new AssertionValidationException(
+                                        "SubjectConfirmationData not belonging to " +
+                                                "AuthnRequest!");
+                        }
+
+                        // recipient
+                        if (!subjectConfirmationData.getRecipient().equals(recipient)) {
+
+                                throw new AssertionValidationException(
+                                        "SubjectConfirmationData recipient does not " +
+                                                "match expected recipient");
+                        }
+
+                        // time validation
+                        validateTime(now, subjectConfirmationData.getNotBefore(),
+                                subjectConfirmationData.getNotOnOrAfter(), maxTimeOffset);
+                }
+        }
+
+        private static void validateTime(DateTime now, DateTime notBefore,
+                                         DateTime notOnOrAfter, int maxTimeOffset)
+                throws AssertionValidationException {
+
+                LOG.debug("now: " + now.toString());
+                LOG.debug("notBefore: " + notBefore.toString());
+                LOG.debug("notOnOrAfter : " + notOnOrAfter.toString());
+
+                if (maxTimeOffset >= 0) {
+                        if (now.isBefore(notBefore)) {
+                                // time skew
+                                if (now.plusMinutes(maxTimeOffset).isBefore(notBefore) ||
+                                        now.minusMinutes(maxTimeOffset).isAfter(notOnOrAfter)) {
+                                        throw new AssertionValidationException(
+                                                "SAML2 assertion validation: invalid SAML message timeframe");
+                                }
+                        } else if (now.isBefore(notBefore) || now.isAfter(notOnOrAfter)) {
+                                throw new AssertionValidationException(
+                                        "SAML2 assertion validation: invalid SAML message timeframe");
+                        }
+                }
+        }
+
+        private static Decrypter getDecrypter(SecretKey secretKey, PrivateKey privateKey)
+                throws AssertionValidationException {
+
+                if (null == secretKey && null == privateKey) {
+                        throw new AssertionValidationException(
+                                "Encrypted attributes were returned but " +
+                                        "no decryption keys were specified.");
+                }
+
+                if (null != privateKey) {
+                        return Saml2Util.getDecrypter(privateKey);
+                }
+
+                return Saml2Util.getDecrypter(secretKey);
+        }
+
+        private static void processAttribute(Attribute attribute,
+                                             Map<String, Object> attributeMap)
+                throws AssertionValidationException {
+
+                String attributeName = attribute.getName();
+
+                if (attribute.getAttributeValues().get(0) instanceof XSString) {
+
+                        XSString attributeValue = (XSString) attribute
+                                .getAttributeValues().get(0);
+                        attributeMap.put(attributeName, attributeValue.getValue());
+
+                } else if (attribute.getAttributeValues().get(0) instanceof XSInteger) {
+
+                        XSInteger attributeValue = (XSInteger) attribute
+                                .getAttributeValues().get(0);
+                        attributeMap.put(attributeName, attributeValue.getValue());
+
+                } else if (attribute.getAttributeValues().get(0) instanceof XSDateTime) {
+
+                        XSDateTime attributeValue = (XSDateTime) attribute
+                                .getAttributeValues().get(0);
+                        attributeMap.put(attributeName, attributeValue.getValue()
+                                .toDateTime(DateTimeZone.getDefault()));
+
+                } else if (attribute.getAttributeValues().get(0) instanceof XSBase64Binary) {
+
+                        XSBase64Binary attributeValue = (XSBase64Binary) attribute
+                                .getAttributeValues().get(0);
+                        attributeMap.put(attributeName,
+                                Base64.decode(attributeValue.getValue()));
+
+                } else {
+                        throw new AssertionValidationException(
+                                "Unsupported attribute of " +
+                                        "type: " + attribute.getAttributeValues().get(0)
+                                        .getClass().getName());
+                }
+        }
+
+        /**
          * Construct an opensaml SAML object of specified class type and
          * element name
          *
@@ -890,6 +1167,7 @@ public abstract class Saml2Util {
                 }
         }
 
+
         /**
          * Write the DOM {@link Document} to specified {@link OutputStream}
          *
@@ -908,6 +1186,30 @@ public abstract class Saml2Util {
                 Transformer xformer = TransformerFactory.newInstance().newTransformer();
                 Source source = new DOMSource(document);
                 xformer.transform(source, result);
+        }
+
+        /**
+         * Parses the given string to a DOM object.
+         *
+         * @param documentString the DOM as string
+         * @return the DOM
+         */
+        public static Document parseDocument(String documentString) {
+
+                try {
+                        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+                        domFactory.setNamespaceAware(true);
+                        DocumentBuilder domBuilder = domFactory.newDocumentBuilder();
+                        StringReader stringReader = new StringReader(documentString);
+                        InputSource inputSource = new InputSource(stringReader);
+                        return domBuilder.parse(inputSource);
+                } catch (IOException e) {
+                        throw new RuntimeException(e);
+                } catch (SAXException e) {
+                        throw new RuntimeException(e);
+                } catch (ParserConfigurationException e) {
+                        throw new RuntimeException(e);
+                }
         }
 
 

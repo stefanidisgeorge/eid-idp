@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.eid.idp.sp.protocol.saml2.spi;
+package be.fedict.eid.idp.common.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import org.joda.time.DateTime;
@@ -39,9 +39,22 @@ public class AuthenticationResponse implements Serializable {
         private final String identifier;
         private final SamlAuthenticationPolicy authenticationPolicy;
         private final Map<String, Object> attributeMap;
-        private final String relayState;
+
+        private String relayState;
 
         private final Assertion assertion;
+
+        public AuthenticationResponse(DateTime authenticationTime,
+                                      String identifier,
+                                      SamlAuthenticationPolicy authenticationPolicy,
+                                      Map<String, Object> attributeMap,
+                                      Assertion assertion) {
+                this.authenticationTime = authenticationTime;
+                this.identifier = identifier;
+                this.authenticationPolicy = authenticationPolicy;
+                this.attributeMap = attributeMap;
+                this.assertion = assertion;
+        }
 
         public AuthenticationResponse(DateTime authenticationTime,
                                       String identifier,
@@ -75,6 +88,10 @@ public class AuthenticationResponse implements Serializable {
          */
         public String getRelayState() {
                 return relayState;
+        }
+
+        public void setRelayState(String relayState) {
+                this.relayState = relayState;
         }
 
         /**
