@@ -110,7 +110,16 @@ public class IdentityServiceBean implements IdentityService {
         public IdPIdentity setIdentity(IdPIdentityConfig idPIdentityConfig)
                 throws KeyStoreLoadException {
 
-                return this.identityServiceSingletonBean.setIdentity(idPIdentityConfig);
+                return this.identityServiceSingletonBean
+                        .setIdentity(idPIdentityConfig);
+        }
+
+        @Override
+        public IdPIdentity loadIdentity(IdPIdentityConfig idPIdentityConfig)
+                throws KeyStoreLoadException {
+
+                return this.identityServiceSingletonBean
+                        .loadIdentity(idPIdentityConfig);
         }
 
         /**
