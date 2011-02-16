@@ -40,8 +40,20 @@ License along with this software; if not, see
 http://www.gnu.org/licenses/.
 
 
-=== 6. License for 3th party libraries
+=== 6. License for 3rd party libraries
 
 Sun JAX-WS RI distributed under CDDL v1.0.
 Apache Commons libraries distributed under Apache License version 2.0.
 Bouncycastle library distributed under BSD license.
+
+=== 7. Apache License version 2.0
+
+http://www.apache.org/licenses/LICENSE-2.0.html
+
+=== 8. COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0 1.
+
+http://glassfish.java.net/public/CDDLv1.0.html
+
+=== 9. BSD License
+
+http://www.bouncycastle.org/licence.html
