@@ -18,24 +18,18 @@
 
 package be.fedict.eid.idp.sp.protocol.ws_federation;
 
-import be.fedict.eid.idp.common.saml2.AssertionValidationException;
 import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.ws.wstrust.*;
-import org.opensaml.xml.XMLObject;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * WS-Federation Authentication Response Servlet.
@@ -52,6 +46,18 @@ import java.util.List;
  * <li><tt>RedirectPage</tt>: Page to redirect to after having processed the
  * OpenID ID Resolution response</li>
  * </ul>
+ * The following init-params are optional:
+ * </p>
+ * <ul>
+ * <li><tt>AuthenticationResponseService</tt>: indicates the JNDI location of
+ * the {@link AuthenticationResponseService} that can be used optionally for
+ * e.g. validation of the certificate chain in the SAML v2.0 assertion's
+ * signature.</li>
+ * <li><tt>ErrorPage</tt>: indicates the page to be shown in case of errors.</li>
+ * <li><tt>ErrorMessageSessionAttribute</tt>: indicates which session attribute
+ * to use for reporting an error. This session attribute can be used on the
+ * error page.</li>
+ * </ul>
  */
 public class AuthenticationResponseServlet extends HttpServlet {
 
@@ -60,18 +66,42 @@ public class AuthenticationResponseServlet extends HttpServlet {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationResponseServlet.class);
 
-        private String responseSessionAttribute;
+        public static final String RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM =
+                "ResponseSessionAttribute";
+        public static final String REDIRECT_PAGE_INIT_PARAM =
+                "RedirectPage";
+        public static final String RESPONSE_SERVICE_INIT_PARAM =
+                "AuthenticationResponseService";
 
+        public static final String ERROR_PAGE_INIT_PARAM = "ErrorPage";
+        public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM =
+                "ErrorMessageSessionAttribute";
+
+        private String responseSessionAttribute;
         private String redirectPage;
+        private String errorPage;
+        private String errorMessageSessionAttribute;
+
+        private ServiceLocator<AuthenticationResponseService> serviceLocator;
 
         /**
          * {@inheritDoc}
          */
         @Override
         public void init(ServletConfig config) throws ServletException {
+
                 this.responseSessionAttribute = getRequiredInitParameter(
-                        "ResponseSessionAttribute", config);
-                this.redirectPage = getRequiredInitParameter("RedirectPage", config);
+                        RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM, config);
+                this.redirectPage = getRequiredInitParameter(
+                        REDIRECT_PAGE_INIT_PARAM, config);
+
+                this.errorPage = config.getInitParameter(ERROR_PAGE_INIT_PARAM);
+                this.errorMessageSessionAttribute = config.getInitParameter(
+                        ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM);
+
+                this.serviceLocator =
+                        new ServiceLocator<AuthenticationResponseService>
+                                (RESPONSE_SERVICE_INIT_PARAM, config);
         }
 
         private String getRequiredInitParameter(String parameterName,
@@ -111,58 +141,23 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 String recipient = AuthenticationRequestServlet.getRecipient(
                         request.getSession());
 
-                // check wa
-                String wa = request.getParameter("wa");
-                if (null == wa) {
-                        throw new ServletException("Missing \"wa\" param.");
-                }
-                if (!wa.equals("wsignin1.0")) {
-                        throw new ServletException("Unexpected value for \"wa\" param.");
-                }
+                // clear old session attributes
+                HttpSession httpSession = request.getSession();
+                clearAllSessionAttribute(httpSession);
 
-                // validate optional ctx
-                validateContext(context, request.getParameter("wctx"));
+                AuthenticationResponseProcessor processor =
+                        new AuthenticationResponseProcessor(
+                                this.serviceLocator.locateService());
 
-                // get wresult
-                String wresult = request.getParameter("wresult");
-                LOG.debug("wresult=" + wresult);
-
-                RequestSecurityTokenResponseCollection rstCollections = Saml2Util.unmarshall(
-                        Saml2Util.parseDocument(wresult).getDocumentElement());
-
-                if (rstCollections.getRequestSecurityTokenResponses().size() != 1) {
-                        throw new ServletException("Expected exactly 1 RequestSecurityTokenResponse");
-                }
-
-                RequestSecurityTokenResponse rstResponse =
-                        rstCollections.getRequestSecurityTokenResponses().get(0);
-
-                // context
-                validateContext(context, rstResponse.getContext());
-
-                // tokentype
-                validateTokenType(rstResponse);
-
-                // requesttype
-                validateRequestType(rstResponse);
-
-                // keytype
-                validateKeyType(rstResponse);
-
-                // validate security token
-                Assertion assertion = validateSecurityToken(rstResponse);
-
-                // validate assertion
-                DateTime now = new DateTime();
                 AuthenticationResponse authenticationResponse;
                 try {
-                        // TODO: support configurable time offset + encryption keys...
-                        authenticationResponse = Saml2Util.validateAssertion(
-                                assertion, now, 5, recipient,
-                                null, null, null);
-                } catch (AssertionValidationException e) {
-                        throw new ServletException(e);
+                        authenticationResponse = processor.process(
+                                recipient, context, request);
+                } catch (AuthenticationResponseProcessorException e) {
+                        showErrorPage(e.getMessage(), e, request, response);
+                        return;
                 }
+
 
                 // save response info to session
                 request.getSession().setAttribute(this.responseSessionAttribute,
@@ -172,78 +167,28 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + this.redirectPage);
         }
 
-        private Assertion validateSecurityToken(RequestSecurityTokenResponse rstResponse)
-                throws ServletException {
+        private void showErrorPage(String errorMessage, Throwable cause,
+                                   HttpServletRequest request, HttpServletResponse response)
+                throws IOException, ServletException {
 
-                List<XMLObject> securityTokens =
-                        rstResponse.getUnknownXMLObjects(RequestedSecurityToken.ELEMENT_NAME);
-                if (securityTokens.size() != 1) {
-                        throw new ServletException("Expected exactly 1 " +
-                                "RequestedSecurityToken element.");
+                if (null == cause) {
+                        LOG.error("Error: " + errorMessage);
+                } else {
+                        LOG.error("Error: " + errorMessage, cause);
                 }
-
-                RequestedSecurityToken securityToken =
-                        (RequestedSecurityToken) securityTokens.get(0);
-
-                if (!(securityToken.getUnknownXMLObject() instanceof Assertion)) {
-                        throw new ServletException("Expected a SAML v2.0 " +
-                                "Assertion as SecurityToken!");
+                if (null != this.errorMessageSessionAttribute) {
+                        request.getSession().setAttribute(
+                                this.errorMessageSessionAttribute, errorMessage);
                 }
-
-                return (Assertion) securityToken.getUnknownXMLObject();
-        }
-
-        private void validateKeyType(RequestSecurityTokenResponse rstResponse)
-                throws ServletException {
-
-                List<XMLObject> keyTypes =
-                        rstResponse.getUnknownXMLObjects(KeyType.ELEMENT_NAME);
-                if (keyTypes.size() != 1) {
-                        throw new ServletException("Expected exactly 1 KeyType element.");
-                }
-                if (!((KeyType) keyTypes.get(0)).getValue().equals(
-                        "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer")) {
-                        throw new ServletException("Unexpected KeyType value.");
+                if (null != this.errorPage) {
+                        response.sendRedirect(request.getContextPath() + this.errorPage);
+                } else {
+                        throw new ServletException(errorMessage, cause);
                 }
         }
 
-        private void validateRequestType(RequestSecurityTokenResponse rstResponse)
-                throws ServletException {
+        private void clearAllSessionAttribute(HttpSession httpSession) {
 
-                List<XMLObject> requestTypes =
-                        rstResponse.getUnknownXMLObjects(RequestType.ELEMENT_NAME);
-                if (requestTypes.size() != 1) {
-                        throw new ServletException("Expected exactly 1 RequestType element.");
-                }
-                if (!((RequestType) requestTypes.get(0)).getValue().equals(
-                        "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue")) {
-                        throw new ServletException("Unexpected RequestType value.");
-                }
-        }
-
-        private void validateTokenType(RequestSecurityTokenResponse rstResponse)
-                throws ServletException {
-
-                List<XMLObject> tokenTypes =
-                        rstResponse.getUnknownXMLObjects(TokenType.ELEMENT_NAME);
-                if (tokenTypes.size() != 1) {
-                        throw new ServletException("Expected exactly 1 TokenType element.");
-                }
-                if (!((TokenType) tokenTypes.get(0)).getValue().equals(SAMLConstants.SAML20_NS)) {
-                        throw new ServletException("Unexpected TokenType value.");
-                }
-        }
-
-        private void validateContext(String expectedContext, String context)
-                throws ServletException {
-
-                if (null != expectedContext) {
-                        if (null == context) {
-                                throw new ServletException("Missing wctx in response.");
-                        } else if (!expectedContext.equals(context)) {
-                                throw new ServletException("Wrong wctx in response.");
-                        }
-                }
-
+                httpSession.removeAttribute(this.responseSessionAttribute);
         }
 }
