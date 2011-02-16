@@ -19,12 +19,15 @@
 package be.fedict.eid.idp.sp;
 
 import be.fedict.eid.idp.common.AttributeConstants;
-import be.fedict.eid.idp.sp.protocol.openid.OpenIDAuthenticationResponse;
 import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.sp.protocol.openid.OpenIDAuthenticationResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opensaml.xml.validation.ValidationException;
 
 import javax.servlet.http.HttpSession;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -50,13 +53,25 @@ public class ResponseBean {
 
                         Object responseObject = session.getAttribute("Response");
                         if (responseObject instanceof AuthenticationResponse) {
-                                // saml2
+                                // saml2 (or WS-Federation...)
                                 AuthenticationResponse response =
                                         (AuthenticationResponse) responseObject;
                                 this.identifier = response.getIdentifier();
                                 this.attributeMap = response.getAttributeMap();
                                 this.policy = response.getAuthenticationPolicy().getUri();
-                                LOG.debug("SAML2 assertion: " + response.getAssertion());
+
+                                // validate assertion
+                                if (null != response.getAssertion().getSignature()) {
+                                        try {
+                                                Saml2Util.validateSignature(response.getAssertion().getSignature());
+                                        } catch (CertificateException e) {
+                                                LOG.error(e);
+                                        } catch (ValidationException e) {
+                                                LOG.error(e);
+                                        }
+                                        LOG.debug("Valid assertion");
+                                }
+
                         } else {
                                 // openid
                                 OpenIDAuthenticationResponse response =

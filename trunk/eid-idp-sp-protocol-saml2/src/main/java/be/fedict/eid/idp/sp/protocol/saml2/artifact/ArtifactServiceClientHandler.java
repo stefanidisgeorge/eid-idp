@@ -70,6 +70,7 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                 "/soap:Envelope/soap:Body/samlp:ArtifactResponse/samlp:Response/saml:Assertion";
 
         private final KeyStore.PrivateKeyEntry spIdentity;
+        private Response response;
 
         /**
          * Main constructor.
@@ -147,7 +148,8 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
 
                 LOG.debug("handle inbound");
 
-                // find ArtifactResponse signature
+                // find and validate ArtifactResponse,Response,Assertion signature
+                Response validResponse = null;
                 if (null != Saml2Util.find(soapPart, XPATH_ARTIFACT_RESPONSE_SIGNATURE)) {
 
                         try {
@@ -165,11 +167,23 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                                         (Element) Saml2Util.find(soapPart,
                                                 XPATH_RESPONSE);
                                 if (null != responseElement) {
-                                        Response response =
+                                        Response tempResponse =
                                                 Saml2Util.unmarshall(responseElement);
                                         LOG.debug("validate Response signature");
                                         Saml2Util.validateSignature(
-                                                response.getSignature());
+                                                tempResponse.getSignature());
+
+                                        // to string and back again so we do not
+                                        // run into problems trying to marshall
+                                        String responseString =
+                                                Saml2Util.domToString(responseElement,
+                                                        false);
+
+                                        validResponse =
+                                                Saml2Util.unmarshall(
+                                                        Saml2Util.parseDocument(
+                                                                responseString)
+                                                                .getDocumentElement());
                                 }
 
                                 Element assertionElement =
@@ -192,8 +206,9 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                                 throw createSOAPFaultException(
                                         "Validation failed on XML signature");
                         }
-
                 }
+
+                this.response = validResponse;
         }
 
         /**
@@ -223,5 +238,15 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                 }
 
                 return new SOAPFaultException(soapFault);
+        }
+
+        /**
+         * We return the SAML v2.0 Response through the SOAP handler as JAXB will
+         * break XML Signatures when unmarshalling.
+         *
+         * @return the validated SAML v2.0 Response.
+         */
+        public Response getResponse() {
+                return this.response;
         }
 }
