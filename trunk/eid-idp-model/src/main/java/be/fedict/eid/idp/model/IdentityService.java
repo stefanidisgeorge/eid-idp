@@ -54,6 +54,16 @@ public interface IdentityService extends IdentityProviderConfiguration {
                 throws KeyStoreLoadException;
 
         /**
+         * Test if specified IdP Identity configuration is valid.
+         *
+         * @param idPIdentityConfig the identity configuration
+         * @return the identity
+         * @throws KeyStoreLoadException failed to load the identity.
+         */
+        IdPIdentity loadIdentity(IdPIdentityConfig idPIdentityConfig)
+                throws KeyStoreLoadException;
+
+        /**
          * @return the currently active eID IdP Identity config
          *         or <code>null</code> if none is active
          */

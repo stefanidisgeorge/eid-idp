@@ -107,7 +107,7 @@ public class IdentityBean implements Identity {
                         return "success";
                 } catch (KeyStoreLoadException e) {
                         this.facesMessages.add(StatusMessage.Severity.ERROR,
-                                "Failed to load keystore", e.getMessage());
+                                "Failed to load keystore: " + e.getMessage());
                         return null;
                 }
         }
@@ -122,7 +122,7 @@ public class IdentityBean implements Identity {
                         return "success";
                 } catch (KeyStoreLoadException e) {
                         this.facesMessages.add(StatusMessage.Severity.ERROR,
-                                "Failed to load keystore", e.getMessage());
+                                "Failed to load keystore: " + e.getMessage());
                         return null;
                 }
         }
@@ -148,6 +148,22 @@ public class IdentityBean implements Identity {
                 }
                 this.name = this.idPIdentityConfig.getName();
                 this.identityNames = this.identityService.getIdentities();
+                return "success";
+        }
+
+        @Override
+        public String test() {
+
+                this.log.debug("test " + this.name);
+                try {
+                        this.identityService.loadIdentity(this.idPIdentityConfig);
+                } catch (KeyStoreLoadException e) {
+                        this.facesMessages.add(StatusMessage.Severity.ERROR,
+                                "Failed to load keystore: " + e.getMessage());
+                        return null;
+                }
+                this.facesMessages.add(StatusMessage.Severity.INFO,
+                        "Keystore loaded ok.");
                 return "success";
         }
 
@@ -245,5 +261,10 @@ public class IdentityBean implements Identity {
         @Override
         public void setKeyEntryAlias(String keyEntryAlias) {
                 this.idPIdentityConfig.setKeyEntryAlias(keyEntryAlias);
+        }
+
+        @Override
+        public boolean isActive() {
+                return this.idPIdentityConfig.isActive();
         }
 }

@@ -98,9 +98,12 @@
             </h:panelGrid>
 
 
-            <h:panelGrid columns="3">
+            <h:panelGrid columns="4">
                 <h:commandButton id="identity_activate" value="Activate"
-                                 action="#{idpIdentity.activate}"/>
+                                 action="#{idpIdentity.activate}"
+                                 rendered="#{!idpIdentity.active}"/>
+                <h:commandButton id="identity_test" value="Test"
+                                 action="#{idpIdentity.test}"/>
                 <h:commandButton id="identity_save" value="Save"
                                  action="#{idpIdentity.save}"/>
                 <h:commandButton id="identity_remove" value="Remove"
