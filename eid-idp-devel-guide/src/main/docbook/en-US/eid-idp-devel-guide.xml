@@ -1174,6 +1174,87 @@ openid.return_to:https://localhost:48745/consumer
             </para>
         </section>
     </section>
+    <section>
+        <title>JBoss Seam Integration</title>
+        <para>
+            This section details on integration of the eID IdP in the JBoss Seam
+            Framework.
+        </para>
+        <section>
+            <title>SAML v2.0</title>
+            <para>
+                It is possible to not use the SAML Authentication
+                Request/Response Servlets provided by the Java SDK.
+                Following explains how.
+            </para>
+            <section>
+                <title>Authentication Request</title>
+                <para>
+                    To send out a SAML v2.0 Authentication Request to the eID
+                    IdP, one can use the
+                    <code>
+                        be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestUtil
+                    </code>
+                    class. Calling the
+                    <code>sendRequest</code>
+                    will construct a SAML v2.0 Authentication Request given the
+                    specified input and send it to the eID IdP using a HTTP
+                    Browser POST. It returns the Authentication Request as the
+                    request's ID is needed for later validation of the returned
+                    Authentication Response.
+                </para>
+            </section>
+            <section>
+                <title>Authentication Response</title>
+                <para>
+                    Depending on which eID IdP Protocol Entry point the request
+                    was sent to, the SAML v2.0 Authentication Response will be
+                    returned using either the HTTP-POST or HTTP-Artifact
+                    binding. For both bindings it is possible to not use the
+                    servlet but directly use a binding specific
+                    <code>AuthenticationResponseProcessor</code>.
+                </para>
+                <para>
+                    For the SAML v2.0 HTTP-POST binding, use
+                    <code>
+                        be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseProcessor
+                    </code>.
+                    Instantiating this response processor takes an optional
+                    <code>AuthenticationResponseService</code>
+                    argument.
+                    If specified, the instance of this service will be used for
+                    validation of the certificate chain attached to the
+                    (optional) XML Signature on both the SAML Response as on the
+                    Assertion, specifying a maximum time offset on the validity
+                    of the assertion and specifying optionally the needed
+                    symmetric/assymetric keys if encryption was configured for
+                    certain attributes. Simply pass the HTTP ServletRequest,
+                    request ID, recipient and optional relaystate to process the
+                    eID IdP response which will return an instance of
+                    <code>AuthenticationResponse</code>
+                    containing all available info on the authenticated subject.
+                </para>
+                <para>
+                    Processing the response for the SAML v2.0 HTTP-Artifact
+                    binding is similar with the exception that an instance of
+                    the
+                    <code>ArtifactAuthenticationResponseService</code>
+                    is
+                    required when instantiating the
+                    <code>
+                        be.fedict.eid.idp.sp.protocol.saml2.artifact.AuthenticationResponseProcessor
+                    </code>. This as it is required for the processor to know
+                    the location of the eID IdP Artifact Resolution Web Service.
+                    This service also allows for proxy configuration, optionally
+                    signing the ArtifactResolve request sent to the eID IdP,
+                    logging, ... .
+                    In the same way as with HTTP-POST, an instance of
+                    <code>AuthenticationResponse</code>
+                    will be returned when successful.
+                </para>
+            </section>
+        </section>
+    </section>
     <appendix>
         <title>eID Identity Provider Developer's Guide License</title>
         <para>
