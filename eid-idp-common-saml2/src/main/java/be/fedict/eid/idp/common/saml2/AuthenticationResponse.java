@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.common.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import org.apache.commons.codec.binary.Base64;
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Assertion;
 
@@ -42,7 +43,7 @@ public class AuthenticationResponse implements Serializable {
 
         private String relayState;
 
-        private final Assertion assertion;
+        private final String encodedAssertion;
 
         public AuthenticationResponse(DateTime authenticationTime,
                                       String identifier,
@@ -53,20 +54,11 @@ public class AuthenticationResponse implements Serializable {
                 this.identifier = identifier;
                 this.authenticationPolicy = authenticationPolicy;
                 this.attributeMap = attributeMap;
-                this.assertion = assertion;
-        }
 
-        public AuthenticationResponse(DateTime authenticationTime,
-                                      String identifier,
-                                      SamlAuthenticationPolicy authenticationPolicy,
-                                      Map<String, Object> attributeMap,
-                                      String relayState, Assertion assertion) {
-                this.authenticationTime = authenticationTime;
-                this.identifier = identifier;
-                this.authenticationPolicy = authenticationPolicy;
-                this.attributeMap = attributeMap;
-                this.relayState = relayState;
-                this.assertion = assertion;
+                // marshall and encode assertion so it is serializble
+                this.encodedAssertion = Base64.encodeBase64String(
+                        Saml2Util.domToString(
+                                Saml2Util.marshall(assertion), false).getBytes());
         }
 
         /**
@@ -112,6 +104,16 @@ public class AuthenticationResponse implements Serializable {
          * @return the SAML v2.0 Assertion.
          */
         public Assertion getAssertion() {
-                return assertion;
+                return Saml2Util.unmarshall(
+                        Saml2Util.parseDocument(new String(
+                                Base64.decodeBase64(this.encodedAssertion)))
+                                .getDocumentElement());
+        }
+
+        /**
+         * @return the Base64 encoded marshalled assertion. ( serializable)
+         */
+        public String getEncodedAssertion() {
+                return encodedAssertion;
         }
 }

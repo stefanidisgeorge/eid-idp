@@ -62,6 +62,8 @@ public class ArtifactServiceClient {
         private final String location;
         private final String issuerName;
 
+        private final ArtifactServiceClientHandler clientHandler;
+
         private static ArtifactProxySelector proxySelector;
 
         static {
@@ -103,7 +105,8 @@ public class ArtifactServiceClient {
                 setEndpointAddress(sslHostname);
 
                 // register client SOAP handler
-                registerSoapHandler(new ArtifactServiceClientHandler(spIdentity));
+                this.clientHandler = new ArtifactServiceClientHandler(spIdentity);
+                registerSoapHandler(this.clientHandler);
         }
 
         /**
@@ -209,12 +212,16 @@ public class ArtifactServiceClient {
                                 "Unexpected content in Artifact Response.");
                 }
 
-                @SuppressWarnings("unchecked")
-                ResponseType samlResponseType = ((JAXBElement<ResponseType>)
-                        response.getAny()).getValue();
-
-                return Saml2Util.toSAML(samlResponseType, ResponseType.class,
-                        Response.DEFAULT_ELEMENT_NAME);
+                /*
+                 * We do not get the SAML v2.0 Response from JAXB but from the
+                 * client SOAP handler as JAXB breaks any XML Signatures...
+                 */
+                if (null == this.clientHandler.getResponse()) {
+                        throw new AuthenticationResponseProcessorException(
+                                "Artifact Service SOAP handler did not return" +
+                                        "a SAML v2.0 Response.");
+                }
+                return this.clientHandler.getResponse();
         }
 
         /**
