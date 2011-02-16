@@ -709,7 +709,9 @@ public abstract class Saml2Util {
         }
 
         /**
-         * Validate specified SAML v2.0 Assertion
+         * Validate specified SAML v2.0 Assertion.
+         * <p/>
+         * NOTE: validation of the XML Signature is not included!
          *
          * @param assertion     the assertion to validate
          * @param now           current time, for validation of conditions
@@ -740,7 +742,7 @@ public abstract class Saml2Util {
 
                 // validate assertion conditions
                 validateConditions(now, maxTimeOffset,
-                        assertion.getConditions(), recipient);
+                        assertion.getConditions(), requestId, recipient);
 
                 // validate authn statement
                 AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
@@ -815,7 +817,8 @@ public abstract class Saml2Util {
         }
 
         private static void validateConditions(DateTime now, int maxTimeOffset,
-                                               Conditions conditions, String recipient)
+                                               Conditions conditions,
+                                               String requestId, String recipient)
                 throws AssertionValidationException {
 
                 // time validation
@@ -847,7 +850,7 @@ public abstract class Saml2Util {
                 }
 
                 // OneTimeUse
-                if (null == conditions.getOneTimeUse()) {
+                if (null == conditions.getOneTimeUse() && null != requestId) {
 
                         throw new AssertionValidationException(
                                 "Assertion is not one-time-use.");

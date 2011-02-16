@@ -33,7 +33,9 @@ import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 
+import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
+import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -87,10 +89,14 @@ public abstract class AbstractAuthenticationResponseProcessor {
 
                 Response samlResponse = getSamlResponse(request);
                 DateTime now = new DateTime();
+                SecretKey secretKey = null;
+                PrivateKey privateKey = null;
                 int maxOffset = 5;
                 AuthenticationResponseService service =
                         getAuthenticationResponseService();
                 if (null != service) {
+                        secretKey = service.getAttributeSecretKey();
+                        privateKey = service.getAttributePrivateKey();
                         maxOffset = service.getMaximumTimeOffset();
                 }
 
@@ -122,9 +128,7 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 try {
                         authenticationResponse = Saml2Util.validateAssertion(
                                 assertion, now, maxOffset, recipient,
-                                requestId,
-                                getAuthenticationResponseService().getAttributeSecretKey(),
-                                getAuthenticationResponseService().getAttributePrivateKey());
+                                requestId, secretKey, privateKey);
                 } catch (AssertionValidationException e) {
                         throw new AuthenticationResponseProcessorException(e);
                 }
@@ -137,12 +141,11 @@ public abstract class AbstractAuthenticationResponseProcessor {
                                         KeyInfoHelper.getCertificates(samlResponse
                                                 .getSignature().getKeyInfo());
 
-                                if (null != getAuthenticationResponseService()) {
-                                        getAuthenticationResponseService().
-                                                validateServiceCertificate(
-                                                        authenticationResponse
-                                                                .getAuthenticationPolicy(),
-                                                        certChain);
+                                if (null != service) {
+                                        service.validateServiceCertificate(
+                                                authenticationResponse
+                                                        .getAuthenticationPolicy(),
+                                                certChain);
                                 }
                         } catch (CertificateException e) {
                                 throw new AuthenticationResponseProcessorException(e);
