@@ -64,12 +64,12 @@ public class RPServiceBean implements RPService {
                         if (null != rp.getDomain() && rp.getDomain().trim().isEmpty()) {
                                 attachedRp.setDomain(null);
                         } else {
-                                attachedRp.setDomain(rp.getDomain());
+                                attachedRp.setDomain(rp.getDomain().trim());
                         }
                         if (null != rp.getTargetURL() && rp.getTargetURL().trim().isEmpty()) {
                                 attachedRp.setTargetURL(null);
                         } else {
-                                attachedRp.setTargetURL(rp.getTargetURL());
+                                attachedRp.setTargetURL(rp.getTargetURL().trim());
                         }
 
                         // pki
@@ -89,7 +89,7 @@ public class RPServiceBean implements RPService {
                         if (null != rp.getIdentifierSecretKey() && rp.getIdentifierSecretKey().trim().isEmpty()) {
                                 attachedRp.setIdentifierSecretKey(null);
                         } else {
-                                attachedRp.setIdentifierSecretKey(rp.getIdentifierSecretKey());
+                                attachedRp.setIdentifierSecretKey(rp.getIdentifierSecretKey().trim());
                         }
 
                         attachedRp.setAttributeSecretAlgorithm(rp.getAttributeSecretAlgorithm());
@@ -103,7 +103,7 @@ public class RPServiceBean implements RPService {
                                 if (null != rp.getAttributeSecretKey() && rp.getAttributeSecretKey().trim().isEmpty()) {
                                         attachedRp.setAttributeSecretKey(null);
                                 } else {
-                                        attachedRp.setAttributeSecretKey(rp.getAttributeSecretKey());
+                                        attachedRp.setAttributeSecretKey(rp.getAttributeSecretKey().trim());
                                 }
                         }
 

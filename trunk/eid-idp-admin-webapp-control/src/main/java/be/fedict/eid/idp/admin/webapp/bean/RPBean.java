@@ -88,10 +88,6 @@ public class RPBean implements RP {
         @Out(value = UPLOADED_CERTIFICATE, required = false, scope = ScopeType.CONVERSATION)
         private byte[] certificateBytes;
 
-//        @In(value = UPLOADED_ATTRIBUTE_SECRET, required = false)
-//        @Out(value = UPLOADED_ATTRIBUTE_SECRET, required = false, scope = ScopeType.CONVERSATION)
-//        private byte[] attributeSecretBytes;
-
         @In(value = "selectedTab", required = false)
         @Out(value = "selectedTab", required = false, scope = ScopeType.CONVERSATION)
         private String selectedTab = null;
