@@ -46,7 +46,7 @@
             <orderedlist>
                 <listitem>
                     <para>
-                        SAML v2.0 Browser Post/Artifact Profile
+                        SAML v2.0 Browser Post/Redirect/Artifact Profile
                     </para>
                 </listitem>
                 <listitem>
@@ -250,7 +250,7 @@
                     Without configuration of the eID IdP SSL Certificate,
                     authentications performed by the eID Applet will be subject
                     to man-in-the-middle attacks. The TLS server certificate is
-                    be digested and used in the authentication signature but
+                    digested and used in the authentication signature but
                     without specifying the SSL certificate no verification can
                     be done.
                 </para>
@@ -282,6 +282,20 @@
                     <para>
                         <ulink url="http://openid.net/specs/openid-authentication-2_0.html">
                             OpenID v2.0 Specification
+                        </ulink>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <ulink url="http://openid.net/specs/openid-attribute-exchange-1_0.html">
+                            OpenID Attribute Exchange v1.0
+                        </ulink>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <ulink url="http://svn.openid.net/repos/specifications/user_interface/1.0/trunk/openid-user-interface-extension-1_0.html">
+                            OpenID User Interface Extension v1.0
                         </ulink>
                     </para>
                 </listitem>
@@ -392,6 +406,13 @@
                         <entry>27 Dec 2010</entry>
                         <entry>Wim Vandenhaute</entry>
                         <entry>Initial Version.</entry>
+                    </row>
+                    <row>
+                        <entry>16 Feb 2010</entry>
+                        <entry>Wim Vandenhaute</entry>
+                        <entry>Update on supported SAML bindings, typos and
+                            usefull links.
+                        </entry>
                     </row>
                 </tbody>
             </tgroup>
