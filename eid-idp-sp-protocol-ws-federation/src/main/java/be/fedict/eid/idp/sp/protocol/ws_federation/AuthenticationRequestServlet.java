@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.ws_federation;
 
+import be.fedict.eid.idp.common.ServiceLocator;
 import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationRequestService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

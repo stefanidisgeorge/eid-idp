@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
+import be.fedict.eid.idp.common.ServiceLocator;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
