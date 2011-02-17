@@ -18,9 +18,9 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.artifact;
 
+import be.fedict.eid.idp.common.ServiceLocator;
 import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseProcessor;
 import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseServlet;
-import be.fedict.eid.idp.sp.protocol.saml2.ServiceLocator;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.artifact.ArtifactAuthenticationResponseService;
 
 import javax.servlet.ServletConfig;

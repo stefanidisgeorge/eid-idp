@@ -19,6 +19,7 @@
 package be.fedict.eid.idp.sp.protocol.openid;
 
 import be.fedict.eid.idp.common.OpenIDAXConstants;
+import be.fedict.eid.idp.common.ServiceLocator;
 import be.fedict.eid.idp.sp.protocol.openid.spi.AuthenticationRequestService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
