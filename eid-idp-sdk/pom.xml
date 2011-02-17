@@ -12,10 +12,38 @@
     <groupId>be.fedict.eid-idp</groupId>
     <artifactId>eid-idp-sdk</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <!-- switch on dependency-driven aggregation -->
+                    <includeDependencySources>true</includeDependencySources>
+                    <dependencySourceIncludes>
+                        <!-- include ONLY dependencies I control -->
+                        <dependencySourceInclude>be.fedict.eid-idp:*
+                        </dependencySourceInclude>
+                    </dependencySourceIncludes>
+                    <dependencySourceExcludes>
+                        <!-- exclude devel-guide -->
+                        <dependencySourceExclude>
+                            be.fedict.eid-idp:eid-idp-devel-guide
+                        </dependencySourceExclude>
+                    </dependencySourceExcludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>javadoc-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -37,108 +65,6 @@
                             </artifactItems>
                             <outputDirectory>
                                 ${project.build.directory}/files
-                            </outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack-javadoc-openid</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>be.fedict.eid-idp</groupId>
-                                    <artifactId>eid-idp-sp-protocol-openid
-                                    </artifactId>
-                                    <classifier>javadoc</classifier>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>
-                                ${project.build.directory}/files/javadoc/openid
-                            </outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack-javadoc-openid-spi</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>be.fedict.eid-idp</groupId>
-                                    <artifactId>eid-idp-sp-protocol-openid-spi
-                                    </artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>javadoc</classifier>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>
-                                ${project.build.directory}/files/javadoc/openid-spi
-                            </outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack-javadoc-saml2</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>be.fedict.eid-idp</groupId>
-                                    <artifactId>eid-idp-sp-protocol-saml2
-                                    </artifactId>
-                                    <classifier>javadoc</classifier>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>
-                                ${project.build.directory}/files/javadoc/saml2
-                            </outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack-javadoc-saml2-spi</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>be.fedict.eid-idp</groupId>
-                                    <artifactId>eid-idp-sp-protocol-saml2-spi
-                                    </artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>javadoc</classifier>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>
-                                ${project.build.directory}/files/javadoc/saml2-spi
-                            </outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack-javadoc-common</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>be.fedict.eid-idp</groupId>
-                                    <artifactId>eid-idp-common</artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>javadoc</classifier>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>
-                                ${project.build.directory}/files/javadoc/common
                             </outputDirectory>
                         </configuration>
                     </execution>
@@ -197,6 +123,21 @@
         <dependency>
             <groupId>be.fedict.eid-idp</groupId>
             <artifactId>eid-idp-sp-protocol-saml2</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.xml.stream</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>be.fedict.eid-idp</groupId>
+            <artifactId>eid-idp-sp-protocol-ws-federation</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
