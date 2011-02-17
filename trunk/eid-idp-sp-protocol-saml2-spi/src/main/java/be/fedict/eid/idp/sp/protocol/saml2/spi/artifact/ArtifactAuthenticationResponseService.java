@@ -59,7 +59,7 @@ public interface ArtifactAuthenticationResponseService extends AuthenticationRes
          * <p/>
          * Returning <code>null</code> will trust all.
          *
-         * @return the SSL {@link} PublicKey.
+         * @return the SSL {@link PublicKey}.
          */
         PublicKey getServicePublicKey();
 

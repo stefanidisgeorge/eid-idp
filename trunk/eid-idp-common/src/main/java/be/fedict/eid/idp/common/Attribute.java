@@ -19,7 +19,9 @@
 package be.fedict.eid.idp.common;
 
 /**
- * Attribute data object returned to the authentication protocols.
+ * Attribute data object.
+ *
+ * @author Wim Vandenhaute
  */
 public class Attribute {
 

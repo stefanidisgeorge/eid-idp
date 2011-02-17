@@ -21,11 +21,11 @@ package be.fedict.eid.idp.sp.protocol.ws_federation.spi;
 import java.util.Map;
 
 /**
- * SPI for authentication request services. Using an authentication request
- * service allows for run-time configuration of the
- * AuthenticationRequestServlet.
+ * WS-Federation SPI for authentication request services. Using an
+ * authentication request * service allows for run-time configuration of the
+ * WS-Federation AuthenticationRequestServlet.
  *
- * @author Frank Cornelis.
+ * @author Wim Vandenhaute.
  */
 public interface AuthenticationRequestService {
 

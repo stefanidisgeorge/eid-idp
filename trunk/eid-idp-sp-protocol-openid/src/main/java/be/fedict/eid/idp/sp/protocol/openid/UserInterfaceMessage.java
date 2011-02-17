@@ -44,17 +44,11 @@ public class UserInterfaceMessage implements MessageExtension,
 
         private ParameterList parameters;
 
-        /**
-         * {@inheritDoc}
-         */
         public UserInterfaceMessage() {
 
                 parameters = new ParameterList();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public UserInterfaceMessage(ParameterList parameterList) {
 
                 parameters = parameterList;

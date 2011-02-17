@@ -19,7 +19,7 @@
 package be.fedict.eid.idp.sp.protocol.ws_federation;
 
 /**
- * Exception thrown when sonething went wrong processing the WS-Federation
+ * Exception thrown when something went wrong processing the WS-Federation
  * Authentication Response
  *
  * @author Wim Vandenhaute

@@ -36,6 +36,8 @@ import java.io.IOException;
  * Passes the incoming HTTP Post to the binding specific authentication response
  * processor and puts the returned {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse} on the HTTP
  * Session.
+ *
+ * @author Wim Vandenhaute
  */
 public abstract class AbstractAuthenticationResponseServlet extends HttpServlet {
 

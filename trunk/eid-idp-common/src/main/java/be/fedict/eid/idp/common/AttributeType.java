@@ -22,6 +22,8 @@ import java.util.GregorianCalendar;
 
 /**
  * Enumeration of allowed eID IdP Attribute Types.
+ *
+ * @author Wim Vandenhaute
  */
 public enum AttributeType {
 

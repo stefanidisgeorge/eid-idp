@@ -19,7 +19,7 @@
 package be.fedict.eid.idp.sp.protocol.saml2;
 
 /**
- * Exception thrown when sonething went wrong processing the SAML v2.0
+ * Exception thrown when something went wrong processing the SAML v2.0
  * Authentication Response
  *
  * @author Wim Vandenhaute

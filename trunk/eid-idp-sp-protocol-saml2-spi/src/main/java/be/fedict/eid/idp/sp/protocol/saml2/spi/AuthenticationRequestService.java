@@ -22,8 +22,8 @@ import java.security.KeyStore;
 import java.util.Map;
 
 /**
- * SPI for authentication request services. Using an authentication request
- * service allows for run-time configuration of the
+ * SAML v2.0 SPI for authentication request services. Using an authentication
+ * request service allows for run-time configuration of the SAML v2.0
  * AuthenticationRequestServlet.
  *
  * @author Frank Cornelis.

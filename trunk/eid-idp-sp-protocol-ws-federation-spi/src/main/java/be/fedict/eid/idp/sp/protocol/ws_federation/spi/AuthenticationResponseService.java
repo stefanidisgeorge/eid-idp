@@ -26,7 +26,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
- * SPI for authentication response services.
+ * WS-Federation SPI for authentication response services.
  *
  * @author Wim Vandenhaute.
  */

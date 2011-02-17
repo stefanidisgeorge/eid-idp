@@ -21,7 +21,9 @@ package be.fedict.eid.idp.common;
 /**
  * OpenID Attribute Exchange 1.0 Attribute Types returned by eID.
  * <p/>
- * {@see http://www.axschema.org/types/}
+ *
+ * @author Wim Vandenhaute
+ * @see <a href="http://www.axschema.org/types">OpenID AX Schema</a>
  */
 public abstract class OpenIDAXConstants {
 

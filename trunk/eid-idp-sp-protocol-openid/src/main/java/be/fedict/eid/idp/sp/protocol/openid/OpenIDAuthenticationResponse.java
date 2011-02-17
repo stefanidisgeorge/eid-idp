@@ -29,6 +29,8 @@ import java.util.Map;
  * Contains the time of authentication, returned OpenID Identifier,
  * list of policies used and a Map containing all available attributes for the
  * authenticated subject.
+ *
+ * @author Wim Vandenhaute
  */
 public class OpenIDAuthenticationResponse implements Serializable {
 
