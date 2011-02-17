@@ -20,6 +20,8 @@ package be.fedict.eid.idp.common;
 
 /**
  * Enumeration of the SAML v2.0 Authentication Policies.
+ *
+ * @author Wim Vandenhaute
  */
 public enum SamlAuthenticationPolicy {
 

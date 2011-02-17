@@ -96,6 +96,8 @@ import java.util.*;
 
 /**
  * Utility class for SAML v2.0
+ *
+ * @author Wim Vandenhaute
  */
 public abstract class Saml2Util {
 
@@ -353,9 +355,8 @@ public abstract class Saml2Util {
                 Conditions conditions =
                         buildXMLObject(Conditions.class, Conditions.DEFAULT_ELEMENT_NAME);
                 assertion.setConditions(conditions);
-                DateTime notBefore = issueInstant;
                 DateTime notAfter = issueInstant.plusMinutes(validity);
-                conditions.setNotBefore(notBefore);
+                conditions.setNotBefore(issueInstant);
                 conditions.setNotOnOrAfter(notAfter);
 
                 if (null != inResponseTo) {
@@ -399,7 +400,7 @@ public abstract class Saml2Util {
                         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
                         subjectConfirmationData.setRecipient(audienceUri);
                         subjectConfirmationData.setInResponseTo(inResponseTo);
-                        subjectConfirmationData.setNotBefore(notBefore);
+                        subjectConfirmationData.setNotBefore(issueInstant);
                         subjectConfirmationData.setNotOnOrAfter(notAfter);
                 }
 

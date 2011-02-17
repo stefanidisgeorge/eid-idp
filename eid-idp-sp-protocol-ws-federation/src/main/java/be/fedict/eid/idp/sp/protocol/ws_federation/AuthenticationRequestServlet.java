@@ -33,6 +33,25 @@ import java.io.IOException;
 
 /**
  * Generates and sends out a WS-Federation SignIn request.
+ * <p/>
+ * <p/>
+ * Configuration can be provided either by providing:
+ * <ul>
+ * <li><tt>AuthenticationRequestService</tt>: {@link AuthenticationRequestService}
+ * to provide the IdP protocol entry point, SP response handling location,
+ * SP identity for signing the authentication request, context, language</li>
+ * </ul>
+ * or by provinding:
+ * <ul>
+ * <li><tt>SPDestination</tt> or <tt>SPDestinationPage</tt>: Service Provider
+ * destination that will handle the returned WS-Fedearation response.
+ * One of the 2 parameters needs to be specified.</li>
+ * <li><tt>IdPDestination</tt>: WS-Federation entry point of the eID IdP.</li>
+ * <li><tt>Language</tt>: optional language to display the eID IdP webapp in
+ * (if available, else the browser's locale will be used).</li>
+ * </ul>
+ *
+ * @author Wim Vandenhaute
  */
 public class AuthenticationRequestServlet extends HttpServlet {
         private static final long serialVersionUID = -2118698465810671071L;

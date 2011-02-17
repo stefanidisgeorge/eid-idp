@@ -71,6 +71,8 @@ import java.util.List;
  * to display the eID IdP webapp in (e.g.: "en,nl,fr"). If not specified, the
  * browsers's locale will be used.</li>
  * </ul>
+ *
+ * @author Frank Cornelis
  */
 public class AuthenticationRequestServlet extends HttpServlet {
 

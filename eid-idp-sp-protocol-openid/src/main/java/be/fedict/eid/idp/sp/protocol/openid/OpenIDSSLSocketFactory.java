@@ -35,6 +35,8 @@ import java.security.cert.X509Certificate;
 
 /**
  * OpenID SSL Socket Factory for installing a specified SSL TrustManager.
+ *
+ * @author Wim Vandenhaute
  */
 public class OpenIDSSLSocketFactory extends SSLSocketFactory {
 

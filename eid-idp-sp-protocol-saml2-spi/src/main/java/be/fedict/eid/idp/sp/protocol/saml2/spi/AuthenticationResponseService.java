@@ -26,7 +26,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
- * SPI for authentication response services.
+ * SAML v2.0 SPI for authentication response services.
  *
  * @author Wim Vandenhaute.
  */

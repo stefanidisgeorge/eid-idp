@@ -33,6 +33,8 @@ import java.security.cert.X509Certificate;
 /**
  * OpenID Trust Manager to install to override the default set of trusted SSL
  * certificates. Used by {@link OpenIDSSLSocketFactory}.
+ *
+ * @author Wim Vandenhaute
  */
 public class OpenIDTrustManager implements X509TrustManager {
 

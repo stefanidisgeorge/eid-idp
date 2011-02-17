@@ -36,6 +36,8 @@ import java.security.cert.CertificateException;
 
 /**
  * SAML v2.0 Authentication response processor for the Browser HTTP POST binding.
+ *
+ * @author Wim Vandenhaute
  */
 public class AuthenticationResponseProcessor extends AbstractAuthenticationResponseProcessor {
 

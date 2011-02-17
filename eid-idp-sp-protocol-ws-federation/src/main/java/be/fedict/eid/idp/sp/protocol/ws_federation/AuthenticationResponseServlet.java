@@ -59,6 +59,8 @@ import java.io.IOException;
  * to use for reporting an error. This session attribute can be used on the
  * error page.</li>
  * </ul>
+ *
+ * @author Wim Vandenhaute
  */
 public class AuthenticationResponseServlet extends HttpServlet {
 

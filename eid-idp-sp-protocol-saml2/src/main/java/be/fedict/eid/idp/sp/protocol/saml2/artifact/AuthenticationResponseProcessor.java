@@ -27,7 +27,9 @@ import org.opensaml.saml2.core.Response;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * SAML v2.0 Authentication response processor for the Browser HTTP POST binding.
+ * SAML v2.0 Authentication response processor for the HTTP Artifact binding.
+ *
+ * @author Wim Vandenhaute
  */
 public class AuthenticationResponseProcessor extends AbstractAuthenticationResponseProcessor {
 

@@ -32,6 +32,9 @@
                         <dependencySourceExclude>
                             be.fedict.eid-idp:eid-idp-devel-guide
                         </dependencySourceExclude>
+                        <dependencySourceExclude>
+                            be.fedict.eid-idp:eid-idp-protocol-saml2-ws
+                        </dependencySourceExclude>
                     </dependencySourceExcludes>
                 </configuration>
                 <executions>

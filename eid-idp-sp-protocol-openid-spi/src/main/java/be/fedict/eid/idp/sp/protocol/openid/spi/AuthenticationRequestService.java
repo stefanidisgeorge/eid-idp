@@ -21,8 +21,8 @@ package be.fedict.eid.idp.sp.protocol.openid.spi;
 import java.security.cert.X509Certificate;
 
 /**
- * SPI for authentication request services. Using an authentication request
- * service allows for run-time configuration of the
+ * OpenID SPI for authentication request services. Using an authentication
+ * request service allows for run-time configuration of the OpenID
  * AuthenticationRequestServlet.
  *
  * @author Wim Vandenhaute.

@@ -52,6 +52,8 @@ import java.security.KeyStore;
  * <li><tt>Language</tt>: optional language to display the eID IdP webapp in
  * (if available, else the browser's locale will be used).</li>
  * </ul>
+ *
+ * @author Wim Vandenhaute
  */
 public class AuthenticationRequestServlet extends HttpServlet {
 

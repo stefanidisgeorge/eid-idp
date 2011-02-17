@@ -57,6 +57,8 @@ import java.util.*;
  * <li><tt>RedirectPage</tt>: Page to redirect to after having processed the
  * OpenID ID Resolution response</li>
  * </ul>
+ *
+ * @author Wim Vandenhaute
  */
 public class AuthenticationResponseServlet extends HttpServlet {
 
