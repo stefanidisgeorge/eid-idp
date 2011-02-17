@@ -9,11 +9,8 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>target/files/javadoc</directory>
+            <directory>target/apidocs</directory>
             <outputDirectory>/javadoc</outputDirectory>
-            <excludes>
-                <exclude>META-INF/**</exclude>
-            </excludes>
         </fileSet>
         <fileSet>
             <directory>target/files/sources</directory>
