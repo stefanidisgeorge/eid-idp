@@ -74,6 +74,7 @@ public abstract class AbstractAuthenticationResponseProcessor {
          * Process the incoming SAML v2.0 response.
          *
          * @param requestId  AuthnRequest.ID, should match response's InResponseTo
+         * @param audience   expected audience
          * @param recipient  recipient, should match response's
          *                   Subject.SubjectConfirmation.Recipient
          * @param relayState optional expected relay state
@@ -82,8 +83,8 @@ public abstract class AbstractAuthenticationResponseProcessor {
          * @throws AuthenticationResponseProcessorException
          *          case something went wrong
          */
-        public AuthenticationResponse process(String requestId, String recipient,
-                                              String relayState,
+        public AuthenticationResponse process(String requestId, String audience,
+                                              String recipient, String relayState,
                                               HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
 
@@ -127,7 +128,7 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 AuthenticationResponse authenticationResponse;
                 try {
                         authenticationResponse = Saml2Util.validateAssertion(
-                                assertion, now, maxOffset, recipient,
+                                assertion, now, maxOffset, audience, recipient,
                                 requestId, secretKey, privateKey);
                 } catch (AssertionValidationException e) {
                         throw new AuthenticationResponseProcessorException(e);

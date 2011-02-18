@@ -24,7 +24,10 @@ import be.fedict.eid.idp.common.Attribute;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.protocol.saml2.artifact.AbstractSAML2ArtifactProtocolService;
 import be.fedict.eid.idp.protocol.saml2.artifact.SAML2ProtocolServiceAuthIdent;
-import be.fedict.eid.idp.spi.*;
+import be.fedict.eid.idp.spi.IdPIdentity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.NameValuePair;
+import be.fedict.eid.idp.spi.ReturnResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -127,10 +130,11 @@ public class SAML2ArtifactProtocolServiceTest {
                                         .getAttribute(AbstractSAML2ProtocolService.RELAY_STATE_SESSION_ATTRIBUTE))
                         .andStubReturn("relay-state");
                 EasyMock.expect(
-                        mockHttpSession.getAttribute(AbstractSAML2ProtocolService.class
-                                .getName()
-                                + ".InResponseTo")).andStubReturn(
-                        "a77a1c87-e590-47d7-a3e0-afea455ebc01");
+                        mockHttpSession.getAttribute(AbstractSAML2ProtocolService.IN_RESPONSE_TO_SESSION_ATTRIBUTE
+                        )).andStubReturn("a77a1c87-e590-47d7-a3e0-afea455ebc01");
+                EasyMock.expect(
+                        mockHttpSession.getAttribute(AbstractSAML2ProtocolService.ISSUER_SESSION_ATTRIBUTE
+                        )).andStubReturn("Issuer");
 
                 EasyMock.expect(mockConfiguration.getResponseTokenValidity())
                         .andStubReturn(5);

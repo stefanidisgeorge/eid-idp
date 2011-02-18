@@ -121,6 +121,8 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
                 // get request state
                 String requestId = AuthenticationRequestServlet.getRequestId(
                         request.getSession());
+                String requestIssuer = AuthenticationRequestServlet.getRequestIssuer(
+                        request.getSession());
                 String recipient = AuthenticationRequestServlet.getRecipient(
                         request.getSession());
                 String relayState = AuthenticationRequestServlet.getRelayState(
@@ -137,7 +139,7 @@ public abstract class AbstractAuthenticationResponseServlet extends HttpServlet 
                 AuthenticationResponse authenticationResponse;
                 try {
                         authenticationResponse = processor.process(requestId,
-                                recipient, relayState, request);
+                                requestIssuer, recipient, relayState, request);
                 } catch (AuthenticationResponseProcessorException e) {
                         showErrorPage(e.getMessage(), e, request, response);
                         return;

@@ -83,6 +83,7 @@ public class AuthenticationResponseProcessorTest {
                 String issuerName = "test-issuer";
 
                 String requestId = UUID.randomUUID().toString();
+                String audience = "request-issuer";
                 String recipient = "http://www.testsp.com/saml";
                 String relayState = "test-relay-state";
 
@@ -90,7 +91,8 @@ public class AuthenticationResponseProcessorTest {
                         recipient, issuerName);
 
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
-                        requestId, recipient, 5, samlResponse.getIssueInstant(),
+                        requestId, audience, recipient, 5,
+                        samlResponse.getIssueInstant(),
                         SamlAuthenticationPolicy.IDENTIFICATION, userId,
                         attributes, null, null);
                 samlResponse.getAssertions().add(assertion);
@@ -124,8 +126,8 @@ public class AuthenticationResponseProcessorTest {
 
                 // Operate
                 AuthenticationResponse authenticationResponse =
-                        responseProcessor.process(requestId, recipient, relayState,
-                                mockHttpServletRequest);
+                        responseProcessor.process(requestId, audience, recipient,
+                                relayState, mockHttpServletRequest);
 
                 // Verify
                 verify(mockAuthenticationResponseService, mockHttpServletRequest);
@@ -405,6 +407,7 @@ public class AuthenticationResponseProcessorTest {
                         String issuerName = "test-issuer";
 
                         String requestId = UUID.randomUUID().toString();
+                        String audience = "request-issuer";
                         String recipient = "http://www.testsp.com/saml";
                         String relayState = "test-relay-state";
 
@@ -412,7 +415,8 @@ public class AuthenticationResponseProcessorTest {
                                 recipient, issuerName);
 
                         Assertion assertion = Saml2Util.getAssertion(issuerName,
-                                requestId, recipient, 5, samlResponse.getIssueInstant(),
+                                requestId, audience, recipient, 5,
+                                samlResponse.getIssueInstant(),
                                 SamlAuthenticationPolicy.IDENTIFICATION, userId,
                                 attributes, null, null);
                         samlResponse.getAssertions().add(assertion);
@@ -448,8 +452,8 @@ public class AuthenticationResponseProcessorTest {
                         replay(mockAuthenticationResponseService, mockHttpServletRequest);
 
                         try {
-                                responseProcessor.process(requestId, recipient, null,
-                                        mockHttpServletRequest);
+                                responseProcessor.process(requestId, audience,
+                                        recipient, null, mockHttpServletRequest);
                                 fail();
                         } catch (AuthenticationResponseProcessorException e) {
                                 // expected

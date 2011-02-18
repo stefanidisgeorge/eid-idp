@@ -183,6 +183,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 IdentityProviderConfiguration configuration =
                         getIdPConfiguration(httpSession.getServletContext());
 
+                String requestIssuer = getIssuer(httpSession);
                 String relayState = getRelayState(httpSession);
                 String inResponseTo = getInResponseTo(httpSession);
 
@@ -202,7 +203,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
 
                 // generate assertion
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
-                        inResponseTo, targetUrl,
+                        inResponseTo, requestIssuer, targetUrl,
                         configuration.getResponseTokenValidity(),
                         samlResponse.getIssueInstant(), getAuthenticationPolicy(),
                         userId, attributes, secretKey,
