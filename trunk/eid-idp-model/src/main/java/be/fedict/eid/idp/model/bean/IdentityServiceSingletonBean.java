@@ -18,7 +18,10 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.model.*;
+import be.fedict.eid.idp.model.ConfigProperty;
+import be.fedict.eid.idp.model.Configuration;
+import be.fedict.eid.idp.model.IdPIdentityConfig;
+import be.fedict.eid.idp.model.KeyStoreType;
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import be.fedict.eid.idp.spi.IdPIdentity;
 import org.apache.commons.logging.Log;
@@ -315,6 +318,7 @@ public class IdentityServiceSingletonBean {
                 String activeIdentity = findActiveIdentityName();
                 if (null != activeIdentity && activeIdentity.equals(name)) {
                         this.configuration.removeValue(ConfigProperty.ACTIVE_IDENTITY);
+                        this.identity = null;
                 }
 
                 this.configuration.removeValue(ConfigProperty.KEY_STORE_TYPE, name);
