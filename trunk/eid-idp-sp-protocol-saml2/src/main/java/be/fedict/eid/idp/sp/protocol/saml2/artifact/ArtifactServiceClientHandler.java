@@ -149,7 +149,6 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                 LOG.debug("handle inbound");
 
                 // find and validate ArtifactResponse,Response,Assertion signature
-                Response validResponse = null;
                 if (null != Saml2Util.find(soapPart, XPATH_ARTIFACT_RESPONSE_SIGNATURE)) {
 
                         try {
@@ -172,18 +171,6 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                                         LOG.debug("validate Response signature");
                                         Saml2Util.validateSignature(
                                                 tempResponse.getSignature());
-
-                                        // to string and back again so we do not
-                                        // run into problems trying to marshall
-                                        String responseString =
-                                                Saml2Util.domToString(responseElement,
-                                                        false);
-
-                                        validResponse =
-                                                Saml2Util.unmarshall(
-                                                        Saml2Util.parseDocument(
-                                                                responseString)
-                                                                .getDocumentElement());
                                 }
 
                                 Element assertionElement =
@@ -208,7 +195,22 @@ public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageCont
                         }
                 }
 
-                this.response = validResponse;
+                // fetch response
+                Element responseElement = (Element) Saml2Util.find(soapPart,
+                        XPATH_RESPONSE);
+                if (null != responseElement) {
+                        Saml2Util.unmarshall(responseElement);
+
+                        // to string and back again so we do not
+                        // run into problems trying to marshall
+                        String responseString =
+                                Saml2Util.domToString(responseElement,
+                                        false);
+
+                        this.response = Saml2Util.unmarshall(
+                                Saml2Util.parseDocument(responseString)
+                                        .getDocumentElement());
+                }
         }
 
         /**
