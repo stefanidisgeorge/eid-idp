@@ -85,8 +85,8 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
                 IdPIdentity identity = configuration.findIdentity();
 
                 // Add a descriptor for our node (the SAMLv2 Entity).
-                EntityDescriptor entityDescriptor = getEntityDescriptor(request,
-                        identity);
+                EntityDescriptor entityDescriptor = getEntityDescriptor(
+                        request, configuration);
 
                 // Marshall & sign the entity descriptor.
                 Element element;
@@ -105,7 +105,7 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
         }
 
         public EntityDescriptor getEntityDescriptor(HttpServletRequest request,
-                                                    IdPIdentity identity) {
+                                                    IdentityProviderConfiguration configuration) {
 
                 String location = "https://" + request.getServerName() + ":"
                         + request.getServerPort() + request.getContextPath()
@@ -113,7 +113,11 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
                         "/" + getPath();
                 LOG.debug("location: " + location);
 
-                return Saml2Util.getEntityDescriptor(location, getBinding(),
+                IdPIdentity identity = configuration.findIdentity();
+
+                return Saml2Util.getEntityDescriptor(
+                        AbstractSAML2ProtocolService.getResponseIssuer(configuration),
+                        location, getBinding(),
                         null != identity ? identity.getPrivateKeyEntry() : null);
         }
 

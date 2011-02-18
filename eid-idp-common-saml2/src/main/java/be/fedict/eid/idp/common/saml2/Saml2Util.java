@@ -160,13 +160,15 @@ public abstract class Saml2Util {
          * {@link AssertionConsumerService} at specified location with specified
          * binding.
          *
+         * @param entityId entity ID (== response.issuer)
          * @param location location
          * @param binding  SAML v2.0 Binding
          * @param identity optional identity, if present key descriptor will be
          *                 added.
          * @return the metadata entity descriptor
          */
-        public static EntityDescriptor getEntityDescriptor(String location,
+        public static EntityDescriptor getEntityDescriptor(String entityId,
+                                                           String location,
                                                            String binding,
                                                            KeyStore.PrivateKeyEntry identity) {
 
@@ -175,7 +177,7 @@ public abstract class Saml2Util {
                         Saml2Util.buildXMLObject(EntityDescriptor.class,
                                 EntityDescriptor.DEFAULT_ELEMENT_NAME);
 
-                entityDescriptor.setEntityID(location);
+                entityDescriptor.setEntityID(entityId);
 
                 // signature
                 if (null != identity) {

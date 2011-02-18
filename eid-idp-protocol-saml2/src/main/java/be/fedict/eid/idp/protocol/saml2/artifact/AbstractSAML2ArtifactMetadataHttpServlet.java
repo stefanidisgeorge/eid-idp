@@ -20,7 +20,7 @@ package be.fedict.eid.idp.protocol.saml2.artifact;
 
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2MetadataHttpServlet;
-import be.fedict.eid.idp.spi.IdPIdentity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,8 +38,9 @@ public abstract class AbstractSAML2ArtifactMetadataHttpServlet extends AbstractS
 
         private static final long serialVersionUID = 3275535116892764771L;
 
+        @Override
         public EntityDescriptor getEntityDescriptor(HttpServletRequest request,
-                                                    IdPIdentity identity) {
+                                                    IdentityProviderConfiguration configuration) {
 
                 String artifactResolutionLocation = "https://"
                         + request.getServerName() + ":"
@@ -49,7 +50,7 @@ public abstract class AbstractSAML2ArtifactMetadataHttpServlet extends AbstractS
                 LOG.debug("Artifact resolution location: " + artifactResolutionLocation);
 
                 EntityDescriptor entityDescriptor = super.getEntityDescriptor(
-                        request, identity);
+                        request, configuration);
 
                 // add ArtifactResolutionService
                 ArtifactResolutionService artifactResolutionService =
