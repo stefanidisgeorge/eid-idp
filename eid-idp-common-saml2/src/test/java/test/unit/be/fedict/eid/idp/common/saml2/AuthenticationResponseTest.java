@@ -87,11 +87,12 @@ public class AuthenticationResponseTest {
 
                 String issuerName = "test-issuer";
 
+                String requestIssuer = "request-issuer";
                 String requestId = UUID.randomUUID().toString();
                 String recipient = "http://www.testsp.com/saml";
 
                 Assertion assertion = Saml2Util.getAssertion(issuerName,
-                        requestId, recipient, 5, new DateTime(),
+                        requestId, requestIssuer, recipient, 5, new DateTime(),
                         SamlAuthenticationPolicy.IDENTIFICATION, userId,
                         attributes, null, null);
 
@@ -107,7 +108,8 @@ public class AuthenticationResponseTest {
                 // Operate: validate assertion
                 AuthenticationResponse authenticationResponse =
                         Saml2Util.validateAssertion(assertion, new DateTime(),
-                                5, recipient, requestId, null, null);
+                                5, requestIssuer, recipient, requestId,
+                                null, null);
 
                 // Verify
                 assertNotNull(authenticationResponse);
@@ -133,7 +135,8 @@ public class AuthenticationResponseTest {
                 Saml2Util.validateSignature(assertionCopy.getSignature());
                 AuthenticationResponse authenticationResponseCopy =
                         Saml2Util.validateAssertion(assertionCopy, new DateTime(),
-                                5, recipient, requestId, null, null);
+                                5, requestIssuer, recipient, requestId,
+                                null, null);
                 assertEquals(authenticationResponse.getEncodedAssertion(),
                         authenticationResponseCopy.getEncodedAssertion());
         }

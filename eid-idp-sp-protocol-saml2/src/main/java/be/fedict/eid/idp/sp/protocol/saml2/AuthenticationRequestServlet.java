@@ -64,6 +64,8 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         public static final String REQUEST_ID_SESSION_ATTRIBUTE =
                 AuthenticationRequestServlet.class.getName() + ".RequestID";
+        public static final String REQUEST_ISSUER_SESSION_ATTRIBUTE =
+                AuthenticationRequestServlet.class.getName() + ".RequestIssuer";
         public static final String RECIPIENT_SESSION_ATTRIBUTE =
                 AuthenticationRequestServlet.class.getName() + ".Recipient";
         public static final String RELAY_STATE_SESSION_ATTRIBUTE =
@@ -168,6 +170,8 @@ public class AuthenticationRequestServlet extends HttpServlet {
                                 spIdentity, response, language);
 
                 // save state on session
+                setRequestIssuer(authnRequest.getIssuer().getValue(),
+                        request.getSession());
                 setRequestId(authnRequest.getID(), request.getSession());
                 setRecipient(authnRequest.getAssertionConsumerServiceURL(),
                         request.getSession());
@@ -191,6 +195,22 @@ public class AuthenticationRequestServlet extends HttpServlet {
         public static String getRequestId(HttpSession httpSession) {
                 return (String) httpSession
                         .getAttribute(REQUEST_ID_SESSION_ATTRIBUTE);
+        }
+
+        private void setRequestIssuer(String requestIssuer, HttpSession session) {
+                session.setAttribute(REQUEST_ISSUER_SESSION_ATTRIBUTE, requestIssuer);
+        }
+
+        /**
+         * Used by the {@link AbstractAuthenticationResponseServlet} for
+         * validation of the SAML v2.0 Assertion Audience Restriction.
+         *
+         * @param httpSession the HTTP Session
+         * @return the SAML v2.0 Authentication Request ID.
+         */
+        public static String getRequestIssuer(HttpSession httpSession) {
+                return (String) httpSession
+                        .getAttribute(REQUEST_ISSUER_SESSION_ATTRIBUTE);
         }
 
         private void setRecipient(String recipient, HttpSession session) {

@@ -51,6 +51,7 @@ import org.opensaml.xml.schema.XSDateTime;
 import org.opensaml.xml.schema.XSInteger;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.credential.BasicCredential;
+import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.keyinfo.*;
 import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
@@ -226,6 +227,7 @@ public abstract class Saml2Util {
                                 Saml2Util.buildXMLObject(KeyDescriptor.class,
                                         KeyDescriptor.DEFAULT_ELEMENT_NAME);
                         keyDescriptor.setKeyInfo(getKeyInfo(identity));
+                        keyDescriptor.setUse(UsageType.SIGNING);
                         idpssoDescriptor.getKeyDescriptors().add(keyDescriptor);
                 }
 
@@ -313,7 +315,8 @@ public abstract class Saml2Util {
          *
          * @param issuerName           assertion issuer
          * @param inResponseTo         optional inResponseTo
-         * @param audienceUri          audience
+         * @param audienceUri          audience in audience restriction
+         * @param recipient            recipient (SubjectConfirmationData.recipient)
          * @param tokenValidity        valitity in minutes of the assertion
          * @param issueInstant         time of issuance
          * @param authenticationPolicy authentication policy
@@ -327,6 +330,7 @@ public abstract class Saml2Util {
         public static Assertion getAssertion(String issuerName,
                                              String inResponseTo,
                                              String audienceUri,
+                                             String recipient,
                                              Integer tokenValidity,
                                              DateTime issueInstant,
                                              SamlAuthenticationPolicy authenticationPolicy,
@@ -398,7 +402,7 @@ public abstract class Saml2Util {
                                 buildXMLObject(SubjectConfirmationData.class,
                                         SubjectConfirmationData.DEFAULT_ELEMENT_NAME);
                         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
-                        subjectConfirmationData.setRecipient(audienceUri);
+                        subjectConfirmationData.setRecipient(recipient);
                         subjectConfirmationData.setInResponseTo(inResponseTo);
                         subjectConfirmationData.setNotBefore(issueInstant);
                         subjectConfirmationData.setNotOnOrAfter(notAfter);
@@ -717,6 +721,7 @@ public abstract class Saml2Util {
          * @param assertion     the assertion to validate
          * @param now           current time, for validation of conditions
          * @param maxTimeOffset maximum time offset for assertion's conditions
+         * @param audience      expected audience
          * @param recipient     recipient
          * @param requestId     optional request ID
          * @param secretKey     optional symmetric secret if encryption was used
@@ -728,6 +733,7 @@ public abstract class Saml2Util {
         public static AuthenticationResponse validateAssertion(Assertion assertion,
                                                                DateTime now,
                                                                int maxTimeOffset,
+                                                               String audience,
                                                                String recipient,
                                                                String requestId,
                                                                SecretKey secretKey,
@@ -743,7 +749,7 @@ public abstract class Saml2Util {
 
                 // validate assertion conditions
                 validateConditions(now, maxTimeOffset,
-                        assertion.getConditions(), requestId, recipient);
+                        assertion.getConditions(), requestId, audience);
 
                 // validate authn statement
                 AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
@@ -819,7 +825,8 @@ public abstract class Saml2Util {
 
         private static void validateConditions(DateTime now, int maxTimeOffset,
                                                Conditions conditions,
-                                               String requestId, String recipient)
+                                               String requestId,
+                                               String audienceUri)
                 throws AssertionValidationException {
 
                 // time validation
@@ -844,7 +851,7 @@ public abstract class Saml2Util {
                 }
 
                 Audience audience = audienceRestriction.getAudiences().get(0);
-                if (!audience.getAudienceURI().equals(recipient)) {
+                if (!audience.getAudienceURI().equals(audienceUri)) {
 
                         throw new AssertionValidationException(
                                 "AudienceURI does not match expected recipient");

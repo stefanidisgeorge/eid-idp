@@ -135,7 +135,7 @@ public class AuthenticationResponseProcessor {
                 AuthenticationResponse authenticationResponse;
                 try {
                         authenticationResponse = Saml2Util.validateAssertion(
-                                assertion, now, maxOffset, recipient,
+                                assertion, now, maxOffset, recipient, recipient,
                                 null, secretKey, privateKey);
                 } catch (AssertionValidationException e) {
                         throw new AuthenticationResponseProcessorException(e);
