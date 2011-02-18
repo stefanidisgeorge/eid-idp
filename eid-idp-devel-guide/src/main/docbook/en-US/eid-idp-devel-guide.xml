@@ -1255,6 +1255,106 @@ openid.return_to:https://localhost:48745/consumer
             </section>
         </section>
     </section>
+    <section>
+        <title>SAML v2.0 mod_mellon</title>
+        <para>
+            Following is a brief explanation on how to setup a Service Provider
+            using the mod_mellon module.
+            <ulink url="http://code.google.com/p/modmellon/">mod_mellon</ulink>
+        </para>
+        <para>
+            <code>mod_mellon</code>
+            is an authentication module for apache. It authenticates
+            the user against a SAML 2.0 IdP, and and grants access to
+            directories depending on attributes received from the IdP.
+            For installation, please refer to the mod_mellon
+            <ulink url="http://modmellon.googlecode.com/svn/trunk/mod_mellon2/README">
+                README</ulink>.
+        </para>
+        <para>
+            mod_mellon requires you to provide the SAML v2.0 Metadata file for
+            the eID IdP SAML v2.0 Protocol entry point you wish to use. It seems
+            that using the entry points using the SAML v2.0 HTTP-POST binding is
+            not supported. The metadata files can be downloaded at the
+            eid-idp webapp start page.
+        </para>
+        <para>
+            mod_mellon requires you to specify a SAML v2.0 Metadata file for
+            your Service Provider. Following is an example of such metadata:
+            <programlisting role="XML">
+                <![CDATA[
+<EntityDescriptor
+    entityID="TestSP"
+    xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
+  <SPSSODescriptor
+      AuthnRequestsSigned="false"
+      WantAssertionsSigned="false"
+      protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <NameIDFormat>
+      urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+    </NameIDFormat>
+    <AssertionConsumerService
+        index="0"
+        isDefault="true"
+        Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+        Location="http://your-host/secret/endpoint/postResponse" />
+  </SPSSODescriptor>
+</EntityDescriptor>
+                        ]]>
+            </programlisting>
+            Note that the
+            <code>entityID</code>
+            corresponds to the SAML v2.0
+            Authentication Request Issuer, which will be used by the eID IdP to
+            identify the Relying Party. This is crucial as the authentication
+            request will not contain the optional SAML
+            <code>AssertionConsumerServiceURL</code>
+            field which can be used by the eID IdP to resolve the location to
+            post its SAML v2.0 Authentication Response to. To resolve this, the
+            eID IdP Admin Portal can specify a
+            <code>TargetURL</code>
+            for each Relying Party it configures, which will be used for this.
+        </para>
+        <para>
+            Besides the SP metadata, you also need to provide your SP's private
+            key in the mod_mellon configuration for signing outgoing SAML v2.0
+            authentication requests.
+        </para>
+        <section>
+            <title>mod_mellon issues</title>
+            <para>
+                By default, an eID IdP Relying Party configuration will by
+                default return all available eID Attributes. mod_mellon has an
+                issue right now with handling large SAML v2.0 Attribute when
+                trying to cache them on the HTTP Session. Therefor you cannot
+                include the eID Photo attribute as it will fail on this.
+                You can follow progress on this issue @
+                <ulink url="http://code.google.com/p/modmellon/issues/detail?id=9">
+                    mod_mellon caching issue.
+                </ulink>
+                <programlisting role="XML">
+                    <![CDATA[
+
+[Fri Feb 18 11:36:42 2011] [error] Unable to store session data because it is to big.
+    Name = "be:fedict:eid:idp:photo"; Value = "..."
+                        ]]>
+                </programlisting>
+            </para>
+            <para>
+                One open issue exists that after mod_mellon has validated the
+                SAML v2.0 Authentication Response successfully, and probably has
+                put the eID Attributes on the session, 2 segmentation faults
+                occur.
+                <programlisting role="XML">
+                    <![CDATA[
+[Fri Feb 18 11:43:09 2011] [notice] child pid 29175 exit signal Segmentation fault (11)
+[Fri Feb 18 11:43:09 2011] [notice] child pid 29176 exit signal Segmentation fault (11)
+                        ]]>
+                </programlisting>
+                More digging into mod_mellon is needed to resolve this...
+            </para>
+        </section>
+    </section>
     <appendix>
         <title>eID Identity Provider Developer's Guide License</title>
         <para>
