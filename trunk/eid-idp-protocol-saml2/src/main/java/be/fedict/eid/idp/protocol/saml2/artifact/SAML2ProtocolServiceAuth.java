@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.protocol.saml2.artifact;
 
+import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 
@@ -33,7 +35,11 @@ public class SAML2ProtocolServiceAuth extends AbstractSAML2ArtifactProtocolServi
         @Override
         protected EntityDescriptor getEntityDescriptor(HttpServletRequest request) {
 
+                IdentityProviderConfiguration configuration =
+                        AbstractSAML2ProtocolService.getIdPConfiguration(
+                                request.getSession().getServletContext());
+
                 return new SAML2MetadataHttpServletAuth()
-                        .getEntityDescriptor(request, null);
+                        .getEntityDescriptor(request, configuration);
         }
 }

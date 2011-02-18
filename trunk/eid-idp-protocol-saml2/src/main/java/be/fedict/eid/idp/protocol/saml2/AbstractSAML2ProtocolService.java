@@ -187,16 +187,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 String relayState = getRelayState(httpSession);
                 String inResponseTo = getInResponseTo(httpSession);
 
-                IdPIdentity idpIdentity = configuration.findIdentity();
-                String issuerName;
-                if (null != idpIdentity) {
-                        issuerName = idpIdentity.getName();
-                } else {
-                        issuerName = configuration.getDefaultIssuer();
-                }
-                if (null == issuerName) {
-                        issuerName = "Default";
-                }
+                String issuerName = getResponseIssuer(configuration);
 
                 Response samlResponse = Saml2Util.getResponse(inResponseTo,
                         targetUrl, issuerName);
@@ -302,6 +293,27 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 ServletContext servletContext) {
                 return (IdentityProviderConfiguration) servletContext
                         .getAttribute(IDP_CONFIG_CONTEXT_ATTRIBUTE);
+        }
+
+        /**
+         * Returns the SAML Response issuer name
+         *
+         * @param configuration IdP configuration
+         * @return response issuer
+         */
+        public static String getResponseIssuer(IdentityProviderConfiguration configuration) {
+
+                IdPIdentity idpIdentity = configuration.findIdentity();
+                String issuerName;
+                if (null != idpIdentity) {
+                        issuerName = idpIdentity.getName();
+                } else {
+                        issuerName = configuration.getDefaultIssuer();
+                }
+                if (null == issuerName) {
+                        issuerName = "Default";
+                }
+                return issuerName;
         }
 
         private SamlAuthenticationPolicy getAuthenticationPolicy() {

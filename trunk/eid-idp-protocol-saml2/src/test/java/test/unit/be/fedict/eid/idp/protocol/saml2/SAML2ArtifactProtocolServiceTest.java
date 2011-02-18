@@ -115,10 +115,10 @@ public class SAML2ArtifactProtocolServiceTest {
                         AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE,
                         mockConfiguration);
                 EasyMock.expect(mockHttpSession.getServletContext())
-                        .andReturn(mockServletContext);
+                        .andReturn(mockServletContext).times(3);
                 EasyMock.expect(mockServletContext.getAttribute(
                         AbstractSAML2ProtocolService.IDP_CONFIG_CONTEXT_ATTRIBUTE))
-                        .andReturn(mockConfiguration).times(2);
+                        .andReturn(mockConfiguration).times(3);
                 EasyMock
                         .expect(
                                 mockHttpSession
@@ -143,9 +143,7 @@ public class SAML2ArtifactProtocolServiceTest {
                 EasyMock.expect(mockConfiguration.getIdentityCertificateChain()).andStubReturn(
                         Collections.singletonList(certificate));
                 EasyMock.expect(mockHttpServletRequest.getSession()).andReturn(
-                        mockHttpSession).times(2);
-                EasyMock.expect(mockHttpSession.getServletContext()).andReturn(
-                        mockServletContext);
+                        mockHttpSession).times(3);
                 EasyMock.expect(mockServletContext.getAttribute(
                         AbstractSAML2ArtifactProtocolService.ARTIFACT_MAP_ATTRIBUTE))
                         .andReturn(null);
