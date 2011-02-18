@@ -186,7 +186,7 @@ public class SAML2ArtifactProtocolServiceTest {
                                 relayStateAttribute = attribute;
                                 continue;
                         }
-                        if ("SAMLArt".equals(attribute.getName())) {
+                        if ("SAMLart".equals(attribute.getName())) {
                                 samlArtAttribute = attribute;
                                 continue;
                         }

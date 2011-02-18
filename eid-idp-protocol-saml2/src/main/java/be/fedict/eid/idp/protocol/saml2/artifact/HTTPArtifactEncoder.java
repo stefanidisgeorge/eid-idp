@@ -67,7 +67,7 @@ public class HTTPArtifactEncoder extends org.opensaml.saml2.binding.encoding.HTT
 
                 SAMLMessageContext artifactContext = (SAMLMessageContext) messageContext;
 
-                httpOutTransport.addParameter("SAMLArt",
+                httpOutTransport.addParameter("SAMLart",
                         buildArtifact(artifactContext).base64Encode());
 
                 String relayState = samlMessageContext.getRelayState();
