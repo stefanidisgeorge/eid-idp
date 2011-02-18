@@ -310,7 +310,7 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 } else {
                         issuerName = configuration.getDefaultIssuer();
                 }
-                if (null == issuerName) {
+                if (null == issuerName || issuerName.trim().isEmpty()) {
                         issuerName = "Default";
                 }
                 return issuerName;

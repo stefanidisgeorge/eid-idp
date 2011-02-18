@@ -96,6 +96,9 @@ public class ConfigurationBean implements Configuration {
                                 propertyValue = enumValue.name();
                         } else {
                                 propertyValue = castedValue.toString();
+                                if (propertyValue.trim().isEmpty()) {
+                                        propertyValue = null;
+                                }
                         }
                 } else {
                         propertyValue = null;
