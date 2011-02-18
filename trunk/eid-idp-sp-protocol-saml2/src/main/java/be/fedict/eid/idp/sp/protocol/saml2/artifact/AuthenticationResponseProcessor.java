@@ -64,7 +64,7 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
         protected Response getSamlResponse(HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
 
-                String encodedArtifact = request.getParameter("SAMLArt");
+                String encodedArtifact = request.getParameter("SAMLart");
                 if (null == encodedArtifact) {
                         throw new AuthenticationResponseProcessorException(
                                 "No SAMLArt parameter found.");
