@@ -121,6 +121,27 @@ public class RPServiceBean implements RPService {
                         return attachedRp;
                 } else {
                         // add
+                        if (null != rp.getDomain() &&
+                                rp.getDomain().trim().isEmpty()) {
+                                rp.setDomain(null);
+                        }
+                        if (null != rp.getTargetURL() &&
+                                rp.getTargetURL().trim().isEmpty()) {
+                                rp.setTargetURL(null);
+                        }
+                        if (null != rp.getAuthnTrustDomain() &&
+                                rp.getAuthnTrustDomain().trim().isEmpty()) {
+                                rp.setAuthnTrustDomain(null);
+                        }
+                        if (null != rp.getIdentityTrustDomain() &&
+                                rp.getIdentityTrustDomain().trim().isEmpty()) {
+                                rp.setIdentityTrustDomain(null);
+                        }
+                        if (null != rp.getIdentifierSecretKey() &&
+                                rp.getIdentifierSecretKey().trim().isEmpty()) {
+                                rp.setIdentifierSecretKey(null);
+                        }
+
                         this.entityManager.persist(rp);
                         for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
                                 RPAttributeEntity newRpAttribute =
