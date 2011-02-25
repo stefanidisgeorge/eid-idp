@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>FedICT eID Identity Provider Project</name>
     <parent>
@@ -12,11 +10,11 @@
           -->
         <groupId>be.fedict</groupId>
         <artifactId>eid-applet</artifactId>
-        <version>1.0.2.Beta3</version>
+        <version>1.0.2.GA</version>
     </parent>
     <groupId>be.fedict</groupId>
     <artifactId>eid-idp</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.Beta3</version>
     <packaging>pom</packaging>
     <inceptionYear>2010</inceptionYear>
     <scm>
@@ -233,8 +231,8 @@
         </repository>
     </repositories>
     <properties>
-        <eid-applet.version>1.0.2.Beta3</eid-applet.version>
-        <eid-trust-service.version>1.0.0.RC4</eid-trust-service.version>
+        <eid-applet.version>1.0.2.GA</eid-applet.version>
+        <eid-trust-service.version>1.0.0.RC5</eid-trust-service.version>
         <!-- http://code.google.com/p/openid4java/issues/detail?id=114 -->
         <openid4java.version>0.9.6-114-7</openid4java.version>
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>

@@ -3,13 +3,13 @@
 	<parent>
 		<groupId>be.fedict</groupId>
 		<artifactId>eid-idp</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.0.Beta3</version>
 	</parent>
 	<name>FedICT eID IdP OpenID Protocol Service</name>
 	<description>OpenID Protocol Service for eID Identity Provider</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-protocol-openid</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0.Beta3</version>
 	<packaging>jar</packaging>
 	<build>
 		<plugins>
