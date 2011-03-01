@@ -70,21 +70,6 @@
         <url-pattern>*.seam</url-pattern>
     </servlet-mapping>
 
-    <!-- eID Applet Registration -->
-    <servlet>
-        <servlet-name>RegistrationAppletService</servlet-name>
-        <servlet-class>be.fedict.eid.applet.service.AppletServiceServlet
-        </servlet-class>
-        <init-param>
-            <param-name>IncludeCertificates</param-name>
-            <param-value>true</param-value>
-        </init-param>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>RegistrationAppletService</servlet-name>
-        <url-pattern>/applet-service-registration</url-pattern>
-    </servlet-mapping>
-
     <!-- eID Applet Authentication -->
     <servlet>
         <servlet-name>AuthenticationAppletService</servlet-name>
