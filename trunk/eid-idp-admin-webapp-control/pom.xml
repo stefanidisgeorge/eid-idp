@@ -3,7 +3,7 @@
     <parent>
         <groupId>be.fedict</groupId>
         <artifactId>eid-idp</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0.Beta4</version>
     </parent>
     <name>FedICT eID IdP Admin Webapp Control</name>
     <description>EJB3 Seam Controller Components for eID Identity Provider Admin
@@ -11,7 +11,7 @@
     </description>
     <groupId>be.fedict.eid-idp</groupId>
     <artifactId>eid-idp-admin-webapp-control</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.Beta4</version>
     <packaging>ejb</packaging>
     <build>
         <plugins>
