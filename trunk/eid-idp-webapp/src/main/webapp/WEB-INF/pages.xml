@@ -10,6 +10,10 @@
         <action execute="#{idpSP.initLanguage}"/>
     </page>
 
+    <page view-id="/main.seam">
+        <rewrite pattern="/main"/>
+    </page>
+
     <page view-id="/authentication.seam">
         <rewrite pattern="/authentication"/>
     </page>
