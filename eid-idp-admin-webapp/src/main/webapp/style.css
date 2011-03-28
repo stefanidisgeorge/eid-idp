@@ -74,6 +74,7 @@ h3 {
 }
 .text {
     overflow:           auto;
+    width:              700px;
 
     font-family:        monospace;
 
