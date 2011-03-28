@@ -18,6 +18,9 @@
 
 package be.fedict.eid.idp.entity;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -60,6 +63,8 @@ import java.util.List;
 public class RPEntity implements Serializable {
 
         private static final long serialVersionUID = 1L;
+
+        private static final Log LOG = LogFactory.getLog(RPEntity.class);
 
         public static final String LIST_ALL = "idp.rp.list.all";
         public static final String FIND_DOMAIN = "idp.rp.find.domain";
@@ -161,6 +166,19 @@ public class RPEntity implements Serializable {
 
         public void setEncodedCertificate(byte[] encodedCertificate) {
                 this.encodedCertificate = encodedCertificate;
+        }
+
+        @Transient
+        public String getCertificateString() {
+
+                X509Certificate certificate = getCertificate();
+                if (null == certificate) {
+                        return "";
+                }
+
+                String returnString =  certificate.toString().replaceAll("\\n", "<br/>");
+                LOG.debug("cert.encoded: " + returnString);
+                return returnString;
         }
 
         @Transient
