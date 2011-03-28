@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -270,8 +271,9 @@ public class RPBean implements RP {
                 }
 
                 try {
-                        this.selectedRP.setCertificate(
-                                CryptoUtil.getCertificate(this.certificateBytes));
+                        X509Certificate certificate = CryptoUtil.getCertificate(this.certificateBytes);
+                        this.log.debug("certificate: " + certificate);
+                        this.selectedRP.setCertificate(certificate);
                 } catch (CertificateException e) {
                         this.facesMessages.addToControl("upload", "Invalid certificate");
                 }
