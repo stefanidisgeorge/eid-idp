@@ -54,7 +54,10 @@ public class RPServiceBean implements RPService {
         @Override
         public RPEntity save(RPEntity rp) {
 
-                RPEntity attachedRp = this.entityManager.find(RPEntity.class, rp.getId());
+                RPEntity attachedRp = null;
+                if (null != rp.getId()) {
+                        attachedRp = this.entityManager.find(RPEntity.class, rp.getId());
+                }
                 if (null != attachedRp) {
                         // save
 

@@ -33,7 +33,7 @@ public class RPAttributePK implements Serializable {
         public static final String RP_COLUMN_NAME = "rpId";
         public static final String ATTRIBUTE_COLUMN_NAME = "attributeUri";
 
-        private long rpId;
+        private Long rpId;
         private String attributeUri;
 
         public RPAttributePK() {
@@ -54,11 +54,11 @@ public class RPAttributePK implements Serializable {
                 this.attributeUri = attributeUri;
         }
 
-        public long getRpId() {
+        public Long getRpId() {
                 return rpId;
         }
 
-        public void setRpId(long rpId) {
+        public void setRpId(Long rpId) {
                 this.rpId = rpId;
         }
 
