@@ -64,7 +64,7 @@ public class RPEntity implements Serializable {
         public static final String LIST_ALL = "idp.rp.list.all";
         public static final String FIND_DOMAIN = "idp.rp.find.domain";
 
-        private long id;
+        private Long id;
 
         // configurations
         private String name;
@@ -118,11 +118,11 @@ public class RPEntity implements Serializable {
 
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
-        public long getId() {
+        public Long getId() {
                 return this.id;
         }
 
-        public void setId(long id) {
+        public void setId(Long id) {
                 this.id = id;
         }
 

@@ -137,6 +137,7 @@ public class RPBean implements RP {
 
                 this.log.debug("add RP");
                 this.selectedRP = new RPEntity();
+                this.log.debug("RP.id: " + this.selectedRP.getId());
                 for (AttributeEntity attribute : this.attributeService.listAttributes()) {
                         this.selectedRP.getAttributes().add(
                                 new RPAttributeEntity(this.selectedRP, attribute));
