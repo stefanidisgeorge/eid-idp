@@ -18,13 +18,14 @@
 
 package be.fedict.eid.idp.model.applet;
 
-import be.fedict.eid.applet.service.spi.AuthenticationService;
+import be.fedict.eid.applet.service.spi.*;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.Constants;
 import be.fedict.trust.client.XKMS2Client;
 import be.fedict.trust.client.exception.ValidationFailedException;
+import be.fedict.trust.xkms2.XKMSConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
@@ -101,7 +102,20 @@ public class AuthenticationServiceBean implements AuthenticationService {
                                 xkms2Client.validate(certificateChain);
                         }
                 } catch (ValidationFailedException e) {
-                        LOG.warn("invalid certificate");
+                        LOG.warn("invalid certificate: " + e.getMessage());
+
+                        for (String reason : e.getReasons()) {
+
+                                if (reason.equals(XKMSConstants.KEY_BINDING_REASON_VALIDITY_INTERVAL_URI)) {
+                                        throw new ExpiredCertificateSecurityException();
+                                } else if (reason.equals(XKMSConstants.KEY_BINDING_REASON_REVOCATION_STATUS_URI)) {
+                                        throw new RevokedCertificateSecurityException();
+                                } else if (reason.equals(XKMSConstants.KEY_BINDING_REASON_ISSUER_TRUST_URI)) {
+                                        throw new TrustCertificateSecurityException();
+                                } else {
+                                        throw new CertificateSecurityException();
+                                }
+                        }
                         throw new SecurityException("invalid certificate");
                 } catch (Exception e) {
                         LOG.warn("eID Trust Service error: " + e.getMessage(), e);
