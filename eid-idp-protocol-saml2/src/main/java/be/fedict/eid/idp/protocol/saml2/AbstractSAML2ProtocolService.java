@@ -134,6 +134,10 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 AuthnRequest authnRequest = (AuthnRequest) samlObject;
 
                 String issuer = authnRequest.getIssuer().getValue();
+                if (null == issuer) {
+                        throw new IllegalArgumentException("SAML2 AuthnRequest "
+                                + "does not have an issuer set.");
+                }
                 LOG.debug("Issuer: " + issuer);
                 setIssuer(issuer, request);
 

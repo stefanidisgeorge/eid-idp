@@ -153,7 +153,7 @@ public class SAML2ArtifactProtocolServiceTest {
                 EasyMock.expect(mockHttpServletRequest.getServerName()).andReturn(
                         "127.0.0.1").times(2);
                 EasyMock.expect(mockHttpServletRequest.getServerPort()).andReturn(
-                        8443).times(2);
+                        8443).times(3);
                 EasyMock.expect(mockHttpServletRequest.getContextPath()).andReturn(
                         "/eid-idp").times(2);
                 EasyMock.expect(mockHttpSession.getAttribute(
