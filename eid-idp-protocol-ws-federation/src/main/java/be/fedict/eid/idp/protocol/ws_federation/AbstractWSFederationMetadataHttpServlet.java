@@ -146,11 +146,7 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
                 InvalidAlgorithmParameterException, MarshalException,
                 XMLSignatureException {
 
-                String location = "https://" + request.getServerName() + ":"
-                        + request.getServerPort() + request.getContextPath()
-                        + IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH
-                        + "/" + getPath();
-                LOG.debug("location: " + location);
+                String location = getLocation(request);
 
                 EntityDescriptor entityDescriptor = Saml2Util.buildXMLObject(EntityDescriptor.class,
                         EntityDescriptor.DEFAULT_ELEMENT_NAME);
@@ -258,6 +254,19 @@ public abstract class AbstractWSFederationMetadataHttpServlet extends HttpServle
                                 Description.DEFAULT_ELEMENT_NAME);
                 claimDescription.setValue(description);
                 claim.setDescription(claimDescription);
+        }
+
+        private String getLocation(HttpServletRequest request) {
+
+                String location = "https://" + request.getServerName();
+                if (request.getServerPort() != 443) {
+                        location += ":" + request.getServerPort();
+                }
+                location += request.getContextPath()
+                        + IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH
+                        + "/" + getPath();
+                LOG.debug("location: " + location);
+                return location;
         }
 
         protected abstract String getPath();
