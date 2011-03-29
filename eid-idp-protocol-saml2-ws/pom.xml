@@ -120,5 +120,11 @@
             <artifactId>jtidy</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 </project>
