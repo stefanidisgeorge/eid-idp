@@ -75,6 +75,11 @@ public class RPServiceBean implements RPService {
                                 attachedRp.setTargetURL(rp.getTargetURL().trim());
                         }
 
+                        // logo
+                        if (null != rp.getLogo()) {
+                                attachedRp.setLogo(rp.getLogo());
+                        }
+
                         // pki
                         if (null != rp.getAuthnTrustDomain() && rp.getAuthnTrustDomain().trim().isEmpty()) {
                                 attachedRp.setAuthnTrustDomain(null);

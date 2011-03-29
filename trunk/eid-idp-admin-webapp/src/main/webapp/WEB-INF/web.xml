@@ -31,7 +31,7 @@
         </init-param>
         <init-param>
             <param-name>maxRequestSize</param-name>
-            <param-value>200000</param-value>
+            <param-value>1000000</param-value>
         </init-param>
     </filter>
     <filter-mapping>
@@ -42,6 +42,10 @@
     <!-- JBoss Richfaces -->
     <context-param>
         <param-name>facelets.BUILD_BEFORE_RESTORE</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    <context-param>
+        <param-name>facelets.RECREATE_VALUE_EXPRESSION_ON_BUILD_BEFORE_RESTORE</param-name>
         <param-value>false</param-value>
     </context-param>
     <context-param>

@@ -36,6 +36,8 @@ import javax.ejb.EJB;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
 import javax.faces.context.FacesContext;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,6 +88,25 @@ public class SPBean implements SP {
                         return rp.getName();
                 }
                 return null;
+        }
+
+        @Override
+        public void paint(OutputStream stream, Object object) throws IOException {
+
+                RPEntity rp = (RPEntity)
+                        this.sessionContext.get(Constants.RP_SESSION_ATTRIBUTE);
+
+                if (null != rp && null != rp.getLogo()) {
+                        this.log.debug("paint logo");
+                        stream.write(rp.getLogo());
+                        stream.close();
+                }
+        }
+
+        @Override
+        public long getTimeStamp() {
+
+                return System.currentTimeMillis();
         }
 
         @Override

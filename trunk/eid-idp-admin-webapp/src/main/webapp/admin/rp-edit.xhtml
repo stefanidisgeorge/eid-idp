@@ -48,6 +48,29 @@
                     </h:panelGrid>
                 </rich:tab>
 
+                <rich:tab name="tab_logo" label="Logo">
+
+                    <h:panelGrid columns="4" border="0">
+                        <h:outputLabel for="uploadLogo" value="Logo"/>
+                        <rich:fileUpload
+                                fileUploadListener="#{idpRP.uploadListenerLogo}"
+                                maxFilesQuantity="1" id="uploadLogo"
+                                immediateUpload="true"
+                                acceptedTypes="jpg, gif, png, bmp">
+                            <a4j:support event="onuploadcomplete" reRender="logo"/>
+                        </rich:fileUpload>
+                        <h:message for="uploadLogo" styleClass="error"/>
+
+                        <a4j:mediaOutput id="logo" element="img" mimeType="image/jpeg"
+                            createContent="#{idpRP.paint}"
+                            style="width:100px; height:100px;" cacheable="false">
+                            <f:param value="#{idpRP.timeStamp}" name="time" />
+                            <s:conversationId value="#{conversation.id}"/>
+                        </a4j:mediaOutput>
+                    </h:panelGrid>
+
+                </rich:tab>
+
                 <rich:tab name="tab_pki" label="PKI">
                     <h:panelGrid columns="2" border="0">
 

@@ -19,6 +19,8 @@
 package be.fedict.eid.idp.webapp;
 
 import javax.ejb.Local;
+import java.io.IOException;
+import java.io.OutputStream;
 
 @Local
 public interface SP {
@@ -35,6 +37,10 @@ public interface SP {
          * Accessors
          */
         String getRp();
+
+        void paint(OutputStream stream, Object object) throws IOException;
+
+        long getTimeStamp();
 
         /*
          * Factories
