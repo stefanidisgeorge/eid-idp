@@ -43,8 +43,11 @@ public interface AuthenticationRequestService {
         /**
          * Gives back the Service Provider destination endpoint that will handle
          * the returned SAML v2.0 Response.
+         * <p/>
+         * If <code>null</code> the <code>SPDestination</code> or
+         * <code>SPDestinationPage</code> init params in web.xml will be used.
          *
-         * @return SP SAML2 response handling location.
+         * @return SP SAML2 response handling location or <code>null</code>.
          */
         String getSPDestination();
 

@@ -133,7 +133,6 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
                 String issuer;
                 String idpDestination;
-                String spDestination;
                 String relayState;
                 KeyStore.PrivateKeyEntry spIdentity = null;
                 String language;
@@ -145,21 +144,30 @@ public class AuthenticationRequestServlet extends HttpServlet {
                         idpDestination = service.getIdPDestination();
                         relayState = service.getRelayState(request.getParameterMap());
                         spIdentity = service.getSPIdentity();
-                        spDestination = service.getSPDestination();
                         language = service.getLanguage();
                 } else {
                         idpDestination = this.idpDestination;
                         relayState = null;
+                        issuer = spDestination;
+                        language = this.language;
+                }
+
+                // sp-destination
+                String spDestination = null;
+                if (null != service) {
+                        spDestination = service.getSPDestination();
+                }
+                if (null == spDestination) {
+                        // not provided by the service, check web.xml...
                         if (null != this.spDestination) {
                                 spDestination = this.spDestination;
                         } else {
                                 spDestination = request.getScheme() + "://"
                                         + request.getServerName() + ":"
-                                        + request.getServerPort() + request.getContextPath()
+                                        + request.getServerPort()
+                                        + request.getContextPath()
                                         + this.spDestinationPage;
                         }
-                        issuer = spDestination;
-                        language = this.language;
                 }
 
 
