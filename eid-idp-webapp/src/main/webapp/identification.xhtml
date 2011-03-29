@@ -3,6 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:s="http://jboss.com/products/seam/taglib"
       xmlns:rich="http://richfaces.org/rich"
       xmlns:f="http://java.sun.com/jsf/core">
 <body>
@@ -13,8 +15,16 @@
         <p>#{messages.identificationInfo}</p>
 
         <p>
-            <h:outputLabel value="#{messages.serviceProvider}: #{idpSP.rp}"
-                           rendered="#{idpSP.rp != null}"/>
+            <div id="logo">
+                <a4j:mediaOutput element="img" mimeType="image/jpeg"
+                    createContent="#{idpSP.paint}"
+                    cacheable="false">
+                    <f:param value="#{idpSP.timeStamp}" name="time" />
+                    <s:conversationId value="#{conversation.id}"/>
+                </a4j:mediaOutput>
+                <h:outputLabel value="#{messages.serviceProvider}: #{idpSP.rp}"
+                        rendered="#{idpSP.rp != null}"/>
+            </div>
         </p>
 
         <script language="javascript1.2" type="text/javascript"

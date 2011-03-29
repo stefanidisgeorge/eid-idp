@@ -46,6 +46,7 @@ import javax.ejb.Remove;
 import javax.ejb.Stateful;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -97,7 +98,7 @@ public class RPBean implements RP {
         private List<String> selectedAttributes;
 
         enum ConfigurationTab {
-                tab_config, tab_pki, tab_secret, tab_signing, tab_attributes
+                tab_config, tab_logo, tab_pki, tab_secret, tab_signing, tab_attributes
         }
 
         @Override
@@ -308,6 +309,26 @@ public class RPBean implements RP {
         }
 
         @Override
+        @Begin(join = true)
+        public void uploadListenerLogo(UploadEvent event) throws IOException {
+
+                UploadItem item = event.getUploadItem();
+                this.log.debug(item.getContentType());
+                this.log.debug(item.getFileSize());
+                this.log.debug(item.getFileName());
+
+                byte[] logoBytes;
+                if (null == item.getData()) {
+                        // meaning createTempFiles is set to true in the SeamFilter
+                        logoBytes = FileUtils.readFileToByteArray(item.getFile());
+                } else {
+                        logoBytes = item.getData();
+                }
+
+                this.selectedRP.setLogo(logoBytes);
+        }
+
+        @Override
         public List<String> getSourceAttributes() {
 
                 List<AttributeEntity> attributes = this.attributeService.
@@ -362,5 +383,22 @@ public class RPBean implements RP {
                 } catch (KeyLoadException e) {
                         throw new RuntimeException(e);
                 }
+        }
+
+        @Override
+        public void paint(OutputStream stream, Object object) throws IOException {
+
+                this.log.debug("paint called");
+                if (null != this.selectedRP && null != this.selectedRP.getLogo()) {
+                        this.log.debug("paint logo");
+                        stream.write(this.selectedRP.getLogo());
+                        stream.close();
+                }
+        }
+
+        @Override
+        public long getTimeStamp() {
+
+                return System.currentTimeMillis();
         }
 }

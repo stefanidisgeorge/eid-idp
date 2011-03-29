@@ -18,9 +18,6 @@
 
 package be.fedict.eid.idp.entity;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -64,8 +61,6 @@ public class RPEntity implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        private static final Log LOG = LogFactory.getLog(RPEntity.class);
-
         public static final String LIST_ALL = "idp.rp.list.all";
         public static final String FIND_DOMAIN = "idp.rp.find.domain";
 
@@ -75,6 +70,11 @@ public class RPEntity implements Serializable {
         private String name;
         private String domain;
         private String targetURL;
+
+        // logo
+        @Lob
+        @Column(length = 500 * 1024, nullable = true)
+        protected byte[] logo;
 
         // signing
         private byte[] encodedCertificate;
@@ -96,7 +96,7 @@ public class RPEntity implements Serializable {
         private List<RPAttributeEntity> attributes;
 
         public RPEntity(String name, String domain, String targetURL,
-                        X509Certificate certificate,
+                        byte[] logo, X509Certificate certificate,
                         boolean requestSigningRequired,
                         String identifierSecretKey,
                         SecretKeyAlgorithm attributeSecretAlgorithm,
@@ -107,6 +107,7 @@ public class RPEntity implements Serializable {
                 this.name = name;
                 this.domain = domain;
                 this.targetURL = targetURL;
+                this.logo = logo;
                 this.encodedCertificate = certificate.getEncoded();
                 this.requestSigningRequired = requestSigningRequired;
                 this.identifierSecretKey = identifierSecretKey;
@@ -158,6 +159,16 @@ public class RPEntity implements Serializable {
                 this.targetURL = targetURL;
         }
 
+        @Column(length = 500 * 1024, nullable = true)
+        @Basic(fetch = FetchType.LAZY)
+        public byte[] getLogo() {
+                return this.logo;
+        }
+
+        public void setLogo(byte[] logo) {
+                this.logo = logo;
+        }
+
         @Column(length = 4 * 1024, nullable = true)
         @Basic(fetch = FetchType.LAZY)
         public byte[] getEncodedCertificate() {
@@ -176,9 +187,7 @@ public class RPEntity implements Serializable {
                         return "";
                 }
 
-                String returnString =  certificate.toString().replaceAll("\\n", "<br/>");
-                LOG.debug("cert.encoded: " + returnString);
-                return returnString;
+                return certificate.toString().replaceAll("\\n", "<br/>");
         }
 
         @Transient

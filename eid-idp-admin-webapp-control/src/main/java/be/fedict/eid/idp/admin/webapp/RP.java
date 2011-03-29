@@ -23,7 +23,7 @@ import org.richfaces.event.UploadEvent;
 import javax.ejb.Local;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
-import java.security.PrivateKey;
+import java.io.OutputStream;
 import java.security.PublicKey;
 import java.util.List;
 
@@ -47,12 +47,19 @@ public interface RP {
 
         PublicKey getAttributePublicKey();
 
+        void paint(OutputStream stream, Object object) throws IOException;
+
+        long getTimeStamp();
+
+
         /*
         * Listeners.
         */
         void uploadListener(UploadEvent event) throws IOException;
 
         void uploadListenerPublic(UploadEvent event) throws IOException;
+
+        void uploadListenerLogo(UploadEvent event) throws IOException;
 
         /*
         * Factories
