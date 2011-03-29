@@ -107,11 +107,7 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
         public EntityDescriptor getEntityDescriptor(HttpServletRequest request,
                                                     IdentityProviderConfiguration configuration) {
 
-                String location = "https://" + request.getServerName() + ":"
-                        + request.getServerPort() + request.getContextPath()
-                        + IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH +
-                        "/" + getPath();
-                LOG.debug("location: " + location);
+                String location = getLocation(request);
 
                 IdPIdentity identity = configuration.findIdentity();
 
@@ -121,6 +117,18 @@ public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
                         null != identity ? identity.getPrivateKeyEntry() : null);
         }
 
+        private String getLocation(HttpServletRequest request) {
+
+                String location = "https://" + request.getServerName();
+                if (request.getServerPort() != 443) {
+                        location += ":" + request.getServerPort();
+                }
+                location += request.getContextPath()
+                        + IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH
+                        + "/" + getPath();
+                LOG.debug("location: " + location);
+                return location;
+        }
 
         protected abstract String getPath();
 
