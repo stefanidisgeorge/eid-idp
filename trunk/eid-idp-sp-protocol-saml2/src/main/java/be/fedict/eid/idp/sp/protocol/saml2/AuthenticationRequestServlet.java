@@ -131,7 +131,6 @@ public class AuthenticationRequestServlet extends HttpServlet {
                              HttpServletResponse response) throws ServletException, IOException {
                 LOG.debug("doGet");
 
-                String issuer;
                 String idpDestination;
                 String relayState;
                 KeyStore.PrivateKeyEntry spIdentity = null;
@@ -140,7 +139,6 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 AuthenticationRequestService service =
                         this.authenticationRequestServiceLocator.locateService();
                 if (null != service) {
-                        issuer = service.getIssuer();
                         idpDestination = service.getIdPDestination();
                         relayState = service.getRelayState(request.getParameterMap());
                         spIdentity = service.getSPIdentity();
@@ -148,7 +146,6 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 } else {
                         idpDestination = this.idpDestination;
                         relayState = null;
-                        issuer = spDestination;
                         language = this.language;
                 }
 
@@ -168,6 +165,15 @@ public class AuthenticationRequestServlet extends HttpServlet {
                                         + request.getContextPath()
                                         + this.spDestinationPage;
                         }
+                }
+
+                // issuer
+                String issuer = null;
+                if (null != service) {
+                        issuer = service.getIssuer();
+                }
+                if (null == issuer) {
+                        issuer = spDestination;
                 }
 
 
