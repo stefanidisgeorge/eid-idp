@@ -202,7 +202,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>IdentityServlet</servlet-name>
-        <url-pattern>/identity</url-pattern>
+        <url-pattern>/identity.pem</url-pattern>
     </servlet-mapping>
 
     <!-- HTTP session logging -->
