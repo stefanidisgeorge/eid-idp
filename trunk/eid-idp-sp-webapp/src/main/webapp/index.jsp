@@ -80,6 +80,41 @@
             </li>
         </ul>
 
+        <h2>SP Configuration</h2>
+
+        <!-- Read config if passed along -->
+
+        <jsp:useBean id="spConfig" class="be.fedict.eid.idp.sp.Config"
+                     scope="session"/>
+
+        <%
+            if(request.getParameter("configure") != null) {
+
+                if (request.getParameter("encrypt") != null) {
+                   spConfig.setEncrypt(true);
+                } else {
+                    spConfig.setEncrypt(false);
+                }
+
+                if (request.getParameter("useKeK") != null) {
+                   spConfig.setUseKeK(true);
+                } else {
+                    spConfig.setUseKeK(false);
+                }
+            }
+        %>
+
+        Encrypt:
+        <jsp:getProperty name="spConfig" property="encrypt"/>
+        <br/>
+        Use KEK:
+        <jsp:getProperty name="spConfig" property="useKeK"/>
+        <br/>
+
+        <p>
+            <a href="./config.jsp">Configure...</a>
+        </p>
+
         <h2>SP Identity</h2>
 
         Download the Test Service Provider's Certificate
