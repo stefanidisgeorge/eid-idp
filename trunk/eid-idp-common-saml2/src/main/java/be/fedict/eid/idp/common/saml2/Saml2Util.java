@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.utils.Constants;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.ISOChronology;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
@@ -577,8 +577,18 @@ public abstract class Saml2Util {
                         Configuration.getBuilderFactory().getBuilder(XSDateTime.TYPE_NAME);
                 XSDateTime xmlAttributeValue = builder.buildObject(
                         AttributeValue.DEFAULT_ELEMENT_NAME, XSDateTime.TYPE_NAME);
-                xmlAttributeValue.setValue(new DateTime(attributeValue.getTime()));
+
+                // convert to Zulu timezone
+                int day = attributeValue.get(Calendar.DAY_OF_MONTH);
+                int month = attributeValue.get(Calendar.MONTH);
+                int year = attributeValue.get(Calendar.YEAR);
+                LOG.debug("day: " + day + " month: " + month + " year: " + year);
+                DateTime zulu = new DateTime(year, month + 1, day, 0, 0, 0, 0, ISOChronology.getInstanceUTC());
+                xmlAttributeValue.setValue(zulu);
                 attribute.getAttributeValues().add(xmlAttributeValue);
+
+                LOG.debug("XmlAttributeValue: " + xmlAttributeValue.getValue());
+
                 return attribute;
         }
 
@@ -979,7 +989,7 @@ public abstract class Saml2Util {
                         XSDateTime attributeValue = (XSDateTime) attribute
                                 .getAttributeValues().get(0);
                         attributeMap.put(attributeName, attributeValue.getValue()
-                                .toDateTime(DateTimeZone.getDefault()));
+                                .toDateTime(ISOChronology.getInstanceUTC()));
 
                 } else if (attribute.getAttributeValues().get(0) instanceof XSBase64Binary) {
 
