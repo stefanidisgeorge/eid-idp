@@ -57,17 +57,26 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
         @Override
         public SecretKey getAttributeSecretKey() {
 
-                return SPBean.aes128SecretKey;
+                if (PkiServlet.isEncrypt()) {
+                        return SPBean.aes128SecretKey;
+                } else {
+                        return null;
+                }
         }
 
         @Override
         public PrivateKey getAttributePrivateKey() {
 
-                try {
-                        return PkiServlet.getPrivateKeyEntry().getPrivateKey();
-                } catch (Exception e) {
-                        throw new RuntimeException(e);
+                if (PkiServlet.isUseKeK()) {
+                        try {
+                                return PkiServlet.getPrivateKeyEntry().getPrivateKey();
+                        } catch (Exception e) {
+                                throw new RuntimeException(e);
+                        }
+                } else {
+                        return null;
                 }
+
         }
 
         @Override
