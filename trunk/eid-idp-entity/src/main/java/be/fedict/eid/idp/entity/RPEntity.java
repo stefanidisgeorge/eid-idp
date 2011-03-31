@@ -169,6 +169,7 @@ public class RPEntity implements Serializable {
                 this.logo = logo;
         }
 
+        @Lob
         @Column(length = 4 * 1024, nullable = true)
         @Basic(fetch = FetchType.LAZY)
         public byte[] getEncodedCertificate() {
@@ -281,6 +282,7 @@ public class RPEntity implements Serializable {
 
         @Column(length = 4 * 1024, nullable = true)
         @Basic(fetch = FetchType.EAGER)
+        @Lob
         public byte[] getAttributePublicKey() {
                 return this.attributePublicKey;
         }

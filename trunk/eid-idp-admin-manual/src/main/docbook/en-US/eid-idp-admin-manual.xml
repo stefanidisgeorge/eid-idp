@@ -176,6 +176,16 @@
                     <code>sql</code>
                     directory.
                 </para>
+                <para>
+                    Note that the SQL-DDL script will create a hibernate
+                    sequence ( use for generation of entity IDs ) by default.
+                    Case your distribution will also run the eID Trust Service
+                    this sequence will already be created, causing the script
+                    to fail on that one. As this is the last command in the
+                    initialization script this does not really matter yet can
+                    be confusing. The command is:
+                    <code>create sequence hibernate_sequence;</code>
+                </para>
             </section>
         </section>
     </section>
