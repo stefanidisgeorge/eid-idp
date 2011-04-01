@@ -12,7 +12,7 @@
           -->
         <groupId>be.fedict</groupId>
         <artifactId>eid-applet</artifactId>
-        <version>1.0.2.GA</version>
+        <version>1.0.3.Beta1</version>
     </parent>
     <groupId>be.fedict</groupId>
     <artifactId>eid-idp</artifactId>
@@ -47,7 +47,6 @@
         <module>eid-idp-sp-webapp</module>
         <module>eid-idp-deploy</module>
         <module>eid-idp-attribute-age</module>
-        <module>eid-idp-sec-analysis</module>
     </modules>
     <profiles>
         <profile>
@@ -130,6 +129,18 @@
             </modules>
         </profile>
         <profile>
+            <id>security</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>security</value>
+                </property>
+            </activation>
+            <modules>
+                <module>eid-idp-sec-analysis</module>
+            </modules>
+        </profile>
+        <profile>
             <id>all</id>
             <activation>
                 <property>
@@ -145,6 +156,7 @@
                 <module>eid-idp-oracle-distribution</module>
                 <module>eid-idp-devel-guide</module>
                 <module>eid-idp-sdk</module>
+                <module>eid-idp-sec-analysis</module>
             </modules>
         </profile>
 
@@ -240,8 +252,8 @@
         </repository>
     </repositories>
     <properties>
-        <eid-applet.version>1.0.2.GA</eid-applet.version>
-        <eid-trust-service.version>1.0.0.RC5</eid-trust-service.version>
+        <eid-applet.version>1.0.3.Beta1</eid-applet.version>
+        <eid-trust-service.version>1.0.0.RC6</eid-trust-service.version>
         <!-- http://code.google.com/p/openid4java/issues/detail?id=114 -->
         <openid4java.version>0.9.6-114-7</openid4java.version>
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
