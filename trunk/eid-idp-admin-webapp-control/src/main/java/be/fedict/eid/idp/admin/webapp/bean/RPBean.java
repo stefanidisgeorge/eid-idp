@@ -62,7 +62,6 @@ public class RPBean implements RP {
         private static final String RP_LIST_NAME = "idpRPList";
         private static final String SELECTED_RP = "selectedRP";
         private static final String UPLOADED_CERTIFICATE = "uploadedCertificate";
-        private static final String UPLOADED_ATTRIBUTE_SECRET = "uploadedAttributeSecret";
 
         @Logger
         private Log log;
@@ -241,6 +240,7 @@ public class RPBean implements RP {
                 this.selectedRP =
                         this.attributeService.setAttributes(this.selectedRP,
                                 this.selectedAttributes);
+                this.log.debug("selectedRP.attributes: " + this.selectedRP.getAttributes().size());
                 return "success";
         }
 

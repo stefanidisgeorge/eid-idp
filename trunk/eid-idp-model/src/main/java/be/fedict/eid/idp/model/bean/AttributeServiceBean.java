@@ -27,6 +27,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 @Stateless
@@ -103,6 +104,17 @@ public class AttributeServiceBean implements AttributeService {
                                 this.entityManager.remove(rpAttribute);
                         }
                 }
+
+                // HSQLDB issue, filter out doubles... ( TODO: ... )
+                List<RPAttributeEntity> rpAttributes = new LinkedList<RPAttributeEntity>();
+                for (RPAttributeEntity rpAttribute : attachedRp.getAttributes()) {
+                        if (!rpAttributes.contains(rpAttribute)) {
+                                rpAttributes.add(rpAttribute);
+                        }
+                }
+                attachedRp.setAttributes(rpAttributes);
+
+                LOG.debug("attachedRP.attributes: " + attachedRp.getAttributes().size());
 
                 return attachedRp;
         }
