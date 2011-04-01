@@ -126,7 +126,7 @@ public class AuthenticationRequestUtil {
                 AuthnRequest authnRequest = requestBuilder.buildObject();
                 authnRequest.setID("authn-request-" + UUID.randomUUID().toString());
                 authnRequest.setVersion(SAMLVersion.VERSION_20);
-                authnRequest.setIssueInstant(new DateTime(0));
+                authnRequest.setIssueInstant(new DateTime());
                 authnRequest.setDestination(idpDestination);
                 authnRequest.setAssertionConsumerServiceURL(spDestination);
                 authnRequest.setForceAuthn(true);

@@ -19,9 +19,11 @@
 package be.fedict.eid.idp.sp.saml2;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.sp.ConfigServlet;
 import be.fedict.eid.idp.sp.PkiServlet;
 import be.fedict.eid.idp.sp.SPBean;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.artifact.ArtifactAuthenticationResponseService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,6 +32,7 @@ import java.io.Serializable;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -47,6 +50,25 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
 
                 LOG.debug("validate saml response policy=" + authenticationPolicy.getUri()
                         + " cert.chain.size=" + certificateChain.size());
+
+                String idpIdentity = ConfigServlet.getIdpIdentity();
+
+                if (null != idpIdentity) {
+                        LOG.debug("validate IdP Identity with " + idpIdentity);
+
+                        String fingerprint;
+                        try {
+                                fingerprint = DigestUtils.shaHex(certificateChain.get(0).getEncoded());
+                        } catch (CertificateEncodingException e) {
+                                throw new SecurityException(e);
+                        }
+
+                        if (!fingerprint.equals(idpIdentity)) {
+                                throw new SecurityException("IdP Identity " +
+                                        "thumbprint mismatch: got: " +
+                                        fingerprint + " expected: " + idpIdentity);
+                        }
+                }
         }
 
         @Override
@@ -57,7 +79,7 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
         @Override
         public SecretKey getAttributeSecretKey() {
 
-                if (PkiServlet.isEncrypt()) {
+                if (ConfigServlet.isEncrypt()) {
                         return SPBean.aes128SecretKey;
                 } else {
                         return null;
@@ -67,7 +89,7 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
         @Override
         public PrivateKey getAttributePrivateKey() {
 
-                if (PkiServlet.isUseKeK()) {
+                if (ConfigServlet.isUseKeK()) {
                         try {
                                 return PkiServlet.getPrivateKeyEntry().getPrivateKey();
                         } catch (Exception e) {

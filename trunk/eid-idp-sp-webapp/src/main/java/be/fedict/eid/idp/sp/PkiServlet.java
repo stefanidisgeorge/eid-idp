@@ -39,15 +39,12 @@ public class PkiServlet extends HttpServlet {
 
         private static final Log LOG = LogFactory.getLog(PkiServlet.class);
 
-        private static boolean encrypt = false;
-        private static boolean useKeK = false;
-
         @Override
         protected void doGet(HttpServletRequest request,
                              HttpServletResponse response) throws ServletException, IOException {
 
                 LOG.debug("doGet");
-                String pemCertificate = null;
+                String pemCertificate;
                 try {
                         pemCertificate = toPem(getPrivateKeyEntry().getCertificate());
                 } catch (Exception e) {
@@ -74,22 +71,6 @@ public class PkiServlet extends HttpServlet {
                 return (KeyStore.PrivateKeyEntry)
                         keyStore.getEntry("sp",
                                 new KeyStore.PasswordProtection("secret".toCharArray()));
-        }
-
-        public static boolean isEncrypt() {
-                return encrypt;
-        }
-
-        public static void setEncrypt(boolean newEncrypt) {
-                encrypt = newEncrypt;
-        }
-
-        public static boolean isUseKeK() {
-                return useKeK;
-        }
-
-        public static void setUseKeK(boolean newUseKeK) {
-                useKeK = newUseKeK;
         }
 
         private static String toPem(Object object) {

@@ -121,8 +121,7 @@ public class RPServiceBean implements RPService {
                         // attributes
                         for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
                                 attachedRp.getAttributes().
-                                        get(attachedRp.getAttributes().
-                                                indexOf(rpAttribute)).
+                                        get(attachedRp.getAttributes().indexOf(rpAttribute)).
                                         setEncrypted(rpAttribute.isEncrypted());
                         }
 

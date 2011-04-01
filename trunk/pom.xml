@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>FedICT eID Identity Provider Project</name>
     <parent>
@@ -44,7 +47,7 @@
         <module>eid-idp-sp-webapp</module>
         <module>eid-idp-deploy</module>
         <module>eid-idp-attribute-age</module>
-	<module>eid-idp-sec-analysis</module>
+        <module>eid-idp-sec-analysis</module>
     </modules>
     <profiles>
         <profile>
@@ -73,6 +76,8 @@
             </modules>
             <properties>
                 <hibernate.hbm2ddl.auto>validate</hibernate.hbm2ddl.auto>
+                <eid-applet.SkipSecureConnectionCheck>true
+                </eid-applet.SkipSecureConnectionCheck>
             </properties>
         </profile>
         <profile>
@@ -89,6 +94,8 @@
             </modules>
             <properties>
                 <hibernate.hbm2ddl.auto>validate</hibernate.hbm2ddl.auto>
+                <eid-applet.SkipSecureConnectionCheck>true
+                </eid-applet.SkipSecureConnectionCheck>
             </properties>
         </profile>
         <profile>
@@ -105,6 +112,8 @@
             </modules>
             <properties>
                 <hibernate.hbm2ddl.auto>validate</hibernate.hbm2ddl.auto>
+                <eid-applet.SkipSecureConnectionCheck>true
+                </eid-applet.SkipSecureConnectionCheck>
             </properties>
         </profile>
         <profile>
@@ -238,5 +247,7 @@
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
         <hibernate.jdbc.use_streams_for_binary>true
         </hibernate.jdbc.use_streams_for_binary>
+        <eid-applet.SkipSecureConnectionCheck>false
+        </eid-applet.SkipSecureConnectionCheck>
     </properties>
 </project>
