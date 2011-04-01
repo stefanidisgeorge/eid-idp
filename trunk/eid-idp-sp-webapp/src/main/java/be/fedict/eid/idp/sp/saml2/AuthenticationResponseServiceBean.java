@@ -45,7 +45,7 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
 
         @Override
         public boolean requiresResponseSignature() {
-                return null != ConfigServlet.getIdpIdentity();
+                return null != ConfigServlet.getIdpIdentity() && !ConfigServlet.getIdPIdentity().isEmpty();
         }
 
         @Override
