@@ -106,7 +106,7 @@ public class RPBean implements RP {
         public void postConstruct() {
 
                 this.sourceAttributes = null;
-                this.selectedAttributes = null;
+                this.selectedAttributes = new LinkedList<String>();
         }
 
         @Override
@@ -236,7 +236,8 @@ public class RPBean implements RP {
         @Override
         public String saveSelect() {
 
-                this.log.debug("save selected attributes");
+                this.log.debug("save selected attributes: " +
+                        this.selectedAttributes.size());
                 this.selectedRP =
                         this.attributeService.setAttributes(this.selectedRP,
                                 this.selectedAttributes);
@@ -334,12 +335,15 @@ public class RPBean implements RP {
                 List<AttributeEntity> attributes = this.attributeService.
                         listAttributes();
                 this.sourceAttributes = new LinkedList<String>();
+                this.log.debug("attributes.size: " + attributes.size());
+                this.log.debug("sourceAttributes.size: " + sourceAttributes.size());
                 for (AttributeEntity attribute : attributes) {
                         if (null != this.selectedAttributes
                                 && !this.selectedAttributes.contains(attribute.getUri())) {
                                 this.sourceAttributes.add(attribute.getUri());
                         }
                 }
+                this.log.debug("sourceAttributes.size: " + sourceAttributes.size());
                 return this.sourceAttributes;
         }
 
@@ -352,12 +356,14 @@ public class RPBean implements RP {
         @Override
         public List<String> getSelectedAttributes() {
 
+                this.log.debug("get selectedAttributes: " + selectedAttributes.size());
                 return this.selectedAttributes;
         }
 
         @Override
         public void setSelectedAttributes(List<String> selectedAttributes) {
 
+                this.log.debug("set selectedAttributes: " + selectedAttributes.size());
                 this.selectedAttributes = selectedAttributes;
         }
 
@@ -388,9 +394,7 @@ public class RPBean implements RP {
         @Override
         public void paint(OutputStream stream, Object object) throws IOException {
 
-                this.log.debug("paint called");
                 if (null != this.selectedRP && null != this.selectedRP.getLogo()) {
-                        this.log.debug("paint logo");
                         stream.write(this.selectedRP.getLogo());
                         stream.close();
                 }
