@@ -310,6 +310,16 @@
                         </listitem>
                         <listitem>
                             <para>
+                                <code>RequiresResponseSignature</code>
+                                Optional flag indicating whether the SP expects
+                                response to be signed. Can also be specified
+                                using the
+                                <code>AuthenticationResponseService</code>. If
+                                neither specified defaults to false.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
                                 <code>AuthenticationResponseService</code>
                                 JNDI location of an implementation of the
                                 AuthenticationResponseService interface.

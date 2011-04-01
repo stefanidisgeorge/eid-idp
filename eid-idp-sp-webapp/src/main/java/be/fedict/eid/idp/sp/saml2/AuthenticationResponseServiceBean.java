@@ -44,6 +44,11 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
         private String artifactServiceLocation;
 
         @Override
+        public boolean requiresResponseSignature() {
+                return null != ConfigServlet.getIdpIdentity();
+        }
+
+        @Override
         public void validateServiceCertificate(SamlAuthenticationPolicy authenticationPolicy,
                                                List<X509Certificate> certificateChain)
                 throws SecurityException {
@@ -53,7 +58,7 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
 
                 String idpIdentity = ConfigServlet.getIdpIdentity();
 
-                if (null != idpIdentity) {
+                if (null != idpIdentity || !idpIdentity.isEmpty()) {
                         LOG.debug("validate IdP Identity with " + idpIdentity);
 
                         String fingerprint;

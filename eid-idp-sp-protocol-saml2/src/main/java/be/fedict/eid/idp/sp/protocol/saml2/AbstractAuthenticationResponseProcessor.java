@@ -73,18 +73,24 @@ public abstract class AbstractAuthenticationResponseProcessor {
         /**
          * Process the incoming SAML v2.0 response.
          *
-         * @param requestId  AuthnRequest.ID, should match response's InResponseTo
-         * @param audience   expected audience
-         * @param recipient  recipient, should match response's
-         *                   Subject.SubjectConfirmation.Recipient
-         * @param relayState optional expected relay state
-         * @param request    the HTTP servlet request that holds the SAML2 response.
+         * @param requestId                 AuthnRequest.ID, should match response's InResponseTo
+         * @param audience                  expected audience
+         * @param recipient                 recipient, should match response's
+         *                                  Subject.SubjectConfirmation.Recipient
+         * @param relayState                optional expected relay state
+         * @param requiresResponseSignature do we expect a signature on the
+         *                                  response or not, or
+         *                                  <code>null</code> if to be retrieved
+         *                                  from the
+         *                                  {@link AuthenticationResponseService}.
+         * @param request                   the HTTP servlet request that holds the SAML2 response.
          * @return the SAML2 {@link AuthenticationResponse}
          * @throws AuthenticationResponseProcessorException
          *          case something went wrong
          */
         public AuthenticationResponse process(String requestId, String audience,
                                               String recipient, String relayState,
+                                              Boolean requiresResponseSignature,
                                               HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
 
@@ -93,12 +99,17 @@ public abstract class AbstractAuthenticationResponseProcessor {
                 SecretKey secretKey = null;
                 PrivateKey privateKey = null;
                 int maxOffset = 5;
+                boolean expectResponseSigned =
+                        null != requiresResponseSignature ?
+                                requiresResponseSignature : false;
+
                 AuthenticationResponseService service =
                         getAuthenticationResponseService();
                 if (null != service) {
                         secretKey = service.getAttributeSecretKey();
                         privateKey = service.getAttributePrivateKey();
                         maxOffset = service.getMaximumTimeOffset();
+                        expectResponseSigned = service.requiresResponseSignature();
                 }
 
                 // validate InResponseTo
@@ -134,22 +145,30 @@ public abstract class AbstractAuthenticationResponseProcessor {
                         throw new AuthenticationResponseProcessorException(e);
                 }
 
+                // check if SP expects a signature and if there is one
+                if (null == samlResponse.getSignature() && expectResponseSigned) {
+                        throw new AuthenticationResponseProcessorException(
+                                "Expected a signed response but was not so! ");
+                }
+
                 // get signature cert.chain if any and pass along to service
-                if (null != samlResponse.getSignature()) {
+                {
+                        if (null != samlResponse.getSignature()) {
 
-                        try {
-                                List<X509Certificate> certChain =
-                                        KeyInfoHelper.getCertificates(samlResponse
-                                                .getSignature().getKeyInfo());
+                                try {
+                                        List<X509Certificate> certChain =
+                                                KeyInfoHelper.getCertificates(samlResponse
+                                                        .getSignature().getKeyInfo());
 
-                                if (null != service) {
-                                        service.validateServiceCertificate(
-                                                authenticationResponse
-                                                        .getAuthenticationPolicy(),
-                                                certChain);
+                                        if (null != service) {
+                                                service.validateServiceCertificate(
+                                                        authenticationResponse
+                                                                .getAuthenticationPolicy(),
+                                                        certChain);
+                                        }
+                                } catch (CertificateException e) {
+                                        throw new AuthenticationResponseProcessorException(e);
                                 }
-                        } catch (CertificateException e) {
-                                throw new AuthenticationResponseProcessorException(e);
                         }
                 }
 
