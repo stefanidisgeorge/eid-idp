@@ -45,7 +45,7 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
 
         @Override
         public boolean requiresResponseSignature() {
-                return null != ConfigServlet.getIdpIdentity() && !ConfigServlet.getIdPIdentity().isEmpty();
+                return null != ConfigServlet.getIdpIdentity() && !ConfigServlet.getIdpIdentity().trim().isEmpty();
         }
 
         @Override
@@ -58,7 +58,7 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
 
                 String idpIdentity = ConfigServlet.getIdpIdentity();
 
-                if (null != idpIdentity || !idpIdentity.isEmpty()) {
+                if (null != idpIdentity && !idpIdentity.trim().isEmpty()) {
                         LOG.debug("validate IdP Identity with " + idpIdentity);
 
                         String fingerprint;
