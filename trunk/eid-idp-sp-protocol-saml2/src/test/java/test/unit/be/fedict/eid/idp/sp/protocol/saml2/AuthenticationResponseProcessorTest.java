@@ -121,13 +121,15 @@ public class AuthenticationResponseProcessorTest {
                         .andReturn(null);
                 expect(mockAuthenticationResponseService.getAttributePrivateKey())
                         .andReturn(null);
+                expect(mockAuthenticationResponseService.requiresResponseSignature())
+                        .andReturn(false);
 
                 replay(mockAuthenticationResponseService, mockHttpServletRequest);
 
                 // Operate
                 AuthenticationResponse authenticationResponse =
                         responseProcessor.process(requestId, audience, recipient,
-                                relayState, mockHttpServletRequest);
+                                relayState, false, mockHttpServletRequest);
 
                 // Verify
                 verify(mockAuthenticationResponseService, mockHttpServletRequest);
@@ -392,9 +394,26 @@ public class AuthenticationResponseProcessorTest {
                 }.doTest();
         }
 
+        @Test
+        public void testPostSamlResponseExpectSignatureButNoneFound() throws Exception {
+
+                new ProcessingFailTest() {
+
+                        @Override
+                        protected void modifyResponse(Response response) {
+
+                        }
+                }.doTest(true);
+        }
+
         abstract class ProcessingFailTest {
 
                 public void doTest() {
+
+                        doTest(false);
+                }
+
+                public void doTest(boolean expectResponseSigned) {
 
                         // Setup
                         String userId = UUID.randomUUID().toString();
@@ -448,12 +467,15 @@ public class AuthenticationResponseProcessorTest {
                                 .andReturn(null);
                         expect(mockAuthenticationResponseService.getAttributePrivateKey())
                                 .andReturn(null);
+                        expect(mockAuthenticationResponseService.requiresResponseSignature())
+                                .andReturn(expectResponseSigned);
 
                         replay(mockAuthenticationResponseService, mockHttpServletRequest);
 
                         try {
                                 responseProcessor.process(requestId, audience,
-                                        recipient, null, mockHttpServletRequest);
+                                        recipient, null, null,
+                                        mockHttpServletRequest);
                                 fail();
                         } catch (AuthenticationResponseProcessorException e) {
                                 // expected
