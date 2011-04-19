@@ -18,7 +18,9 @@
 
 package test.unit.be.fedict.eid.idp.sp.protocol.ws_federation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -26,7 +28,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +38,7 @@ import org.junit.Test;
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
 import be.fedict.eid.idp.sp.protocol.ws_federation.AuthenticationResponseProcessor;
+import be.fedict.eid.idp.sp.protocol.ws_federation.AuthenticationResponseProcessorException;
 import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
 
 public class AuthenticationResponseProcessorTest {
@@ -99,5 +101,47 @@ public class AuthenticationResponseProcessorTest {
 				"Vilvoorde",
 				responseAttributes
 						.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality"));
+	}
+
+	@Test
+	public void testBrokenSignature() throws Exception {
+		// setup
+
+		String wsFederationResponse = IOUtils
+				.toString(AuthenticationResponseProcessorTest.class
+						.getResourceAsStream("/ws-federation-response-broken-signature.xml"));
+		AuthenticationResponseService mockService = EasyMock
+				.createMock(AuthenticationResponseService.class);
+		AuthenticationResponseProcessor testedInstance = new AuthenticationResponseProcessor(
+				mockService);
+		HttpServletRequest mockRequest = EasyMock
+				.createMock(HttpServletRequest.class);
+
+		EasyMock.expect(mockService.getAttributeSecretKey())
+				.andStubReturn(null);
+		EasyMock.expect(mockService.getAttributePrivateKey()).andStubReturn(
+				null);
+		EasyMock.expect(mockService.getMaximumTimeOffset()).andStubReturn(-1);
+
+		EasyMock.expect(mockRequest.getParameter("wa")).andStubReturn(
+				"wsignin1.0");
+		EasyMock.expect(mockRequest.getParameter("wctx")).andStubReturn(null);
+		EasyMock.expect(mockRequest.getParameter("wresult")).andStubReturn(
+				wsFederationResponse);
+
+		// prepare
+		EasyMock.replay(mockService, mockRequest);
+
+		// operate & verify
+		try {
+			testedInstance.process(
+					"https://www.e-contract.be:443/eid-idp-sp/wsfed-landing",
+					null, mockRequest);
+			fail();
+		} catch (AuthenticationResponseProcessorException ex) {
+			// expected
+			EasyMock.verify(mockService, mockRequest);
+			LOG.debug("expected exception message: " + ex.getMessage());
+		}
 	}
 }
