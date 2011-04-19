@@ -59,7 +59,7 @@ public class IdentityIntegrityServiceBean implements IdentityIntegrityService {
                 String xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
                         String.class);
                 if (null == xkmsUrl || xkmsUrl.trim().isEmpty()) {
-                        LOG.error("no XKMS URL configured!");
+                        LOG.warn("no XKMS URL configured!");
                         return;
                 }
 
