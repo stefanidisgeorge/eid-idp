@@ -864,7 +864,8 @@ public abstract class Saml2Util {
 
                 Audience audience = audienceRestriction.getAudiences().get(0);
                 if (!audience.getAudienceURI().equals(audienceUri)) {
-
+                		LOG.debug("expected audience URI: " + audienceUri);
+                		LOG.debug("audience URI: " + audience.getAudienceURI());
                         throw new AssertionValidationException(
                                 "AudienceURI does not match expected recipient");
                 }
