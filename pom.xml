@@ -250,7 +250,7 @@
     </repositories>
     <properties>
         <eid-applet.version>1.0.3.Beta1</eid-applet.version>
-        <eid-trust-service.version>1.0.0.RC6</eid-trust-service.version>
+        <eid-trust-service.version>1.0.0.RC7</eid-trust-service.version>
         <!-- http://code.google.com/p/openid4java/issues/detail?id=114 -->
         <openid4java.version>0.9.6-114-7</openid4java.version>
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
