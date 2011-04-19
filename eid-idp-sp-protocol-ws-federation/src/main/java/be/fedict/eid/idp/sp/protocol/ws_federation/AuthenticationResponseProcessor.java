@@ -105,6 +105,10 @@ public class AuthenticationResponseProcessor {
                 // get wresult
                 String wresult = request.getParameter("wresult");
 
+                if (null == wresult) {
+                	throw new AuthenticationResponseProcessorException(
+                    "Missing \"wresult\" param.");
+                }
                 RequestSecurityTokenResponseCollection rstCollections = Saml2Util.unmarshall(
                         Saml2Util.parseDocument(wresult).getDocumentElement());
 
