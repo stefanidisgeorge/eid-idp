@@ -33,6 +33,14 @@ import java.util.List;
 public interface AuthenticationResponseService {
 
         /**
+         * Callback to the SAML v2.0 SDK whether the SP expects a response to
+         * be signed or not
+         *
+         * @return true if expect a signed response.
+         */
+        boolean requiresResponseSignature();
+
+        /**
          * Validation of the certificate chain in the SAML v2.0 assertion signature.
          *
          * @param authenticationPolicy SAML v2.0 authentication policy.

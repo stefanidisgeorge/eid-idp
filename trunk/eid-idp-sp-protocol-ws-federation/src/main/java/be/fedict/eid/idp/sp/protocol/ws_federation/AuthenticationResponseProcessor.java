@@ -66,16 +66,22 @@ public class AuthenticationResponseProcessor {
         /**
          * Process the incoming WS-Federation response.
          *
-         * @param recipient recipient, should match SAML v2.0 assertions's
-         *                  AudienceRestriction
-         * @param context   optional expected context
-         * @param request   the HTTP servlet request that holds the SAML2 response.
+         * @param recipient                 recipient, should match SAML v2.0 assertions's
+         *                                  AudienceRestriction
+         * @param context                   optional expected context
+         * @param requiresResponseSignature do we expect a signature on the
+         *                                  response or not, or
+         *                                  <code>null</code> if to be retrieved
+         *                                  from the
+         *                                  {@link AuthenticationResponseService}.
+         * @param request                   the HTTP servlet request that holds the SAML2 response.
          * @return the {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse}
          * @throws AuthenticationResponseProcessorException
          *          case something went wrong
          */
         public AuthenticationResponse process(String recipient,
                                               String context,
+                                              Boolean requiresResponseSignature,
                                               HttpServletRequest request)
                 throws AuthenticationResponseProcessorException {
 
@@ -83,20 +89,25 @@ public class AuthenticationResponseProcessor {
                 SecretKey secretKey = null;
                 PrivateKey privateKey = null;
                 int maxOffset = 5;
+                boolean expectAssertionSigned =
+                        null != requiresResponseSignature ?
+                                requiresResponseSignature : false;
+
                 if (null != this.service) {
                         secretKey = this.service.getAttributeSecretKey();
                         privateKey = this.service.getAttributePrivateKey();
                         maxOffset = this.service.getMaximumTimeOffset();
+                        expectAssertionSigned = this.service.requiresResponseSignature();
                 }
 
-            // force UTF8 encoding!
-            try {
-                request.setCharacterEncoding("UTF8");
-            } catch (UnsupportedEncodingException e) {
-                throw new  AuthenticationResponseProcessorException(e);
-            }
+                // force UTF8 encoding!
+                try {
+                        request.setCharacterEncoding("UTF8");
+                } catch (UnsupportedEncodingException e) {
+                        throw new AuthenticationResponseProcessorException(e);
+                }
 
-            // check wa
+                // check wa
                 String wa = request.getParameter("wa");
                 if (null == wa) {
                         throw new AuthenticationResponseProcessorException(
@@ -112,11 +123,11 @@ public class AuthenticationResponseProcessor {
 
                 // get wresult
                 String wresult = request.getParameter("wresult");
-            LOG.debug("wresult=\""+wresult + "\"" );
+                LOG.debug("wresult=\"" + wresult + "\"");
 
                 if (null == wresult) {
-                	throw new AuthenticationResponseProcessorException(
-                    "Missing \"wresult\" param.");
+                        throw new AuthenticationResponseProcessorException(
+                                "Missing \"wresult\" param.");
                 }
                 RequestSecurityTokenResponseCollection rstCollections = Saml2Util.unmarshall(
                         Saml2Util.parseDocument(wresult).getDocumentElement());
@@ -152,6 +163,12 @@ public class AuthenticationResponseProcessor {
                                 null, secretKey, privateKey);
                 } catch (AssertionValidationException e) {
                         throw new AuthenticationResponseProcessorException(e);
+                }
+
+                // check if SP expects a signature and if there is one
+                if (null == assertion.getSignature() && expectAssertionSigned) {
+                        throw new AuthenticationResponseProcessorException(
+                                "Expected a signed assertion but was not so! ");
                 }
 
                 // validate assertion's signature if any
