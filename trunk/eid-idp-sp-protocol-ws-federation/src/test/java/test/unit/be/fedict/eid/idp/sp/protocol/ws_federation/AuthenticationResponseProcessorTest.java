@@ -66,6 +66,7 @@ public class AuthenticationResponseProcessorTest {
 				null);
 		EasyMock.expect(mockService.getMaximumTimeOffset()).andStubReturn(-1);
 
+        mockRequest.setCharacterEncoding("UTF8");
 		EasyMock.expect(mockRequest.getParameter("wa")).andStubReturn(
 				"wsignin1.0");
 		EasyMock.expect(mockRequest.getParameter("wctx")).andStubReturn(null);
@@ -123,6 +124,7 @@ public class AuthenticationResponseProcessorTest {
 				null);
 		EasyMock.expect(mockService.getMaximumTimeOffset()).andStubReturn(-1);
 
+        mockRequest.setCharacterEncoding("UTF8");
 		EasyMock.expect(mockRequest.getParameter("wa")).andStubReturn(
 				"wsignin1.0");
 		EasyMock.expect(mockRequest.getParameter("wctx")).andStubReturn(null);
