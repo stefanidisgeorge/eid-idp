@@ -40,6 +40,7 @@ import javax.servlet.http.HttpSession;
 import javax.xml.transform.TransformerException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.PublicKey;
 import java.util.Collections;
 import java.util.Map;
@@ -99,6 +100,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 HttpServletRequest request, HttpServletResponse response)
                 throws Exception {
                 LOG.debug("handleIncomingRequest");
+
                 String wa = request.getParameter("wa");
                 if (null == wa) {
                         throw new ServletException("wa parameter missing");
@@ -227,7 +229,9 @@ public abstract class AbstractWSFederationProtocolService implements
 
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 Saml2Util.writeDocument(element.getOwnerDocument(), outputStream);
-                return new String(outputStream.toByteArray());
+                String wresult  =  new String(outputStream.toByteArray(), Charset.forName("UTF-8"));
+            LOG.debug("wresult=\""+wresult + "\"");
+                return wresult ;
         }
 
 

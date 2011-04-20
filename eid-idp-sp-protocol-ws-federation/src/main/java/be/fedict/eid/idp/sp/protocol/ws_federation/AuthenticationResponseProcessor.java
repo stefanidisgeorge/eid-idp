@@ -33,6 +33,7 @@ import org.opensaml.xml.validation.ValidationException;
 
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -88,7 +89,14 @@ public class AuthenticationResponseProcessor {
                         maxOffset = this.service.getMaximumTimeOffset();
                 }
 
-                // check wa
+            // force UTF8 encoding!
+            try {
+                request.setCharacterEncoding("UTF8");
+            } catch (UnsupportedEncodingException e) {
+                throw new  AuthenticationResponseProcessorException(e);
+            }
+
+            // check wa
                 String wa = request.getParameter("wa");
                 if (null == wa) {
                         throw new AuthenticationResponseProcessorException(
@@ -104,6 +112,7 @@ public class AuthenticationResponseProcessor {
 
                 // get wresult
                 String wresult = request.getParameter("wresult");
+            LOG.debug("wresult=\""+wresult + "\"" );
 
                 if (null == wresult) {
                 	throw new AuthenticationResponseProcessorException(
