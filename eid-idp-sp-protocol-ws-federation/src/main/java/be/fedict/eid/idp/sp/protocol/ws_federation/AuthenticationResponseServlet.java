@@ -69,6 +69,9 @@ public class AuthenticationResponseServlet extends HttpServlet {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationResponseServlet.class);
 
+        public static final String REQUIRES_RESPONSE_SIGNATURE_INIT_PARAM =
+                "RequiresResponseSignature";
+
         public static final String RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM =
                 "ResponseSessionAttribute";
         public static final String REDIRECT_PAGE_INIT_PARAM =
@@ -80,6 +83,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
         public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM =
                 "ErrorMessageSessionAttribute";
 
+        private Boolean requiresResponseSignature = null;
         private String responseSessionAttribute;
         private String redirectPage;
         private String errorPage;
@@ -92,6 +96,13 @@ public class AuthenticationResponseServlet extends HttpServlet {
          */
         @Override
         public void init(ServletConfig config) throws ServletException {
+
+                String requiresResponseSignatureString = config.getInitParameter(
+                        REQUIRES_RESPONSE_SIGNATURE_INIT_PARAM);
+                if (null != requiresResponseSignatureString) {
+                        requiresResponseSignature =
+                                Boolean.valueOf(requiresResponseSignatureString);
+                }
 
                 this.responseSessionAttribute = getRequiredInitParameter(
                         RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM, config);
@@ -155,7 +166,8 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 AuthenticationResponse authenticationResponse;
                 try {
                         authenticationResponse = processor.process(
-                                recipient, context, request);
+                                recipient, context, requiresResponseSignature,
+                                request);
                 } catch (AuthenticationResponseProcessorException e) {
                         showErrorPage(e.getMessage(), e, request, response);
                         return;
