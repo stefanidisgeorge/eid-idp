@@ -38,6 +38,8 @@ public interface SP {
          */
         String getRp();
 
+        boolean isRpLogo();
+
         void paint(OutputStream stream, Object object) throws IOException;
 
         long getTimeStamp();

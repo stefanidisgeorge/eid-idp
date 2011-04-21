@@ -91,6 +91,18 @@ public class SPBean implements SP {
         }
 
         @Override
+        public boolean isRpLogo() {
+
+                RPEntity rp = (RPEntity)
+                        this.sessionContext.get(Constants.RP_SESSION_ATTRIBUTE);
+                if (null != rp) {
+                        return null != rp.getLogo();
+                }
+
+                return false;
+        }
+
+        @Override
         public void paint(OutputStream stream, Object object) throws IOException {
 
                 RPEntity rp = (RPEntity)
