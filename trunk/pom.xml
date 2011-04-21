@@ -9,11 +9,11 @@
           -->
         <groupId>be.fedict</groupId>
         <artifactId>eid-applet</artifactId>
-        <version>1.0.3.Beta2</version>
+        <version>1.0.3.Beta3</version>
     </parent>
     <groupId>be.fedict</groupId>
     <artifactId>eid-idp</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.RC2</version>
     <packaging>pom</packaging>
     <inceptionYear>2010</inceptionYear>
     <scm>
@@ -259,7 +259,7 @@
         </repository>
     </repositories>
     <properties>
-        <eid-applet.version>1.0.3.Beta2</eid-applet.version>
+        <eid-applet.version>1.0.3.Beta3</eid-applet.version>
         <eid-trust-service.version>1.0.0.RC7</eid-trust-service.version>
         <!-- http://code.google.com/p/openid4java/issues/detail?id=114 -->
         <openid4java.version>0.9.6-114-7</openid4java.version>
