@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -114,6 +115,16 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 DiscoveryException, AssociationException, IOException {
                 LOG.debug("id_res");
                 LOG.debug("request URL: " + request.getRequestURL());
+
+                // TODO: debug, remove if not needed... force UTF8 encoding!
+                try {
+                        request.setCharacterEncoding("UTF8");
+                        response.setCharacterEncoding("UTF8");
+                } catch (UnsupportedEncodingException e) {
+                        throw new MessageException(e);
+                }
+
+
                 ParameterList parameterList = new ParameterList(request
                         .getParameterMap());
                 DiscoveryInformation discovered = (DiscoveryInformation) request
