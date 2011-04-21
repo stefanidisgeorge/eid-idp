@@ -1266,6 +1266,19 @@ openid.return_to:https://localhost:48745/consumer
         </section>
     </section>
     <section>
+        <title>Character Encodings</title>
+        <para>
+            The FedICT eID IdP will post/redirect all data UTF8 encoded. Beware
+            that for example when using OpenID, the request parameter parsing,
+            depending on your environment, must be processed using UTF8 encoding.
+            JBoss 6's tomcat for example will default to ISO-8859-1 encoding
+            by default, which will break the OpenID signature as non-ascii
+            characters will be badly translated. On your tomcat connectors you
+            need to explicitly specify <code>URIEncoding="UTF-8"</code> to
+            resolve this.
+        </para>
+    </section>
+    <section>
         <title>SAML v2.0 mod_mellon</title>
         <para>
             Following is a brief explanation on how to setup a Service Provider

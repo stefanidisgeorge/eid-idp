@@ -116,15 +116,6 @@ public class AuthenticationResponseServlet extends HttpServlet {
                 LOG.debug("id_res");
                 LOG.debug("request URL: " + request.getRequestURL());
 
-                // TODO: debug, remove if not needed... force UTF8 encoding!
-                try {
-                        request.setCharacterEncoding("UTF8");
-                        response.setCharacterEncoding("UTF8");
-                } catch (UnsupportedEncodingException e) {
-                        throw new MessageException(e);
-                }
-
-
                 ParameterList parameterList = new ParameterList(request
                         .getParameterMap());
                 DiscoveryInformation discovered = (DiscoveryInformation) request
