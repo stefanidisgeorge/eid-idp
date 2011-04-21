@@ -3,13 +3,13 @@
     <parent>
         <groupId>be.fedict</groupId>
         <artifactId>eid-idp</artifactId>
-        <version>1.0.0.RC2</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <name>FedICT eID IdP SAML2 Web Service</name>
     <description>SAML2 Web Service for eID Identity Provider</description>
     <groupId>be.fedict.eid-idp</groupId>
     <artifactId>eid-idp-protocol-saml2-ws</artifactId>
-    <version>1.0.0.RC2</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <build>
         <plugins>
