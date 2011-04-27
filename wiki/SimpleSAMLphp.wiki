@@ -1,4 +1,4 @@
-#summary Interate eid-idp in a php application with SimpleSAMLphp.
+#summary Integrate eid-idp in a php application with SimpleSAMLphp.
 
 = Introduction =
 
@@ -39,7 +39,7 @@ $metadata['e-contract'] = array (
 
 *SingleSignOnService* and *certFingerprint* can be found on the eid-idp home page (e.g. https://www.e-contract.be/eid-idp/)
 
-Edit */var/simplesamlphp/config/authsources.php*:
+Edit */var/simplesamlphp/config/authsources.php*: edit the entity ID of the eID IDP you just configured in saml20-idp-remote.php as default IDP.
 
 {{{
 <?php
@@ -53,11 +53,11 @@ $config = array(
 
                 // The entity ID of the IdP this should SP should contact.
                 // Can be NULL/unset, in which case the user will be shown a list of available IdPs.
-                'idp' => 'e-contract 2048 Go Daddy',
+                'idp' => 'e-contract',
 
         ),
 
 );
 }}}
 
-We configure the eID IDP entity ID as default IDP. 
+= 
