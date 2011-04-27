@@ -22,6 +22,23 @@ In the Apache httpd configuration, make sure an Alias is available to the www di
 
 = SimpleSAMLphp configuration =
 
+First, edit */var/simplesamlphp/metatdata/saml20-idp-remote.php*:
+
+{{{
+<?php
+$metadata['e-contract'] = array (
+  'entityid' => 'e-contract',
+  'metadata-set' => 'saml20-idp-remote',
+  'SingleSignOnService' => 'https://www.e-contract.be/eid-idp/protocol/saml2/post/auth-ident',
+  'certFingerprint' => 'd838f129659ef5d2f3ea974221e0d8ae1bb5206b',
+  'OrganizationName' => 'e-Contract eID IDP',
+  'OrganizationURL' => 'http://www.e-contract.be'
+);
+?>
+}}}
+
+*SingleSignOnService* and *certFingerprint* can be found on the eid-idp home page (e.g. https://www.e-contract.be/eid-idp/)
+
 Edit */var/simplesamlphp/config/authsources.php*:
 
 {{{
@@ -42,3 +59,5 @@ $config = array(
 
 );
 }}}
+
+We configure the eID IDP entity ID as default IDP. 
