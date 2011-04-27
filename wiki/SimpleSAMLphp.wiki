@@ -37,9 +37,9 @@ $metadata['e-contract'] = array (
 ?>
 }}}
 
-*SingleSignOnService* and *certFingerprint* can be found on the eid-idp home page (e.g. https://www.e-contract.be/eid-idp/)
+*!SingleSignOnService* and *certFingerprint* can be found on the eid-idp home page (e.g. https://www.e-contract.be/eid-idp/)
 
-Edit */var/simplesamlphp/config/authsources.php*: edit the entity ID of the eID IDP you just configured in saml20-idp-remote.php as default IDP.
+Edit */var/simplesamlphp/config/authsources.php*: set the entity ID of the eID IDP you just configured in saml20-idp-remote.php as default IDP.
 
 {{{
 <?php
@@ -60,4 +60,68 @@ $config = array(
 );
 }}}
 
-= 
+= Sample Service Provider script =
+
+Put these files somewhere in the same folder in your httpd document tree
+
+== index.php ==
+
+{{{
+
+<?php
+# 
+# Sample Service Provider for SimpleSAMLphp with eID IDP -http://http://code.google.com/p/eid-idp/
+#
+# include _autoload.php
+require_once('/var/simplesamlphp/lib/_autoload.php');
+
+# require authentication
+$as = new SimpleSAML_Auth_Simple('default-sp');
+$as->requireAuth();
+?>
+<html>
+<head>
+<title>eID IDP Test SP</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<?php
+# get the attributes we received from the idp
+$attributes = $as->getAttributes();
+
+# print the name of the user
+print ("Hello, " . $attributes["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"][0] . "<br />");
+ 
+# print all attributes
+print ("<table>");
+foreach ($attributes as $key => $value) {
+  if ( $key == "be:fedict:eid:idp:photo")
+    # photo
+    print ("<tr><td><strong>". $key . "</td><td><img src='image.php?imagedata=" . urlencode($value[0]) . "' /></td></tr>");
+  else 
+    # other atributes
+    print ("<tr><td><strong>" . $key . "</strong></td><td>" . $value[0] . "</td></tr>");
+}
+print ("</table>");
+?>
+</body>
+</html>
+}}}
+
+==image.php==
+
+{{{
+
+<?php
+# 
+# image.php: simple jpeg generator with image payload in request variable
+#   request variables: 
+#         imagedata : base64 encoded jpeg payload
+#
+# set jpeg mime type
+header('Content-Type: image/jpeg');
+
+# echo decoded image payload
+echo base64_decode($_REQUEST["imagedata"]);
+?>
+}}}
