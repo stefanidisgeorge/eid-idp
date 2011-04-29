@@ -22,7 +22,7 @@ In the Apache httpd configuration, make sure an Alias is available to the www di
 
 = SimpleSAMLphp configuration =
 
-First, edit */var/simplesamlphp/metatdata/saml20-idp-remote.php*:
+First, edit */var/simplesamlphp/metadata/saml20-idp-remote.php*:
 
 {{{
 <?php
@@ -67,39 +67,29 @@ Put these files somewhere in the same folder in your httpd document tree
 == index.php ==
 
 {{{
-
 <?php
-# 
-# Sample Service Provider for SimpleSAMLphp with eID IDP -http://http://code.google.com/p/eid-idp/
-#
-# include _autoload.php
 require_once('/var/simplesamlphp/lib/_autoload.php');
-
-# require authentication
 $as = new SimpleSAML_Auth_Simple('default-sp');
 $as->requireAuth();
 ?>
 <html>
 <head>
 <title>eID IDP Test SP</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
 </head>
 <body>
 <?php
-# get the attributes we received from the idp
+session_start();
 $attributes = $as->getAttributes();
-
-# print the name of the user
 print ("Hello, " . $attributes["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"][0] . "<br />");
- 
-# print all attributes
+
 print ("<table>");
 foreach ($attributes as $key => $value) {
-  if ( $key == "be:fedict:eid:idp:photo")
-    # photo
-    print ("<tr><td><strong>". $key . "</td><td><img src='image.php?imagedata=" . urlencode($value[0]) . "' /></td></tr>");
-  else 
-    # other atributes
+  if ( $key == "be:fedict:eid:idp:photo") {
+    $_SESSION["imagedata"] = $value[0];
+    print ("<tr><td><strong>". $key . "</td><td><img src='image.php' /></td></tr>");
+  }
+  else
     print ("<tr><td><strong>" . $key . "</strong></td><td>" . $value[0] . "</td></tr>");
 }
 print ("</table>");
@@ -111,17 +101,17 @@ print ("</table>");
 ==image.php==
 
 {{{
-
 <?php
 # 
-# image.php: simple jpeg generator with image payload in request variable
-#   request variables: 
+# image.php: simple jpeg generator with image payload in session variable
+#   session variables:
 #         imagedata : base64 encoded jpeg payload
 #
 # set jpeg mime type
 header('Content-Type: image/jpeg');
 
+session_start();
 # echo decoded image payload
-echo base64_decode($_REQUEST["imagedata"]);
+echo base64_decode($_SESSION["imagedata"]);
 ?>
 }}}
