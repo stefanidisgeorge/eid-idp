@@ -50,6 +50,7 @@
 		<dependency>
 			<groupId>org.openid4java</groupId>
 			<artifactId>openid4java-consumer</artifactId>
+            <type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
