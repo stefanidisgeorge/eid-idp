@@ -68,9 +68,15 @@ public class AuthenticationResponseServlet extends HttpServlet {
         private static final Log LOG = LogFactory
                 .getLog(AuthenticationResponseServlet.class);
 
+        public static final String ERROR_PAGE_INIT_PARAM = "ErrorPage";
+        public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM =
+                "ErrorMessageSessionAttribute";
+
         private String responseSessionAttribute;
 
         private String redirectPage;
+        private String errorPage;
+        private String errorMessageSessionAttribute;
 
         /**
          * {@inheritDoc}
@@ -79,7 +85,12 @@ public class AuthenticationResponseServlet extends HttpServlet {
         public void init(ServletConfig config) throws ServletException {
                 this.responseSessionAttribute = getRequiredInitParameter(
                         "ResponseSessionAttribute", config);
+
                 this.redirectPage = getRequiredInitParameter("RedirectPage", config);
+                this.errorPage = config.getInitParameter(ERROR_PAGE_INIT_PARAM);
+                this.errorMessageSessionAttribute = config.getInitParameter(
+                        ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM);
+
         }
 
         private String getRequiredInitParameter(String parameterName,
@@ -104,7 +115,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
                         try {
                                 doIdRes(request, response);
                         } catch (Exception e) {
-                                throw new ServletException("OpenID error: " + e.getMessage(), e);
+                                showErrorPage(e.getMessage(), e, request, response);
                         }
                 }
         }
@@ -112,7 +123,7 @@ public class AuthenticationResponseServlet extends HttpServlet {
         @SuppressWarnings("unchecked")
         private void doIdRes(HttpServletRequest request,
                              HttpServletResponse response) throws MessageException,
-                DiscoveryException, AssociationException, IOException {
+                DiscoveryException, AssociationException, IOException, ServletException {
                 LOG.debug("id_res");
                 LOG.debug("request URL: " + request.getRequestURL());
 
@@ -197,7 +208,28 @@ public class AuthenticationResponseServlet extends HttpServlet {
 
                         response.sendRedirect(request.getContextPath() + this.redirectPage);
                 } else {
-                        LOG.warn("no verified identifier");
+                        showErrorPage("No verified identifier", null, request, response);
                 }
         }
+
+        private void showErrorPage(String errorMessage, Throwable cause,
+                                   HttpServletRequest request, HttpServletResponse response)
+                throws IOException, ServletException {
+
+                if (null == cause) {
+                        LOG.error("Error: " + errorMessage);
+                } else {
+                        LOG.error("Error: " + errorMessage, cause);
+                }
+                if (null != this.errorMessageSessionAttribute) {
+                        request.getSession().setAttribute(
+                                this.errorMessageSessionAttribute, errorMessage);
+                }
+                if (null != this.errorPage) {
+                        response.sendRedirect(request.getContextPath() + this.errorPage);
+                } else {
+                        throw new ServletException(errorMessage, cause);
+                }
+        }
+
 }
