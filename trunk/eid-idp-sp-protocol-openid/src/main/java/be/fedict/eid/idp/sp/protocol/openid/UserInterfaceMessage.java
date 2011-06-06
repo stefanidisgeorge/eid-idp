@@ -40,7 +40,7 @@ public class UserInterfaceMessage implements MessageExtension,
         public static final String OPENID_NS_UI =
                 "http://specs.openid.net/extensions/ui/1.0";
 
-        public static final String LANGUAGE_PREFIX = "openid.ui.lang";
+        public static final String LANGUAGE_PREFIX = "lang";
 
         private ParameterList parameters;
 
