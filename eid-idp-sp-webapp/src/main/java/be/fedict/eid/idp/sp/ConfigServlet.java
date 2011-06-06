@@ -127,6 +127,10 @@ public class ConfigServlet extends HttpServlet {
                 // Submit
                 addSubmit(out);
 
+                // Home link
+                out.println("<p />");
+                out.println("<a href=\"./\">Home</a>");
+
                 out.println("</body>");
                 out.close();
         }
