@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.sp.openid;
 
+import be.fedict.eid.idp.sp.ConfigServlet;
 import be.fedict.eid.idp.sp.StartupServletContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,9 +36,9 @@ public class OpenIDBean {
                 LOG.debug("set IdP Entry Point " + idPEntryPoint);
 
                 StartupServletContextListener.getOpenIDRequestBean().
-                        setIdPEntryPoint("https://" + this.request.getServerName() +
-                                ':' + this.request.getServerPort() +
-                                "/eid-idp/endpoints/" + idPEntryPoint);
+                        setIdPEntryPoint(ConfigServlet.getIdpBaseLocation(request)
+                                + "endpoints/" + idPEntryPoint);
+
         }
 
         public void setSpResponseEndpoint(String spResponseEndpoint) {

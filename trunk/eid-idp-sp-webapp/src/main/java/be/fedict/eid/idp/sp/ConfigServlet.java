@@ -36,15 +36,31 @@ public class ConfigServlet extends HttpServlet {
 
         private static final String PATH = "configuration";
         private static final String IDENTITY = "identity";
+        private static final String IDP_BASE_LOCATION = "idpBaseLocation";
         private static final String ENCRYPT = "encrypt";
         private static final String USE_KEK = "useKeK";
 
         private static String idpIdentity = null;
+        private static String idpBaseLocation = null;
         private static boolean encrypt = false;
         private static boolean useKeK = false;
 
         public static String getIdpIdentity() {
                 return idpIdentity;
+        }
+
+        public static String getIdpBaseLocation(HttpServletRequest request) {
+
+                String baseLocation = idpBaseLocation;
+                if (null == baseLocation || baseLocation.trim().isEmpty()) {
+                        baseLocation = "https://" + request.getServerName()
+                                + ":" + request.getServerPort() + "/eid-idp/";
+                }
+                if (!baseLocation.endsWith("/")) {
+                        baseLocation += '/';
+                }
+                idpBaseLocation = baseLocation;
+                return baseLocation;
         }
 
         public static boolean isEncrypt() {
@@ -71,6 +87,10 @@ public class ConfigServlet extends HttpServlet {
                 LOG.debug("save config");
 
                 idpIdentity = request.getParameter(IDENTITY);
+                idpBaseLocation = request.getParameter(IDP_BASE_LOCATION);
+                if (idpBaseLocation.trim().isEmpty()) {
+                        idpBaseLocation = null;
+                }
                 encrypt = null != request.getParameter(ENCRYPT);
                 useKeK = null != request.getParameter(USE_KEK);
         }
@@ -95,6 +115,10 @@ public class ConfigServlet extends HttpServlet {
 
                 // IdP Identity Thumbprint
                 addTextInput(out, "IdP Identity Thumbprint", IDENTITY, idpIdentity);
+
+                // IdP Base Location
+                addTextInput(out, "IdP Base Location ( e.g. https://www.e-contract.be/eid-idp/ )",
+                        IDP_BASE_LOCATION, getIdpBaseLocation(request));
 
                 // Encryption Configuration
                 addCheckbox(out, "Encrypt", ENCRYPT, encrypt);

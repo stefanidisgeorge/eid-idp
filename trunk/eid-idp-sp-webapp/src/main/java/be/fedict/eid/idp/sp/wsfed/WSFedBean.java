@@ -18,6 +18,7 @@
 
 package be.fedict.eid.idp.sp.wsfed;
 
+import be.fedict.eid.idp.sp.ConfigServlet;
 import be.fedict.eid.idp.sp.StartupServletContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,9 +36,8 @@ public class WSFedBean {
                 LOG.debug("set IdP Entry Point " + idPEntryPoint);
 
                 StartupServletContextListener.getWSFedRequestBean().
-                        setIdPEntryPoint("https://" + this.request.getServerName() +
-                                ':' + this.request.getServerPort() +
-                                "/eid-idp/protocol/" + idPEntryPoint);
+                        setIdPEntryPoint(ConfigServlet.getIdpBaseLocation(request)
+                                + "protocol/" + idPEntryPoint);
         }
 
         public void setSpResponseEndpoint(String spResponseEndpoint) {

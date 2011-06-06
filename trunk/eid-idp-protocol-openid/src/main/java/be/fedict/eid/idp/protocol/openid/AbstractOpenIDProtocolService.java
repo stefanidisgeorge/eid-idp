@@ -82,8 +82,11 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                         .setSharedAssociations(new InMemoryServerAssociationStore());
                 serverManager
                         .setPrivateAssociations(new InMemoryServerAssociationStore());
-                String location = "https://" + request.getServerName() + ":"
-                        + request.getServerPort() + "/eid-idp";
+                String location = "https://" + request.getServerName();
+                if (request.getServerPort() != 443) {
+                        location += ":" + request.getServerPort();
+                }
+                location += "/eid-idp";
                 String opEndpointUrl = location + "/protocol/" + getPath();
                 LOG.debug("OP endpoint URL: " + opEndpointUrl);
                 serverManager.setOPEndpointUrl(opEndpointUrl);
@@ -235,10 +238,11 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 AuthRequest authRequest = AuthRequest.createAuthRequest(parameterList,
                         realmVerifier);
 
-                String location = "https://" + request.getServerName() + ":"
-                        + request.getServerPort()
-                        + "/eid-idp/endpoints/" + getPath();
-
+                String location = "https://" + request.getServerName();
+                if (request.getServerPort() != 443) {
+                        location += ":" + request.getServerPort();
+                }
+                location += "/eid-idp/endpoints/" + getPath();
 
                 String userIdentifier = location + "?" + userId;
                 LOG.debug("user identifier: " + userIdentifier);

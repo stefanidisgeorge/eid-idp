@@ -36,55 +36,60 @@ import java.io.PrintWriter;
  */
 public abstract class AbstractOpenIDIdentityHttpServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-    private static final Log LOG = LogFactory
-            .getLog(AbstractOpenIDIdentityHttpServlet.class);
+        private static final Log LOG = LogFactory
+                .getLog(AbstractOpenIDIdentityHttpServlet.class);
 
-    @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException, IOException {
-        LOG.debug("doGet");
-        String location = "https://" + request.getServerName() + ":"
-                + request.getServerPort() + "/eid-idp";
-        LOG.debug("location: " + location);
-        PrintWriter printWriter = response.getWriter();
-        if (request.getRequestURI().endsWith("/xrds")) {
-            LOG.debug("returning the YADIS XRDS document");
-            response.setContentType("application/xrds+xml");
-            printWriter.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            printWriter
-                    .println("<xrds:XRDS xmlns:xrds=\"xri://$xrds\" xmlns=\"xri://$xrd*($v*2.0)\">");
-            printWriter.println("<XRD>");
+        @Override
+        protected void doGet(HttpServletRequest request,
+                             HttpServletResponse response) throws ServletException, IOException {
+                LOG.debug("doGet");
+                String location = "https://" + request.getServerName();
 
-            printWriter.println("<Service>");
-            printWriter
-                    .println("<Type>http://specs.openid.net/auth/2.0/server</Type>");
-            printWriter.println("<URI>" + location + "/protocol/" + getPath() + "</URI>");
-            printWriter.println("</Service>");
+                if (request.getServerPort() != 443) {
+                        location += ":" + request.getServerPort();
+                }
+                location += "/eid-idp";
+                LOG.debug("location: " + location);
 
-            printWriter.println("<Service>");
-            printWriter
-                    .println("<Type>http://specs.openid.net/auth/2.0/signon</Type>");
-            printWriter.println("<URI>" + location + "/protocol/" + getPath() + "</URI>");
-            printWriter.println("</Service>");
+                PrintWriter printWriter = response.getWriter();
+                if (request.getRequestURI().endsWith("/xrds")) {
+                        LOG.debug("returning the YADIS XRDS document");
+                        response.setContentType("application/xrds+xml");
+                        printWriter.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                        printWriter
+                                .println("<xrds:XRDS xmlns:xrds=\"xri://$xrds\" xmlns=\"xri://$xrd*($v*2.0)\">");
+                        printWriter.println("<XRD>");
 
-            printWriter.println("</XRD>");
-            printWriter.println("</xrds:XRDS>");
-            return;
+                        printWriter.println("<Service>");
+                        printWriter
+                                .println("<Type>http://specs.openid.net/auth/2.0/server</Type>");
+                        printWriter.println("<URI>" + location + "/protocol/" + getPath() + "</URI>");
+                        printWriter.println("</Service>");
+
+                        printWriter.println("<Service>");
+                        printWriter
+                                .println("<Type>http://specs.openid.net/auth/2.0/signon</Type>");
+                        printWriter.println("<URI>" + location + "/protocol/" + getPath() + "</URI>");
+                        printWriter.println("</Service>");
+
+                        printWriter.println("</XRD>");
+                        printWriter.println("</xrds:XRDS>");
+                        return;
+                }
+                LOG.debug("returning the HTML identity document");
+                String xrdsLocation = location + "/endpoints/" + getPath() + "/xrds";
+                response.setContentType("text/html");
+                response.addHeader("X-XRDS-Location", xrdsLocation);
+                printWriter.println("<html>");
+                printWriter.println("<head>");
+                printWriter.println("<meta http-equiv=\"X-XRDS-Location\" content=\""
+                        + xrdsLocation + "\"/>");
+                printWriter.println("</head>");
+                printWriter.println("<body><p>OpenID Identity URL</p></body>");
+                printWriter.println("</html>");
         }
-        LOG.debug("returning the HTML identity document");
-        String xrdsLocation = location + "/endpoints/" + getPath() + "/xrds";
-        response.setContentType("text/html");
-        response.addHeader("X-XRDS-Location", xrdsLocation);
-        printWriter.println("<html>");
-        printWriter.println("<head>");
-        printWriter.println("<meta http-equiv=\"X-XRDS-Location\" content=\""
-                + xrdsLocation + "\"/>");
-        printWriter.println("</head>");
-        printWriter.println("<body><p>OpenID Identity URL</p></body>");
-        printWriter.println("</html>");
-    }
 
-    protected abstract String getPath();
+        protected abstract String getPath();
 }
