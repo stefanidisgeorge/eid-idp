@@ -11,6 +11,7 @@
 
     <!-- security configuration -->
     <security:identity authenticate-method="#{idpAuthenticator.authenticate}"/>
+
     <event type="org.jboss.seam.security.notLoggedIn">
         <action execute="#{redirect.captureCurrentView}"/>
     </event>
