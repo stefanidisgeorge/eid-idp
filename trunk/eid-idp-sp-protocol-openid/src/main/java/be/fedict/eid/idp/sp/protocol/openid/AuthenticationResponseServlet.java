@@ -26,10 +26,7 @@ import org.openid4java.consumer.VerificationResult;
 import org.openid4java.discovery.DiscoveryException;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.discovery.Identifier;
-import org.openid4java.message.Message;
-import org.openid4java.message.MessageException;
-import org.openid4java.message.MessageExtension;
-import org.openid4java.message.ParameterList;
+import org.openid4java.message.*;
 import org.openid4java.message.ax.AxMessage;
 import org.openid4java.message.ax.FetchResponse;
 import org.openid4java.message.pape.PapeResponse;
@@ -162,6 +159,27 @@ public class AuthenticationResponseServlet extends HttpServlet {
                         Map<String, Object> attributeMap = new HashMap<String, Object>();
                         LOG.debug("userId: " + userId);
                         Message authResponse = verificationResult.getAuthResponse();
+
+                        // verify return_to nonce
+                        AuthSuccess authResp = AuthSuccess.createAuthSuccess(parameterList);
+
+                        String returnTo = authResp.getReturnTo();
+                        String requestReturnTo = (String) request.getSession().getAttribute(
+                                AuthenticationRequestServlet.RETURN_TO_SESSION_ATTRIBUTE);
+                        if (null == returnTo || null == requestReturnTo) {
+                                showErrorPage("Insufficient args for validation of " +
+                                        " \"openid.return_to\".", null, request, response);
+                                return;
+                        }
+                        if (!consumerManager.verifyReturnTo(requestReturnTo, authResp)) {
+                                showErrorPage("Invalid \"return_to\" in response!",
+                                        null, request, response);
+                                return;
+                        }
+                        // cleanup
+                        request.getSession().removeAttribute(
+                                AuthenticationRequestServlet.RETURN_TO_SESSION_ATTRIBUTE);
+
 
                         // AX
                         if (authResponse.hasExtension(AxMessage.OPENID_NS_AX)) {

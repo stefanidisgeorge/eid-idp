@@ -33,6 +33,8 @@ import org.openid4java.discovery.xri.XriResolver;
 import org.openid4java.discovery.yadis.YadisResolver;
 import org.openid4java.message.AuthRequest;
 import org.openid4java.message.ax.FetchRequest;
+import org.openid4java.server.IncrementalNonceGenerator;
+import org.openid4java.server.NonceGenerator;
 import org.openid4java.server.RealmVerifierFactory;
 import org.openid4java.util.HttpFetcherFactory;
 
@@ -46,6 +48,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -96,6 +100,10 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
         public static final String CONSUMER_MANAGER_ATTRIBUTE =
                 AuthenticationRequestServlet.class.getName() + ".ConsumerManager";
+
+        public static final String RETURN_TO_SESSION_ATTRIBUTE =
+                AuthenticationRequestServlet.class.getName() + ".ReturnToNonce";
+        public static final String RETURN_TO_NONCE_PARAM = "janrain_nonce";
 
         private String userIdentifier;
         private String spDestination;
@@ -240,6 +248,25 @@ public class AuthenticationRequestServlet extends HttpServlet {
                 return consumerManager;
         }
 
+        private String getReturnTo(String spDestination, HttpSession httpSession) throws UnsupportedEncodingException {
+
+                // generate nonce for protection against CSRF
+                NonceGenerator _consumerNonceGenerator = new IncrementalNonceGenerator();
+                String nonce = _consumerNonceGenerator.next();
+
+
+                // add to "return_to"
+                String returnTo = spDestination;
+                returnTo += (returnTo.indexOf('?') != -1) ? '&' : '?';
+                returnTo += RETURN_TO_NONCE_PARAM + "=" +
+                        URLEncoder.encode(nonce, "UTF-8");
+
+                // store return_to on session for response validation
+                httpSession.setAttribute(RETURN_TO_SESSION_ATTRIBUTE, returnTo);
+
+                return returnTo;
+        }
+
         /**
          * {@inheritDoc}
          */
@@ -281,8 +308,10 @@ public class AuthenticationRequestServlet extends HttpServlet {
                         request.getSession().setAttribute("openid-disc", discovered);
 
                         LOG.debug("SP destination: " + spDestination);
+
                         AuthRequest authRequest = this.consumerManager.authenticate(
-                                discovered, spDestination);
+                                discovered, getReturnTo(spDestination,
+                                request.getSession()), spDestination);
 
                         /*
                         * We also piggy-back an attribute fetch request.
