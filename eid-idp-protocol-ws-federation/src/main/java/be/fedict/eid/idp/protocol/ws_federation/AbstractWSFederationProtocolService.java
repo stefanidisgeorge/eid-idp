@@ -40,6 +40,7 @@ import javax.servlet.http.HttpSession;
 import javax.xml.transform.TransformerException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.PublicKey;
 import java.util.Collections;
@@ -113,6 +114,23 @@ public abstract class AbstractWSFederationProtocolService implements
                         throw new ServletException("missing wtrealm parameter");
                 }
                 LOG.debug("wtrealm: " + wtrealm);
+
+                // HTTP Referer check
+                String referer = request.getHeader("referer");
+                if (null != referer) {
+
+                        URL refererUrl = new URL(referer);
+                        URL wtRealmUrl = new URL(wtrealm);
+
+                        LOG.debug("HTTP Referer check: referer=\"" +
+                                refererUrl.getHost() + "\" wtrealm=\"" +
+                                wtRealmUrl.getHost() + "\"");
+
+                        if (!refererUrl.getHost().equals(wtRealmUrl.getHost())) {
+                                throw new IllegalArgumentException("Invalid referer!");
+                        }
+                }
+
                 storeWtrealm(wtrealm, request);
                 String wctx = request.getParameter("wctx");
                 LOG.debug("wctx: " + wctx);
@@ -229,9 +247,9 @@ public abstract class AbstractWSFederationProtocolService implements
 
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 Saml2Util.writeDocument(element.getOwnerDocument(), outputStream);
-                String wresult  =  new String(outputStream.toByteArray(), Charset.forName("UTF-8"));
-            LOG.debug("wresult=\""+wresult + "\"");
-                return wresult ;
+                String wresult = new String(outputStream.toByteArray(), Charset.forName("UTF-8"));
+                LOG.debug("wresult=\"" + wresult + "\"");
+                return wresult;
         }
 
 

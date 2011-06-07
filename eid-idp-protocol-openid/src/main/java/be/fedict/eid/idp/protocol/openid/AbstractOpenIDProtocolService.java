@@ -44,6 +44,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.PublicKey;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -141,7 +143,7 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
         private IncomingRequest doCheckIdSetup(HttpServletRequest request,
                                                ServerManager serverManager,
                                                ParameterList parameterList)
-                throws MessageException {
+                throws MessageException, MalformedURLException {
 
                 LOG.debug("checkid_setup");
                 RealmVerifier realmVerifier = serverManager.getRealmVerifier();
@@ -150,6 +152,24 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 // cannot store authRequest since it's not serializable.
                 HttpSession httpSession = request.getSession();
                 storeParameterList(parameterList, httpSession);
+
+                // HTTP Referer check
+                String referer = request.getHeader("referer");
+                String returnTo = authRequest.getReturnTo();
+                if (null != returnTo && null != referer) {
+
+                        URL refererUrl = new URL(referer);
+                        URL returnToUrl = new URL(returnTo);
+
+                        LOG.debug("HTTP Referer check: referer=\"" +
+                                refererUrl.getHost() + "\" return_to=\"" +
+                                returnToUrl.getHost() + "\"");
+
+                        if (!refererUrl.getHost().equals(returnToUrl.getHost())) {
+                                throw new IllegalArgumentException("Invalid referer!");
+                        }
+                }
+
 
                 // check for UI Extension
                 List<String> languages = null;
@@ -270,7 +290,6 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
 
                 if (message instanceof AuthSuccess) {
                         AuthSuccess authSuccess = (AuthSuccess) message;
-
 
                         // Attribute Exchange Extension
                         if (authRequest.hasExtension(AxMessage.OPENID_NS_AX)) {
