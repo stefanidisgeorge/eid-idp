@@ -24,6 +24,8 @@ import be.fedict.eid.idp.sp.protocol.openid.UserInterfaceMessage;
 import be.fedict.eid.idp.spi.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openid4java.association.AssociationException;
+import org.openid4java.association.AssociationSessionType;
 import org.openid4java.discovery.UrlIdentifier;
 import org.openid4java.message.*;
 import org.openid4java.message.ax.AxMessage;
@@ -124,7 +126,8 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                         .getParameterMap());
                 String openIdMode = request.getParameter("openid.mode");
                 if ("associate".equals(openIdMode)) {
-                        return doAssociation(response, serverManager, parameterList);
+                        return doAssociation(request, response, serverManager,
+                                parameterList);
                 }
                 if ("check_authentication".equals(openIdMode)) {
                         return doCheckAuthentication(response, serverManager, parameterList);
@@ -203,15 +206,27 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                 return null;
         }
 
-        private IncomingRequest doAssociation(HttpServletResponse response,
+        private IncomingRequest doAssociation(HttpServletRequest request,
+                                              HttpServletResponse response,
                                               ServerManager serverManager,
                                               ParameterList parameterList)
-                throws IOException {
+                throws IOException, MessageException, AssociationException {
 
                 /*
-                * We should only allow SSL here. Thus also no need for DH,
-                * no-encryption is just fine.
-                */
+                 * If not running over SSL, only allow DH
+                 */
+                if (!request.isSecure()) {
+                        AssociationRequest associationRequest =
+                                AssociationRequest.createAssociationRequest(parameterList);
+                        AssociationSessionType associationSessionType =
+                                associationRequest.getType();
+                        if (associationSessionType.getHAlgorithm() == null) {
+                                throw new AssociationException("Not running over " +
+                                        "SSL requires DH.");
+                        }
+                }
+
+
                 LOG.debug("associate");
                 Message message = serverManager.associationResponse(parameterList);
                 String keyValueFormEncoding = message.keyValueFormEncoding();
