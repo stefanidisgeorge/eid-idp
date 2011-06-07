@@ -78,8 +78,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class SAML2ProtocolServiceTest {
 
@@ -204,6 +203,8 @@ public class SAML2ProtocolServiceTest {
                         .andReturn(new String(encodedSamlRequest));
                 EasyMock.expect(mockHttpServletRequest.getRequestURL()).andReturn(
                         new StringBuffer("http://idp.be"));
+                EasyMock.expect(mockHttpServletRequest.getHeader("referer"))
+                        .andReturn("http://sp.be/request");
 
                 HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
                 EasyMock.expect(mockHttpServletRequest.getSession()).andStubReturn(
@@ -224,6 +225,63 @@ public class SAML2ProtocolServiceTest {
                 // operate
                 saml2ProtocolService
                         .handleIncomingRequest(mockHttpServletRequest, null);
+
+                // verify
+                EasyMock.verify(mockHttpServletRequest, mockHttpSession);
+        }
+
+        @Test
+        public void testHandleIncomingRequestWrongReferer() throws Exception {
+                // setup
+                SAML2ProtocolServiceAuthIdent saml2ProtocolService =
+                        new SAML2ProtocolServiceAuthIdent();
+                HttpServletRequest mockHttpServletRequest = EasyMock
+                        .createMock(HttpServletRequest.class);
+
+                InputStream samlRequestInputStream = SAML2ProtocolServiceTest.class
+                        .getResourceAsStream("/saml-request.xml");
+                byte[] samlRequest = IOUtils.toByteArray(samlRequestInputStream);
+                byte[] encodedSamlRequest = Base64.encodeBase64(samlRequest);
+
+                // expectations
+                EasyMock.expect(mockHttpServletRequest.getMethod())
+                        .andReturn("POST").times(2);
+                EasyMock.expect(mockHttpServletRequest.getParameter(
+                        AbstractSAML2ProtocolService.LANGUAGE_PARAM))
+                        .andReturn(null);
+                EasyMock.expect(mockHttpServletRequest.getParameter("RelayState"))
+                        .andStubReturn(null);
+                EasyMock.expect(mockHttpServletRequest.getParameter("SAMLRequest"))
+                        .andReturn(new String(encodedSamlRequest));
+                EasyMock.expect(mockHttpServletRequest.getRequestURL()).andReturn(
+                        new StringBuffer("http://idp.be"));
+                EasyMock.expect(mockHttpServletRequest.getHeader("referer"))
+                        .andReturn("http://evil.be/request");
+
+                HttpSession mockHttpSession = EasyMock.createMock(HttpSession.class);
+                EasyMock.expect(mockHttpServletRequest.getSession()).andStubReturn(
+                        mockHttpSession);
+                mockHttpSession.setAttribute(AbstractSAML2ProtocolService
+                        .ISSUER_SESSION_ATTRIBUTE, "http://sp.be/response");
+                mockHttpSession.setAttribute(AbstractSAML2ProtocolService
+                        .TARGET_URL_SESSION_ATTRIBUTE, "http://sp.be/response");
+                mockHttpSession.setAttribute(AbstractSAML2ProtocolService
+                        .RELAY_STATE_SESSION_ATTRIBUTE, null);
+                mockHttpSession.setAttribute(AbstractSAML2ProtocolService
+                        .IN_RESPONSE_TO_SESSION_ATTRIBUTE,
+                        "a77a1c87-e590-47d7-a3e0-afea455ebc01");
+
+                // prepare
+                EasyMock.replay(mockHttpServletRequest, mockHttpSession);
+
+                // operate
+                try {
+                        saml2ProtocolService
+                                .handleIncomingRequest(mockHttpServletRequest, null);
+                        fail();
+                } catch (IllegalArgumentException ignored) {
+                        // expected
+                }
 
                 // verify
                 EasyMock.verify(mockHttpServletRequest, mockHttpSession);

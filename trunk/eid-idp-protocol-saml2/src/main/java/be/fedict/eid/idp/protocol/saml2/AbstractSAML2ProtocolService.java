@@ -42,6 +42,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.net.URL;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
@@ -161,6 +162,23 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                         List<X509Certificate> certChain =
                                 Saml2Util.validateSignature(authnRequest.getSignature());
                         certificate = Saml2Util.getEndCertificate(certChain);
+                }
+
+                // HTTP Referer check
+                String referer = request.getHeader("referer");
+                if (null != authnRequest.getAssertionConsumerServiceURL()
+                        && null != referer) {
+
+                        URL refererUrl = new URL(referer);
+                        URL acsUrl = new URL(authnRequest.getAssertionConsumerServiceURL());
+
+                        LOG.debug("HTTP Referer check: referer=\"" +
+                                refererUrl.getHost() + "\" request.acs=\"" +
+                                acsUrl.getHost() + "\"");
+
+                        if (!refererUrl.getHost().equals(acsUrl.getHost())) {
+                                throw new IllegalArgumentException("Invalid referer!");
+                        }
                 }
 
                 return new IncomingRequest(getAuthenticationFlow(), issuer,
