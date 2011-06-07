@@ -91,6 +91,9 @@ public class IdentityIntegrityServiceBean implements IdentityIntegrityService {
                                 ConfigProperty.HTTP_PROXY_PORT, Integer.class);
                         LOG.debug("use proxy: " + httpProxyHost + ":" + httpProxyPort);
                         xkms2Client.setProxy(httpProxyHost, httpProxyPort);
+                } else {
+                        // disable previously set proxy
+                        xkms2Client.setProxy(null, 0);
                 }
 
                 try {

@@ -84,6 +84,9 @@ public class AuthenticationResponseProcessor extends AbstractAuthenticationRespo
                 if (null != this.service.getProxyHost()) {
                         client.setProxy(this.service.getProxyHost(),
                                 this.service.getProxyPort());
+                } else {
+                        // disable previously set proxy
+                        client.setProxy(null, 0);
                 }
 
                 // resolve
