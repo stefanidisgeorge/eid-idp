@@ -1292,7 +1292,13 @@ openid.return_to:https://localhost:48745/consumer
             directories depending on attributes received from the IdP.
             For installation, please refer to the mod_mellon
             <ulink url="http://modmellon.googlecode.com/svn/trunk/mod_mellon2/README">
-                README</ulink>.
+                README</ulink>. Testing was done against version 0.4.0-1.
+        </para>
+        <para>
+            Be sure to have Liblasso3 version 3.9.3 or higer installed.
+            Segmentation faults were encountered in version 3.7.1.
+            You can find the latest release @ <ulink
+                url="http://lasso.entrouvert.org/download/">Lasso</ulink>
         </para>
         <para>
             mod_mellon requires you to provide the SAML v2.0 Metadata file for
@@ -1343,6 +1349,18 @@ openid.return_to:https://localhost:48745/consumer
             key in the mod_mellon configuration for signing outgoing SAML v2.0
             authentication requests.
         </para>
+        <para>
+            An additional check for a successful login in mod_mellon is to add a
+            <code>MellonRequire</code> directive in mellon.conf.
+            Something like:
+            <programlisting role="XML">
+                <![CDATA[
+        MellonRequire "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname" "Wim"
+                    ]]>
+            </programlisting>
+            If successfully authenticated, mod_mellon will match these directives
+            against the SAML attributes in the authentication response.
+        </para>
         <section>
             <title>mod_mellon issues</title>
             <para>
@@ -1362,19 +1380,6 @@ openid.return_to:https://localhost:48745/consumer
     Name = "be:fedict:eid:idp:photo"; Value = "..."
                         ]]>
                 </programlisting>
-            </para>
-            <para>
-                One open issue exists that after mod_mellon has validated the
-                SAML v2.0 Authentication Response successfully, and probably has
-                put the eID Attributes on the session, 2 segmentation faults
-                occur.
-                <programlisting role="XML">
-                    <![CDATA[
-[Fri Feb 18 11:43:09 2011] [notice] child pid 29175 exit signal Segmentation fault (11)
-[Fri Feb 18 11:43:09 2011] [notice] child pid 29176 exit signal Segmentation fault (11)
-                        ]]>
-                </programlisting>
-                More digging into mod_mellon is needed to resolve this...
             </para>
         </section>
     </section>
