@@ -143,7 +143,7 @@ public abstract class AbstractWSFederationProtocolService implements
                 }
 
                 return new IncomingRequest(getAuthenticationFlow(), wtrealm,
-                        null, Collections.singletonList(language));
+                        null, Collections.singletonList(language), null);
         }
 
         @Override
