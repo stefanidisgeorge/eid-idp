@@ -393,7 +393,15 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                                 switch (attribute.getAttributeType()) {
 
                                         case STRING:
+
+                                            if (attribute.getUri().equals(OpenIDAXConstants.AX_GENDER_TYPE)) {
+                                                String attributeValue = (String) attribute.getValue();
+                                                if (attributeValue.equals("1")) return "M";
+                                                else if (attributeValue.equals("2"))return "F";
+                                                else return attributeValue;
+                                            } else {
                                                 return (String) attribute.getValue();
+                                            }
                                         case INTEGER:
                                                 return attribute.getValue().toString();
                                         case DATE:
