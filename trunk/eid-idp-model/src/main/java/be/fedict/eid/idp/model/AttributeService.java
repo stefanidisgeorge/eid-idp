@@ -28,19 +28,21 @@ import java.util.List;
 @Local
 public interface AttributeService {
 
-        List<AttributeEntity> listAttributes();
+    List<AttributeEntity> listAttributes();
 
-        List<AttributeProtocolUriEntity> listAttributeUris();
+    List<AttributeProtocolUriEntity> listAttributeUris();
 
-        AttributeEntity saveAttribute(String name, String description, String uri);
+    AttributeEntity saveAttribute(String name, String description, String uri);
 
-        RPEntity setAttributes(RPEntity rp, List<String> attributes);
+    RPEntity setAttributes(RPEntity rp, List<String> attributes);
 
-        AttributeProtocolUriEntity createAttributeUri(String protocolId,
-                                                      String attributeUri,
-                                                      String protocolUri);
+    AttributeProtocolUriEntity createAttributeUri(String protocolId,
+                                                  String attributeUri,
+                                                  String protocolUri);
 
-        String getUri(String protocolId, String attributeUri);
+    String getUri(String protocolId, String attributeUri);
 
-        void saveAttributeUris(List<AttributeProtocolUriEntity> attributeUris);
+    AttributeEntity findAttribute(String protocolId, String attributeUri);
+
+    void saveAttributeUris(List<AttributeProtocolUriEntity> attributeUris);
 }
