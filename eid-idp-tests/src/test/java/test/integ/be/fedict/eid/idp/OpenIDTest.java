@@ -55,7 +55,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Test;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -63,7 +63,9 @@ import org.mortbay.jetty.testing.ServletTester;
 
 import be.fedict.eid.applet.Applet;
 import be.fedict.eid.applet.Controller;
+import be.fedict.eid.applet.DiagnosticTests;
 import be.fedict.eid.applet.Messages;
+import be.fedict.eid.applet.Messages.MESSAGE_ID;
 import be.fedict.eid.applet.Runtime;
 import be.fedict.eid.applet.Status;
 import be.fedict.eid.applet.View;
@@ -380,16 +382,30 @@ public class OpenIDTest {
 		}
 
 		@Override
-		public void setStatusMessage(Status status, String statusMessage) {
-			LOG.debug("status message: " + status + ": " + statusMessage);
+		public void setStatusMessage(Status status, MESSAGE_ID messageId) {
+			LOG.debug("status message: " + status + ": " + messageId.getId());
 			if (Status.ERROR == status) {
 				// throw new RuntimeException("status ERROR received");
 			}
 		}
 
 		@Override
-		public void progressIndication(int max, int current) {
-			LOG.debug("progress: " + current + "/" + max);
+		public void addTestResult(DiagnosticTests diagnosticTest,
+				boolean success, String description) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void setProgressIndeterminate() {
+		}
+
+		@Override
+		public void resetProgress(int max) {
+		}
+
+		@Override
+		public void increaseProgress() {
 		}
 	}
 }
