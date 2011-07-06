@@ -27,13 +27,19 @@ import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.security.cert.X509Certificate;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Result;
@@ -96,17 +102,26 @@ import be.fedict.eid.applet.shared.protocol.Unmarshaller;
 
 public class PerformanceTest {
 
-	private static final String PROXY_HOST = "proxy.yourict.net";
+	// private static final String PROXY_HOST = null;
+
+	private static final String PROXY_HOST = "proxy2.yourict.net";
 
 	private static final int PROXY_PORT = 8080;
 
+	//private static final String EID_IDP_HOST = "idp.services.belgium.be";
+
+	// private static final String EID_IDP_HOST = "localhost";
+
 	private static final String EID_IDP_HOST = "www.e-contract.be";
 
-	private static final String EID_IDP_SAML_BROWSER_POST_URL = "https://www.e-contract.be/eid-idp/protocol/saml2/post/auth-ident";
+	private static final String EID_IDP_SAML_BROWSER_POST_URL = "https://"
+			+ EID_IDP_HOST + "/eid-idp/protocol/saml2/post/auth-ident";
 
-	private static final String EID_IDP_APPLET_URL = "https://www.e-contract.be/eid-idp/applet-authentication-service";
+	private static final String EID_IDP_APPLET_URL = "https://" + EID_IDP_HOST
+			+ "/eid-idp/applet-authentication-service";
 
-	private static final String EID_IDP_EXIT_URL = "https://www.e-contract.be/eid-idp/protocol-exit";
+	private static final String EID_IDP_EXIT_URL = "https://" + EID_IDP_HOST
+			+ "/eid-idp/protocol-exit";
 
 	private static final Log LOG = LogFactory.getLog(PerformanceTest.class);
 
@@ -193,9 +208,11 @@ public class PerformanceTest {
 			LOG.debug("IdP location: " + idpLocation);
 			Cookie[] cookies = httpClient.getState().getCookies();
 			LOG.debug("# cookies: " + cookies.length);
-			Cookie sessionCookie = cookies[0];
-			String sessionCookieValue = sessionCookie.getValue();
-			LOG.debug("session cookie value: " + sessionCookieValue);
+			for (Cookie cookie : cookies) {
+				String cookieName = cookie.getName();
+				String cookieValue = cookie.getValue();
+				LOG.debug("cookie: " + cookieName + "=" + cookieValue);
+			}
 
 			HttpClientHttpTransceiver httpTransceiver = new HttpClientHttpTransceiver(
 					httpClient, EID_IDP_APPLET_URL);
@@ -273,7 +290,17 @@ public class PerformanceTest {
 		private static final Log LOG = LogFactory
 				.getLog(MySSLProtocolSocketFactory.class);
 
+		private final SSLContext sslContext;
+
 		private SSLSession sslSession;
+
+		public MySSLProtocolSocketFactory() throws NoSuchAlgorithmException,
+				KeyManagementException {
+			this.sslContext = SSLContext.getInstance("SSL");
+			TrustManager trustManager = new MyTrustManager();
+			TrustManager[] trustManagers = { trustManager };
+			this.sslContext.init(null, trustManagers, null);
+		}
 
 		public SSLSession getSSLSession() {
 			return this.sslSession;
@@ -293,8 +320,8 @@ public class PerformanceTest {
 				boolean autoClose) throws IOException, UnknownHostException {
 			LOG.debug("create socket (socket, host, port, autoClose): " + host
 					+ ":" + port);
-			Socket resultSocket = super.createSocket(socket, host, port,
-					autoClose);
+			Socket resultSocket = this.sslContext.getSocketFactory()
+					.createSocket(socket, host, port, autoClose);
 			LOG.debug("result socket type: "
 					+ resultSocket.getClass().getName());
 			SSLSocket sslSocket = (SSLSocket) resultSocket;
@@ -303,11 +330,16 @@ public class PerformanceTest {
 		}
 
 		@Override
-		public Socket createSocket(String arg0, int arg1, InetAddress arg2,
-				int arg3, HttpConnectionParams arg4) throws IOException,
+		public Socket createSocket(String host, int port,
+				InetAddress clientHost, int clientPort,
+				HttpConnectionParams params) throws IOException,
 				UnknownHostException, ConnectTimeoutException {
 			LOG.debug("create socket");
-			return super.createSocket(arg0, arg1, arg2, arg3, arg4);
+			Socket resultSocket = this.sslContext.getSocketFactory()
+					.createSocket(host, port, clientHost, clientPort);
+			SSLSocket sslSocket = (SSLSocket) resultSocket;
+			this.sslSession = sslSocket.getSession();
+			return resultSocket;
 		}
 
 		@Override
@@ -445,4 +477,27 @@ public class PerformanceTest {
 		}
 	}
 
+	private static class MyTrustManager implements X509TrustManager {
+
+		private static final Log LOG = LogFactory.getLog(MyTrustManager.class);
+
+		public void checkClientTrusted(
+				java.security.cert.X509Certificate[] chain, String authType)
+				throws CertificateException {
+			LOG.error("checkClientTrusted");
+			throw new UnsupportedOperationException();
+		}
+
+		public void checkServerTrusted(
+				java.security.cert.X509Certificate[] chain, String authType)
+				throws CertificateException {
+			LOG.debug("check server trusted");
+			LOG.debug("auth type: " + authType);
+		}
+
+		public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+			LOG.error("getAcceptedIssuers");
+			throw new UnsupportedOperationException();
+		}
+	}
 }

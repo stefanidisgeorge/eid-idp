@@ -9,9 +9,6 @@
 			<param name="ConversionPattern" value="%-5p [%c{1}] %m%n" />
 		</layout>
 	</appender>
-	<category name="test.unit">
-		<priority value="DEBUG" />
-	</category>
 
 	<category name="test.integ">
 		<priority value="INFO" />
