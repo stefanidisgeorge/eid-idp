@@ -102,13 +102,13 @@ import be.fedict.eid.applet.shared.protocol.Unmarshaller;
 
 public class PerformanceTest {
 
-	// private static final String PROXY_HOST = null;
+	private static final String PROXY_HOST = null;
 
-	private static final String PROXY_HOST = "proxy2.yourict.net";
+	// private static final String PROXY_HOST = "proxy2.yourict.net";
 
 	private static final int PROXY_PORT = 8080;
 
-	//private static final String EID_IDP_HOST = "idp.services.belgium.be";
+	// private static final String EID_IDP_HOST = "idp.services.belgium.be";
 
 	// private static final String EID_IDP_HOST = "localhost";
 
@@ -151,6 +151,17 @@ public class PerformanceTest {
 				.getBuilderFactory();
 		String spDestination = "http://localhost/eid-idp-performance-sp";
 
+		HttpClient httpClient = new HttpClient();
+		HostConfiguration hostConfiguration = httpClient.getHostConfiguration();
+		if (null != PROXY_HOST) {
+			hostConfiguration.setProxy(PROXY_HOST, PROXY_PORT);
+		}
+
+		MySSLProtocolSocketFactory protocolSocketFactory = new MySSLProtocolSocketFactory();
+		Protocol protocol = new Protocol("https",
+				(ProtocolSocketFactory) protocolSocketFactory, 443);
+		Protocol.registerProtocol("https", protocol);
+
 		boolean running = true;
 		long t0 = System.currentTimeMillis();
 		long authnCount = 0;
@@ -183,18 +194,6 @@ public class PerformanceTest {
 			String authnRequestBase64 = Base64
 					.encodeBase64String(authnRequestString.getBytes());
 
-			HttpClient httpClient = new HttpClient();
-			HostConfiguration hostConfiguration = httpClient
-					.getHostConfiguration();
-			if (null != PROXY_HOST) {
-				hostConfiguration.setProxy(PROXY_HOST, PROXY_PORT);
-			}
-
-			MySSLProtocolSocketFactory protocolSocketFactory = new MySSLProtocolSocketFactory();
-			Protocol protocol = new Protocol("https",
-					(ProtocolSocketFactory) protocolSocketFactory, 443);
-			Protocol.registerProtocol("https", protocol);
-
 			PostMethod postMethod = new PostMethod(
 					EID_IDP_SAML_BROWSER_POST_URL);
 			postMethod.addParameter("SAMLRequest", authnRequestBase64);
@@ -218,7 +217,6 @@ public class PerformanceTest {
 					httpClient, EID_IDP_APPLET_URL);
 			HelloMessage helloMessage = new HelloMessage();
 			Transport.transfer(helloMessage, httpTransceiver);
-			postMethod = httpTransceiver.getPostMethod();
 			LOG.debug("eID Applet HelloMessage result: "
 					+ httpTransceiver.getResult());
 
@@ -243,7 +241,10 @@ public class PerformanceTest {
 
 			byte[] toBeSigned = authenticationContract.calculateToBeSigned();
 
+			long t0_sign = System.currentTimeMillis();
 			byte[] signature = pcscEid.signAuthn(toBeSigned);
+			long t1_sign = System.currentTimeMillis();
+			LOG.info("sign dt: " + (t1_sign - t0_sign));
 
 			AuthenticationDataMessage authenticationDataMessage = new AuthenticationDataMessage(
 					salt, null, signature, authnCertChain, null, identityData,
@@ -270,7 +271,7 @@ public class PerformanceTest {
 			long t = System.currentTimeMillis();
 			double averageAuthn = ((double) (t - t0) / 1000)
 					/ (double) (authnCount);
-			LOG.info("average # authn / sec: " + averageAuthn);
+			LOG.info("average # sec / authn: " + averageAuthn);
 		}
 	}
 
@@ -367,10 +368,6 @@ public class PerformanceTest {
 			this.httpClient = httpClient;
 			this.url = url;
 			reset();
-		}
-
-		public PostMethod getPostMethod() {
-			return this.postMethod;
 		}
 
 		public int getResult() {
