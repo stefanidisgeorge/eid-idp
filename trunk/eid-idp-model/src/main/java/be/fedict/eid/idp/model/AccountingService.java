@@ -31,4 +31,6 @@ public interface AccountingService {
         void resetAll();
 
         AccountingEntity addRequest(String domain);
+
+        long getNumberOfRequests();
 }

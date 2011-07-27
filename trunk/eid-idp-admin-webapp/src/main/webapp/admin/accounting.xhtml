@@ -18,6 +18,17 @@
             <h:outputLabel value="No accounting info yet."
                            rendered="#{idpAccountingList.rowCount == 0}"/>
 
+            <h:panelGrid id="infoPanel" columns="1"
+                         border="0" rendered="#{idpAccountingList.rowCount > 0}"
+                         styleClass="center">
+
+                <h:outputText
+                        value="# of domains: #{idpAccounting.numberOfDomains}"/>
+                <h:outputText
+                        value="# of requests: #{idpAccounting.numberOfRequests}"/>
+
+            </h:panelGrid>
+
             <rich:dataTable id="data" var="item"
                             value="#{idpAccountingList}"
                             rows="10"

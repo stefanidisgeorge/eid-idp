@@ -30,13 +30,15 @@ import java.util.List;
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "accounting")
 @NamedQueries({@NamedQuery(name = AccountingEntity.LIST_ALL, query = "FROM AccountingEntity"),
-        @NamedQuery(name = AccountingEntity.RESET_ALL, query = "DELETE FROM AccountingEntity")})
+        @NamedQuery(name = AccountingEntity.RESET_ALL, query = "DELETE FROM AccountingEntity"),
+        @NamedQuery(name = AccountingEntity.NUMBER_OF_REQUESTS, query = "SELECT SUM(requests) FROM AccountingEntity")})
 public class AccountingEntity implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
         public static final String LIST_ALL = "idp.accounting.all";
         public static final String RESET_ALL = "idp.accounting.reset.all";
+        public static final String NUMBER_OF_REQUESTS = "idp.accounting.nbr.requests";
 
         private String domain;
         private Long requests;
@@ -79,4 +81,11 @@ public class AccountingEntity implements Serializable {
                 return entityManager.createNamedQuery(AccountingEntity.RESET_ALL)
                         .executeUpdate();
         }
+
+        public static Long getNumberOfRequests(EntityManager entityManager) {
+
+                return (Long) entityManager.createNamedQuery(
+                        AccountingEntity.NUMBER_OF_REQUESTS).getSingleResult();
+        }
+
 }

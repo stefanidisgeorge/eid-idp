@@ -67,6 +67,16 @@ public class AccountingBean implements Accounting {
         }
 
         @Override
+        public int getNumberOfDomains() {
+                return this.accountingList.size();
+        }
+
+        @Override
+        public long getNumberOfRequests() {
+                return this.accountingService.getNumberOfRequests();
+        }
+
+        @Override
         @Factory(ACCOUNTING_LIST_NAME)
         public void accountingListFactory() {
 
