@@ -19,9 +19,10 @@
 			</noscript>
 		</form>
 		<script type="text/javascript">
-            if (document.getElementById('response-form').action == "") {
+            if (document.getElementById('response-form').action == "" ||
+                document.getElementById('response-form').action.indexOf("protocol-response-post") != -1) {
                 document.getElementById('response-form').action = "main";
-            }
+	        }
             document.getElementById('response-form').submit();
 		</script>
 	</ui:define>
