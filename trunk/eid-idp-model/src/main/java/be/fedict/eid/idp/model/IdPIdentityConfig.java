@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.model;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+
 public class IdPIdentityConfig {
 
         private String name;
@@ -101,5 +103,27 @@ public class IdPIdentityConfig {
 
         public void setActive(boolean active) {
                 this.active = active;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+
+                if (this == obj) {
+                        return true;
+                }
+                if (!(obj instanceof IdPIdentityConfig)) {
+                        return false;
+                }
+
+                IdPIdentityConfig rhs = (IdPIdentityConfig) obj;
+                return new EqualsBuilder()
+                        .append(name, rhs.name)
+                        .append(keyStoreType, rhs.keyStoreType)
+                        .append(keyStorePath, rhs.keyStorePath)
+                        .append(keyStorePassword, rhs.keyStorePassword)
+                        .append(keyEntryPassword, rhs.keyEntryPassword)
+                        .append(keyEntryAlias, rhs.keyEntryAlias)
+                        .append(active, rhs.active)
+                        .isEquals();
         }
 }

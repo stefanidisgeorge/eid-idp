@@ -49,6 +49,7 @@ public class IdentityServiceSingletonBean {
                 .getLog(IdentityServiceSingletonBean.class);
 
         private IdPIdentity identity;
+        private IdPIdentityConfig identityConfig;
 
         @EJB
         private Configuration configuration;
@@ -87,6 +88,7 @@ public class IdentityServiceSingletonBean {
                 this.configuration.setValue(ConfigProperty.ACTIVE_IDENTITY, name);
 
                 this.identity = loadIdentity(idPIdentityConfig);
+                this.identityConfig = idPIdentityConfig;
                 LOG.debug("private key entry reloaded");
         }
 
@@ -97,7 +99,11 @@ public class IdentityServiceSingletonBean {
          */
         public void reloadIdentity() throws KeyStoreLoadException {
 
-                this.identity = loadIdentity(findActiveIdentityName());
+                IdPIdentityConfig idPIdentityConfig = findIdentityConfig(
+                        findActiveIdentityName());
+
+                this.identity = loadIdentity(idPIdentityConfig);
+                this.identityConfig = idPIdentityConfig;
                 LOG.debug("private key entry reloaded");
         }
 
@@ -222,6 +228,16 @@ public class IdentityServiceSingletonBean {
          */
         public IdPIdentity findIdentity() {
 
+                IdPIdentityConfig databaseIdentityConfig = findIdentityConfig();
+
+                if (!databaseIdentityConfig.equals(this.identityConfig)) {
+                        try {
+                                this.identity = loadIdentity(databaseIdentityConfig);
+                        } catch (KeyStoreLoadException e) {
+                                throw new RuntimeException(e);
+                        }
+                        this.identityConfig = databaseIdentityConfig;
+                }
                 return this.identity;
         }
 
