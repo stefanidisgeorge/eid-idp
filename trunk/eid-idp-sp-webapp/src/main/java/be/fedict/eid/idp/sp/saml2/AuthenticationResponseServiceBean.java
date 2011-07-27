@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.crypto.SecretKey;
+import javax.ejb.EJBException;
 import java.io.Serializable;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -69,7 +70,7 @@ public class AuthenticationResponseServiceBean implements ArtifactAuthentication
                         }
 
                         if (!fingerprint.equals(idpIdentity)) {
-                                throw new SecurityException("IdP Identity " +
+                                throw new EJBException("IdP Identity " +
                                         "thumbprint mismatch: got: " +
                                         fingerprint + " expected: " + idpIdentity);
                         }
