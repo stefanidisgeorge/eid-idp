@@ -69,6 +69,13 @@ public class AccountingServiceBean implements AccountingService {
                 }
                 return accountingEntity;
         }
+
+        @Override
+        public long getNumberOfRequests() {
+
+                LOG.debug("get # of requests");
+                return AccountingEntity.getNumberOfRequests(this.entityManager);
+        }
 }
 
 
