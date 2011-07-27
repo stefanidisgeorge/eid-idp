@@ -34,14 +34,14 @@
                             rows="10"
                             rendered="#{idpAccountingList.rowCount > 0}">
 
-                <h:column>
+                <rich:column sortBy="#{item.domain}">
                     <f:facet name="header">Domain</f:facet>
                     <h:outputText value="#{item.domain}"/>
-                </h:column>
-                <h:column>
+                </rich:column>
+                <rich:column sortBy="#{item.requests}">
                     <f:facet name="header">Requests</f:facet>
                     <h:outputText value="#{item.requests}"/>
-                </h:column>
+                </rich:column>
 
                 <f:facet name="footer">
                     <rich:datascroller for="data" pageIndexVar="pageIndex"
