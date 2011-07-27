@@ -34,6 +34,7 @@ import org.opensaml.xml.validation.ValidationException;
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -187,6 +188,28 @@ public class AuthenticationResponseProcessor {
                         } catch (CertificateException e) {
                                 throw new AuthenticationResponseProcessorException(e);
                         } catch (ValidationException e) {
+                                throw new AuthenticationResponseProcessorException(e);
+                        } catch (Exception e) {
+
+                                if ("javax.ejb.EJBException".equals(e.getClass().getName())) {
+                                        Exception exception;
+                                        try {
+                                                Method getCausedByExceptionMethod = e.getClass().getMethod(
+                                                        "getCausedByException", new Class[]{});
+                                                exception = (Exception) getCausedByExceptionMethod.invoke(
+                                                        e, new Object[]{});
+                                        } catch (Exception e2) {
+                                                LOG.debug("error: " + e.getMessage(), e);
+                                                throw new AuthenticationResponseProcessorException(
+                                                        "error retrieving the root cause: "
+                                                                + e2.getMessage());
+                                        }
+
+                                        throw new AuthenticationResponseProcessorException(
+                                                "Validation exception: " +
+                                                        (null != exception ? exception.getMessage() : e.getMessage()));
+                                }
+
                                 throw new AuthenticationResponseProcessorException(e);
                         }
                 }
