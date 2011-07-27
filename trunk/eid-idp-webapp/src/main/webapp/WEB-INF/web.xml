@@ -139,7 +139,7 @@
     <!-- eID Applet Identification -->
     <servlet>
         <servlet-name>AppletIdentificationServiceServlet</servlet-name>
-        <servlet-class>be.fedict.eid.applet.service.AppletServiceServlet
+        <servlet-class>be.fedict.eid.idp.webapp.IdPAppletServiceServlet
         </servlet-class>
         <init-param>
             <param-name>IdentityService</param-name>
@@ -164,7 +164,7 @@
     <!-- eID Applet Authentication -->
     <servlet>
         <servlet-name>AppletAuthenticationServiceServlet</servlet-name>
-        <servlet-class>be.fedict.eid.applet.service.AppletServiceServlet
+        <servlet-class>be.fedict.eid.idp.webapp.IdPAppletServiceServlet
         </servlet-class>
         <init-param>
             <param-name>IdentityService</param-name>
