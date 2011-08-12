@@ -60,8 +60,6 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
     private static final Log LOG = LogFactory
             .getLog(AbstractOpenIDProtocolService.class);
 
-    private IdentityProviderConfiguration configuration;
-
     private String getServiceManagerAttribute() {
 
         return AbstractOpenIDProtocolService.class.getName() +
@@ -105,7 +103,6 @@ public abstract class AbstractOpenIDProtocolService implements IdentityProviderP
                      IdentityProviderConfiguration configuration) {
 
         LOG.debug("init");
-        this.configuration = configuration;
 
         // add UI Extension message
         try {

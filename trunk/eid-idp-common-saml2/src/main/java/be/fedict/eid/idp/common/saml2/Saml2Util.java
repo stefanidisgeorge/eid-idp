@@ -1016,7 +1016,6 @@ public abstract class Saml2Util {
          * @param <T>         opensaml object type
          * @return opensaml object.
          */
-        @SuppressWarnings("unused")
         public static <T extends XMLObject> T buildXMLObject(Class<T> clazz, QName objectQName) {
 
                 @SuppressWarnings("unchecked")

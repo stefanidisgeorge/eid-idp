@@ -82,7 +82,6 @@ public abstract class AbstractSAML2ProtocolService implements IdentityProviderPr
                 return "SAML2";
         }
 
-        @SuppressWarnings("unchecked")
         public void init(ServletContext servletContext,
                          IdentityProviderConfiguration configuration) {
 
