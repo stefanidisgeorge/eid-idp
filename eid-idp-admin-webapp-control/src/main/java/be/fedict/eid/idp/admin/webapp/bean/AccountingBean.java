@@ -51,7 +51,6 @@ public class AccountingBean implements Accounting {
         FacesMessages facesMessages;
 
 
-        @SuppressWarnings("unused")
         @DataModel(ACCOUNTING_LIST_NAME)
         private List<AccountingEntity> accountingList;
 

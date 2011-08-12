@@ -51,7 +51,6 @@ public class AttributeBean implements Attribute {
         FacesMessages facesMessages;
 
 
-        @SuppressWarnings("unused")
         @DataModel(ATTRIBUTE_URI_LIST_NAME)
         private List<AttributeProtocolUriEntity> attributeUriList;
 

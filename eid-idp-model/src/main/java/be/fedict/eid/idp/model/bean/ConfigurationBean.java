@@ -140,7 +140,6 @@ public class ConfigurationBean implements Configuration {
         /**
          * {@inheritDoc}
          */
-        @SuppressWarnings({"unchecked", "static-access"})
         public <T> T getValue(ConfigProperty configProperty, Class<T> type) {
                 return getValue(configProperty, null, type);
         }
@@ -148,7 +147,7 @@ public class ConfigurationBean implements Configuration {
         /**
          * {@inheritDoc}
          */
-        @SuppressWarnings({"unchecked", "static-access"})
+        @SuppressWarnings({"unchecked"})
         public <T> T getValue(ConfigProperty configProperty, String index, Class<T> type) {
 
                 if (!type.equals(configProperty.getType())) {

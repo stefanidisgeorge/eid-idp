@@ -26,7 +26,6 @@ import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
-import org.jboss.seam.security.Credentials;
 import org.jboss.seam.security.Identity;
 
 import javax.ejb.EJB;
@@ -39,9 +38,6 @@ import java.security.cert.X509Certificate;
 public class AuthenticatorBean implements Authenticator {
 
         private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(AuthenticatorBean.class);
-
-        @In
-        private Credentials credentials;
 
         @In
         private Identity identity;

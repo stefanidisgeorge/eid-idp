@@ -44,7 +44,6 @@ public class ResponseBean {
                 return this.session;
         }
 
-        @SuppressWarnings("unchecked")
         public void setSession(HttpSession session) {
 
                 this.session = session;

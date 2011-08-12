@@ -21,7 +21,6 @@ package be.fedict.eid.idp.admin.webapp.bean;
 import be.fedict.eid.idp.admin.webapp.Admin;
 import be.fedict.eid.idp.admin.webapp.AdminConstants;
 import be.fedict.eid.idp.entity.AdministratorEntity;
-import be.fedict.eid.idp.model.Constants;
 import be.fedict.eid.idp.model.admin.AdminManager;
 import be.fedict.eid.idp.model.exception.RemoveLastAdminException;
 import org.jboss.ejb3.annotation.LocalBinding;

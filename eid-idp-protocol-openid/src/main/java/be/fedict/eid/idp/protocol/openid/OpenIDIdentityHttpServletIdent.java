@@ -22,7 +22,9 @@ import be.fedict.eid.idp.protocol.openid.AbstractOpenIDIdentityHttpServlet;
 
 public class OpenIDIdentityHttpServletIdent extends AbstractOpenIDIdentityHttpServlet {
 
-    @Override
+	private static final long serialVersionUID = 1L;
+
+	@Override
     protected String getPath() {
         return new OpenIDProtocolServiceIdent().getPath();
     }

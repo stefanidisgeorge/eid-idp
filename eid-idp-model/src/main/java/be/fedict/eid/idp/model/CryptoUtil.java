@@ -22,8 +22,6 @@ import be.fedict.eid.idp.entity.SecretKeyAlgorithm;
 import be.fedict.eid.idp.model.exception.KeyLoadException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.openssl.PEMReader;
 
 import javax.crypto.Mac;
@@ -46,8 +44,6 @@ import java.security.spec.X509EncodedKeySpec;
  * @author Wim Vandenhaute
  */
 public abstract class CryptoUtil {
-
-        private static final Log LOG = LogFactory.getLog(CryptoUtil.class);
 
         public static X509Certificate getCertificate(byte[] certificateBytes)
                 throws CertificateException {

@@ -20,7 +20,9 @@ package be.fedict.eid.idp.protocol.ws_federation;
 
 public class WSFederationMetadataHttpServletAuth extends AbstractWSFederationMetadataHttpServlet {
 
-    @Override
+	private static final long serialVersionUID = 1L;
+
+	@Override
     protected String getPath() {
         return "ws-federation/auth";
     }

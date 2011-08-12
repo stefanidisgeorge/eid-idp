@@ -18,20 +18,13 @@
 
 package be.fedict.eid.idp.sp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;
 
 public class SPBean {
-
-        private static final Log LOG = LogFactory.getLog(SPBean.class);
-
-        private HttpServletRequest request;
 
         public static SecretKey aes128SecretKey;
 

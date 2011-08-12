@@ -68,7 +68,6 @@ public class SPBean implements SP {
         @EJB
         AttributeService attributeService;
 
-        @SuppressWarnings("unused")
         @DataModel(ATTRIBUTE_LIST_NAME)
         private List<AttributeEntity> attributeList;
 

@@ -21,8 +21,6 @@ package be.fedict.eid.idp.model.applet;
 import be.fedict.eid.applet.service.spi.ChannelBindingService;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.Constants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
 
 import javax.ejb.EJB;
@@ -39,9 +37,6 @@ import java.security.cert.X509Certificate;
 @Local(ChannelBindingService.class)
 @LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "ChannelBindingServiceBean")
 public class ChannelBindingServiceBean implements ChannelBindingService {
-
-        private static final Log LOG = LogFactory
-                .getLog(ChannelBindingServiceBean.class);
 
         @EJB
         private Configuration configuration;

@@ -46,7 +46,6 @@ public class AgeAttributeService implements IdentityProviderAttributeService {
         public void init(ServletContext servletContext) {
         }
 
-        @SuppressWarnings("unchecked")
         public void addAttribute(Map<String, Attribute> attributeMap) {
 
                 LOG.debug("Add age attribute");
