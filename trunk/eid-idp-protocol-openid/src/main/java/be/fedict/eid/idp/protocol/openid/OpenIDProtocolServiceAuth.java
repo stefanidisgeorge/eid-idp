@@ -22,13 +22,13 @@ import be.fedict.eid.idp.spi.IdentityProviderFlow;
 
 public class OpenIDProtocolServiceAuth extends AbstractOpenIDProtocolService {
 
-    @Override
-    protected String getPath() {
-        return "openid/auth";
-    }
+	@Override
+	protected String getPath() {
+		return "openid/auth";
+	}
 
-    @Override
-    protected IdentityProviderFlow getAuthenticationFlow() {
-        return IdentityProviderFlow.AUTHENTICATION;
-    }
+	@Override
+	protected IdentityProviderFlow getAuthenticationFlow() {
+		return IdentityProviderFlow.AUTHENTICATION;
+	}
 }

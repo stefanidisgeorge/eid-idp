@@ -29,156 +29,159 @@ import java.util.List;
 /**
  * OpenID User Interface Extension v1.0
  * <p/>
- *
+ * 
  * @author Wim Vandenhaute
- * @see <a href="http://svn.openid.net/repos/specifications/user_interface/1.0/trunk/openid-user-interface-extension-1_0.html">
+ * @see <a
+ *      href="http://svn.openid.net/repos/specifications/user_interface/1.0/trunk/openid-user-interface-extension-1_0.html">
  *      OpenID User Interface Extension v1.0</a>
  */
 public class UserInterfaceMessage implements MessageExtension,
-        MessageExtensionFactory, Iterable<String> {
+		MessageExtensionFactory, Iterable<String> {
 
-        public static final String OPENID_NS_UI =
-                "http://specs.openid.net/extensions/ui/1.0";
+	public static final String OPENID_NS_UI = "http://specs.openid.net/extensions/ui/1.0";
 
-        public static final String LANGUAGE_PREFIX = "lang";
+	public static final String LANGUAGE_PREFIX = "lang";
 
-        private ParameterList parameters;
+	private ParameterList parameters;
 
-        public UserInterfaceMessage() {
+	public UserInterfaceMessage() {
 
-                parameters = new ParameterList();
-        }
+		parameters = new ParameterList();
+	}
 
-        public UserInterfaceMessage(ParameterList parameterList) {
+	public UserInterfaceMessage(ParameterList parameterList) {
 
-                parameters = parameterList;
-        }
+		parameters = parameterList;
+	}
 
-        /**
-         * Set the comma seperated list of preferred languages
-         *
-         * @param languageString Comma seperated list of preferred languages
-         */
-        public void setLanguages(String languageString) {
+	/**
+	 * Set the comma seperated list of preferred languages
+	 * 
+	 * @param languageString
+	 *            Comma seperated list of preferred languages
+	 */
+	public void setLanguages(String languageString) {
 
-                parameters.set(new Parameter(LANGUAGE_PREFIX, languageString));
-        }
+		parameters.set(new Parameter(LANGUAGE_PREFIX, languageString));
+	}
 
-        /**
-         * Set the list of preferred languages
-         *
-         * @param languages list of preferred languages
-         */
-        public void setLanguages(List<String> languages) {
+	/**
+	 * Set the list of preferred languages
+	 * 
+	 * @param languages
+	 *            list of preferred languages
+	 */
+	public void setLanguages(List<String> languages) {
 
-                if (null == languages) {
-                        return;
-                }
+		if (null == languages) {
+			return;
+		}
 
-                String languageString = "";
-                for (String language : languages) {
-                        languageString += language + ",";
-                }
-                if (languages.size() > 1) {
-                        // strip last ','
-                        languageString = languageString.substring(
-                                languageString.lastIndexOf(','));
-                }
+		String languageString = "";
+		for (String language : languages) {
+			languageString += language + ",";
+		}
+		if (languages.size() > 1) {
+			// strip last ','
+			languageString = languageString.substring(languageString
+					.lastIndexOf(','));
+		}
 
-                setLanguages(languageString);
-        }
+		setLanguages(languageString);
+	}
 
-        /**
-         * @return list of preferred languages. Empty list returned if none.
-         */
-        public List<String> getLanguages() {
+	/**
+	 * @return list of preferred languages. Empty list returned if none.
+	 */
+	public List<String> getLanguages() {
 
-                String languageString = this.parameters.getParameterValue(
-                        UserInterfaceMessage.LANGUAGE_PREFIX);
+		String languageString = this.parameters
+				.getParameterValue(UserInterfaceMessage.LANGUAGE_PREFIX);
 
-                if (null == languageString) {
-                        return new LinkedList<String>();
-                }
+		if (null == languageString) {
+			return new LinkedList<String>();
+		}
 
-                String[] languages = languageString.split(",");
-                return Arrays.asList(languages);
-        }
+		String[] languages = languageString.split(",");
+		return Arrays.asList(languages);
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public String getTypeUri() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getTypeUri() {
 
-                return OPENID_NS_UI;
-        }
+		return OPENID_NS_UI;
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public ParameterList getParameters() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public ParameterList getParameters() {
 
-                return parameters;
-        }
+		return parameters;
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public void setParameters(ParameterList params) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setParameters(ParameterList params) {
 
-                parameters = params;
-        }
+		parameters = params;
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public boolean providesIdentifier() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean providesIdentifier() {
 
-                return false;
-        }
+		return false;
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public boolean signRequired() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean signRequired() {
 
-                return true;
-        }
+		return true;
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public MessageExtension getExtension(ParameterList parameterList, boolean isRequest)
-                throws MessageException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public MessageExtension getExtension(ParameterList parameterList,
+			boolean isRequest) throws MessageException {
 
-                return new UserInterfaceMessage(parameterList);
-        }
+		return new UserInterfaceMessage(parameterList);
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public Iterator<String> iterator() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public Iterator<String> iterator() {
 
-                return new AbstractIterator<String>() {
+		return new AbstractIterator<String>() {
 
-                        @SuppressWarnings({"unchecked"})
-                        private Iterator<Parameter> source = parameters.getParameters().iterator();
+			@SuppressWarnings({ "unchecked" })
+			private Iterator<Parameter> source = parameters.getParameters()
+					.iterator();
 
-                        @Override
-                        protected String computeNext() {
+			@Override
+			protected String computeNext() {
 
-                                while (source.hasNext()) {
-                                        Parameter param = source.next();
-                                        String paramName = param.getKey();
-                                        String paramValue = param.getValue();
+				while (source.hasNext()) {
+					Parameter param = source.next();
+					String paramName = param.getKey();
+					String paramValue = param.getValue();
 
-                                        if (paramName.startsWith(LANGUAGE_PREFIX)) {
-                                                return paramValue;
-                                        }
-                                }
+					if (paramName.startsWith(LANGUAGE_PREFIX)) {
+						return paramValue;
+					}
+				}
 
-                                return endOfData();
-                        }
-                };
-        }
+				return endOfData();
+			}
+		};
+	}
 
 }

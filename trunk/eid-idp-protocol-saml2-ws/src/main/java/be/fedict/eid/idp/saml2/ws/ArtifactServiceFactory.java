@@ -23,22 +23,21 @@ import java.net.URL;
 
 public class ArtifactServiceFactory {
 
-        public static final String WSDL_RESOURCE = "/eid-idp-saml2.wsdl";
+	public static final String WSDL_RESOURCE = "/eid-idp-saml2.wsdl";
 
-        public ArtifactServiceFactory() {
-                super();
-        }
+	public ArtifactServiceFactory() {
+		super();
+	}
 
-        public static ArtifactService getInstance() {
-                URL wsdlLocation = ArtifactServiceFactory.class
-                        .getResource(WSDL_RESOURCE);
-                if (null == wsdlLocation) {
-                        throw new RuntimeException("WSDL location not valid: "
-                                + WSDL_RESOURCE);
-                }
-                QName serviceName = new QName("urn:be:fedict:eid:idp:saml2:ws",
-                        "ArtifactService");
-                return new ArtifactService(
-                        wsdlLocation, serviceName);
-        }
+	public static ArtifactService getInstance() {
+		URL wsdlLocation = ArtifactServiceFactory.class
+				.getResource(WSDL_RESOURCE);
+		if (null == wsdlLocation) {
+			throw new RuntimeException("WSDL location not valid: "
+					+ WSDL_RESOURCE);
+		}
+		QName serviceName = new QName("urn:be:fedict:eid:idp:saml2:ws",
+				"ArtifactService");
+		return new ArtifactService(wsdlLocation, serviceName);
+	}
 }

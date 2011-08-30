@@ -59,9 +59,10 @@ import java.util.List;
  * <p/>
  * Configuration can be provided either by providing:
  * <ul>
- * <li><tt>AuthenticationRequestService</tt>: {@link AuthenticationRequestService}
- * to provide the IdP protocol entry point, SP response handling location,
- * optional SSL certificate to trust, optional list of preferred languages</li>
+ * <li><tt>AuthenticationRequestService</tt>:
+ * {@link AuthenticationRequestService} to provide the IdP protocol entry point,
+ * SP response handling location, optional SSL certificate to trust, optional
+ * list of preferred languages</li>
  * </ul>
  * or by provinding:
  * <ul>
@@ -75,277 +76,279 @@ import java.util.List;
  * to display the eID IdP webapp in (e.g.: "en,nl,fr"). If not specified, the
  * browsers's locale will be used.</li>
  * </ul>
- *
+ * 
  * @author Frank Cornelis
  */
 public class AuthenticationRequestServlet extends HttpServlet {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        private static final Log LOG = LogFactory
-                .getLog(AuthenticationRequestServlet.class);
+	private static final Log LOG = LogFactory
+			.getLog(AuthenticationRequestServlet.class);
 
-        private static final String AUTHN_REQUEST_SERVICE_PARAM =
-                "AuthenticationRequestService";
-        private static final String USER_IDENTIFIER_PARAM =
-                "UserIdentifier";
-        private static final String SP_DESTINATION_PARAM =
-                "SPDestination";
-        private static final String SP_DESTINATION_PAGE_PARAM =
-                SP_DESTINATION_PARAM + "Page";
-        private static final String LANGUAGES_PARAM = "Language";
+	private static final String AUTHN_REQUEST_SERVICE_PARAM = "AuthenticationRequestService";
+	private static final String USER_IDENTIFIER_PARAM = "UserIdentifier";
+	private static final String SP_DESTINATION_PARAM = "SPDestination";
+	private static final String SP_DESTINATION_PAGE_PARAM = SP_DESTINATION_PARAM
+			+ "Page";
+	private static final String LANGUAGES_PARAM = "Language";
 
+	private static final String TRUST_SERVER_PARAM = "TrustServer";
 
-        private static final String TRUST_SERVER_PARAM = "TrustServer";
+	public static final String CONSUMER_MANAGER_ATTRIBUTE = AuthenticationRequestServlet.class
+			.getName() + ".ConsumerManager";
 
-        public static final String CONSUMER_MANAGER_ATTRIBUTE =
-                AuthenticationRequestServlet.class.getName() + ".ConsumerManager";
+	public static final String RETURN_TO_SESSION_ATTRIBUTE = AuthenticationRequestServlet.class
+			.getName() + ".ReturnToNonce";
+	public static final String RETURN_TO_NONCE_PARAM = "janrain_nonce";
 
-        public static final String RETURN_TO_SESSION_ATTRIBUTE =
-                AuthenticationRequestServlet.class.getName() + ".ReturnToNonce";
-        public static final String RETURN_TO_NONCE_PARAM = "janrain_nonce";
+	private String userIdentifier;
+	private String spDestination;
+	private String spDestinationPage;
+	private String languages;
 
-        private String userIdentifier;
-        private String spDestination;
-        private String spDestinationPage;
-        private String languages;
+	private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;
 
-        private ServiceLocator<AuthenticationRequestService> authenticationRequestServiceLocator;
+	private ConsumerManager consumerManager;
 
+	private boolean trustServer;
 
-        private ConsumerManager consumerManager;
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void init(ServletConfig config) throws ServletException {
 
-        private boolean trustServer;
+		this.userIdentifier = config.getInitParameter(USER_IDENTIFIER_PARAM);
+		this.spDestination = config.getInitParameter(SP_DESTINATION_PARAM);
+		this.spDestinationPage = config
+				.getInitParameter(SP_DESTINATION_PAGE_PARAM);
+		this.languages = config.getInitParameter(LANGUAGES_PARAM);
+		this.authenticationRequestServiceLocator = new ServiceLocator<AuthenticationRequestService>(
+				AUTHN_REQUEST_SERVICE_PARAM, config);
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void init(ServletConfig config) throws ServletException {
+		// validate necessary configuration params
+		if (null == this.userIdentifier
+				&& !this.authenticationRequestServiceLocator.isConfigured()) {
+			throw new ServletException("need to provide either "
+					+ USER_IDENTIFIER_PARAM + " or "
+					+ AUTHN_REQUEST_SERVICE_PARAM + "(Class) init-params");
+		}
 
-                this.userIdentifier = config.getInitParameter(USER_IDENTIFIER_PARAM);
-                this.spDestination = config.getInitParameter(SP_DESTINATION_PARAM);
-                this.spDestinationPage = config.getInitParameter(SP_DESTINATION_PAGE_PARAM);
-                this.languages = config.getInitParameter(LANGUAGES_PARAM);
-                this.authenticationRequestServiceLocator = new
-                        ServiceLocator<AuthenticationRequestService>
-                        (AUTHN_REQUEST_SERVICE_PARAM, config);
+		if (null == this.spDestination && null == this.spDestinationPage
+				&& !this.authenticationRequestServiceLocator.isConfigured()) {
+			throw new ServletException("need to provide either "
+					+ SP_DESTINATION_PARAM + " or " + SP_DESTINATION_PAGE_PARAM
+					+ " or " + AUTHN_REQUEST_SERVICE_PARAM
+					+ "(Class) init-param");
+		}
 
-                // validate necessary configuration params
-                if (null == this.userIdentifier
-                        && !this.authenticationRequestServiceLocator.isConfigured()) {
-                        throw new ServletException(
-                                "need to provide either " + USER_IDENTIFIER_PARAM
-                                        + " or " + AUTHN_REQUEST_SERVICE_PARAM +
-                                        "(Class) init-params");
-                }
+		// SSL configuration
+		String trustServer = config.getInitParameter(TRUST_SERVER_PARAM);
+		if (null != trustServer) {
+			this.trustServer = Boolean.parseBoolean(trustServer);
+		}
+		X509Certificate serverCertificate = null;
+		if (this.authenticationRequestServiceLocator.isConfigured()) {
+			AuthenticationRequestService service = this.authenticationRequestServiceLocator
+					.locateService();
+			serverCertificate = service.getServerCertificate();
+		}
 
-                if (null == this.spDestination && null == this.spDestinationPage
-                        && !this.authenticationRequestServiceLocator.isConfigured()) {
-                        throw new ServletException(
-                                "need to provide either " + SP_DESTINATION_PARAM
-                                        + " or " + SP_DESTINATION_PAGE_PARAM +
-                                        " or " + AUTHN_REQUEST_SERVICE_PARAM +
-                                        "(Class) init-param");
-                }
+		if (this.trustServer) {
 
-                // SSL configuration
-                String trustServer = config.getInitParameter(TRUST_SERVER_PARAM);
-                if (null != trustServer) {
-                        this.trustServer = Boolean.parseBoolean(trustServer);
-                }
-                X509Certificate serverCertificate = null;
-                if (this.authenticationRequestServiceLocator.isConfigured()) {
-                        AuthenticationRequestService service =
-                                this.authenticationRequestServiceLocator.locateService();
-                        serverCertificate = service.getServerCertificate();
-                }
+			LOG.warn("Trusting all SSL server certificates!");
+			try {
+				OpenIDSSLSocketFactory.installAllTrusted();
+			} catch (Exception e) {
+				throw new ServletException(
+						"could not install OpenID SSL Socket Factory: "
+								+ e.getMessage(), e);
+			}
+		} else if (null != serverCertificate) {
 
-                if (this.trustServer) {
+			LOG.info("Trusting specified SSL certificate: " + serverCertificate);
+			try {
+				OpenIDSSLSocketFactory.install(serverCertificate);
+			} catch (Exception e) {
+				throw new ServletException(
+						"could not install OpenID SSL Socket Factory: "
+								+ e.getMessage(), e);
+			}
+		}
 
-                        LOG.warn("Trusting all SSL server certificates!");
-                        try {
-                                OpenIDSSLSocketFactory.installAllTrusted();
-                        } catch (Exception e) {
-                                throw new ServletException(
-                                        "could not install OpenID SSL Socket Factory: "
-                                                + e.getMessage(), e);
-                        }
-                } else if (null != serverCertificate) {
+		ServletContext servletContext = config.getServletContext();
+		this.consumerManager = (ConsumerManager) servletContext
+				.getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
 
-                        LOG.info("Trusting specified SSL certificate: " + serverCertificate);
-                        try {
-                                OpenIDSSLSocketFactory.install(serverCertificate);
-                        } catch (Exception e) {
-                                throw new ServletException(
-                                        "could not install OpenID SSL Socket Factory: "
-                                                + e.getMessage(), e);
-                        }
-                }
+		if (null == this.consumerManager) {
+			try {
+				if (this.trustServer || null != serverCertificate) {
 
-                ServletContext servletContext = config.getServletContext();
-                this.consumerManager = (ConsumerManager) servletContext
-                        .getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
+					TrustManager trustManager;
+					if (this.trustServer) {
+						trustManager = new OpenIDTrustManager();
+					} else {
+						trustManager = new OpenIDTrustManager(serverCertificate);
+					}
 
-                if (null == this.consumerManager) {
-                        try {
-                                if (this.trustServer || null != serverCertificate) {
+					SSLContext sslContext = SSLContext.getInstance("SSL");
+					TrustManager[] trustManagers = { trustManager };
+					sslContext.init(null, trustManagers, null);
+					HttpFetcherFactory httpFetcherFactory = new HttpFetcherFactory(
+							sslContext,
+							SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+					YadisResolver yadisResolver = new YadisResolver(
+							httpFetcherFactory);
+					RealmVerifierFactory realmFactory = new RealmVerifierFactory(
+							yadisResolver);
+					HtmlResolver htmlResolver = new HtmlResolver(
+							httpFetcherFactory);
+					XriResolver xriResolver = Discovery.getXriResolver();
+					Discovery discovery = new Discovery(htmlResolver,
+							yadisResolver, xriResolver);
+					this.consumerManager = new ConsumerManager(realmFactory,
+							discovery, httpFetcherFactory);
 
-                                        TrustManager trustManager;
-                                        if (this.trustServer) {
-                                                trustManager = new OpenIDTrustManager();
-                                        } else {
-                                                trustManager = new OpenIDTrustManager(serverCertificate);
-                                        }
+				} else {
+					this.consumerManager = new ConsumerManager();
+				}
+			} catch (Exception e) {
+				throw new ServletException(
+						"could not init OpenID ConsumerManager");
+			}
+			servletContext.setAttribute(CONSUMER_MANAGER_ATTRIBUTE,
+					this.consumerManager);
+		}
+	}
 
-                                        SSLContext sslContext = SSLContext.getInstance("SSL");
-                                        TrustManager[] trustManagers = {trustManager};
-                                        sslContext.init(null, trustManagers, null);
-                                        HttpFetcherFactory httpFetcherFactory = new HttpFetcherFactory(
-                                                sslContext,
-                                                SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-                                        YadisResolver yadisResolver = new YadisResolver(
-                                                httpFetcherFactory);
-                                        RealmVerifierFactory realmFactory = new RealmVerifierFactory(
-                                                yadisResolver);
-                                        HtmlResolver htmlResolver = new HtmlResolver(
-                                                httpFetcherFactory);
-                                        XriResolver xriResolver = Discovery.getXriResolver();
-                                        Discovery discovery = new Discovery(htmlResolver,
-                                                yadisResolver, xriResolver);
-                                        this.consumerManager = new ConsumerManager(realmFactory,
-                                                discovery, httpFetcherFactory);
+	/**
+	 * Used by the {@link AuthenticationResponseServlet} for processing the
+	 * returned OpenID response
+	 * 
+	 * @param request
+	 *            HTTP Servlet Request, used to get the OpenID
+	 *            {@link ConsumerManager} from the {@link ServletContext}
+	 * @return the OpenID {@link ConsumerManager}
+	 */
+	public static ConsumerManager getConsumerManager(HttpServletRequest request) {
+		HttpSession httpSession = request.getSession();
+		ServletContext servletContext = httpSession.getServletContext();
+		ConsumerManager consumerManager = (ConsumerManager) servletContext
+				.getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
+		if (null == consumerManager) {
+			throw new IllegalStateException(
+					"no ConsumerManager found in ServletContext");
+		}
+		return consumerManager;
+	}
 
-                                } else {
-                                        this.consumerManager = new ConsumerManager();
-                                }
-                        } catch (Exception e) {
-                                throw new ServletException(
-                                        "could not init OpenID ConsumerManager");
-                        }
-                        servletContext.setAttribute(CONSUMER_MANAGER_ATTRIBUTE,
-                                this.consumerManager);
-                }
-        }
+	private String getReturnTo(String spDestination, HttpSession httpSession)
+			throws UnsupportedEncodingException {
 
-        /**
-         * Used by the {@link AuthenticationResponseServlet} for processing the
-         * returned OpenID response
-         *
-         * @param request HTTP Servlet Request, used to get the OpenID
-         *                {@link ConsumerManager} from the {@link ServletContext}
-         * @return the OpenID {@link ConsumerManager}
-         */
-        public static ConsumerManager getConsumerManager(HttpServletRequest request) {
-                HttpSession httpSession = request.getSession();
-                ServletContext servletContext = httpSession.getServletContext();
-                ConsumerManager consumerManager = (ConsumerManager) servletContext
-                        .getAttribute(CONSUMER_MANAGER_ATTRIBUTE);
-                if (null == consumerManager) {
-                        throw new IllegalStateException(
-                                "no ConsumerManager found in ServletContext");
-                }
-                return consumerManager;
-        }
+		// generate nonce for protection against CSRF
+		NonceGenerator _consumerNonceGenerator = new IncrementalNonceGenerator();
+		String nonce = _consumerNonceGenerator.next();
 
-        private String getReturnTo(String spDestination, HttpSession httpSession) throws UnsupportedEncodingException {
+		// add to "return_to"
+		String returnTo = spDestination;
+		returnTo += (returnTo.indexOf('?') != -1) ? '&' : '?';
+		returnTo += RETURN_TO_NONCE_PARAM + "="
+				+ URLEncoder.encode(nonce, "UTF-8");
 
-                // generate nonce for protection against CSRF
-                NonceGenerator _consumerNonceGenerator = new IncrementalNonceGenerator();
-                String nonce = _consumerNonceGenerator.next();
+		// store return_to on session for response validation
+		httpSession.setAttribute(RETURN_TO_SESSION_ATTRIBUTE, returnTo);
 
+		return returnTo;
+	}
 
-                // add to "return_to"
-                String returnTo = spDestination;
-                returnTo += (returnTo.indexOf('?') != -1) ? '&' : '?';
-                returnTo += RETURN_TO_NONCE_PARAM + "=" +
-                        URLEncoder.encode(nonce, "UTF-8");
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 
-                // store return_to on session for response validation
-                httpSession.setAttribute(RETURN_TO_SESSION_ATTRIBUTE, returnTo);
+		String spDestination;
+		String userIdentifier;
+		String languages;
 
-                return returnTo;
-        }
+		AuthenticationRequestService service = this.authenticationRequestServiceLocator
+				.locateService();
+		if (null != service) {
+			userIdentifier = service.getUserIdentifier();
+			spDestination = service.getSPDestination();
+			languages = service.getPreferredLanguages();
+		} else {
+			userIdentifier = this.userIdentifier;
+			if (null != this.spDestination) {
+				spDestination = this.spDestination;
+			} else {
+				spDestination = request.getScheme() + "://"
+						+ request.getServerName() + ":"
+						+ request.getServerPort() + request.getContextPath()
+						+ this.spDestinationPage;
+			}
+			languages = this.languages;
+		}
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected void doGet(HttpServletRequest request,
-                             HttpServletResponse response) throws ServletException, IOException {
+		try {
+			LOG.debug("discovering the identity...");
+			LOG.debug("user identifier: " + userIdentifier);
+			List discoveries = this.consumerManager.discover(userIdentifier);
+			LOG.debug("associating with the IdP...");
+			DiscoveryInformation discovered = this.consumerManager
+					.associate(discoveries);
+			request.getSession().setAttribute("openid-disc", discovered);
 
-                String spDestination;
-                String userIdentifier;
-                String languages;
+			LOG.debug("SP destination: " + spDestination);
 
-                AuthenticationRequestService service =
-                        this.authenticationRequestServiceLocator.locateService();
-                if (null != service) {
-                        userIdentifier = service.getUserIdentifier();
-                        spDestination = service.getSPDestination();
-                        languages = service.getPreferredLanguages();
-                } else {
-                        userIdentifier = this.userIdentifier;
-                        if (null != this.spDestination) {
-                                spDestination = this.spDestination;
-                        } else {
-                                spDestination = request.getScheme() + "://"
-                                        + request.getServerName() + ":"
-                                        + request.getServerPort() + request.getContextPath()
-                                        + this.spDestinationPage;
-                        }
-                        languages = this.languages;
-                }
+			AuthRequest authRequest = this.consumerManager.authenticate(
+					discovered,
+					getReturnTo(spDestination, request.getSession()),
+					spDestination);
 
+			/*
+			 * We also piggy-back an attribute fetch request.
+			 */
+			FetchRequest fetchRequest = FetchRequest.createFetchRequest();
 
-                try {
-                        LOG.debug("discovering the identity...");
-                        LOG.debug("user identifier: " + userIdentifier);
-                        List discoveries = this.consumerManager.discover(userIdentifier);
-                        LOG.debug("associating with the IdP...");
-                        DiscoveryInformation discovered = this.consumerManager
-                                .associate(discoveries);
-                        request.getSession().setAttribute("openid-disc", discovered);
+			// required attributes
+			fetchRequest.addAttribute(
+					OpenIDAXConstants.AX_FIRST_NAME_PERSON_TYPE, true);
+			fetchRequest.addAttribute(
+					OpenIDAXConstants.AX_LAST_NAME_PERSON_TYPE, true);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_NAME_PERSON_TYPE,
+					true);
 
-                        LOG.debug("SP destination: " + spDestination);
+			// optional attributes
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_GENDER_TYPE, false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_POSTAL_CODE_TYPE,
+					false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_POSTAL_ADDRESS_TYPE,
+					false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_CITY_TYPE, false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_NATIONALITY_TYPE,
+					false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE,
+					false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_BIRTHDATE_TYPE,
+					false);
 
-                        AuthRequest authRequest = this.consumerManager.authenticate(
-                                discovered, getReturnTo(spDestination,
-                                request.getSession()), spDestination);
+			authRequest.addExtension(fetchRequest);
 
-                        /*
-                        * We also piggy-back an attribute fetch request.
-                        */
-                        FetchRequest fetchRequest = FetchRequest.createFetchRequest();
+			/*
+			 * Piggy back UI Extension if any languages were specified
+			 */
+			UserInterfaceMessage uiMessage = new UserInterfaceMessage();
+			uiMessage.setLanguages(languages);
 
-                        // required attributes
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_FIRST_NAME_PERSON_TYPE, true);
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_LAST_NAME_PERSON_TYPE, true);
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_NAME_PERSON_TYPE, true);
+			authRequest.addExtension(uiMessage);
 
-                        // optional attributes
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_GENDER_TYPE, false);
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_POSTAL_CODE_TYPE, false);
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_POSTAL_ADDRESS_TYPE, false);
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_CITY_TYPE, false);
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_NATIONALITY_TYPE, false);
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE, false);
-                        fetchRequest.addAttribute(OpenIDAXConstants.AX_BIRTHDATE_TYPE, false);
-
-                        authRequest.addExtension(fetchRequest);
-
-                        /*
-                        * Piggy back UI Extension if any languages were specified
-                        */
-                        UserInterfaceMessage uiMessage = new UserInterfaceMessage();
-                        uiMessage.setLanguages(languages);
-
-                        authRequest.addExtension(uiMessage);
-
-                        LOG.debug("redirecting to producer with authn request...");
-                        response.sendRedirect(authRequest.getDestinationUrl(true));
-                } catch (OpenIDException e) {
-                        throw new ServletException("OpenID error: " + e.getMessage(), e);
-                }
-        }
+			LOG.debug("redirecting to producer with authn request...");
+			response.sendRedirect(authRequest.getDestinationUrl(true));
+		} catch (OpenIDException e) {
+			throw new ServletException("OpenID error: " + e.getMessage(), e);
+		}
+	}
 }

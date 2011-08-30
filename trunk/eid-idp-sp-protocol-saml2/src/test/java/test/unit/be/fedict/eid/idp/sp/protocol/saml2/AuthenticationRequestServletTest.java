@@ -26,7 +26,6 @@ import java.io.ByteArrayInputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +56,7 @@ public class AuthenticationRequestServletTest {
 		ServletHolder servletHolder = this.servletTester.addServlet(
 				AuthenticationRequestServlet.class, "/");
 		servletHolder.setInitParameter("IdPDestination", "http://idp.be");
-                servletHolder.setInitParameter("SPDestination", "http://sp.be");
+		servletHolder.setInitParameter("SPDestination", "http://sp.be");
 		this.servletTester.start();
 		this.location = this.servletTester.createSocketConnector(true);
 	}
@@ -82,8 +81,8 @@ public class AuthenticationRequestServletTest {
 		String responseBody = getMethod.getResponseBodyAsString();
 		LOG.debug("Response body: " + responseBody);
 		Tidy tidy = new Tidy();
-		Document document = tidy.parseDOM(new ByteArrayInputStream(getMethod
-				.getResponseBody()), null);
+		Document document = tidy.parseDOM(
+				new ByteArrayInputStream(getMethod.getResponseBody()), null);
 
 		Node actionNode = XPathAPI.selectSingleNode(document,
 				"//form[@action='http://idp.be']");

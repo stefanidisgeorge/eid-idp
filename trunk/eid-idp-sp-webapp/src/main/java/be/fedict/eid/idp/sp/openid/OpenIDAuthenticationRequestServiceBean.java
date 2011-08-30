@@ -25,52 +25,54 @@ import org.apache.commons.logging.LogFactory;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 
-public class OpenIDAuthenticationRequestServiceBean implements AuthenticationRequestService, Serializable {
+public class OpenIDAuthenticationRequestServiceBean implements
+		AuthenticationRequestService, Serializable {
 
-        private static final Log LOG = LogFactory.getLog(OpenIDAuthenticationRequestServiceBean.class);
-        private static final long serialVersionUID = 1185931387819658055L;
+	private static final Log LOG = LogFactory
+			.getLog(OpenIDAuthenticationRequestServiceBean.class);
+	private static final long serialVersionUID = 1185931387819658055L;
 
-        private String idPEntryPoint;
-        private String spResponseEndpoint;
+	private String idPEntryPoint;
+	private String spResponseEndpoint;
 
-        @Override
-        public String getSPDestination() {
+	@Override
+	public String getSPDestination() {
 
-                LOG.debug("get SP destination: " + this.spResponseEndpoint);
-                return this.spResponseEndpoint;
-        }
+		LOG.debug("get SP destination: " + this.spResponseEndpoint);
+		return this.spResponseEndpoint;
+	}
 
-        @Override
-        public String getUserIdentifier() {
+	@Override
+	public String getUserIdentifier() {
 
-                LOG.debug("get User Identifier: " + this.idPEntryPoint);
-                return this.idPEntryPoint;
-        }
+		LOG.debug("get User Identifier: " + this.idPEntryPoint);
+		return this.idPEntryPoint;
+	}
 
-        @Override
-        public X509Certificate getServerCertificate() {
-                return null;
-        }
+	@Override
+	public X509Certificate getServerCertificate() {
+		return null;
+	}
 
-        @Override
-        public String getPreferredLanguages() {
+	@Override
+	public String getPreferredLanguages() {
 
-                return "nl";
-        }
+		return "nl";
+	}
 
-        public String getIdPEntryPoint() {
-                return idPEntryPoint;
-        }
+	public String getIdPEntryPoint() {
+		return idPEntryPoint;
+	}
 
-        public void setIdPEntryPoint(String idPEntryPoint) {
-                this.idPEntryPoint = idPEntryPoint;
-        }
+	public void setIdPEntryPoint(String idPEntryPoint) {
+		this.idPEntryPoint = idPEntryPoint;
+	}
 
-        public String getSpResponseEndpoint() {
-                return spResponseEndpoint;
-        }
+	public String getSpResponseEndpoint() {
+		return spResponseEndpoint;
+	}
 
-        public void setSpResponseEndpoint(String spResponseEndpoint) {
-                this.spResponseEndpoint = spResponseEndpoint;
-        }
+	public void setSpResponseEndpoint(String spResponseEndpoint) {
+		this.spResponseEndpoint = spResponseEndpoint;
+	}
 }

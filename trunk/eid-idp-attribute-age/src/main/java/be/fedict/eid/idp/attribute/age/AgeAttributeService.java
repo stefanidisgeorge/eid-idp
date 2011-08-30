@@ -33,34 +33,33 @@ import java.util.Map;
 
 /**
  * Age Attribute service.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public class AgeAttributeService implements IdentityProviderAttributeService {
 
-        private static final Log LOG = LogFactory
-                .getLog(AgeAttributeService.class);
+	private static final Log LOG = LogFactory.getLog(AgeAttributeService.class);
 
-        private static final String URI = "be:fedict:eid:idp:age";
+	private static final String URI = "be:fedict:eid:idp:age";
 
-        public void init(ServletContext servletContext) {
-        }
+	public void init(ServletContext servletContext) {
+	}
 
-        public void addAttribute(Map<String, Attribute> attributeMap) {
+	public void addAttribute(Map<String, Attribute> attributeMap) {
 
-                LOG.debug("Add age attribute");
-                Attribute dobAttribute =
-                        attributeMap.get(DefaultAttribute.DATE_OF_BIRTH.getUri());
-                if (null != dobAttribute) {
+		LOG.debug("Add age attribute");
+		Attribute dobAttribute = attributeMap
+				.get(DefaultAttribute.DATE_OF_BIRTH.getUri());
+		if (null != dobAttribute) {
 
-                        GregorianCalendar dobValue =
-                                (GregorianCalendar) dobAttribute.getValue();
-                        DateTime dob = new DateTime(dobValue.getTime());
-                        DateTime now = new DateTime();
-                        Years years = Years.yearsBetween(dob, now);
-                        int age = years.getYears();
-                        attributeMap.put(URI, new Attribute(URI,
-                                AttributeType.INTEGER, age));
-                }
-        }
+			GregorianCalendar dobValue = (GregorianCalendar) dobAttribute
+					.getValue();
+			DateTime dob = new DateTime(dobValue.getTime());
+			DateTime now = new DateTime();
+			Years years = Years.yearsBetween(dob, now);
+			int age = years.getYears();
+			attributeMap.put(URI,
+					new Attribute(URI, AttributeType.INTEGER, age));
+		}
+	}
 }

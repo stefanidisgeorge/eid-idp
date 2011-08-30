@@ -32,21 +32,22 @@ import java.util.List;
 /**
  * eID Applet Service Authentication Service implementation for the admin
  * portal.
- *
+ * 
  * @author Frank Cornelis
  */
 @Stateless
 @Local(AuthenticationService.class)
-@LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT + "AuthenticationServiceBean")
+@LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT
+		+ "AuthenticationServiceBean")
 public class AdminAuthenticationServiceBean implements AuthenticationService {
 
-        private static final Log LOG = LogFactory
-                .getLog(AdminAuthenticationServiceBean.class);
+	private static final Log LOG = LogFactory
+			.getLog(AdminAuthenticationServiceBean.class);
 
-        public void validateCertificateChain(List<X509Certificate> certificateChain)
-                throws SecurityException {
-                LOG.debug("validate certificate: "
-                        + certificateChain.get(0).getSubjectX500Principal());
-                // nothing to do here as we accept all certificates
-        }
+	public void validateCertificateChain(List<X509Certificate> certificateChain)
+			throws SecurityException {
+		LOG.debug("validate certificate: "
+				+ certificateChain.get(0).getSubjectX500Principal());
+		// nothing to do here as we accept all certificates
+	}
 }

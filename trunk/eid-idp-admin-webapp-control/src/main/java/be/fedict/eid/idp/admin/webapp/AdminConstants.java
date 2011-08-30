@@ -18,12 +18,11 @@
 
 package be.fedict.eid.idp.admin.webapp;
 
-
 import be.fedict.eid.idp.model.Constants;
 
 public abstract class AdminConstants {
 
-        public static final String ADMIN_JNDI_CONTEXT =
-                Constants.IDP_JNDI_CONTEXT + "admin/webapp/";
+	public static final String ADMIN_JNDI_CONTEXT = Constants.IDP_JNDI_CONTEXT
+			+ "admin/webapp/";
 
 }

@@ -26,24 +26,24 @@ import java.security.NoSuchAlgorithmException;
 
 public class SPBean {
 
-        public static SecretKey aes128SecretKey;
+	public static SecretKey aes128SecretKey;
 
-        static {
+	static {
 
-                try {
-                        // generate some symmetric keys
-                        KeyGenerator kgen = KeyGenerator.getInstance("AES");
+		try {
+			// generate some symmetric keys
+			KeyGenerator kgen = KeyGenerator.getInstance("AES");
 
-                        kgen.init(128);
-                        aes128SecretKey = kgen.generateKey();
-                } catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException(e);
-                }
+			kgen.init(128);
+			aes128SecretKey = kgen.generateKey();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
 
-        }
+	}
 
-        public String getAes128SecretKey() {
+	public String getAes128SecretKey() {
 
-                return new String(Hex.encode(aes128SecretKey.getEncoded()));
-        }
+		return new String(Hex.encode(aes128SecretKey.getEncoded()));
+	}
 }

@@ -29,63 +29,64 @@ import java.util.List;
  */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "accounting")
-@NamedQueries({@NamedQuery(name = AccountingEntity.LIST_ALL, query = "FROM AccountingEntity"),
-        @NamedQuery(name = AccountingEntity.RESET_ALL, query = "DELETE FROM AccountingEntity"),
-        @NamedQuery(name = AccountingEntity.NUMBER_OF_REQUESTS, query = "SELECT SUM(requests) FROM AccountingEntity")})
+@NamedQueries({
+		@NamedQuery(name = AccountingEntity.LIST_ALL, query = "FROM AccountingEntity"),
+		@NamedQuery(name = AccountingEntity.RESET_ALL, query = "DELETE FROM AccountingEntity"),
+		@NamedQuery(name = AccountingEntity.NUMBER_OF_REQUESTS, query = "SELECT SUM(requests) FROM AccountingEntity") })
 public class AccountingEntity implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        public static final String LIST_ALL = "idp.accounting.all";
-        public static final String RESET_ALL = "idp.accounting.reset.all";
-        public static final String NUMBER_OF_REQUESTS = "idp.accounting.nbr.requests";
+	public static final String LIST_ALL = "idp.accounting.all";
+	public static final String RESET_ALL = "idp.accounting.reset.all";
+	public static final String NUMBER_OF_REQUESTS = "idp.accounting.nbr.requests";
 
-        private String domain;
-        private Long requests;
+	private String domain;
+	private Long requests;
 
-        public AccountingEntity() {
-                super();
-        }
+	public AccountingEntity() {
+		super();
+	}
 
-        public AccountingEntity(String domain) {
-                this.domain = domain;
-                this.requests = 1L;
-        }
+	public AccountingEntity(String domain) {
+		this.domain = domain;
+		this.requests = 1L;
+	}
 
-        @Id
-        public String getDomain() {
-                return domain;
-        }
+	@Id
+	public String getDomain() {
+		return domain;
+	}
 
-        public void setDomain(String domain) {
-                this.domain = domain;
-        }
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
 
-        public Long getRequests() {
-                return requests;
-        }
+	public Long getRequests() {
+		return requests;
+	}
 
-        public void setRequests(Long requests) {
-                this.requests = requests;
-        }
+	public void setRequests(Long requests) {
+		this.requests = requests;
+	}
 
-        @SuppressWarnings("unchecked")
-        public static List<AccountingEntity> listAll(EntityManager entityManager) {
+	@SuppressWarnings("unchecked")
+	public static List<AccountingEntity> listAll(EntityManager entityManager) {
 
-                return entityManager.createNamedQuery(AccountingEntity.LIST_ALL)
-                        .getResultList();
-        }
+		return entityManager.createNamedQuery(AccountingEntity.LIST_ALL)
+				.getResultList();
+	}
 
-        public static int resetAll(EntityManager entityManager) {
+	public static int resetAll(EntityManager entityManager) {
 
-                return entityManager.createNamedQuery(AccountingEntity.RESET_ALL)
-                        .executeUpdate();
-        }
+		return entityManager.createNamedQuery(AccountingEntity.RESET_ALL)
+				.executeUpdate();
+	}
 
-        public static Long getNumberOfRequests(EntityManager entityManager) {
+	public static Long getNumberOfRequests(EntityManager entityManager) {
 
-                return (Long) entityManager.createNamedQuery(
-                        AccountingEntity.NUMBER_OF_REQUESTS).getSingleResult();
-        }
+		return (Long) entityManager.createNamedQuery(
+				AccountingEntity.NUMBER_OF_REQUESTS).getSingleResult();
+	}
 
 }

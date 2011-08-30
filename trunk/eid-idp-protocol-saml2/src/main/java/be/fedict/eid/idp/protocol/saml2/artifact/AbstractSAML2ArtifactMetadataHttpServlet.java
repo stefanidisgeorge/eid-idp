@@ -31,42 +31,43 @@ import org.opensaml.saml2.metadata.IDPSSODescriptor;
 
 import javax.servlet.http.HttpServletRequest;
 
-public abstract class AbstractSAML2ArtifactMetadataHttpServlet extends AbstractSAML2MetadataHttpServlet {
+public abstract class AbstractSAML2ArtifactMetadataHttpServlet extends
+		AbstractSAML2MetadataHttpServlet {
 
-        private static final Log LOG = LogFactory
-                .getLog(AbstractSAML2ArtifactMetadataHttpServlet.class);
+	private static final Log LOG = LogFactory
+			.getLog(AbstractSAML2ArtifactMetadataHttpServlet.class);
 
-        private static final long serialVersionUID = 3275535116892764771L;
+	private static final long serialVersionUID = 3275535116892764771L;
 
-        @Override
-        public EntityDescriptor getEntityDescriptor(HttpServletRequest request,
-                                                    IdentityProviderConfiguration configuration) {
+	@Override
+	public EntityDescriptor getEntityDescriptor(HttpServletRequest request,
+			IdentityProviderConfiguration configuration) {
 
-                String artifactResolutionLocation = "https://"
-                        + request.getServerName() + ":"
-                        + request.getServerPort() + request.getContextPath()
-                        + IdentityProviderProtocolService.WS_ENDPOINT_CONTEXT_PATH
-                        + "/saml2/artifact";
-                LOG.debug("Artifact resolution location: " + artifactResolutionLocation);
+		String artifactResolutionLocation = "https://"
+				+ request.getServerName() + ":" + request.getServerPort()
+				+ request.getContextPath()
+				+ IdentityProviderProtocolService.WS_ENDPOINT_CONTEXT_PATH
+				+ "/saml2/artifact";
+		LOG.debug("Artifact resolution location: " + artifactResolutionLocation);
 
-                EntityDescriptor entityDescriptor = super.getEntityDescriptor(
-                        request, configuration);
+		EntityDescriptor entityDescriptor = super.getEntityDescriptor(request,
+				configuration);
 
-                // add ArtifactResolutionService
-                ArtifactResolutionService artifactResolutionService =
-                        Saml2Util.buildXMLObject(
-                                ArtifactResolutionService.class,
-                                ArtifactResolutionService.DEFAULT_ELEMENT_NAME);
-                artifactResolutionService.setLocation(artifactResolutionLocation);
-                artifactResolutionService.setBinding(
-                        SAMLConstants.SAML2_SOAP11_BINDING_URI);
-                artifactResolutionService.setIndex(0);
-                artifactResolutionService.setIsDefault(true);
+		// add ArtifactResolutionService
+		ArtifactResolutionService artifactResolutionService = Saml2Util
+				.buildXMLObject(ArtifactResolutionService.class,
+						ArtifactResolutionService.DEFAULT_ELEMENT_NAME);
+		artifactResolutionService.setLocation(artifactResolutionLocation);
+		artifactResolutionService
+				.setBinding(SAMLConstants.SAML2_SOAP11_BINDING_URI);
+		artifactResolutionService.setIndex(0);
+		artifactResolutionService.setIsDefault(true);
 
-                IDPSSODescriptor idpssoDescriptor =
-                        (IDPSSODescriptor) entityDescriptor.getRoleDescriptors().get(0);
-                idpssoDescriptor.getArtifactResolutionServices().add(artifactResolutionService);
+		IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) entityDescriptor
+				.getRoleDescriptors().get(0);
+		idpssoDescriptor.getArtifactResolutionServices().add(
+				artifactResolutionService);
 
-                return entityDescriptor;
-        }
+		return entityDescriptor;
+	}
 }

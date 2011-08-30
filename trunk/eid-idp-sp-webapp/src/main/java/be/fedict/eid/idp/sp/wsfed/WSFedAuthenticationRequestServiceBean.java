@@ -25,52 +25,53 @@ import org.apache.commons.logging.LogFactory;
 import java.io.Serializable;
 import java.util.Map;
 
-public class WSFedAuthenticationRequestServiceBean implements AuthenticationRequestService, Serializable {
+public class WSFedAuthenticationRequestServiceBean implements
+		AuthenticationRequestService, Serializable {
 
-        private static final Log LOG = LogFactory.getLog(WSFedAuthenticationRequestServiceBean.class);
-        private static final long serialVersionUID = 1185931387819658055L;
+	private static final Log LOG = LogFactory
+			.getLog(WSFedAuthenticationRequestServiceBean.class);
+	private static final long serialVersionUID = 1185931387819658055L;
 
-        private String idPEntryPoint;
-        private String spResponseEndpoint;
+	private String idPEntryPoint;
+	private String spResponseEndpoint;
 
-        @Override
-        public String getSPDestination() {
+	@Override
+	public String getSPDestination() {
 
-                LOG.debug("get SP destination: " + this.spResponseEndpoint);
-                return this.spResponseEndpoint;
-        }
+		LOG.debug("get SP destination: " + this.spResponseEndpoint);
+		return this.spResponseEndpoint;
+	}
 
-        @Override
-        public String getIdPDestination() {
+	@Override
+	public String getIdPDestination() {
 
-                LOG.debug("get IdP destionation: " + this.idPEntryPoint);
-                return this.idPEntryPoint;
-        }
+		LOG.debug("get IdP destionation: " + this.idPEntryPoint);
+		return this.idPEntryPoint;
+	}
 
-        @Override
-        public String getContext(Map<String, String[]> parameterMap) {
-                return "some-context";
-        }
+	@Override
+	public String getContext(Map<String, String[]> parameterMap) {
+		return "some-context";
+	}
 
-        @Override
-        public String getLanguage() {
-                return "fr";
-        }
+	@Override
+	public String getLanguage() {
+		return "fr";
+	}
 
+	public String getIdPEntryPoint() {
+		return idPEntryPoint;
+	}
 
-        public String getIdPEntryPoint() {
-                return idPEntryPoint;
-        }
+	public void setIdPEntryPoint(String idPEntryPoint) {
+		this.idPEntryPoint = idPEntryPoint;
+	}
 
-        public void setIdPEntryPoint(String idPEntryPoint) {
-                this.idPEntryPoint = idPEntryPoint;
-        }
+	public String getSpResponseEndpoint() {
+		return spResponseEndpoint;
+	}
 
-        public String getSpResponseEndpoint() {
-                return spResponseEndpoint;
-        }
-
-        public void setSpResponseEndpoint(String spResponseEndpoint) {
-                this.spResponseEndpoint = spResponseEndpoint;
-        }
+	public void setSpResponseEndpoint(String spResponseEndpoint) {
+		this.spResponseEndpoint = spResponseEndpoint;
+	}
 }

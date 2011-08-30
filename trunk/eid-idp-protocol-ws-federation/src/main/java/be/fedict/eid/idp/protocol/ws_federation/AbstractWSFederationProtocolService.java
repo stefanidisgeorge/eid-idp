@@ -49,270 +49,268 @@ import java.util.Map;
 /**
  * WS-Federation Web (Passive) Requestors. We could use OpenAM (OpenSS0), but
  * then again they're also just doing a wrapping around the JAXB classes.
- *
+ * 
  * @author Frank Cornelis
  */
 public abstract class AbstractWSFederationProtocolService implements
-        IdentityProviderProtocolService {
+		IdentityProviderProtocolService {
 
-        private static final Log LOG = LogFactory
-                .getLog(AbstractWSFederationProtocolService.class);
+	private static final Log LOG = LogFactory
+			.getLog(AbstractWSFederationProtocolService.class);
 
-        public static final String WS_FED_PROTOCOL_ID = "WS-Federation";
+	public static final String WS_FED_PROTOCOL_ID = "WS-Federation";
 
-        public static final String WCTX_SESSION_ATTRIBUTE =
-                AbstractWSFederationProtocolService.class.getName() + ".wctx";
+	public static final String WCTX_SESSION_ATTRIBUTE = AbstractWSFederationProtocolService.class
+			.getName() + ".wctx";
 
-        public static final String WTREALM_SESSION_ATTRIBUTE =
-                AbstractWSFederationProtocolService.class.getName() + ".wtrealm";
+	public static final String WTREALM_SESSION_ATTRIBUTE = AbstractWSFederationProtocolService.class
+			.getName() + ".wtrealm";
 
-        public static final String LANGUAGE_PARAM = "language";
+	public static final String LANGUAGE_PARAM = "language";
 
-        private IdentityProviderConfiguration configuration;
+	private IdentityProviderConfiguration configuration;
 
-        private void storeWCtx(String wctx, HttpServletRequest request) {
-                HttpSession httpSession = request.getSession();
-                httpSession.setAttribute(WCTX_SESSION_ATTRIBUTE, wctx);
-        }
+	private void storeWCtx(String wctx, HttpServletRequest request) {
+		HttpSession httpSession = request.getSession();
+		httpSession.setAttribute(WCTX_SESSION_ATTRIBUTE, wctx);
+	}
 
-        private String retrieveWctx(HttpSession httpSession) {
-                return (String) httpSession.getAttribute(WCTX_SESSION_ATTRIBUTE);
-        }
+	private String retrieveWctx(HttpSession httpSession) {
+		return (String) httpSession.getAttribute(WCTX_SESSION_ATTRIBUTE);
+	}
 
-        private void storeWtrealm(String wtrealm, HttpServletRequest request) {
-                HttpSession httpSession = request.getSession();
-                httpSession.setAttribute(WTREALM_SESSION_ATTRIBUTE, wtrealm);
-        }
+	private void storeWtrealm(String wtrealm, HttpServletRequest request) {
+		HttpSession httpSession = request.getSession();
+		httpSession.setAttribute(WTREALM_SESSION_ATTRIBUTE, wtrealm);
+	}
 
-        private String retrieveWtrealm(HttpSession httpSession) {
-                return (String) httpSession
-                        .getAttribute(WTREALM_SESSION_ATTRIBUTE);
-        }
+	private String retrieveWtrealm(HttpSession httpSession) {
+		return (String) httpSession.getAttribute(WTREALM_SESSION_ATTRIBUTE);
+	}
 
-        @Override
-        public String getId() {
+	@Override
+	public String getId() {
 
-                LOG.debug("get ID");
-                return WS_FED_PROTOCOL_ID;
-        }
+		LOG.debug("get ID");
+		return WS_FED_PROTOCOL_ID;
+	}
 
-        @Override
-        public IncomingRequest handleIncomingRequest(
-                HttpServletRequest request, HttpServletResponse response)
-                throws Exception {
-                LOG.debug("handleIncomingRequest");
+	@Override
+	public IncomingRequest handleIncomingRequest(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		LOG.debug("handleIncomingRequest");
 
-                String wa = request.getParameter("wa");
-                if (null == wa) {
-                        throw new ServletException("wa parameter missing");
-                }
-                if (!"wsignin1.0".equals(wa)) {
-                        throw new ServletException("wa action not \"wsignin1.0\"");
-                }
-                String wtrealm = request.getParameter("wtrealm");
-                if (null == wtrealm) {
-                        throw new ServletException("missing wtrealm parameter");
-                }
-                LOG.debug("wtrealm: " + wtrealm);
+		String wa = request.getParameter("wa");
+		if (null == wa) {
+			throw new ServletException("wa parameter missing");
+		}
+		if (!"wsignin1.0".equals(wa)) {
+			throw new ServletException("wa action not \"wsignin1.0\"");
+		}
+		String wtrealm = request.getParameter("wtrealm");
+		if (null == wtrealm) {
+			throw new ServletException("missing wtrealm parameter");
+		}
+		LOG.debug("wtrealm: " + wtrealm);
 
-                // HTTP Referer check
-                String referer = request.getHeader("referer");
-                if (null != referer) {
+		// HTTP Referer check
+		String referer = request.getHeader("referer");
+		if (null != referer) {
 
-                        URL refererUrl = new URL(referer);
-                        URL wtRealmUrl = new URL(wtrealm);
+			URL refererUrl = new URL(referer);
+			URL wtRealmUrl = new URL(wtrealm);
 
-                        LOG.debug("HTTP Referer check: referer=\"" +
-                                refererUrl.getHost() + "\" wtrealm=\"" +
-                                wtRealmUrl.getHost() + "\"");
+			LOG.debug("HTTP Referer check: referer=\"" + refererUrl.getHost()
+					+ "\" wtrealm=\"" + wtRealmUrl.getHost() + "\"");
 
-                        if (!refererUrl.getHost().equals(wtRealmUrl.getHost())) {
-                                throw new IllegalArgumentException("Invalid referer!");
-                        }
-                }
+			if (!refererUrl.getHost().equals(wtRealmUrl.getHost())) {
+				throw new IllegalArgumentException("Invalid referer!");
+			}
+		}
 
-                storeWtrealm(wtrealm, request);
-                String wctx = request.getParameter("wctx");
-                LOG.debug("wctx: " + wctx);
-                storeWCtx(wctx, request);
+		storeWtrealm(wtrealm, request);
+		String wctx = request.getParameter("wctx");
+		LOG.debug("wctx: " + wctx);
+		storeWCtx(wctx, request);
 
-                // get optional language hint
-                String language = null;
-                if (null != request.getParameter(LANGUAGE_PARAM)) {
-                        language = request.getParameter(LANGUAGE_PARAM);
-                }
+		// get optional language hint
+		String language = null;
+		if (null != request.getParameter(LANGUAGE_PARAM)) {
+			language = request.getParameter(LANGUAGE_PARAM);
+		}
 
-                return new IncomingRequest(getAuthenticationFlow(), wtrealm,
-                        null, Collections.singletonList(language), null);
-        }
+		return new IncomingRequest(getAuthenticationFlow(), wtrealm, null,
+				Collections.singletonList(language), null);
+	}
 
-        @Override
-        public ReturnResponse handleReturnResponse(HttpSession httpSession,
-                                                   String userId,
-                                                   Map<String, Attribute> attributes,
-                                                   SecretKey secretKey, PublicKey publicKey,
-                                                   String rpTargetUrl,
-                                                   HttpServletRequest request,
-                                                   HttpServletResponse response)
-                throws Exception {
-                LOG.debug("handleReturnResponse");
+	@Override
+	public ReturnResponse handleReturnResponse(HttpSession httpSession,
+			String userId, Map<String, Attribute> attributes,
+			SecretKey secretKey, PublicKey publicKey, String rpTargetUrl,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		LOG.debug("handleReturnResponse");
 
-                String wtrealm = retrieveWtrealm(httpSession);
-                String targetUrl = rpTargetUrl;
-                if (null == targetUrl) {
-                        targetUrl = wtrealm;
-                }
-                ReturnResponse returnResponse = new ReturnResponse(targetUrl);
-                returnResponse.addAttribute("wa", "wsignin1.0");
-                String wctx = retrieveWctx(httpSession);
-                returnResponse.addAttribute("wctx", wctx);
+		String wtrealm = retrieveWtrealm(httpSession);
+		String targetUrl = rpTargetUrl;
+		if (null == targetUrl) {
+			targetUrl = wtrealm;
+		}
+		ReturnResponse returnResponse = new ReturnResponse(targetUrl);
+		returnResponse.addAttribute("wa", "wsignin1.0");
+		String wctx = retrieveWctx(httpSession);
+		returnResponse.addAttribute("wctx", wctx);
 
-                String wresult = getWResult(wctx, wtrealm, userId, attributes,
-                        secretKey, publicKey);
-                returnResponse.addAttribute("wresult", wresult);
-                return returnResponse;
-        }
+		String wresult = getWResult(wctx, wtrealm, userId, attributes,
+				secretKey, publicKey);
+		returnResponse.addAttribute("wresult", wresult);
+		return returnResponse;
+	}
 
-        private String getWResult(String wctx, String wtrealm,
-                                  String userId, Map<String, Attribute> attributes,
-                                  SecretKey secretKey, PublicKey publicKey)
-                throws TransformerException, IOException {
+	private String getWResult(String wctx, String wtrealm, String userId,
+			Map<String, Attribute> attributes, SecretKey secretKey,
+			PublicKey publicKey) throws TransformerException, IOException {
 
-                RequestSecurityTokenResponseCollection requestSecurityTokenResponseCollection =
-                        Saml2Util.buildXMLObject(RequestSecurityTokenResponseCollection.class,
-                                RequestSecurityTokenResponseCollection.ELEMENT_NAME);
+		RequestSecurityTokenResponseCollection requestSecurityTokenResponseCollection = Saml2Util
+				.buildXMLObject(RequestSecurityTokenResponseCollection.class,
+						RequestSecurityTokenResponseCollection.ELEMENT_NAME);
 
-                RequestSecurityTokenResponse requestSecurityTokenResponse =
-                        Saml2Util.buildXMLObject(RequestSecurityTokenResponse.class,
-                                RequestSecurityTokenResponse.ELEMENT_NAME);
-                requestSecurityTokenResponseCollection.getRequestSecurityTokenResponses().
-                        add(requestSecurityTokenResponse);
+		RequestSecurityTokenResponse requestSecurityTokenResponse = Saml2Util
+				.buildXMLObject(RequestSecurityTokenResponse.class,
+						RequestSecurityTokenResponse.ELEMENT_NAME);
+		requestSecurityTokenResponseCollection
+				.getRequestSecurityTokenResponses().add(
+						requestSecurityTokenResponse);
 
-                if (null != wctx) {
-                        requestSecurityTokenResponse.setContext(wctx);
-                }
+		if (null != wctx) {
+			requestSecurityTokenResponse.setContext(wctx);
+		}
 
-                TokenType tokenType = Saml2Util.buildXMLObject(TokenType.class,
-                        TokenType.ELEMENT_NAME);
-                tokenType.setValue(SAMLConstants.SAML20_NS);
+		TokenType tokenType = Saml2Util.buildXMLObject(TokenType.class,
+				TokenType.ELEMENT_NAME);
+		tokenType.setValue(SAMLConstants.SAML20_NS);
 
-                RequestType requestType = Saml2Util.buildXMLObject(RequestType.class,
-                        RequestType.ELEMENT_NAME);
-                requestType.setValue("http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue");
+		RequestType requestType = Saml2Util.buildXMLObject(RequestType.class,
+				RequestType.ELEMENT_NAME);
+		requestType
+				.setValue("http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue");
 
-                KeyType keyType = Saml2Util.buildXMLObject(KeyType.class,
-                        KeyType.ELEMENT_NAME);
-                keyType.setValue("http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer");
+		KeyType keyType = Saml2Util.buildXMLObject(KeyType.class,
+				KeyType.ELEMENT_NAME);
+		keyType.setValue("http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer");
 
-                RequestedSecurityToken requestedSecurityToken =
-                        Saml2Util.buildXMLObject(RequestedSecurityToken.class,
-                                RequestedSecurityToken.ELEMENT_NAME);
+		RequestedSecurityToken requestedSecurityToken = Saml2Util
+				.buildXMLObject(RequestedSecurityToken.class,
+						RequestedSecurityToken.ELEMENT_NAME);
 
-                requestSecurityTokenResponse.getUnknownXMLObjects().add(tokenType);
-                requestSecurityTokenResponse.getUnknownXMLObjects().add(requestType);
-                requestSecurityTokenResponse.getUnknownXMLObjects().add(keyType);
-                requestSecurityTokenResponse.getUnknownXMLObjects().add(requestedSecurityToken);
+		requestSecurityTokenResponse.getUnknownXMLObjects().add(tokenType);
+		requestSecurityTokenResponse.getUnknownXMLObjects().add(requestType);
+		requestSecurityTokenResponse.getUnknownXMLObjects().add(keyType);
+		requestSecurityTokenResponse.getUnknownXMLObjects().add(
+				requestedSecurityToken);
 
-                IdPIdentity idpIdentity = this.configuration.findIdentity();
-                String issuerName;
-                if (null != idpIdentity) {
-                        issuerName = idpIdentity.getName();
-                } else {
-                        issuerName = this.configuration.getDefaultIssuer();
-                }
-                if (null == issuerName) {
-                        issuerName = "Default";
-                }
+		IdPIdentity idpIdentity = this.configuration.findIdentity();
+		String issuerName;
+		if (null != idpIdentity) {
+			issuerName = idpIdentity.getName();
+		} else {
+			issuerName = this.configuration.getDefaultIssuer();
+		}
+		if (null == issuerName) {
+			issuerName = "Default";
+		}
 
-                DateTime issueInstantDateTime = new DateTime();
-                Assertion assertion = Saml2Util.getAssertion(issuerName, null,
-                        wtrealm, wtrealm, configuration.getResponseTokenValidity(),
-                        issueInstantDateTime, getAuthenticationPolicy(),
-                        userId, attributes, secretKey, publicKey);
+		DateTime issueInstantDateTime = new DateTime();
+		Assertion assertion = Saml2Util.getAssertion(issuerName, null, wtrealm,
+				wtrealm, configuration.getResponseTokenValidity(),
+				issueInstantDateTime, getAuthenticationPolicy(), userId,
+				attributes, secretKey, publicKey);
 
-                requestedSecurityToken.setUnknownXMLObject(assertion);
+		requestedSecurityToken.setUnknownXMLObject(assertion);
 
-                Element element;
-                if (null != idpIdentity) {
+		Element element;
+		if (null != idpIdentity) {
 
-                        LOG.debug("sign assertion");
-                        element = Saml2Util.signAsElement(
-                                requestSecurityTokenResponseCollection,
-                                assertion, idpIdentity.getPrivateKeyEntry());
-                } else {
+			LOG.debug("sign assertion");
+			element = Saml2Util.signAsElement(
+					requestSecurityTokenResponseCollection, assertion,
+					idpIdentity.getPrivateKeyEntry());
+		} else {
 
-                        LOG.warn("assertion NOT signed!");
-                        element = Saml2Util.marshall(requestSecurityTokenResponseCollection);
-                }
+			LOG.warn("assertion NOT signed!");
+			element = Saml2Util
+					.marshall(requestSecurityTokenResponseCollection);
+		}
 
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                Saml2Util.writeDocument(element.getOwnerDocument(), outputStream);
-                String wresult = new String(outputStream.toByteArray(), Charset.forName("UTF-8"));
-                LOG.debug("wresult=\"" + wresult + "\"");
-                return wresult;
-        }
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		Saml2Util.writeDocument(element.getOwnerDocument(), outputStream);
+		String wresult = new String(outputStream.toByteArray(),
+				Charset.forName("UTF-8"));
+		LOG.debug("wresult=\"" + wresult + "\"");
+		return wresult;
+	}
 
+	@Override
+	public void init(ServletContext servletContext,
+			IdentityProviderConfiguration configuration) {
 
-        @Override
-        public void init(ServletContext servletContext,
-                         IdentityProviderConfiguration configuration) {
+		LOG.debug("init");
+		this.configuration = configuration;
+	}
 
-                LOG.debug("init");
-                this.configuration = configuration;
-        }
+	@Override
+	public String findAttributeUri(String uri) {
 
-        @Override
-        public String findAttributeUri(String uri) {
+		DefaultAttribute defaultAttribute = DefaultAttribute
+				.findDefaultAttribute(uri);
+		if (null != defaultAttribute) {
+			switch (defaultAttribute) {
 
-                DefaultAttribute defaultAttribute = DefaultAttribute.findDefaultAttribute(uri);
-                if (null != defaultAttribute) {
-                        switch (defaultAttribute) {
+			case LAST_NAME:
+				return AttributeConstants.LAST_NAME_CLAIM_TYPE_URI;
+			case FIRST_NAME:
+				return AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI;
+			case NAME:
+				return AttributeConstants.NAME_CLAIM_TYPE_URI;
+			case IDENTIFIER:
+				return AttributeConstants.PPID_CLAIM_TYPE_URI;
+			case ADDRESS:
+				return AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI;
+			case LOCALITY:
+				return AttributeConstants.LOCALITY_CLAIM_TYPE_URI;
+			case POSTAL_CODE:
+				return AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI;
+			case GENDER:
+				return AttributeConstants.GENDER_CLAIM_TYPE_URI;
+			case DATE_OF_BIRTH:
+				return AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI;
+			case NATIONALITY:
+				return AttributeConstants.NATIONALITY_CLAIM_TYPE_URI;
+			case PLACE_OF_BIRTH:
+				return AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI;
+			case PHOTO:
+				return AttributeConstants.PHOTO_CLAIM_TYPE_URI;
+			}
+		}
+		return null;
+	}
 
-                                case LAST_NAME:
-                                        return AttributeConstants.LAST_NAME_CLAIM_TYPE_URI;
-                                case FIRST_NAME:
-                                        return AttributeConstants.FIRST_NAME_CLAIM_TYPE_URI;
-                                case NAME:
-                                        return AttributeConstants.NAME_CLAIM_TYPE_URI;
-                                case IDENTIFIER:
-                                        return AttributeConstants.PPID_CLAIM_TYPE_URI;
-                                case ADDRESS:
-                                        return AttributeConstants.STREET_ADDRESS_CLAIM_TYPE_URI;
-                                case LOCALITY:
-                                        return AttributeConstants.LOCALITY_CLAIM_TYPE_URI;
-                                case POSTAL_CODE:
-                                        return AttributeConstants.POSTAL_CODE_CLAIM_TYPE_URI;
-                                case GENDER:
-                                        return AttributeConstants.GENDER_CLAIM_TYPE_URI;
-                                case DATE_OF_BIRTH:
-                                        return AttributeConstants.DATE_OF_BIRTH_CLAIM_TYPE_URI;
-                                case NATIONALITY:
-                                        return AttributeConstants.NATIONALITY_CLAIM_TYPE_URI;
-                                case PLACE_OF_BIRTH:
-                                        return AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI;
-                                case PHOTO:
-                                        return AttributeConstants.PHOTO_CLAIM_TYPE_URI;
-                        }
-                }
-                return null;
-        }
+	private SamlAuthenticationPolicy getAuthenticationPolicy() {
 
-        private SamlAuthenticationPolicy getAuthenticationPolicy() {
+		IdentityProviderFlow authenticationFlow = getAuthenticationFlow();
+		switch (authenticationFlow) {
 
-                IdentityProviderFlow authenticationFlow = getAuthenticationFlow();
-                switch (authenticationFlow) {
+		case IDENTIFICATION:
+			return SamlAuthenticationPolicy.IDENTIFICATION;
+		case AUTHENTICATION:
+			return SamlAuthenticationPolicy.AUTHENTICATION;
+		case AUTHENTICATION_WITH_IDENTIFICATION:
+			return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
+		}
 
-                        case IDENTIFICATION:
-                                return SamlAuthenticationPolicy.IDENTIFICATION;
-                        case AUTHENTICATION:
-                                return SamlAuthenticationPolicy.AUTHENTICATION;
-                        case AUTHENTICATION_WITH_IDENTIFICATION:
-                                return SamlAuthenticationPolicy.AUTHENTICATION_WITH_IDENTIFICATION;
-                }
+		throw new RuntimeException("Unsupported authentication flow: "
+				+ authenticationFlow);
+	}
 
-                throw new RuntimeException("Unsupported authentication flow: "
-                        + authenticationFlow);
-        }
-
-        protected abstract IdentityProviderFlow getAuthenticationFlow();
+	protected abstract IdentityProviderFlow getAuthenticationFlow();
 }

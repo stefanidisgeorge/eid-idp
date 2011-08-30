@@ -22,23 +22,21 @@ import java.util.GregorianCalendar;
 
 /**
  * Enumeration of allowed eID IdP Attribute Types.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public enum AttributeType {
 
-        STRING(String.class),
-        INTEGER(Integer.class),
-        DATE(GregorianCalendar.class),
-        BINARY(Byte[].class);
+	STRING(String.class), INTEGER(Integer.class), DATE(GregorianCalendar.class), BINARY(
+			Byte[].class);
 
-        private final Class<?> type;
+	private final Class<?> type;
 
-        private AttributeType(Class<?> type) {
-                this.type = type;
-        }
+	private AttributeType(Class<?> type) {
+		this.type = type;
+	}
 
-        public Class<?> getType() {
-                return type;
-        }
+	public Class<?> getType() {
+		return type;
+	}
 }

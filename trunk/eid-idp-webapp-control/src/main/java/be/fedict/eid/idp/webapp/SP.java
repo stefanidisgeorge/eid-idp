@@ -25,32 +25,31 @@ import java.io.OutputStream;
 @Local
 public interface SP {
 
-        public static final String LANGUAGE_LIST_SESSION_ATTRIBUTE =
-                "LanguageList";
+	public static final String LANGUAGE_LIST_SESSION_ATTRIBUTE = "LanguageList";
 
-        /*
-         * Lifecycle.
-         */
-        void destroy();
+	/*
+	 * Lifecycle.
+	 */
+	void destroy();
 
-        /*
-         * Accessors
-         */
-        String getRp();
+	/*
+	 * Accessors
+	 */
+	String getRp();
 
-        boolean isRpLogo();
+	boolean isRpLogo();
 
-        void paint(OutputStream stream, Object object) throws IOException;
+	void paint(OutputStream stream, Object object) throws IOException;
 
-        long getTimeStamp();
+	long getTimeStamp();
 
-        /*
-         * Factories
-         */
-        void attributeFactory();
+	/*
+	 * Factories
+	 */
+	void attributeFactory();
 
-        /*
-         * Actions
-         */
-        void initLanguage();
+	/*
+	 * Actions
+	 */
+	void initLanguage();
 }

@@ -34,7 +34,8 @@ import javax.servlet.ServletException;
  * </p>
  * <ul>
  * <li><tt>ResponseSessionAttribute</tt>: indicates the session attribute to
- * store the returned {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse} data object..</li>
+ * store the returned
+ * {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse} data object..</li>
  * <li><tt>RedirectPage</tt>: indicates the page where to redirect after
  * successfull authentication.</li>
  * </ul>
@@ -51,26 +52,28 @@ import javax.servlet.ServletException;
  * to use for reporting an error. This session attribute can be used on the
  * error page.</li>
  * </ul>
- *
+ * 
  * @author Wim Vandenhaute
  */
-public class AuthenticationResponseServlet extends AbstractAuthenticationResponseServlet {
+public class AuthenticationResponseServlet extends
+		AbstractAuthenticationResponseServlet {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        private ServiceLocator<AuthenticationResponseService> serviceLocator;
+	private ServiceLocator<AuthenticationResponseService> serviceLocator;
 
-        @Override
-        protected void initialize(ServletConfig config) throws ServletException {
+	@Override
+	protected void initialize(ServletConfig config) throws ServletException {
 
-                this.serviceLocator = new ServiceLocator<AuthenticationResponseService>
-                        ("AuthenticationResponseService", config);
-        }
+		this.serviceLocator = new ServiceLocator<AuthenticationResponseService>(
+				"AuthenticationResponseService", config);
+	}
 
-        @Override
-        protected AbstractAuthenticationResponseProcessor getAuthenticationResponseProcessor()
-                throws ServletException {
+	@Override
+	protected AbstractAuthenticationResponseProcessor getAuthenticationResponseProcessor()
+			throws ServletException {
 
-                return new AuthenticationResponseProcessor(this.serviceLocator.locateService());
-        }
+		return new AuthenticationResponseProcessor(
+				this.serviceLocator.locateService());
+	}
 }

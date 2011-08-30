@@ -159,16 +159,13 @@ public class OpenIDProtocolServiceTest {
 				.getLog(OpenIDConsumerServlet.class);
 
 		public static final String CONSUMER_MANAGER_ATTRIBUTE = OpenIDConsumerServlet.class
-				.getName()
-				+ ".ConsumerManager";
+				.getName() + ".ConsumerManager";
 
 		public static final String USER_ID_SESSION_ATTRIBUTE = OpenIDConsumerServlet.class
-				.getName()
-				+ ".UserId";
+				.getName() + ".UserId";
 
 		public static final String FIRST_NAME_SESSION_ATTRIBUTE = OpenIDConsumerServlet.class
-				.getName()
-				+ ".FirstName";
+				.getName() + ".FirstName";
 
 		private ConsumerManager consumerManager;
 
@@ -199,8 +196,8 @@ public class OpenIDProtocolServiceTest {
 				String openIdMode = request.getParameter("openid.mode");
 				if ("id_res".equals(openIdMode)) {
 					LOG.debug("id_res");
-					ParameterList parameterList = new ParameterList(request
-							.getParameterMap());
+					ParameterList parameterList = new ParameterList(
+							request.getParameterMap());
 					DiscoveryInformation discovered = (DiscoveryInformation) request
 							.getSession().getAttribute("openid-disc");
 					StringBuffer receivingUrl = request.getRequestURL();
@@ -283,8 +280,7 @@ public class OpenIDProtocolServiceTest {
 				.getLog(OpenIDProducerServlet.class);
 
 		public static final String SERVER_MANAGER_ATTRIBUTE = OpenIDConsumerServlet.class
-				.getName()
-				+ ".ServerManager";
+				.getName() + ".ServerManager";
 
 		private ServerManager serverManager;
 
@@ -316,8 +312,8 @@ public class OpenIDProtocolServiceTest {
 			String openIdMode = request.getParameter("openid.mode");
 			if ("checkid_setup".equals(openIdMode)) {
 				LOG.debug("checkid_setup");
-				ParameterList parameterList = new ParameterList(request
-						.getParameterMap());
+				ParameterList parameterList = new ParameterList(
+						request.getParameterMap());
 				LOG.debug("redirecting to the consumer...");
 
 				try {
@@ -392,8 +388,8 @@ public class OpenIDProtocolServiceTest {
 				HttpServletResponse response) throws ServletException,
 				IOException {
 			LOG.debug("doPost");
-			ParameterList parameterList = new ParameterList(request
-					.getParameterMap());
+			ParameterList parameterList = new ParameterList(
+					request.getParameterMap());
 			String openIdMode = request.getParameter("openid.mode");
 			if ("associate".equals(openIdMode)) {
 				/*

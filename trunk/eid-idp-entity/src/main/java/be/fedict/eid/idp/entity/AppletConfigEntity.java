@@ -36,90 +36,89 @@ import java.util.List;
  */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "applet")
-@NamedQueries({@NamedQuery(name = AppletConfigEntity.LIST_ALL, query = "FROM AppletConfigEntity ")})
+@NamedQueries({ @NamedQuery(name = AppletConfigEntity.LIST_ALL, query = "FROM AppletConfigEntity ") })
 public class AppletConfigEntity implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        public static final String LIST_ALL = "idp.applet.list.all";
+	public static final String LIST_ALL = "idp.applet.list.all";
 
-        private Long id;
+	private Long id;
 
-        private byte[] encodedServerCertificate;
+	private byte[] encodedServerCertificate;
 
-        public AppletConfigEntity(X509Certificate certificate)
-                throws CertificateEncodingException {
+	public AppletConfigEntity(X509Certificate certificate)
+			throws CertificateEncodingException {
 
-                this.encodedServerCertificate = certificate.getEncoded();
-        }
+		this.encodedServerCertificate = certificate.getEncoded();
+	}
 
-        public AppletConfigEntity() {
-                super();
-        }
+	public AppletConfigEntity() {
+		super();
+	}
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
-        public Long getId() {
-                return this.id;
-        }
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	public Long getId() {
+		return this.id;
+	}
 
-        public void setId(Long id) {
-                this.id = id;
-        }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-        @Column(length = 4 * 1024, nullable = true)
-        @Basic(fetch = FetchType.LAZY)
-        public byte[] getEncodedServerCertificate() {
-                return encodedServerCertificate;
-        }
+	@Column(length = 4 * 1024, nullable = true)
+	@Basic(fetch = FetchType.LAZY)
+	public byte[] getEncodedServerCertificate() {
+		return encodedServerCertificate;
+	}
 
-        public void setEncodedServerCertificate(byte[] encodedServerCertificate) {
-                this.encodedServerCertificate = encodedServerCertificate;
-        }
+	public void setEncodedServerCertificate(byte[] encodedServerCertificate) {
+		this.encodedServerCertificate = encodedServerCertificate;
+	}
 
-        @Transient
-        public X509Certificate getServerCertificate() {
+	@Transient
+	public X509Certificate getServerCertificate() {
 
-                if (null == this.encodedServerCertificate) {
-                        return null;
-                }
-                try {
-                        CertificateFactory certificateFactory = CertificateFactory
-                                .getInstance("X.509");
-                        InputStream certificateStream = new ByteArrayInputStream(
-                                this.encodedServerCertificate);
-                        return (X509Certificate) certificateFactory
-                                .generateCertificate(certificateStream);
-                } catch (CertificateException e) {
-                        throw new RuntimeException("cert factory error: " + e.getMessage());
-                }
-        }
+		if (null == this.encodedServerCertificate) {
+			return null;
+		}
+		try {
+			CertificateFactory certificateFactory = CertificateFactory
+					.getInstance("X.509");
+			InputStream certificateStream = new ByteArrayInputStream(
+					this.encodedServerCertificate);
+			return (X509Certificate) certificateFactory
+					.generateCertificate(certificateStream);
+		} catch (CertificateException e) {
+			throw new RuntimeException("cert factory error: " + e.getMessage());
+		}
+	}
 
-        @Transient
-        public void setServerCertificate(X509Certificate certificate)
-                throws CertificateEncodingException {
+	@Transient
+	public void setServerCertificate(X509Certificate certificate)
+			throws CertificateEncodingException {
 
-                this.encodedServerCertificate = certificate.getEncoded();
-        }
+		this.encodedServerCertificate = certificate.getEncoded();
+	}
 
-        @Transient
-        public String getServerCertificateSubject() {
+	@Transient
+	public String getServerCertificateSubject() {
 
-                if (null == this.encodedServerCertificate) {
-                        return null;
-                }
-                return getServerCertificate().getSubjectDN().getName();
-        }
+		if (null == this.encodedServerCertificate) {
+			return null;
+		}
+		return getServerCertificate().getSubjectDN().getName();
+	}
 
+	@SuppressWarnings("unchecked")
+	public static AppletConfigEntity getAppletConfig(EntityManager entityManager) {
 
-        @SuppressWarnings("unchecked")
-        public static AppletConfigEntity getAppletConfig(EntityManager entityManager) {
-
-                Query query = entityManager.createNamedQuery(LIST_ALL);
-                List<AppletConfigEntity> configs = query.getResultList();
-                if (configs.isEmpty()) {
-                        return new AppletConfigEntity();
-                }
-                return configs.get(0);
-        }
+		Query query = entityManager.createNamedQuery(LIST_ALL);
+		List<AppletConfigEntity> configs = query.getResultList();
+		if (configs.isEmpty()) {
+			return new AppletConfigEntity();
+		}
+		return configs.get(0);
+	}
 }

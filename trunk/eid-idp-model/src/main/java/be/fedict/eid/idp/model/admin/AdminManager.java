@@ -28,16 +28,17 @@ import java.util.List;
 @Local
 public interface AdminManager {
 
-    /**
-     * @param certificate certificate
-     * @return whether the (already authenticated) admin identifier indeed belongs
-     *         to an admin.
-     */
-    boolean isAdmin(X509Certificate certificate);
+	/**
+	 * @param certificate
+	 *            certificate
+	 * @return whether the (already authenticated) admin identifier indeed
+	 *         belongs to an admin.
+	 */
+	boolean isAdmin(X509Certificate certificate);
 
-    List<AdministratorEntity> listAdmins();
+	List<AdministratorEntity> listAdmins();
 
-    void register(AdministratorEntity admin);
+	void register(AdministratorEntity admin);
 
-    void remove(AdministratorEntity admin) throws RemoveLastAdminException;
+	void remove(AdministratorEntity admin) throws RemoveLastAdminException;
 }

@@ -27,36 +27,37 @@ import javax.servlet.http.HttpServletRequest;
 
 public class WSFedBean {
 
-        private static final Log LOG = LogFactory.getLog(WSFedBean.class);
+	private static final Log LOG = LogFactory.getLog(WSFedBean.class);
 
-        private HttpServletRequest request;
+	private HttpServletRequest request;
 
-        public void setIdPEntryPoint(String idPEntryPoint) {
+	public void setIdPEntryPoint(String idPEntryPoint) {
 
-                LOG.debug("set IdP Entry Point " + idPEntryPoint);
+		LOG.debug("set IdP Entry Point " + idPEntryPoint);
 
-                StartupServletContextListener.getWSFedRequestBean().
-                        setIdPEntryPoint(ConfigServlet.getIdpBaseLocation(request)
-                                + "protocol/" + idPEntryPoint);
-        }
+		StartupServletContextListener.getWSFedRequestBean().setIdPEntryPoint(
+				ConfigServlet.getIdpBaseLocation(request) + "protocol/"
+						+ idPEntryPoint);
+	}
 
-        public void setSpResponseEndpoint(String spResponseEndpoint) {
+	public void setSpResponseEndpoint(String spResponseEndpoint) {
 
-                LOG.debug("set SP Response Endpoint: " + spResponseEndpoint);
+		LOG.debug("set SP Response Endpoint: " + spResponseEndpoint);
 
-                StartupServletContextListener.getWSFedRequestBean().
-                        setSpResponseEndpoint(this.request.getScheme() + "://"
-                                + this.request.getServerName() + ":"
-                                + this.request.getServerPort()
-                                + this.request.getContextPath() + "/"
-                                + spResponseEndpoint);
-        }
+		StartupServletContextListener.getWSFedRequestBean()
+				.setSpResponseEndpoint(
+						this.request.getScheme() + "://"
+								+ this.request.getServerName() + ":"
+								+ this.request.getServerPort()
+								+ this.request.getContextPath() + "/"
+								+ spResponseEndpoint);
+	}
 
-        public HttpServletRequest getRequest() {
-                return request;
-        }
+	public HttpServletRequest getRequest() {
+		return request;
+	}
 
-        public void setRequest(HttpServletRequest request) {
-                this.request = request;
-        }
+	public void setRequest(HttpServletRequest request) {
+		this.request = request;
+	}
 }

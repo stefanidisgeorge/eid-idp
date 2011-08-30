@@ -33,72 +33,66 @@ import org.opensaml.ws.transport.OutTransport;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-public abstract class AbstractSAML2ArtifactProtocolService extends AbstractSAML2ProtocolService {
+public abstract class AbstractSAML2ArtifactProtocolService extends
+		AbstractSAML2ProtocolService {
 
-        public static final String ARTIFACT_MAP_ATTRIBUTE =
-                AbstractSAML2ArtifactProtocolService.class.getName() + "." +
-                        "ArtifactMap";
+	public static final String ARTIFACT_MAP_ATTRIBUTE = AbstractSAML2ArtifactProtocolService.class
+			.getName() + "." + "ArtifactMap";
 
-        @SuppressWarnings("unchecked")
-        @Override
-        protected ReturnResponse handleSamlResponse(HttpServletRequest request,
-                                                    String targetUrl,
-                                                    Response samlResponse,
-                                                    String relayState)
-                throws Exception {
+	@SuppressWarnings("unchecked")
+	@Override
+	protected ReturnResponse handleSamlResponse(HttpServletRequest request,
+			String targetUrl, Response samlResponse, String relayState)
+			throws Exception {
 
-                ReturnResponse returnResponse = new ReturnResponse(targetUrl);
+		ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 
-                HTTPArtifactEncoder messageEncoder =
-                        new HTTPArtifactEncoder(getArtifactMap(
-                                request.getSession().getServletContext()));
-                BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
+		HTTPArtifactEncoder messageEncoder = new HTTPArtifactEncoder(
+				getArtifactMap(request.getSession().getServletContext()));
+		BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
 
-                // used for construction of artifact by looking up IndexedEndpoint
-                EntityDescriptor entityDescriptor = getEntityDescriptor(request);
-                messageContext.setLocalEntityRoleMetadata(entityDescriptor
-                        .getRoleDescriptors().get(0));
-                messageContext.setLocalEntityId(entityDescriptor.getEntityID());
+		// used for construction of artifact by looking up IndexedEndpoint
+		EntityDescriptor entityDescriptor = getEntityDescriptor(request);
+		messageContext.setLocalEntityRoleMetadata(entityDescriptor
+				.getRoleDescriptors().get(0));
+		messageContext.setLocalEntityId(entityDescriptor.getEntityID());
 
-                messageContext.setInboundMessageIssuer(getIssuer(request.getSession()));
-                messageContext.setOutboundSAMLMessage(samlResponse);
-                messageContext.setOutboundMessageIssuer(
-                        samlResponse.getIssuer().getValue());
-                messageContext.setRelayState(relayState);
+		messageContext.setInboundMessageIssuer(getIssuer(request.getSession()));
+		messageContext.setOutboundSAMLMessage(samlResponse);
+		messageContext.setOutboundMessageIssuer(samlResponse.getIssuer()
+				.getValue());
+		messageContext.setRelayState(relayState);
 
-                OutTransport outTransport = new HTTPOutTransport(returnResponse);
-                messageContext.setOutboundMessageTransport(outTransport);
+		OutTransport outTransport = new HTTPOutTransport(returnResponse);
+		messageContext.setOutboundMessageTransport(outTransport);
 
-                messageEncoder.encode(messageContext);
-                return returnResponse;
-        }
+		messageEncoder.encode(messageContext);
+		return returnResponse;
+	}
 
-        public static SAMLArtifactMap getArtifactMap(ServletContext context) {
+	public static SAMLArtifactMap getArtifactMap(ServletContext context) {
 
-                BasicSAMLArtifactMap artifactMap =
-                        (BasicSAMLArtifactMap)
-                                context.getAttribute(ARTIFACT_MAP_ATTRIBUTE);
+		BasicSAMLArtifactMap artifactMap = (BasicSAMLArtifactMap) context
+				.getAttribute(ARTIFACT_MAP_ATTRIBUTE);
 
+		if (null == artifactMap) {
 
-                if (null == artifactMap) {
+			IdentityProviderConfiguration configuration = getIdPConfiguration(context);
 
-                        IdentityProviderConfiguration configuration =
-                                getIdPConfiguration(context);
+			int validity = 5;
+			if (null != configuration.getResponseTokenValidity()
+					&& configuration.getResponseTokenValidity() > 0) {
+				validity = configuration.getResponseTokenValidity();
+			}
 
-                        int validity = 5;
-                        if (null != configuration.getResponseTokenValidity() &&
-                                configuration.getResponseTokenValidity() > 0) {
-                                validity = configuration.getResponseTokenValidity();
-                        }
+			artifactMap = new BasicSAMLArtifactMap(
+					new MapBasedStorageService<String, SAMLArtifactMap.SAMLArtifactMapEntry>(),
+					validity * 60 * 1000);
+			context.setAttribute(ARTIFACT_MAP_ATTRIBUTE, artifactMap);
+		}
+		return artifactMap;
+	}
 
-                        artifactMap = new BasicSAMLArtifactMap(
-                                new MapBasedStorageService<String,
-                                        SAMLArtifactMap.SAMLArtifactMapEntry>(),
-                                validity * 60 * 1000);
-                        context.setAttribute(ARTIFACT_MAP_ATTRIBUTE, artifactMap);
-                }
-                return artifactMap;
-        }
-
-        protected abstract EntityDescriptor getEntityDescriptor(HttpServletRequest request);
+	protected abstract EntityDescriptor getEntityDescriptor(
+			HttpServletRequest request);
 }

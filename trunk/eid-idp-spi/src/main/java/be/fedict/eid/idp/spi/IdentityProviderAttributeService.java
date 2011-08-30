@@ -25,17 +25,18 @@ import java.util.Map;
 
 /**
  * eID IdP Service Attribute Interface for derived attributes.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public interface IdentityProviderAttributeService {
 
-        /**
-         * Initializes this attribute service handler.
-         *
-         * @param servletContext servlet context
-         */
-        void init(ServletContext servletContext);
+	/**
+	 * Initializes this attribute service handler.
+	 * 
+	 * @param servletContext
+	 *            servlet context
+	 */
+	void init(ServletContext servletContext);
 
-        void addAttribute(Map<String, Attribute> attributeMap);
+	void addAttribute(Map<String, Attribute> attributeMap);
 }

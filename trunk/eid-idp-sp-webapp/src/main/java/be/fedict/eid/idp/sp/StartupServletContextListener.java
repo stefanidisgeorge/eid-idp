@@ -30,117 +30,106 @@ import javax.naming.*;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-
 public class StartupServletContextListener implements ServletContextListener {
 
-        private static final Log LOG = LogFactory.getLog(StartupServletContextListener.class);
+	private static final Log LOG = LogFactory
+			.getLog(StartupServletContextListener.class);
 
-        private static final String SAML2_REQUEST_BEAN_JNDI =
-                "be/fedict/eid/idp/sp/saml2/AuthenticationRequestServiceBean";
+	private static final String SAML2_REQUEST_BEAN_JNDI = "be/fedict/eid/idp/sp/saml2/AuthenticationRequestServiceBean";
 
-        private static final String SAML2_RESPONSE_BEAN_JNDI =
-                "be/fedict/eid/idp/sp/saml2/AuthenticationResponseServiceBean";
+	private static final String SAML2_RESPONSE_BEAN_JNDI = "be/fedict/eid/idp/sp/saml2/AuthenticationResponseServiceBean";
 
-        private static final String OPENID_REQUEST_BEAN_JNDI =
-                "be/fedict/eid/idp/sp/openid/AuthenticationRequestServiceBean";
+	private static final String OPENID_REQUEST_BEAN_JNDI = "be/fedict/eid/idp/sp/openid/AuthenticationRequestServiceBean";
 
-        private static final String WS_FED_REQUEST_BEAN_JNDI =
-                "be/fedict/eid/idp/sp/wsfed/AuthenticationRequestServiceBean";
+	private static final String WS_FED_REQUEST_BEAN_JNDI = "be/fedict/eid/idp/sp/wsfed/AuthenticationRequestServiceBean";
 
-        private static final String WS_FED_RESPONSE_BEAN_JNDI =
-                "be/fedict/eid/idp/sp/wsfed/AuthenticationResponseServiceBean";
+	private static final String WS_FED_RESPONSE_BEAN_JNDI = "be/fedict/eid/idp/sp/wsfed/AuthenticationResponseServiceBean";
 
-        @Override
-        public void contextInitialized(ServletContextEvent sce) {
+	@Override
+	public void contextInitialized(ServletContextEvent sce) {
 
-                try {
-                        bindComponent(SAML2_REQUEST_BEAN_JNDI,
-                                new AuthenticationRequestServiceBean());
-                        bindComponent(SAML2_RESPONSE_BEAN_JNDI,
-                                new AuthenticationResponseServiceBean());
-                        bindComponent(OPENID_REQUEST_BEAN_JNDI,
-                                new OpenIDAuthenticationRequestServiceBean());
-                        bindComponent(WS_FED_REQUEST_BEAN_JNDI,
-                                new WSFedAuthenticationRequestServiceBean());
-                        bindComponent(WS_FED_RESPONSE_BEAN_JNDI,
-                                new WSFedAuthenticationResponseServiceBean());
-                } catch (NamingException e) {
-                        throw new RuntimeException(e);
-                }
-        }
+		try {
+			bindComponent(SAML2_REQUEST_BEAN_JNDI,
+					new AuthenticationRequestServiceBean());
+			bindComponent(SAML2_RESPONSE_BEAN_JNDI,
+					new AuthenticationResponseServiceBean());
+			bindComponent(OPENID_REQUEST_BEAN_JNDI,
+					new OpenIDAuthenticationRequestServiceBean());
+			bindComponent(WS_FED_REQUEST_BEAN_JNDI,
+					new WSFedAuthenticationRequestServiceBean());
+			bindComponent(WS_FED_RESPONSE_BEAN_JNDI,
+					new WSFedAuthenticationResponseServiceBean());
+		} catch (NamingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-        @Override
-        public void contextDestroyed(ServletContextEvent sce) {
-        }
+	@Override
+	public void contextDestroyed(ServletContextEvent sce) {
+	}
 
-        public static void bindComponent(String jndiName, Object component)
-                throws NamingException {
+	public static void bindComponent(String jndiName, Object component)
+			throws NamingException {
 
-                LOG.debug("bind component: " + jndiName);
-                InitialContext initialContext = new InitialContext();
-                String[] names = jndiName.split("/");
-                Context context = initialContext;
-                for (int idx = 0; idx < names.length - 1; idx++) {
-                        String name = names[idx];
-                        LOG.debug("name: " + name);
-                        NamingEnumeration<NameClassPair> listContent = context.list("");
-                        boolean subContextPresent = false;
-                        while (listContent.hasMore()) {
-                                NameClassPair nameClassPair = listContent.next();
-                                if (!name.equals(nameClassPair.getName())) {
-                                        continue;
-                                }
-                                subContextPresent = true;
-                        }
-                        if (!subContextPresent) {
-                                context = context.createSubcontext(name);
-                        } else {
-                                context = (Context) context.lookup(name);
-                        }
-                }
-                String name = names[names.length - 1];
-                context.rebind(name, component);
-        }
+		LOG.debug("bind component: " + jndiName);
+		InitialContext initialContext = new InitialContext();
+		String[] names = jndiName.split("/");
+		Context context = initialContext;
+		for (int idx = 0; idx < names.length - 1; idx++) {
+			String name = names[idx];
+			LOG.debug("name: " + name);
+			NamingEnumeration<NameClassPair> listContent = context.list("");
+			boolean subContextPresent = false;
+			while (listContent.hasMore()) {
+				NameClassPair nameClassPair = listContent.next();
+				if (!name.equals(nameClassPair.getName())) {
+					continue;
+				}
+				subContextPresent = true;
+			}
+			if (!subContextPresent) {
+				context = context.createSubcontext(name);
+			} else {
+				context = (Context) context.lookup(name);
+			}
+		}
+		String name = names[names.length - 1];
+		context.rebind(name, component);
+	}
 
-        public static AuthenticationRequestServiceBean getSaml2RequestBean() {
+	public static AuthenticationRequestServiceBean getSaml2RequestBean() {
 
-                return (AuthenticationRequestServiceBean)
-                        getComponent(SAML2_REQUEST_BEAN_JNDI);
-        }
+		return (AuthenticationRequestServiceBean) getComponent(SAML2_REQUEST_BEAN_JNDI);
+	}
 
-        public static AuthenticationResponseServiceBean getSaml2ResponseBean() {
+	public static AuthenticationResponseServiceBean getSaml2ResponseBean() {
 
-                return (AuthenticationResponseServiceBean)
-                        getComponent(SAML2_RESPONSE_BEAN_JNDI);
-        }
+		return (AuthenticationResponseServiceBean) getComponent(SAML2_RESPONSE_BEAN_JNDI);
+	}
 
-        public static OpenIDAuthenticationRequestServiceBean getOpenIDRequestBean() {
+	public static OpenIDAuthenticationRequestServiceBean getOpenIDRequestBean() {
 
-                return (OpenIDAuthenticationRequestServiceBean)
-                        getComponent(OPENID_REQUEST_BEAN_JNDI);
-        }
+		return (OpenIDAuthenticationRequestServiceBean) getComponent(OPENID_REQUEST_BEAN_JNDI);
+	}
 
-        public static WSFedAuthenticationRequestServiceBean getWSFedRequestBean() {
+	public static WSFedAuthenticationRequestServiceBean getWSFedRequestBean() {
 
-                return (WSFedAuthenticationRequestServiceBean)
-                        getComponent(WS_FED_REQUEST_BEAN_JNDI);
-        }
+		return (WSFedAuthenticationRequestServiceBean) getComponent(WS_FED_REQUEST_BEAN_JNDI);
+	}
 
-        public static WSFedAuthenticationResponseServiceBean getWSFedResponseBean() {
+	public static WSFedAuthenticationResponseServiceBean getWSFedResponseBean() {
 
-                return (WSFedAuthenticationResponseServiceBean)
-                        getComponent(WS_FED_RESPONSE_BEAN_JNDI);
-        }
+		return (WSFedAuthenticationResponseServiceBean) getComponent(WS_FED_RESPONSE_BEAN_JNDI);
+	}
 
+	private static Object getComponent(String jndiName) {
 
-        private static Object getComponent(String jndiName) {
-
-                try {
-                        InitialContext initialContext = new InitialContext();
-                        return initialContext.lookup(jndiName);
-                } catch (NamingException e) {
-                        throw new RuntimeException(e);
-                }
-        }
+		try {
+			InitialContext initialContext = new InitialContext();
+			return initialContext.lookup(jndiName);
+		} catch (NamingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 }

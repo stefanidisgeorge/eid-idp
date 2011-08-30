@@ -35,50 +35,51 @@ import java.io.IOException;
 
 public class PhotoServlet extends HttpServlet {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        private static final Log LOG = LogFactory.getLog(PhotoServlet.class);
+	private static final Log LOG = LogFactory.getLog(PhotoServlet.class);
 
-        public static final String PHOTO_SESSION_ATTRIBUTE = "Photo";
+	public static final String PHOTO_SESSION_ATTRIBUTE = "Photo";
 
-        @Override
-        protected void doGet(HttpServletRequest request,
-                             HttpServletResponse response) throws ServletException, IOException {
-                LOG.debug("doGet");
-                response.setContentType("image/jpg");
-                response.setHeader("Cache-Control",
-                        "no-cache, no-store, must-revalidate, max-age=-1"); // http 1.1
-                response.setHeader("Pragma", "no-cache, no-store"); // http 1.0
-                response.setDateHeader("Expires", -1);
-                ServletOutputStream out = response.getOutputStream();
-                HttpSession session = request.getSession();
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		LOG.debug("doGet");
+		response.setContentType("image/jpg");
+		response.setHeader("Cache-Control",
+				"no-cache, no-store, must-revalidate, max-age=-1"); // http 1.1
+		response.setHeader("Pragma", "no-cache, no-store"); // http 1.0
+		response.setDateHeader("Expires", -1);
+		ServletOutputStream out = response.getOutputStream();
+		HttpSession session = request.getSession();
 
-                byte[] photoData = (byte[]) session.getAttribute(PHOTO_SESSION_ATTRIBUTE);
+		byte[] photoData = (byte[]) session
+				.getAttribute(PHOTO_SESSION_ATTRIBUTE);
 
-                if (null != photoData) {
-                        BufferedImage photo = ImageIO.read(new ByteArrayInputStream(
-                                photoData));
-                        if (null == photo) {
-                                /*
-                                * In this case we render a photo containing some error message.
-                                */
-                                photo = new BufferedImage(140, 200, BufferedImage.TYPE_INT_RGB);
-                                Graphics2D graphics = (Graphics2D) photo.getGraphics();
-                                RenderingHints renderingHints = new RenderingHints(
-                                        RenderingHints.KEY_TEXT_ANTIALIASING,
-                                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-                                graphics.setRenderingHints(renderingHints);
-                                graphics.setColor(Color.WHITE);
-                                graphics.fillRect(1, 1, 140 - 1 - 1, 200 - 1 - 1);
-                                graphics.setColor(Color.RED);
-                                graphics.setFont(new Font("Dialog", Font.BOLD, 20));
-                                graphics.drawString("Photo Error", 0, 200 / 2);
-                                graphics.dispose();
-                                ImageIO.write(photo, "jpg", out);
-                        } else {
-                                out.write(photoData);
-                        }
-                }
-                out.close();
-        }
+		if (null != photoData) {
+			BufferedImage photo = ImageIO.read(new ByteArrayInputStream(
+					photoData));
+			if (null == photo) {
+				/*
+				 * In this case we render a photo containing some error message.
+				 */
+				photo = new BufferedImage(140, 200, BufferedImage.TYPE_INT_RGB);
+				Graphics2D graphics = (Graphics2D) photo.getGraphics();
+				RenderingHints renderingHints = new RenderingHints(
+						RenderingHints.KEY_TEXT_ANTIALIASING,
+						RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+				graphics.setRenderingHints(renderingHints);
+				graphics.setColor(Color.WHITE);
+				graphics.fillRect(1, 1, 140 - 1 - 1, 200 - 1 - 1);
+				graphics.setColor(Color.RED);
+				graphics.setFont(new Font("Dialog", Font.BOLD, 20));
+				graphics.drawString("Photo Error", 0, 200 / 2);
+				graphics.dispose();
+				ImageIO.write(photo, "jpg", out);
+			} else {
+				out.write(photoData);
+			}
+		}
+		out.close();
+	}
 }

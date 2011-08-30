@@ -30,31 +30,32 @@ import java.io.IOException;
 
 public class IdPAppletServiceServlet extends AppletServiceServlet {
 
-        private static final long serialVersionUID = -3390647246478622619L;
+	private static final long serialVersionUID = -3390647246478622619L;
 
-        private static final Log LOG = LogFactory
-                .getLog(IdPAppletServiceServlet.class);
+	private static final Log LOG = LogFactory
+			.getLog(IdPAppletServiceServlet.class);
 
-        @Override
-        protected void doGet(HttpServletRequest request,
-                             HttpServletResponse response) throws ServletException, IOException {
-                LOG.debug("doGet");
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		LOG.debug("doGet");
 
-                response.sendRedirect("./main");
-        }
+		response.sendRedirect("./main");
+	}
 
-        @Override
-        protected void doPost(HttpServletRequest request,
-                              HttpServletResponse response) throws ServletException, IOException {
-                LOG.debug("doPost");
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		LOG.debug("doPost");
 
-                IdentityProviderProtocolService protocolService = ProtocolEntryServlet
-                        .findProtocolService(request);
-                if (null == protocolService) {
-                        // user navigated directly here without a processed authentication request, abort...
-                        return;
-                }
+		IdentityProviderProtocolService protocolService = ProtocolEntryServlet
+				.findProtocolService(request);
+		if (null == protocolService) {
+			// user navigated directly here without a processed authentication
+			// request, abort...
+			return;
+		}
 
-                super.doPost(request, response);
-        }
+		super.doPost(request, response);
+	}
 }

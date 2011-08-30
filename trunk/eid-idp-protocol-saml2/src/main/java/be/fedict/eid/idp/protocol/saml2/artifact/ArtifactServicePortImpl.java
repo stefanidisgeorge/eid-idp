@@ -44,90 +44,84 @@ import java.util.UUID;
 @HandlerChain(file = "ws-handlers.xml")
 public class ArtifactServicePortImpl implements ArtifactServicePortType {
 
-        private static final Log LOG = LogFactory
-                .getLog(ArtifactServicePortImpl.class);
+	private static final Log LOG = LogFactory
+			.getLog(ArtifactServicePortImpl.class);
 
-        @Resource
-        private WebServiceContext context;
+	@Resource
+	private WebServiceContext context;
 
-        public ArtifactResponseType resolve(ArtifactResolveType artifactResolveType) {
+	public ArtifactResponseType resolve(ArtifactResolveType artifactResolveType) {
 
-                LOG.debug("Resolve: " + artifactResolveType.getArtifact());
+		LOG.debug("Resolve: " + artifactResolveType.getArtifact());
 
-                ServletContext servletContext =
-                        (ServletContext) context.getMessageContext()
-                                .get(MessageContext.SERVLET_CONTEXT);
+		ServletContext servletContext = (ServletContext) context
+				.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
 
-                // construct successfull artifact response
-                ArtifactResponse artifactResponse = getArtifactResponse(
-                        artifactResolveType.getID());
+		// construct successfull artifact response
+		ArtifactResponse artifactResponse = getArtifactResponse(artifactResolveType
+				.getID());
 
-                // get SAML Artifact Map
-                SAMLArtifactMap artifactMap =
-                        AbstractSAML2ArtifactProtocolService.getArtifactMap(
-                                servletContext);
+		// get SAML Artifact Map
+		SAMLArtifactMap artifactMap = AbstractSAML2ArtifactProtocolService
+				.getArtifactMap(servletContext);
 
-                SAMLArtifactMap.SAMLArtifactMapEntry entry =
-                        artifactMap.get(artifactResolveType.getArtifact());
+		SAMLArtifactMap.SAMLArtifactMapEntry entry = artifactMap
+				.get(artifactResolveType.getArtifact());
 
-                // Add entry if found and remove from map
-                if (null != entry) {
+		// Add entry if found and remove from map
+		if (null != entry) {
 
-                        // validate issuer with entry.issuer
-                        if (!entry.getRelyingPartyId().equals(
-                                artifactResolveType.getIssuer().getValue())) {
-                                String message = "ArtifactResolve Issuer (" +
-                                        artifactResolveType.getIssuer().getValue() +
-                                        ") does not match entry RP ID!";
-                                LOG.error(message + " (" + entry.getIssuerId() + ")");
-                                artifactResponse = getArtifactResponse(
-                                        artifactResolveType.getID(),
-                                        StatusCode.REQUEST_DENIED_URI,
-                                        message);
-                        } else {
+			// validate issuer with entry.issuer
+			if (!entry.getRelyingPartyId().equals(
+					artifactResolveType.getIssuer().getValue())) {
+				String message = "ArtifactResolve Issuer ("
+						+ artifactResolveType.getIssuer().getValue()
+						+ ") does not match entry RP ID!";
+				LOG.error(message + " (" + entry.getIssuerId() + ")");
+				artifactResponse = getArtifactResponse(
+						artifactResolveType.getID(),
+						StatusCode.REQUEST_DENIED_URI, message);
+			} else {
 
-                                LOG.debug("response found and added");
-                                artifactResponse.setMessage(entry.getSamlMessage());
-                                artifactMap.remove(artifactResolveType.getArtifact());
-                        }
-                }
+				LOG.debug("response found and added");
+				artifactResponse.setMessage(entry.getSamlMessage());
+				artifactMap.remove(artifactResolveType.getArtifact());
+			}
+		}
 
-                return Saml2Util.toJAXB(artifactResponse, ArtifactResponseType.class);
-        }
+		return Saml2Util.toJAXB(artifactResponse, ArtifactResponseType.class);
+	}
 
-        private ArtifactResponse getArtifactResponse(String inResponseTo) {
+	private ArtifactResponse getArtifactResponse(String inResponseTo) {
 
-                return getArtifactResponse(inResponseTo, StatusCode.SUCCESS_URI,
-                        null);
-        }
+		return getArtifactResponse(inResponseTo, StatusCode.SUCCESS_URI, null);
+	}
 
-        private ArtifactResponse getArtifactResponse(String inResponseTo,
-                                                     String statusCodeValue,
-                                                     String statusMessageValue) {
+	private ArtifactResponse getArtifactResponse(String inResponseTo,
+			String statusCodeValue, String statusMessageValue) {
 
-                ArtifactResponse artifactResponse = Saml2Util.buildXMLObject(
-                        ArtifactResponse.class, ArtifactResponse.DEFAULT_ELEMENT_NAME);
-                DateTime issueInstant = new DateTime();
-                artifactResponse.setIssueInstant(issueInstant);
-                artifactResponse.setVersion(SAMLVersion.VERSION_20);
-                artifactResponse.setID(UUID.randomUUID().toString());
-                artifactResponse.setInResponseTo(inResponseTo);
+		ArtifactResponse artifactResponse = Saml2Util.buildXMLObject(
+				ArtifactResponse.class, ArtifactResponse.DEFAULT_ELEMENT_NAME);
+		DateTime issueInstant = new DateTime();
+		artifactResponse.setIssueInstant(issueInstant);
+		artifactResponse.setVersion(SAMLVersion.VERSION_20);
+		artifactResponse.setID(UUID.randomUUID().toString());
+		artifactResponse.setInResponseTo(inResponseTo);
 
-                Status status = Saml2Util.buildXMLObject(Status.class,
-                        Status.DEFAULT_ELEMENT_NAME);
-                artifactResponse.setStatus(status);
-                StatusCode statusCode = Saml2Util.buildXMLObject(StatusCode.class,
-                        StatusCode.DEFAULT_ELEMENT_NAME);
-                status.setStatusCode(statusCode);
-                statusCode.setValue(statusCodeValue);
-                if (null != statusMessageValue) {
-                        StatusMessage statusMessage = Saml2Util.buildXMLObject(
-                                StatusMessage.class,
-                                StatusMessage.DEFAULT_ELEMENT_NAME);
-                        statusMessage.setMessage(statusMessageValue);
-                        status.setStatusMessage(statusMessage);
-                }
+		Status status = Saml2Util.buildXMLObject(Status.class,
+				Status.DEFAULT_ELEMENT_NAME);
+		artifactResponse.setStatus(status);
+		StatusCode statusCode = Saml2Util.buildXMLObject(StatusCode.class,
+				StatusCode.DEFAULT_ELEMENT_NAME);
+		status.setStatusCode(statusCode);
+		statusCode.setValue(statusCodeValue);
+		if (null != statusMessageValue) {
+			StatusMessage statusMessage = Saml2Util.buildXMLObject(
+					StatusMessage.class, StatusMessage.DEFAULT_ELEMENT_NAME);
+			statusMessage.setMessage(statusMessageValue);
+			status.setStatusMessage(statusMessage);
+		}
 
-                return artifactResponse;
-        }
+		return artifactResponse;
+	}
 }

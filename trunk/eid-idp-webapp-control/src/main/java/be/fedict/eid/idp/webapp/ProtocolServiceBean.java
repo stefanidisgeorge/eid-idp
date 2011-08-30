@@ -40,74 +40,71 @@ import java.util.List;
 
 @Stateful
 @Name("idpProtocolService")
-@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "webapp/ProtocolServiceBean")
+@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT
+		+ "webapp/ProtocolServiceBean")
 public class ProtocolServiceBean implements ProtocolService {
 
-        @Logger
-        private Log log;
+	@Logger
+	private Log log;
 
-        @DataModel
-        private List<ServiceEndpoint> idpProtocolServices;
+	@DataModel
+	private List<ServiceEndpoint> idpProtocolServices;
 
-        @DataModel
-        private List<ServiceEndpoint> idpServiceEndpoints;
+	@DataModel
+	private List<ServiceEndpoint> idpServiceEndpoints;
 
-        @EJB
-        private ProtocolServiceManager protocolServiceManager;
+	@EJB
+	private ProtocolServiceManager protocolServiceManager;
 
-        @EJB
-        private IdentityService identityService;
+	@EJB
+	private IdentityService identityService;
 
-        @Override
-        @Factory("idpProtocolServices")
-        public void initProtocolServices() {
-                this.log.debug("init idpProtocolServices");
-                this.idpProtocolServices = new LinkedList<ServiceEndpoint>();
+	@Override
+	@Factory("idpProtocolServices")
+	public void initProtocolServices() {
+		this.log.debug("init idpProtocolServices");
+		this.idpProtocolServices = new LinkedList<ServiceEndpoint>();
 
-                for (IdentityProviderProtocolType protocolService :
-                        this.protocolServiceManager.getProtocolServices()) {
-                        this.idpProtocolServices.add(
-                                new ServiceEndpoint(protocolService.getName(),
-                                        "/eid-idp" +
-                                                IdentityProviderProtocolService
-                                                        .PROTOCOL_ENDPOINT_PATH +
-                                                protocolService.getContextPath()));
-                }
-        }
+		for (IdentityProviderProtocolType protocolService : this.protocolServiceManager
+				.getProtocolServices()) {
+			this.idpProtocolServices.add(new ServiceEndpoint(protocolService
+					.getName(), "/eid-idp"
+					+ IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH
+					+ protocolService.getContextPath()));
+		}
+	}
 
-        @Factory("idpServiceEndpoints")
-        public void initServiceEndpoints() {
-                this.log.debug("init idpServiceEndpoints");
-                this.idpServiceEndpoints = new LinkedList<ServiceEndpoint>();
+	@Factory("idpServiceEndpoints")
+	public void initServiceEndpoints() {
+		this.log.debug("init idpServiceEndpoints");
+		this.idpServiceEndpoints = new LinkedList<ServiceEndpoint>();
 
-                for (IdentityProviderProtocolType protocolService :
-                        this.protocolServiceManager.getProtocolServices()) {
+		for (IdentityProviderProtocolType protocolService : this.protocolServiceManager
+				.getProtocolServices()) {
 
-                        for (EndpointType endpoint :
-                                protocolService.getEndpoints().getEndpoint()) {
-                                this.idpServiceEndpoints.add(
-                                        new ServiceEndpoint(endpoint.getName(),
-                                                "/eid-idp" +
-                                                        IdentityProviderProtocolService
-                                                                .ENDPOINT_CONTEXT_PATH +
-                                                        endpoint.getContextPath()));
-                        }
-                }
-        }
+			for (EndpointType endpoint : protocolService.getEndpoints()
+					.getEndpoint()) {
+				this.idpServiceEndpoints.add(new ServiceEndpoint(endpoint
+						.getName(), "/eid-idp"
+						+ IdentityProviderProtocolService.ENDPOINT_CONTEXT_PATH
+						+ endpoint.getContextPath()));
+			}
+		}
+	}
 
-        @Remove
-        @Destroy
-        public void destroy() {
-                this.log.debug("destroy");
-        }
+	@Remove
+	@Destroy
+	public void destroy() {
+		this.log.debug("destroy");
+	}
 
-        @Override
-        public String getThumbprint() {
+	@Override
+	public String getThumbprint() {
 
-                String thumbprint = this.identityService.getIdentityFingerprint();
-                if (null == thumbprint) {
-                        return "<No identity configured>";
-                }
-                return thumbprint;
-        }
+		String thumbprint = this.identityService.getIdentityFingerprint();
+		if (null == thumbprint) {
+			return "<No identity configured>";
+		}
+		return thumbprint;
+	}
 }

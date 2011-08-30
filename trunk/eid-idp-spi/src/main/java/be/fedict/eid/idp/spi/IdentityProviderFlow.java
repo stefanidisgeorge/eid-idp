@@ -20,9 +20,9 @@ package be.fedict.eid.idp.spi;
 
 /**
  * The possible internal flows provided by the eID IdP.
- *
+ * 
  * @author Frank Cornelis
  */
 public enum IdentityProviderFlow {
-    IDENTIFICATION, AUTHENTICATION, AUTHENTICATION_WITH_IDENTIFICATION
+	IDENTIFICATION, AUTHENTICATION, AUTHENTICATION_WITH_IDENTIFICATION
 }

@@ -33,89 +33,91 @@ import java.security.cert.X509Certificate;
 /**
  * OpenID Trust Manager to install to override the default set of trusted SSL
  * certificates. Used by {@link OpenIDSSLSocketFactory}.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public class OpenIDTrustManager implements X509TrustManager {
 
-        private static final Log LOG = LogFactory.getLog(OpenIDTrustManager.class);
+	private static final Log LOG = LogFactory.getLog(OpenIDTrustManager.class);
 
-        private final X509Certificate serverCertificate;
+	private final X509Certificate serverCertificate;
 
-        private X509TrustManager defaultTrustManager;
+	private X509TrustManager defaultTrustManager;
 
-        /**
-         * Allows all server certificates.
-         */
-        public OpenIDTrustManager() {
-                this.serverCertificate = null;
-                this.defaultTrustManager = null;
-        }
+	/**
+	 * Allows all server certificates.
+	 */
+	public OpenIDTrustManager() {
+		this.serverCertificate = null;
+		this.defaultTrustManager = null;
+	}
 
-        /**
-         * Trust only the given server certificate, and the default trusted server
-         * certificates.
-         *
-         * @param serverCertificate SSL certificate to trust
-         * @throws NoSuchAlgorithmException could not get an SSLContext instance
-         * @throws KeyStoreException        failed to intialize the
-         *                                  {@link OpenIDTrustManager}
-         */
-        public OpenIDTrustManager(X509Certificate serverCertificate)
-                throws NoSuchAlgorithmException, KeyStoreException {
-                this.serverCertificate = serverCertificate;
-                String algorithm = TrustManagerFactory.getDefaultAlgorithm();
-                TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                        .getInstance(algorithm);
-                trustManagerFactory.init((KeyStore) null);
-                TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-                for (TrustManager trustManager : trustManagers) {
-                        if (trustManager instanceof X509TrustManager) {
-                                this.defaultTrustManager = (X509TrustManager) trustManager;
-                                break;
-                        }
-                }
-                if (null == this.defaultTrustManager) {
-                        throw new IllegalStateException(
-                                "no default X509 trust manager found");
-                }
-        }
+	/**
+	 * Trust only the given server certificate, and the default trusted server
+	 * certificates.
+	 * 
+	 * @param serverCertificate
+	 *            SSL certificate to trust
+	 * @throws NoSuchAlgorithmException
+	 *             could not get an SSLContext instance
+	 * @throws KeyStoreException
+	 *             failed to intialize the {@link OpenIDTrustManager}
+	 */
+	public OpenIDTrustManager(X509Certificate serverCertificate)
+			throws NoSuchAlgorithmException, KeyStoreException {
+		this.serverCertificate = serverCertificate;
+		String algorithm = TrustManagerFactory.getDefaultAlgorithm();
+		TrustManagerFactory trustManagerFactory = TrustManagerFactory
+				.getInstance(algorithm);
+		trustManagerFactory.init((KeyStore) null);
+		TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+		for (TrustManager trustManager : trustManagers) {
+			if (trustManager instanceof X509TrustManager) {
+				this.defaultTrustManager = (X509TrustManager) trustManager;
+				break;
+			}
+		}
+		if (null == this.defaultTrustManager) {
+			throw new IllegalStateException(
+					"no default X509 trust manager found");
+		}
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public void checkClientTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
-                LOG.error("checkClientTrusted");
-                if (null != this.defaultTrustManager) {
-                        this.defaultTrustManager.checkClientTrusted(chain, authType);
-                }
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public void checkClientTrusted(X509Certificate[] chain, String authType)
+			throws CertificateException {
+		LOG.error("checkClientTrusted");
+		if (null != this.defaultTrustManager) {
+			this.defaultTrustManager.checkClientTrusted(chain, authType);
+		}
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public void checkServerTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
-                LOG.debug("check server trusted");
-                LOG.debug("auth type: " + authType);
-                if (null == this.serverCertificate) {
-                        LOG.debug("trusting all server certificates");
-                        return;
-                }
-                if (!this.serverCertificate.equals(chain[0])) {
-                        throw new CertificateException("untrusted server certificate");
-                }
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public void checkServerTrusted(X509Certificate[] chain, String authType)
+			throws CertificateException {
+		LOG.debug("check server trusted");
+		LOG.debug("auth type: " + authType);
+		if (null == this.serverCertificate) {
+			LOG.debug("trusting all server certificates");
+			return;
+		}
+		if (!this.serverCertificate.equals(chain[0])) {
+			throw new CertificateException("untrusted server certificate");
+		}
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public X509Certificate[] getAcceptedIssuers() {
-                LOG.error("getAcceptedIssuers");
-                if (null == this.defaultTrustManager) {
-                        return null;
-                }
-                return this.defaultTrustManager.getAcceptedIssuers();
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public X509Certificate[] getAcceptedIssuers() {
+		LOG.error("getAcceptedIssuers");
+		if (null == this.defaultTrustManager) {
+			return null;
+		}
+		return this.defaultTrustManager.getAcceptedIssuers();
+	}
 }

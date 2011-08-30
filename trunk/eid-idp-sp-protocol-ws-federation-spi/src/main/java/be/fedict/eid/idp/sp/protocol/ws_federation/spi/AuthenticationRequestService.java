@@ -24,40 +24,41 @@ import java.util.Map;
  * WS-Federation SPI for authentication request services. Using an
  * authentication request * service allows for run-time configuration of the
  * WS-Federation AuthenticationRequestServlet.
- *
+ * 
  * @author Wim Vandenhaute.
  */
 public interface AuthenticationRequestService {
 
-        /**
-         * Gives back the Service Provider destination endpoint that will handle
-         * the returned SAML v2.0 Response.
-         *
-         * @return SP SAML2 response handling location.
-         */
-        String getSPDestination();
+	/**
+	 * Gives back the Service Provider destination endpoint that will handle the
+	 * returned SAML v2.0 Response.
+	 * 
+	 * @return SP SAML2 response handling location.
+	 */
+	String getSPDestination();
 
-        /**
-         * Gives back the destination URL of the eID IdP SAML2 protocol entry point.
-         *
-         * @return eID IdP SAML2 entry point
-         */
-        String getIdPDestination();
+	/**
+	 * Gives back the destination URL of the eID IdP SAML2 protocol entry point.
+	 * 
+	 * @return eID IdP SAML2 entry point
+	 */
+	String getIdPDestination();
 
-        /**
-         * Gives back the relay state to be used towards the eID IdP SAML2 protocol
-         * entry point.
-         *
-         * @param parameterMap the HTTP parameter map.
-         * @return relay state
-         */
-        String getContext(Map<String, String[]> parameterMap);
+	/**
+	 * Gives back the relay state to be used towards the eID IdP SAML2 protocol
+	 * entry point.
+	 * 
+	 * @param parameterMap
+	 *            the HTTP parameter map.
+	 * @return relay state
+	 */
+	String getContext(Map<String, String[]> parameterMap);
 
-        /**
-         * Language hint for the eID IdP webapp. Return <code>null</code> if the
-         * browser's locale is ok.
-         *
-         * @return language hint for the eID IdP webapp.
-         */
-        String getLanguage();
+	/**
+	 * Language hint for the eID IdP webapp. Return <code>null</code> if the
+	 * browser's locale is ok.
+	 * 
+	 * @return language hint for the eID IdP webapp.
+	 */
+	String getLanguage();
 }

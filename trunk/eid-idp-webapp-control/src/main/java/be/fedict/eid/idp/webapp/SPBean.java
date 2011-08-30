@@ -48,118 +48,118 @@ import java.util.Locale;
 @LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "webapp/SPBean")
 public class SPBean implements SP {
 
-        private static final String ATTRIBUTE_LIST_NAME = "idpRPAttributes";
+	private static final String ATTRIBUTE_LIST_NAME = "idpRPAttributes";
 
-        @Logger
-        private Log log;
+	@Logger
+	private Log log;
 
-        @In(create = true)
-        private SessionContext sessionContext;
+	@In(create = true)
+	private SessionContext sessionContext;
 
-        @In(create = true)
-        FacesMessages facesMessages;
+	@In(create = true)
+	FacesMessages facesMessages;
 
-        @In
-        private LocaleSelector localeSelector;
+	@In
+	private LocaleSelector localeSelector;
 
-        @In(value = SP.LANGUAGE_LIST_SESSION_ATTRIBUTE, scope = ScopeType.SESSION, required = false)
-        private List<String> languages;
+	@In(value = SP.LANGUAGE_LIST_SESSION_ATTRIBUTE, scope = ScopeType.SESSION, required = false)
+	private List<String> languages;
 
-        @EJB
-        AttributeService attributeService;
+	@EJB
+	AttributeService attributeService;
 
-        @DataModel(ATTRIBUTE_LIST_NAME)
-        private List<AttributeEntity> attributeList;
+	@DataModel(ATTRIBUTE_LIST_NAME)
+	private List<AttributeEntity> attributeList;
 
-        @Remove
-        @Destroy
-        public void destroy() {
-                this.log.debug("destroy");
+	@Remove
+	@Destroy
+	public void destroy() {
+		this.log.debug("destroy");
 
-        }
+	}
 
-        @Override
-        public String getRp() {
+	@Override
+	public String getRp() {
 
-                RPEntity rp = (RPEntity)
-                        this.sessionContext.get(Constants.RP_SESSION_ATTRIBUTE);
-                if (null != rp) {
-                        return rp.getName();
-                }
-                return null;
-        }
+		RPEntity rp = (RPEntity) this.sessionContext
+				.get(Constants.RP_SESSION_ATTRIBUTE);
+		if (null != rp) {
+			return rp.getName();
+		}
+		return null;
+	}
 
-        @Override
-        public boolean isRpLogo() {
+	@Override
+	public boolean isRpLogo() {
 
-                RPEntity rp = (RPEntity)
-                        this.sessionContext.get(Constants.RP_SESSION_ATTRIBUTE);
-                if (null != rp) {
-                        return null != rp.getLogo();
-                }
+		RPEntity rp = (RPEntity) this.sessionContext
+				.get(Constants.RP_SESSION_ATTRIBUTE);
+		if (null != rp) {
+			return null != rp.getLogo();
+		}
 
-                return false;
-        }
+		return false;
+	}
 
-        @Override
-        public void paint(OutputStream stream, Object object) throws IOException {
+	@Override
+	public void paint(OutputStream stream, Object object) throws IOException {
 
-                RPEntity rp = (RPEntity)
-                        this.sessionContext.get(Constants.RP_SESSION_ATTRIBUTE);
+		RPEntity rp = (RPEntity) this.sessionContext
+				.get(Constants.RP_SESSION_ATTRIBUTE);
 
-                if (null != rp && null != rp.getLogo()) {
-                        this.log.debug("paint logo");
-                        stream.write(rp.getLogo());
-                        stream.close();
-                }
-        }
+		if (null != rp && null != rp.getLogo()) {
+			this.log.debug("paint logo");
+			stream.write(rp.getLogo());
+			stream.close();
+		}
+	}
 
-        @Override
-        public long getTimeStamp() {
+	@Override
+	public long getTimeStamp() {
 
-                return System.currentTimeMillis();
-        }
+		return System.currentTimeMillis();
+	}
 
-        @Override
-        @Factory(ATTRIBUTE_LIST_NAME)
-        public void attributeFactory() {
+	@Override
+	@Factory(ATTRIBUTE_LIST_NAME)
+	public void attributeFactory() {
 
-                RPEntity rp = (RPEntity)
-                        this.sessionContext.get(Constants.RP_SESSION_ATTRIBUTE);
-                if (null != rp) {
-                        this.attributeList = new LinkedList<AttributeEntity>();
-                        for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
-                                this.attributeList.add(rpAttribute.getAttribute());
-                        }
-                } else {
-                        this.attributeList = this.attributeService.listAttributes();
-                }
-        }
+		RPEntity rp = (RPEntity) this.sessionContext
+				.get(Constants.RP_SESSION_ATTRIBUTE);
+		if (null != rp) {
+			this.attributeList = new LinkedList<AttributeEntity>();
+			for (RPAttributeEntity rpAttribute : rp.getAttributes()) {
+				this.attributeList.add(rpAttribute.getAttribute());
+			}
+		} else {
+			this.attributeList = this.attributeService.listAttributes();
+		}
+	}
 
-        @Override
-        public void initLanguage() {
-                this.log.debug("languages: #0", this.languages);
-                if (null != this.languages) {
+	@Override
+	public void initLanguage() {
+		this.log.debug("languages: #0", this.languages);
+		if (null != this.languages) {
 
-                        Iterator<Locale> supportedLocales =
-                                FacesContext.getCurrentInstance()
-                                        .getApplication().getSupportedLocales();
+			Iterator<Locale> supportedLocales = FacesContext
+					.getCurrentInstance().getApplication()
+					.getSupportedLocales();
 
-                        for (String language : this.languages) {
+			for (String language : this.languages) {
 
-                                while (supportedLocales.hasNext()) {
-                                        Locale locale = supportedLocales.next();
-                                        this.log.debug("language: " + language +
-                                                " supportedLocale: " + locale.getLanguage());
-                                        if (locale.getLanguage().equals(language)) {
-                                                // we got a winner
-                                                this.localeSelector.setLocale(locale);
-                                                this.localeSelector.select();
-                                                return;
-                                        }
-                                }
-                        }
-                }
-        }
+				while (supportedLocales.hasNext()) {
+					Locale locale = supportedLocales.next();
+					this.log.debug("language: " + language
+							+ " supportedLocale: " + locale.getLanguage());
+					if (locale.getLanguage().equals(language)) {
+						// we got a winner
+						this.localeSelector.setLocale(locale);
+						this.localeSelector.select();
+						return;
+					}
+				}
+			}
+		}
+	}
 
 }

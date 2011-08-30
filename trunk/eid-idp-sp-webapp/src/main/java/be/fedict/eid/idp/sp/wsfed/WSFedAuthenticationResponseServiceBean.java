@@ -34,72 +34,75 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-public class WSFedAuthenticationResponseServiceBean implements AuthenticationResponseService, Serializable {
+public class WSFedAuthenticationResponseServiceBean implements
+		AuthenticationResponseService, Serializable {
 
-        private static final Log LOG = LogFactory.getLog(
-                WSFedAuthenticationResponseServiceBean.class);
-        private static final long serialVersionUID = -27408002115429526L;
+	private static final Log LOG = LogFactory
+			.getLog(WSFedAuthenticationResponseServiceBean.class);
+	private static final long serialVersionUID = -27408002115429526L;
 
-        @Override
-        public boolean requiresResponseSignature() {
-                return null != ConfigServlet.getIdpIdentity() &&
-                        !ConfigServlet.getIdpIdentity().trim().isEmpty();
-        }
+	@Override
+	public boolean requiresResponseSignature() {
+		return null != ConfigServlet.getIdpIdentity()
+				&& !ConfigServlet.getIdpIdentity().trim().isEmpty();
+	}
 
-        @Override
-        public void validateServiceCertificate(SamlAuthenticationPolicy authenticationPolicy,
-                                               List<X509Certificate> certificateChain)
-                throws SecurityException {
+	@Override
+	public void validateServiceCertificate(
+			SamlAuthenticationPolicy authenticationPolicy,
+			List<X509Certificate> certificateChain) throws SecurityException {
 
-                LOG.debug("validate saml response policy=" + authenticationPolicy.getUri()
-                        + " cert.chain.size=" + certificateChain.size());
+		LOG.debug("validate saml response policy="
+				+ authenticationPolicy.getUri() + " cert.chain.size="
+				+ certificateChain.size());
 
-                String idpIdentity = ConfigServlet.getIdpIdentity();
+		String idpIdentity = ConfigServlet.getIdpIdentity();
 
-                if (null != idpIdentity && !idpIdentity.trim().isEmpty()) {
-                        LOG.debug("validate IdP Identity with " + idpIdentity);
+		if (null != idpIdentity && !idpIdentity.trim().isEmpty()) {
+			LOG.debug("validate IdP Identity with " + idpIdentity);
 
-                        String fingerprint;
-                        try {
-                                fingerprint = DigestUtils.shaHex(certificateChain.get(0).getEncoded());
-                        } catch (CertificateEncodingException e) {
-                                throw new SecurityException(e);
-                        }
+			String fingerprint;
+			try {
+				fingerprint = DigestUtils.shaHex(certificateChain.get(0)
+						.getEncoded());
+			} catch (CertificateEncodingException e) {
+				throw new SecurityException(e);
+			}
 
-                        if (!fingerprint.equals(idpIdentity)) {
-                                throw new SecurityException("IdP Identity " +
-                                        "thumbprint mismatch: got: " +
-                                        fingerprint + " expected: " + idpIdentity);
-                        }
-                }
-        }
+			if (!fingerprint.equals(idpIdentity)) {
+				throw new SecurityException("IdP Identity "
+						+ "thumbprint mismatch: got: " + fingerprint
+						+ " expected: " + idpIdentity);
+			}
+		}
+	}
 
-        @Override
-        public int getMaximumTimeOffset() {
-                return 5;
-        }
+	@Override
+	public int getMaximumTimeOffset() {
+		return 5;
+	}
 
-        @Override
-        public SecretKey getAttributeSecretKey() {
+	@Override
+	public SecretKey getAttributeSecretKey() {
 
-                if (ConfigServlet.isEncrypt()) {
-                        return SPBean.aes128SecretKey;
-                } else {
-                        return null;
-                }
-        }
+		if (ConfigServlet.isEncrypt()) {
+			return SPBean.aes128SecretKey;
+		} else {
+			return null;
+		}
+	}
 
-        @Override
-        public PrivateKey getAttributePrivateKey() {
+	@Override
+	public PrivateKey getAttributePrivateKey() {
 
-                if (ConfigServlet.isUseKeK()) {
-                        try {
-                                return PkiServlet.getPrivateKeyEntry().getPrivateKey();
-                        } catch (Exception e) {
-                                throw new RuntimeException(e);
-                        }
-                } else {
-                        return null;
-                }
-        }
+		if (ConfigServlet.isUseKeK()) {
+			try {
+				return PkiServlet.getPrivateKeyEntry().getPrivateKey();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return null;
+		}
+	}
 }

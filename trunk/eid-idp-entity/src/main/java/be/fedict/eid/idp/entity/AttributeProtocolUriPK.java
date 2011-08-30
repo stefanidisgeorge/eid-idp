@@ -28,75 +28,74 @@ import java.io.Serializable;
 @Embeddable
 public class AttributeProtocolUriPK implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String PROTOCOL_COLUMN_NAME = "protocolId";
-    public static final String ATTRIBUTE_COLUMN_NAME = "attributeUri";
+	public static final String PROTOCOL_COLUMN_NAME = "protocolId";
+	public static final String ATTRIBUTE_COLUMN_NAME = "attributeUri";
 
-    private String protocolId;
-    private String attributeUri;
+	private String protocolId;
+	private String attributeUri;
 
-    public AttributeProtocolUriPK() {
-        super();
-    }
+	public AttributeProtocolUriPK() {
+		super();
+	}
 
-    public AttributeProtocolUriPK(String protocolId, AttributeEntity attribute) {
+	public AttributeProtocolUriPK(String protocolId, AttributeEntity attribute) {
 
-        this.protocolId = protocolId;
-        this.attributeUri = attribute.getUri();
-    }
+		this.protocolId = protocolId;
+		this.attributeUri = attribute.getUri();
+	}
 
-    public AttributeProtocolUriPK(String protocolId, String attributeUri) {
+	public AttributeProtocolUriPK(String protocolId, String attributeUri) {
 
-        this.protocolId = protocolId;
-        this.attributeUri = attributeUri;
-    }
+		this.protocolId = protocolId;
+		this.attributeUri = attributeUri;
+	}
 
-    public String getProtocolId() {
-        return this.protocolId;
-    }
+	public String getProtocolId() {
+		return this.protocolId;
+	}
 
-    public void setProtocolId(String protocolId) {
-        this.protocolId = protocolId;
-    }
+	public void setProtocolId(String protocolId) {
+		this.protocolId = protocolId;
+	}
 
-    public String getAttributeUri() {
-        return this.attributeUri;
-    }
+	public String getAttributeUri() {
+		return this.attributeUri;
+	}
 
-    public void setAttributeUri(String attributeUri) {
-        this.attributeUri = attributeUri;
-    }
+	public void setAttributeUri(String attributeUri) {
+		this.attributeUri = attributeUri;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
+	@Override
+	public boolean equals(Object obj) {
 
-        if (null == obj) {
-            return false;
-        }
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof AttributeProtocolUriPK)) {
-            return false;
-        }
-        AttributeProtocolUriPK rhs = (AttributeProtocolUriPK) obj;
-        return new EqualsBuilder().append(this.protocolId, rhs.protocolId)
-                .append(this.attributeUri, rhs.attributeUri).isEquals();
-    }
+		if (null == obj) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof AttributeProtocolUriPK)) {
+			return false;
+		}
+		AttributeProtocolUriPK rhs = (AttributeProtocolUriPK) obj;
+		return new EqualsBuilder().append(this.protocolId, rhs.protocolId)
+				.append(this.attributeUri, rhs.attributeUri).isEquals();
+	}
 
-    @Override
-    public int hashCode() {
+	@Override
+	public int hashCode() {
 
-        return new HashCodeBuilder().append(this.protocolId).append(
-                this.attributeUri).toHashCode();
-    }
+		return new HashCodeBuilder().append(this.protocolId)
+				.append(this.attributeUri).toHashCode();
+	}
 
-    @Override
-    public String toString() {
+	@Override
+	public String toString() {
 
-        return new ToStringBuilder(this).append("Protocol",
-                this.protocolId).append("attribute", this.attributeUri).
-                toString();
-    }
+		return new ToStringBuilder(this).append("Protocol", this.protocolId)
+				.append("attribute", this.attributeUri).toString();
+	}
 }
