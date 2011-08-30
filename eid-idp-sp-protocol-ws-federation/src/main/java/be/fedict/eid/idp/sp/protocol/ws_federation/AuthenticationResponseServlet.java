@@ -59,151 +59,140 @@ import java.io.IOException;
  * to use for reporting an error. This session attribute can be used on the
  * error page.</li>
  * </ul>
- *
+ * 
  * @author Wim Vandenhaute
  */
 public class AuthenticationResponseServlet extends HttpServlet {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        private static final Log LOG = LogFactory
-                .getLog(AuthenticationResponseServlet.class);
+	private static final Log LOG = LogFactory
+			.getLog(AuthenticationResponseServlet.class);
 
-        public static final String REQUIRES_RESPONSE_SIGNATURE_INIT_PARAM =
-                "RequiresResponseSignature";
+	public static final String REQUIRES_RESPONSE_SIGNATURE_INIT_PARAM = "RequiresResponseSignature";
 
-        public static final String RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM =
-                "ResponseSessionAttribute";
-        public static final String REDIRECT_PAGE_INIT_PARAM =
-                "RedirectPage";
-        public static final String RESPONSE_SERVICE_INIT_PARAM =
-                "AuthenticationResponseService";
+	public static final String RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM = "ResponseSessionAttribute";
+	public static final String REDIRECT_PAGE_INIT_PARAM = "RedirectPage";
+	public static final String RESPONSE_SERVICE_INIT_PARAM = "AuthenticationResponseService";
 
-        public static final String ERROR_PAGE_INIT_PARAM = "ErrorPage";
-        public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM =
-                "ErrorMessageSessionAttribute";
+	public static final String ERROR_PAGE_INIT_PARAM = "ErrorPage";
+	public static final String ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM = "ErrorMessageSessionAttribute";
 
-        private Boolean requiresResponseSignature = null;
-        private String responseSessionAttribute;
-        private String redirectPage;
-        private String errorPage;
-        private String errorMessageSessionAttribute;
+	private Boolean requiresResponseSignature = null;
+	private String responseSessionAttribute;
+	private String redirectPage;
+	private String errorPage;
+	private String errorMessageSessionAttribute;
 
-        private ServiceLocator<AuthenticationResponseService> serviceLocator;
+	private ServiceLocator<AuthenticationResponseService> serviceLocator;
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void init(ServletConfig config) throws ServletException {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void init(ServletConfig config) throws ServletException {
 
-                String requiresResponseSignatureString = config.getInitParameter(
-                        REQUIRES_RESPONSE_SIGNATURE_INIT_PARAM);
-                if (null != requiresResponseSignatureString) {
-                        requiresResponseSignature =
-                                Boolean.valueOf(requiresResponseSignatureString);
-                }
+		String requiresResponseSignatureString = config
+				.getInitParameter(REQUIRES_RESPONSE_SIGNATURE_INIT_PARAM);
+		if (null != requiresResponseSignatureString) {
+			requiresResponseSignature = Boolean
+					.valueOf(requiresResponseSignatureString);
+		}
 
-                this.responseSessionAttribute = getRequiredInitParameter(
-                        RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM, config);
-                this.redirectPage = getRequiredInitParameter(
-                        REDIRECT_PAGE_INIT_PARAM, config);
+		this.responseSessionAttribute = getRequiredInitParameter(
+				RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM, config);
+		this.redirectPage = getRequiredInitParameter(REDIRECT_PAGE_INIT_PARAM,
+				config);
 
-                this.errorPage = config.getInitParameter(ERROR_PAGE_INIT_PARAM);
-                this.errorMessageSessionAttribute = config.getInitParameter(
-                        ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM);
+		this.errorPage = config.getInitParameter(ERROR_PAGE_INIT_PARAM);
+		this.errorMessageSessionAttribute = config
+				.getInitParameter(ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM);
 
-                this.serviceLocator =
-                        new ServiceLocator<AuthenticationResponseService>
-                                (RESPONSE_SERVICE_INIT_PARAM, config);
-        }
+		this.serviceLocator = new ServiceLocator<AuthenticationResponseService>(
+				RESPONSE_SERVICE_INIT_PARAM, config);
+	}
 
-        private String getRequiredInitParameter(String parameterName,
-                                                ServletConfig config) throws ServletException {
-                String value = config.getInitParameter(parameterName);
-                if (null == value) {
-                        throw new ServletException(parameterName
-                                + " init-param is required");
-                }
-                return value;
-        }
+	private String getRequiredInitParameter(String parameterName,
+			ServletConfig config) throws ServletException {
+		String value = config.getInitParameter(parameterName);
+		if (null == value) {
+			throw new ServletException(parameterName
+					+ " init-param is required");
+		}
+		return value;
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected void doGet(HttpServletRequest request,
-                             HttpServletResponse response)
-                throws ServletException, IOException {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 
-                throw new ServletException("GET not available");
-        }
+		throw new ServletException("GET not available");
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected void doPost(HttpServletRequest request,
-                              HttpServletResponse response)
-                throws ServletException, IOException {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 
-                LOG.debug("doPost");
+		LOG.debug("doPost");
 
-                // get request state
-                String context = AuthenticationRequestServlet.getContext(
-                        request.getSession());
-                String recipient = AuthenticationRequestServlet.getRecipient(
-                        request.getSession());
+		// get request state
+		String context = AuthenticationRequestServlet.getContext(request
+				.getSession());
+		String recipient = AuthenticationRequestServlet.getRecipient(request
+				.getSession());
 
-                // clear old session attributes
-                HttpSession httpSession = request.getSession();
-                clearAllSessionAttribute(httpSession);
+		// clear old session attributes
+		HttpSession httpSession = request.getSession();
+		clearAllSessionAttribute(httpSession);
 
-                AuthenticationResponseProcessor processor =
-                        new AuthenticationResponseProcessor(
-                                this.serviceLocator.locateService());
+		AuthenticationResponseProcessor processor = new AuthenticationResponseProcessor(
+				this.serviceLocator.locateService());
 
-                AuthenticationResponse authenticationResponse;
-                try {
-                        authenticationResponse = processor.process(
-                                recipient, context, requiresResponseSignature,
-                                request);
-                } catch (AuthenticationResponseProcessorException e) {
-                        showErrorPage(e.getMessage(), e, request, response);
-                        return;
-                }
+		AuthenticationResponse authenticationResponse;
+		try {
+			authenticationResponse = processor.process(recipient, context,
+					requiresResponseSignature, request);
+		} catch (AuthenticationResponseProcessorException e) {
+			showErrorPage(e.getMessage(), e, request, response);
+			return;
+		}
 
+		// save response info to session
+		request.getSession().setAttribute(this.responseSessionAttribute,
+				authenticationResponse);
 
-                // save response info to session
-                request.getSession().setAttribute(this.responseSessionAttribute,
-                        authenticationResponse);
+		// done, redirect
+		response.sendRedirect(request.getContextPath() + this.redirectPage);
+	}
 
-                // done, redirect
-                response.sendRedirect(request.getContextPath() + this.redirectPage);
-        }
+	private void showErrorPage(String errorMessage, Throwable cause,
+			HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException {
 
-        private void showErrorPage(String errorMessage, Throwable cause,
-                                   HttpServletRequest request, HttpServletResponse response)
-                throws IOException, ServletException {
+		if (null == cause) {
+			LOG.error("Error: " + errorMessage);
+		} else {
+			LOG.error("Error: " + errorMessage, cause);
+		}
+		if (null != this.errorMessageSessionAttribute) {
+			request.getSession().setAttribute(
+					this.errorMessageSessionAttribute, errorMessage);
+		}
+		if (null != this.errorPage) {
+			response.sendRedirect(request.getContextPath() + this.errorPage);
+		} else {
+			throw new ServletException(errorMessage, cause);
+		}
+	}
 
-                if (null == cause) {
-                        LOG.error("Error: " + errorMessage);
-                } else {
-                        LOG.error("Error: " + errorMessage, cause);
-                }
-                if (null != this.errorMessageSessionAttribute) {
-                        request.getSession().setAttribute(
-                                this.errorMessageSessionAttribute, errorMessage);
-                }
-                if (null != this.errorPage) {
-                        response.sendRedirect(request.getContextPath() + this.errorPage);
-                } else {
-                        throw new ServletException(errorMessage, cause);
-                }
-        }
+	private void clearAllSessionAttribute(HttpSession httpSession) {
 
-        private void clearAllSessionAttribute(HttpSession httpSession) {
-
-                httpSession.removeAttribute(this.responseSessionAttribute);
-        }
+		httpSession.removeAttribute(this.responseSessionAttribute);
+	}
 }

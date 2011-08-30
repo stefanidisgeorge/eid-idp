@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.protocol.ws_federation;
 
-public class WSFederationMetadataHttpServletAuthIdent extends AbstractWSFederationMetadataHttpServlet {
+public class WSFederationMetadataHttpServletAuthIdent extends
+		AbstractWSFederationMetadataHttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-    protected String getPath() {
-        return "ws-federation/auth-ident";
-    }
+	protected String getPath() {
+		return "ws-federation/auth-ident";
+	}
 }

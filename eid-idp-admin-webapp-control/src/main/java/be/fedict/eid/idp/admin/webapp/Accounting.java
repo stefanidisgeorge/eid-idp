@@ -23,27 +23,27 @@ import javax.ejb.Local;
 @Local
 public interface Accounting {
 
-        /*
-        * Accessors.
-        */
-        int getNumberOfDomains();
+	/*
+	 * Accessors.
+	 */
+	int getNumberOfDomains();
 
-        long getNumberOfRequests();
+	long getNumberOfRequests();
 
-        /*
-        * Factories
-        */
-        void accountingListFactory();
+	/*
+	 * Factories
+	 */
+	void accountingListFactory();
 
-        /*
-        * Actions.
-        */
-        String reset();
+	/*
+	 * Actions.
+	 */
+	String reset();
 
-        /*
-        * Lifecycle.
-        */
-        void destroy();
+	/*
+	 * Lifecycle.
+	 */
+	void destroy();
 
-        void postConstruct();
+	void postConstruct();
 }

@@ -30,45 +30,44 @@ import org.opensaml.ws.transport.OutTransport;
 
 import javax.servlet.http.HttpServletRequest;
 
-public abstract class AbstractSAML2BrowserPostProtocolService extends AbstractSAML2ProtocolService {
+public abstract class AbstractSAML2BrowserPostProtocolService extends
+		AbstractSAML2ProtocolService {
 
-        @SuppressWarnings("unchecked")
-        @Override
-        protected ReturnResponse handleSamlResponse(HttpServletRequest request,
-                                                    String targetUrl,
-                                                    Response samlResponse,
-                                                    String relayState)
-                throws Exception {
+	@SuppressWarnings("unchecked")
+	@Override
+	protected ReturnResponse handleSamlResponse(HttpServletRequest request,
+			String targetUrl, Response samlResponse, String relayState)
+			throws Exception {
 
-                // sign assertion + response
-                IdentityProviderConfiguration configuration =
-                        getIdPConfiguration(request.getSession().getServletContext());
-                IdPIdentity idpIdentity = configuration.findIdentity();
+		// sign assertion + response
+		IdentityProviderConfiguration configuration = getIdPConfiguration(request
+				.getSession().getServletContext());
+		IdPIdentity idpIdentity = configuration.findIdentity();
 
-                // sign assertion
-                if (null != idpIdentity) {
-                        if (!samlResponse.getAssertions().isEmpty()) {
-                                Saml2Util.sign(samlResponse.getAssertions().get(0),
-                                        idpIdentity.getPrivateKeyEntry());
-                        }
-                }
+		// sign assertion
+		if (null != idpIdentity) {
+			if (!samlResponse.getAssertions().isEmpty()) {
+				Saml2Util.sign(samlResponse.getAssertions().get(0),
+						idpIdentity.getPrivateKeyEntry());
+			}
+		}
 
-                // sign response
-                if (null != idpIdentity) {
-                        Saml2Util.sign(samlResponse, idpIdentity.getPrivateKeyEntry());
-                }
+		// sign response
+		if (null != idpIdentity) {
+			Saml2Util.sign(samlResponse, idpIdentity.getPrivateKeyEntry());
+		}
 
-                ReturnResponse returnResponse = new ReturnResponse(targetUrl);
+		ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 
-                HTTPPostEncoder messageEncoder = new HTTPPostEncoder();
-                BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
-                messageContext.setOutboundSAMLMessage(samlResponse);
-                messageContext.setRelayState(relayState);
+		HTTPPostEncoder messageEncoder = new HTTPPostEncoder();
+		BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
+		messageContext.setOutboundSAMLMessage(samlResponse);
+		messageContext.setRelayState(relayState);
 
-                OutTransport outTransport = new HTTPOutTransport(returnResponse);
-                messageContext.setOutboundMessageTransport(outTransport);
+		OutTransport outTransport = new HTTPOutTransport(returnResponse);
+		messageContext.setOutboundMessageTransport(outTransport);
 
-                messageEncoder.encode(messageContext);
-                return returnResponse;
-        }
+		messageEncoder.encode(messageContext);
+		return returnResponse;
+	}
 }

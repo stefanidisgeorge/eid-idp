@@ -40,99 +40,97 @@ import java.util.List;
 @Stateless
 public class AttributeServiceManagerBean implements AttributeServiceManager {
 
-        private static final Log LOG = LogFactory
-                .getLog(AttributeServiceManagerBean.class);
+	private static final Log LOG = LogFactory
+			.getLog(AttributeServiceManagerBean.class);
 
-        @SuppressWarnings("unchecked")
-        public List<IdentityProviderAttributeType> getAttributeServiceTypes() {
+	@SuppressWarnings("unchecked")
+	public List<IdentityProviderAttributeType> getAttributeServiceTypes() {
 
-                List<IdentityProviderAttributeType> attributeServices =
-                        new LinkedList<IdentityProviderAttributeType>();
-                ClassLoader classLoader = Thread.currentThread()
-                        .getContextClassLoader();
-                Enumeration<URL> resources;
-                try {
-                        resources = classLoader
-                                .getResources("META-INF/eid-idp-attribute.xml");
-                } catch (IOException e) {
-                        LOG.error("I/O error: " + e.getMessage(), e);
-                        return attributeServices;
-                }
-                Unmarshaller unmarshaller;
-                try {
-                        JAXBContext jaxbContext = JAXBContext
-                                .newInstance(ObjectFactory.class);
-                        unmarshaller = jaxbContext.createUnmarshaller();
-                } catch (JAXBException e) {
-                        LOG.error("JAXB error: " + e.getMessage(), e);
-                        return attributeServices;
-                }
-                while (resources.hasMoreElements()) {
-                        URL resource = resources.nextElement();
-                        LOG.debug("resource URL: " + resource.toString());
-                        JAXBElement<IdentityProviderAttributesType> jaxbElement;
-                        try {
-                                jaxbElement = (JAXBElement<IdentityProviderAttributesType>) unmarshaller
-                                        .unmarshal(resource);
-                        } catch (JAXBException e) {
-                                LOG.error("JAXB error: " + e.getMessage(), e);
-                                continue;
-                        }
-                        IdentityProviderAttributesType identityProviderAttributes =
-                                jaxbElement.getValue();
-                        for (IdentityProviderAttributeType identityProviderAttribute :
-                                identityProviderAttributes.getIdentityProviderAttribute()) {
-                                attributeServices.add(identityProviderAttribute);
-                        }
-                }
-                return attributeServices;
-        }
+		List<IdentityProviderAttributeType> attributeServices = new LinkedList<IdentityProviderAttributeType>();
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+		Enumeration<URL> resources;
+		try {
+			resources = classLoader
+					.getResources("META-INF/eid-idp-attribute.xml");
+		} catch (IOException e) {
+			LOG.error("I/O error: " + e.getMessage(), e);
+			return attributeServices;
+		}
+		Unmarshaller unmarshaller;
+		try {
+			JAXBContext jaxbContext = JAXBContext
+					.newInstance(ObjectFactory.class);
+			unmarshaller = jaxbContext.createUnmarshaller();
+		} catch (JAXBException e) {
+			LOG.error("JAXB error: " + e.getMessage(), e);
+			return attributeServices;
+		}
+		while (resources.hasMoreElements()) {
+			URL resource = resources.nextElement();
+			LOG.debug("resource URL: " + resource.toString());
+			JAXBElement<IdentityProviderAttributesType> jaxbElement;
+			try {
+				jaxbElement = (JAXBElement<IdentityProviderAttributesType>) unmarshaller
+						.unmarshal(resource);
+			} catch (JAXBException e) {
+				LOG.error("JAXB error: " + e.getMessage(), e);
+				continue;
+			}
+			IdentityProviderAttributesType identityProviderAttributes = jaxbElement
+					.getValue();
+			for (IdentityProviderAttributeType identityProviderAttribute : identityProviderAttributes
+					.getIdentityProviderAttribute()) {
+				attributeServices.add(identityProviderAttribute);
+			}
+		}
+		return attributeServices;
+	}
 
-        @Override
-        public List<IdentityProviderAttributeService> getAttributeServices() {
+	@Override
+	public List<IdentityProviderAttributeService> getAttributeServices() {
 
-                List<IdentityProviderAttributeService> attributeServices =
-                        new LinkedList<IdentityProviderAttributeService>();
+		List<IdentityProviderAttributeService> attributeServices = new LinkedList<IdentityProviderAttributeService>();
 
-                for (IdentityProviderAttributeType attributeServiceType :
-                        getAttributeServiceTypes()) {
-                        attributeServices.add(getAttributeService(attributeServiceType));
-                }
+		for (IdentityProviderAttributeType attributeServiceType : getAttributeServiceTypes()) {
+			attributeServices.add(getAttributeService(attributeServiceType));
+		}
 
-                return attributeServices;
-        }
+		return attributeServices;
+	}
 
-        public IdentityProviderAttributeService getAttributeService(
-                IdentityProviderAttributeType identityProviderAttribute) {
+	public IdentityProviderAttributeService getAttributeService(
+			IdentityProviderAttributeType identityProviderAttribute) {
 
-                ClassLoader classLoader = Thread.currentThread()
-                        .getContextClassLoader();
-                LOG.debug("loading attribute service class: "
-                        + identityProviderAttribute.getAttributeService());
-                Class<?> attributeServiceClass;
-                try {
-                        attributeServiceClass = classLoader
-                                .loadClass(identityProviderAttribute.getAttributeService());
-                } catch (ClassNotFoundException e) {
-                        LOG.error("attribute service class not found: "
-                                + identityProviderAttribute.getAttributeService(), e);
-                        return null;
-                }
-                if (!IdentityProviderAttributeService.class
-                        .isAssignableFrom(attributeServiceClass)) {
-                        LOG.error("illegal attribute service class: "
-                                + identityProviderAttribute.getAttributeService());
-                        return null;
-                }
-                IdentityProviderAttributeService attributeService;
-                try {
-                        attributeService = (IdentityProviderAttributeService) attributeServiceClass
-                                .newInstance();
-                } catch (Exception e) {
-                        LOG.error("could not init the attribute service object: "
-                                + e.getMessage(), e);
-                        return null;
-                }
-                return attributeService;
-        }
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+		LOG.debug("loading attribute service class: "
+				+ identityProviderAttribute.getAttributeService());
+		Class<?> attributeServiceClass;
+		try {
+			attributeServiceClass = classLoader
+					.loadClass(identityProviderAttribute.getAttributeService());
+		} catch (ClassNotFoundException e) {
+			LOG.error("attribute service class not found: "
+					+ identityProviderAttribute.getAttributeService(), e);
+			return null;
+		}
+		if (!IdentityProviderAttributeService.class
+				.isAssignableFrom(attributeServiceClass)) {
+			LOG.error("illegal attribute service class: "
+					+ identityProviderAttribute.getAttributeService());
+			return null;
+		}
+		IdentityProviderAttributeService attributeService;
+		try {
+			attributeService = (IdentityProviderAttributeService) attributeServiceClass
+					.newInstance();
+		} catch (Exception e) {
+			LOG.error(
+					"could not init the attribute service object: "
+							+ e.getMessage(), e);
+			return null;
+		}
+		return attributeService;
+	}
 }

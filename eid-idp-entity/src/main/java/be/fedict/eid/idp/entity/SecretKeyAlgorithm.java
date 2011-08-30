@@ -23,6 +23,5 @@ package be.fedict.eid.idp.entity;
  */
 public enum SecretKeyAlgorithm {
 
-        NONE,
-        AES_128
+	NONE, AES_128
 }

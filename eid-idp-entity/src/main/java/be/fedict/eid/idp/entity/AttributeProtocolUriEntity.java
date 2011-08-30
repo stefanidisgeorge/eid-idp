@@ -36,115 +36,112 @@ import java.util.List;
  */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "attribute_uri")
-@NamedQueries({@NamedQuery(name = AttributeProtocolUriEntity.LIST_ALL,
-        query = "SELECT apu FROM AttributeProtocolUriEntity AS apu " +
-                "ORDER BY apu.attribute"),
-        @NamedQuery(name = AttributeProtocolUriEntity.FIND_ATTRIBUTE,
-                query = "SELECT apu FROM AttributeProtocolUriEntity AS apu " +
-                        "WHERE apu.uri = :uri AND apu.pk.protocolId = :protocolId")})
+@NamedQueries({
+		@NamedQuery(name = AttributeProtocolUriEntity.LIST_ALL, query = "SELECT apu FROM AttributeProtocolUriEntity AS apu "
+				+ "ORDER BY apu.attribute"),
+		@NamedQuery(name = AttributeProtocolUriEntity.FIND_ATTRIBUTE, query = "SELECT apu FROM AttributeProtocolUriEntity AS apu "
+				+ "WHERE apu.uri = :uri AND apu.pk.protocolId = :protocolId") })
 public class AttributeProtocolUriEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public static final String LIST_ALL = "idp.attr.uri.all";
-    public static final String FIND_ATTRIBUTE = "idp.attr.uri.find";
+	public static final String LIST_ALL = "idp.attr.uri.all";
+	public static final String FIND_ATTRIBUTE = "idp.attr.uri.find";
 
-    public static final String ATTRIBUTE_COLUMN_NAME = "attribute";
+	public static final String ATTRIBUTE_COLUMN_NAME = "attribute";
 
-    private AttributeProtocolUriPK pk;
+	private AttributeProtocolUriPK pk;
 
-    private AttributeEntity attribute;
-    private String uri;
+	private AttributeEntity attribute;
+	private String uri;
 
-    public AttributeProtocolUriEntity() {
-        super();
-    }
+	public AttributeProtocolUriEntity() {
+		super();
+	}
 
-    public AttributeProtocolUriEntity(String protocolId,
-                                      AttributeEntity attribute,
-                                      String uri) {
-        this.pk = new AttributeProtocolUriPK(protocolId, attribute);
-        this.attribute = attribute;
-        this.uri = uri;
-    }
+	public AttributeProtocolUriEntity(String protocolId,
+			AttributeEntity attribute, String uri) {
+		this.pk = new AttributeProtocolUriPK(protocolId, attribute);
+		this.attribute = attribute;
+		this.uri = uri;
+	}
 
-    @EmbeddedId
-    @AttributeOverrides({
-            @AttributeOverride(name = AttributeProtocolUriPK.ATTRIBUTE_COLUMN_NAME,
-                    column = @Column(name = ATTRIBUTE_COLUMN_NAME))})
-    public AttributeProtocolUriPK getPk() {
-        return pk;
-    }
+	@EmbeddedId
+	@AttributeOverrides({ @AttributeOverride(name = AttributeProtocolUriPK.ATTRIBUTE_COLUMN_NAME, column = @Column(name = ATTRIBUTE_COLUMN_NAME)) })
+	public AttributeProtocolUriPK getPk() {
+		return pk;
+	}
 
-    public void setPk(AttributeProtocolUriPK pk) {
-        this.pk = pk;
-    }
+	public void setPk(AttributeProtocolUriPK pk) {
+		this.pk = pk;
+	}
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = ATTRIBUTE_COLUMN_NAME, insertable = false, updatable = false)
-    public AttributeEntity getAttribute() {
-        return attribute;
-    }
+	@ManyToOne(optional = false)
+	@JoinColumn(name = ATTRIBUTE_COLUMN_NAME, insertable = false, updatable = false)
+	public AttributeEntity getAttribute() {
+		return attribute;
+	}
 
-    public void setAttribute(AttributeEntity attribute) {
-        this.attribute = attribute;
-    }
+	public void setAttribute(AttributeEntity attribute) {
+		this.attribute = attribute;
+	}
 
-    @Column(nullable = true)
-    public String getUri() {
-        return this.uri;
-    }
+	@Column(nullable = true)
+	public String getUri() {
+		return this.uri;
+	}
 
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
 
-    @SuppressWarnings("unchecked")
-    public static List<AttributeProtocolUriEntity> listAll(EntityManager entityManager) {
+	@SuppressWarnings("unchecked")
+	public static List<AttributeProtocolUriEntity> listAll(
+			EntityManager entityManager) {
 
-        Query query = entityManager.createNamedQuery(LIST_ALL);
-        return query.getResultList();
-    }
+		Query query = entityManager.createNamedQuery(LIST_ALL);
+		return query.getResultList();
+	}
 
-    public static AttributeProtocolUriEntity findAttribute(EntityManager entityManager,
-                                                           String uri, String protocolId) {
+	public static AttributeProtocolUriEntity findAttribute(
+			EntityManager entityManager, String uri, String protocolId) {
 
-        Query query = entityManager.createNamedQuery(FIND_ATTRIBUTE);
-        query.setParameter("uri", uri);
-        query.setParameter("protocolId", protocolId);
-        try {
-            return (AttributeProtocolUriEntity) query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
+		Query query = entityManager.createNamedQuery(FIND_ATTRIBUTE);
+		query.setParameter("uri", uri);
+		query.setParameter("protocolId", protocolId);
+		try {
+			return (AttributeProtocolUriEntity) query.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
+	}
 
-    @Override
-    public boolean equals(Object obj) {
+	@Override
+	public boolean equals(Object obj) {
 
-        if (this == obj) {
-            return true;
-        }
-        if (null == obj) {
-            return false;
-        }
-        if (!(obj instanceof AttributeProtocolUriEntity)) {
-            return false;
-        }
-        AttributeProtocolUriEntity rhs = (AttributeProtocolUriEntity) obj;
-        return new EqualsBuilder().append(this.pk, rhs.pk).isEquals();
-    }
+		if (this == obj) {
+			return true;
+		}
+		if (null == obj) {
+			return false;
+		}
+		if (!(obj instanceof AttributeProtocolUriEntity)) {
+			return false;
+		}
+		AttributeProtocolUriEntity rhs = (AttributeProtocolUriEntity) obj;
+		return new EqualsBuilder().append(this.pk, rhs.pk).isEquals();
+	}
 
-    @Override
-    public int hashCode() {
+	@Override
+	public int hashCode() {
 
-        return new HashCodeBuilder().append(this.pk).toHashCode();
-    }
+		return new HashCodeBuilder().append(this.pk).toHashCode();
+	}
 
-    @Override
-    public String toString() {
+	@Override
+	public String toString() {
 
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("pk", this.pk).toString();
-    }
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("pk", this.pk).toString();
+	}
 }

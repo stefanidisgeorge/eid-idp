@@ -25,20 +25,20 @@ import javax.servlet.http.HttpSession;
 
 public abstract class AppletUtil {
 
-        @SuppressWarnings("unchecked")
-        public static <T> T getSessionAttribute(String attributeName) {
-                return (T) getHttpSession().getAttribute(attributeName);
-        }
+	@SuppressWarnings("unchecked")
+	public static <T> T getSessionAttribute(String attributeName) {
+		return (T) getHttpSession().getAttribute(attributeName);
+	}
 
-        private static HttpSession getHttpSession() {
-                HttpServletRequest httpServletRequest;
-                try {
-                        httpServletRequest = (HttpServletRequest) PolicyContext
-                                .getContext("javax.servlet.http.HttpServletRequest");
-                } catch (PolicyContextException e) {
-                        throw new RuntimeException("JACC error: " + e.getMessage());
-                }
+	private static HttpSession getHttpSession() {
+		HttpServletRequest httpServletRequest;
+		try {
+			httpServletRequest = (HttpServletRequest) PolicyContext
+					.getContext("javax.servlet.http.HttpServletRequest");
+		} catch (PolicyContextException e) {
+			throw new RuntimeException("JACC error: " + e.getMessage());
+		}
 
-                return httpServletRequest.getSession();
-        }
+		return httpServletRequest.getSession();
+	}
 }

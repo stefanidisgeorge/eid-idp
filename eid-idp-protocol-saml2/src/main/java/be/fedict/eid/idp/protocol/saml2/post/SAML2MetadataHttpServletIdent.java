@@ -21,17 +21,18 @@ package be.fedict.eid.idp.protocol.saml2.post;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2MetadataHttpServlet;
 import org.opensaml.common.xml.SAMLConstants;
 
-public class SAML2MetadataHttpServletIdent extends AbstractSAML2MetadataHttpServlet {
+public class SAML2MetadataHttpServletIdent extends
+		AbstractSAML2MetadataHttpServlet {
 
-        private static final long serialVersionUID = 6349259119875257556L;
+	private static final long serialVersionUID = 6349259119875257556L;
 
-        @Override
-        protected String getPath() {
-                return "saml2/post/ident";
-        }
+	@Override
+	protected String getPath() {
+		return "saml2/post/ident";
+	}
 
-        @Override
-        protected String getBinding() {
-                return SAMLConstants.SAML2_POST_BINDING_URI;
-        }
+	@Override
+	protected String getBinding() {
+		return SAMLConstants.SAML2_POST_BINDING_URI;
+	}
 }

@@ -20,10 +20,11 @@ package be.fedict.eid.idp.protocol.ws_federation;
 
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 
-public class WSFederationProtocolServiceIdent extends AbstractWSFederationProtocolService {
+public class WSFederationProtocolServiceIdent extends
+		AbstractWSFederationProtocolService {
 
-    @Override
-    protected IdentityProviderFlow getAuthenticationFlow() {
-        return IdentityProviderFlow.IDENTIFICATION;
-    }
+	@Override
+	protected IdentityProviderFlow getAuthenticationFlow() {
+		return IdentityProviderFlow.IDENTIFICATION;
+	}
 }

@@ -28,77 +28,80 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * SAML v2.0 Authentication response processor for the HTTP Artifact binding.
- *
+ * 
  * @author Wim Vandenhaute
  */
-public class AuthenticationResponseProcessor extends AbstractAuthenticationResponseProcessor {
+public class AuthenticationResponseProcessor extends
+		AbstractAuthenticationResponseProcessor {
 
-        private final ArtifactAuthenticationResponseService service;
+	private final ArtifactAuthenticationResponseService service;
 
-        /**
-         * Main Constructor
-         *
-         * @param service required {@link ArtifactAuthenticationResponseService} for
-         *                validation of certificate chain in returned SAML v2.0
-         *                Response. Required as the location of the
-         *                eID IdP Artifact Service is needed.
-         */
-        public AuthenticationResponseProcessor(ArtifactAuthenticationResponseService service) {
+	/**
+	 * Main Constructor
+	 * 
+	 * @param service
+	 *            required {@link ArtifactAuthenticationResponseService} for
+	 *            validation of certificate chain in returned SAML v2.0
+	 *            Response. Required as the location of the eID IdP Artifact
+	 *            Service is needed.
+	 */
+	public AuthenticationResponseProcessor(
+			ArtifactAuthenticationResponseService service) {
 
-                this.service = service;
-        }
+		this.service = service;
+	}
 
-        /**
-         * Used the <tt>SAMLArt</tt> parameter in the HTTP Servlet Request and
-         * makes a call used the Artifact Web Service to resolve the SAML v2.0
-         * Authentication Response using the WS Client
-         * {@link ArtifactServiceClient}
-         *
-         * @param request HTTP Servlet Request
-         * @return the SAML v2.0 Authentication Response
-         * @throws AuthenticationResponseProcessorException
-         *          something went wrong trying to resolve the SAML v2.0
-         *          Authentication Response.
-         */
-        @Override
-        protected Response getSamlResponse(HttpServletRequest request)
-                throws AuthenticationResponseProcessorException {
+	/**
+	 * Used the <tt>SAMLArt</tt> parameter in the HTTP Servlet Request and makes
+	 * a call used the Artifact Web Service to resolve the SAML v2.0
+	 * Authentication Response using the WS Client {@link ArtifactServiceClient}
+	 * 
+	 * @param request
+	 *            HTTP Servlet Request
+	 * @return the SAML v2.0 Authentication Response
+	 * @throws AuthenticationResponseProcessorException
+	 *             something went wrong trying to resolve the SAML v2.0
+	 *             Authentication Response.
+	 */
+	@Override
+	protected Response getSamlResponse(HttpServletRequest request)
+			throws AuthenticationResponseProcessorException {
 
-                String encodedArtifact = request.getParameter("SAMLart");
-                if (null == encodedArtifact) {
-                        throw new AuthenticationResponseProcessorException(
-                                "No SAMLArt parameter found.");
-                }
-                LOG.debug("Encoded artifact: " + encodedArtifact);
+		String encodedArtifact = request.getParameter("SAMLart");
+		if (null == encodedArtifact) {
+			throw new AuthenticationResponseProcessorException(
+					"No SAMLArt parameter found.");
+		}
+		LOG.debug("Encoded artifact: " + encodedArtifact);
 
-                // construct client
-                String location = this.service.getArtifactServiceLocation();
-                LOG.debug("SAML2 Artifact Service: " + location);
-                ArtifactServiceClient client = new ArtifactServiceClient(
-                        location, this.service.getServiceHostname(),
-                        this.service.getSPIdentity(), this.service.getIssuer());
+		// construct client
+		String location = this.service.getArtifactServiceLocation();
+		LOG.debug("SAML2 Artifact Service: " + location);
+		ArtifactServiceClient client = new ArtifactServiceClient(location,
+				this.service.getServiceHostname(),
+				this.service.getSPIdentity(), this.service.getIssuer());
 
-                // client configuration
-                client.setServicePublicKey(this.service.getServicePublicKey());
-                client.setLogging(this.service.logSoapMessages());
-                if (null != this.service.getProxyHost()) {
-                        client.setProxy(this.service.getProxyHost(),
-                                this.service.getProxyPort());
-                } else {
-                        // disable previously set proxy
-                        client.setProxy(null, 0);
-                }
+		// client configuration
+		client.setServicePublicKey(this.service.getServicePublicKey());
+		client.setLogging(this.service.logSoapMessages());
+		if (null != this.service.getProxyHost()) {
+			client.setProxy(this.service.getProxyHost(),
+					this.service.getProxyPort());
+		} else {
+			// disable previously set proxy
+			client.setProxy(null, 0);
+		}
 
-                // resolve
-                return client.resolve(encodedArtifact);
-        }
+		// resolve
+		return client.resolve(encodedArtifact);
+	}
 
-        /**
-         * @return the required {@link ArtifactAuthenticationResponseService}.
-         */
-        @Override
-        protected AuthenticationResponseService getAuthenticationResponseService() {
+	/**
+	 * @return the required {@link ArtifactAuthenticationResponseService}.
+	 */
+	@Override
+	protected AuthenticationResponseService getAuthenticationResponseService() {
 
-                return this.service;
-        }
+		return this.service;
+	}
 }

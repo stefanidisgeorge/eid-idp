@@ -20,15 +20,16 @@ package be.fedict.eid.idp.protocol.openid;
 
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 
-public class OpenIDProtocolServiceAuthIdent extends AbstractOpenIDProtocolService {
+public class OpenIDProtocolServiceAuthIdent extends
+		AbstractOpenIDProtocolService {
 
-    @Override
-    protected String getPath() {
-        return "openid/auth-ident";
-    }
+	@Override
+	protected String getPath() {
+		return "openid/auth-ident";
+	}
 
-    @Override
-    protected IdentityProviderFlow getAuthenticationFlow() {
-        return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
-    }
+	@Override
+	protected IdentityProviderFlow getAuthenticationFlow() {
+		return IdentityProviderFlow.AUTHENTICATION_WITH_IDENTIFICATION;
+	}
 }

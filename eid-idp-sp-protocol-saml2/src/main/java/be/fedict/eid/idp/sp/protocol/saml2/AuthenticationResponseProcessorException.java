@@ -21,23 +21,23 @@ package be.fedict.eid.idp.sp.protocol.saml2;
 /**
  * Exception thrown when something went wrong processing the SAML v2.0
  * Authentication Response
- *
+ * 
  * @author Wim Vandenhaute
  */
 public class AuthenticationResponseProcessorException extends Exception {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        public AuthenticationResponseProcessorException(String message,
-                                                        Throwable cause) {
-                super(message, cause);
-        }
+	public AuthenticationResponseProcessorException(String message,
+			Throwable cause) {
+		super(message, cause);
+	}
 
-        public AuthenticationResponseProcessorException(Throwable cause) {
-                super(cause);
-        }
+	public AuthenticationResponseProcessorException(Throwable cause) {
+		super(cause);
+	}
 
-        public AuthenticationResponseProcessorException(String message) {
-                super(message);
-        }
+	public AuthenticationResponseProcessorException(String message) {
+		super(message);
+	}
 }

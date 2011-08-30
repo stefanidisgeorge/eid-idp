@@ -23,28 +23,28 @@ import javax.ejb.Local;
 @Local
 public interface Admin {
 
-    /*
-     * Accessors.
-     */
+	/*
+	 * Accessors.
+	 */
 
-    /*
-    * Factories
-    */
-    void adminListFactory();
+	/*
+	 * Factories
+	 */
+	void adminListFactory();
 
-    /*
-    * Actions.
-    */
-    String registerPending();
+	/*
+	 * Actions.
+	 */
+	String registerPending();
 
-    void select();
+	void select();
 
-    String remove();
+	String remove();
 
-    /*
-    * Lifecycle.
-    */
-    void destroy();
+	/*
+	 * Lifecycle.
+	 */
+	void destroy();
 
-    void postConstruct();
+	void postConstruct();
 }

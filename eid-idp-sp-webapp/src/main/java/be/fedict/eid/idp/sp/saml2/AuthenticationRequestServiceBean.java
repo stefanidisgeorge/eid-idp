@@ -27,75 +27,76 @@ import java.io.Serializable;
 import java.security.KeyStore;
 import java.util.Map;
 
-public class AuthenticationRequestServiceBean implements AuthenticationRequestService, Serializable {
+public class AuthenticationRequestServiceBean implements
+		AuthenticationRequestService, Serializable {
 
-        private static final Log LOG = LogFactory.getLog(AuthenticationRequestServiceBean.class);
-        private static final long serialVersionUID = 1185931387819658055L;
+	private static final Log LOG = LogFactory
+			.getLog(AuthenticationRequestServiceBean.class);
+	private static final long serialVersionUID = 1185931387819658055L;
 
-        public static final String ISSUER = "TestSP";
+	public static final String ISSUER = "TestSP";
 
-        private String idPEntryPoint;
-        private String spResponseEndpoint;
+	private String idPEntryPoint;
+	private String spResponseEndpoint;
 
-        @Override
-        public String getIssuer() {
+	@Override
+	public String getIssuer() {
 
-                LOG.debug("get issuer");
-                return ISSUER;
-        }
+		LOG.debug("get issuer");
+		return ISSUER;
+	}
 
-        @Override
-        public String getSPDestination() {
+	@Override
+	public String getSPDestination() {
 
-                LOG.debug("get SP destination: " + this.spResponseEndpoint);
-                return this.spResponseEndpoint;
-        }
+		LOG.debug("get SP destination: " + this.spResponseEndpoint);
+		return this.spResponseEndpoint;
+	}
 
-        @Override
-        public String getIdPDestination() {
+	@Override
+	public String getIdPDestination() {
 
-                LOG.debug("get IdP destionation: " + this.idPEntryPoint);
-                return this.idPEntryPoint;
-        }
+		LOG.debug("get IdP destionation: " + this.idPEntryPoint);
+		return this.idPEntryPoint;
+	}
 
-        @Override
-        public String getRelayState(Map<String, String[]> parameterMap) {
-                return null;
-        }
+	@Override
+	public String getRelayState(Map<String, String[]> parameterMap) {
+		return null;
+	}
 
-        @Override
-        public KeyStore.PrivateKeyEntry getSPIdentity() {
+	@Override
+	public KeyStore.PrivateKeyEntry getSPIdentity() {
 
-                LOG.debug("get SP Identity");
-                try {
-                        KeyStore.PrivateKeyEntry pke = PkiServlet.getPrivateKeyEntry();
-                        LOG.debug("certificate: " + pke.getCertificate());
-                        return pke;
-                } catch (Exception e) {
-                        LOG.error(e);
-                        return null;
-                }
-        }
+		LOG.debug("get SP Identity");
+		try {
+			KeyStore.PrivateKeyEntry pke = PkiServlet.getPrivateKeyEntry();
+			LOG.debug("certificate: " + pke.getCertificate());
+			return pke;
+		} catch (Exception e) {
+			LOG.error(e);
+			return null;
+		}
+	}
 
-        @Override
-        public String getLanguage() {
-                return "nl";
-        }
+	@Override
+	public String getLanguage() {
+		return "nl";
+	}
 
+	public String getIdPEntryPoint() {
+		return idPEntryPoint;
+	}
 
-        public String getIdPEntryPoint() {
-                return idPEntryPoint;
-        }
+	public void setIdPEntryPoint(String idPEntryPoint) {
+		this.idPEntryPoint = idPEntryPoint;
+	}
 
-        public void setIdPEntryPoint(String idPEntryPoint) {
-                this.idPEntryPoint = idPEntryPoint;
-        }
+	public String getSpResponseEndpoint() {
+		return spResponseEndpoint;
+	}
 
-        public String getSpResponseEndpoint() {
-                return spResponseEndpoint;
-        }
-
-        public void setSpResponseEndpoint(String spResponseEndpoint) {
-                this.spResponseEndpoint = spResponseEndpoint;
-        }
+	public void setSpResponseEndpoint(String spResponseEndpoint) {
+		this.spResponseEndpoint = spResponseEndpoint;
+	}
 }

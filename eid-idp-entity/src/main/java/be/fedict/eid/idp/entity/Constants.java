@@ -20,9 +20,9 @@ package be.fedict.eid.idp.entity;
 
 public class Constants {
 
-    public static final String DATABASE_TABLE_PREFIX = "idp_";
+	public static final String DATABASE_TABLE_PREFIX = "idp_";
 
-    private Constants() {
-        super();
-    }
+	private Constants() {
+		super();
+	}
 }

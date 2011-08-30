@@ -33,100 +33,102 @@ import java.util.Map;
 
 public class ResponseBean {
 
-        private static final Log LOG = LogFactory.getLog(ResponseBean.class);
+	private static final Log LOG = LogFactory.getLog(ResponseBean.class);
 
-        private HttpSession session;
-        private String identifier;
-        private Map<String, Object> attributeMap;
-        private String policy;
+	private HttpSession session;
+	private String identifier;
+	private Map<String, Object> attributeMap;
+	private String policy;
 
-        public HttpSession getSession() {
-                return this.session;
-        }
+	public HttpSession getSession() {
+		return this.session;
+	}
 
-        public void setSession(HttpSession session) {
+	public void setSession(HttpSession session) {
 
-                this.session = session;
+		this.session = session;
 
-                if (null != session.getAttribute("Response")) {
+		if (null != session.getAttribute("Response")) {
 
-                        Object responseObject = session.getAttribute("Response");
-                        if (responseObject instanceof AuthenticationResponse) {
-                                // saml2 (or WS-Federation...)
-                                AuthenticationResponse response =
-                                        (AuthenticationResponse) responseObject;
-                                this.identifier = response.getIdentifier();
-                                this.attributeMap = response.getAttributeMap();
-                                this.policy = response.getAuthenticationPolicy().getUri();
+			Object responseObject = session.getAttribute("Response");
+			if (responseObject instanceof AuthenticationResponse) {
+				// saml2 (or WS-Federation...)
+				AuthenticationResponse response = (AuthenticationResponse) responseObject;
+				this.identifier = response.getIdentifier();
+				this.attributeMap = response.getAttributeMap();
+				this.policy = response.getAuthenticationPolicy().getUri();
 
-                                // validate assertion
-                                if (null != response.getAssertion().getSignature()) {
-                                        try {
-                                                Saml2Util.validateSignature(response.getAssertion().getSignature());
-                                        } catch (CertificateException e) {
-                                                LOG.error(e);
-                                        } catch (ValidationException e) {
-                                                LOG.error(e);
-                                        }
-                                        LOG.debug("Valid assertion");
-                                }
+				// validate assertion
+				if (null != response.getAssertion().getSignature()) {
+					try {
+						Saml2Util.validateSignature(response.getAssertion()
+								.getSignature());
+					} catch (CertificateException e) {
+						LOG.error(e);
+					} catch (ValidationException e) {
+						LOG.error(e);
+					}
+					LOG.debug("Valid assertion");
+				}
 
-                        } else {
-                                // openid
-                                OpenIDAuthenticationResponse response =
-                                        (OpenIDAuthenticationResponse) responseObject;
-                                this.identifier = response.getIdentifier();
-                                this.attributeMap = response.getAttributeMap();
-                                this.policy = Arrays.toString(response.getAuthenticationPolicies().toArray());
-                        }
+			} else {
+				// openid
+				OpenIDAuthenticationResponse response = (OpenIDAuthenticationResponse) responseObject;
+				this.identifier = response.getIdentifier();
+				this.attributeMap = response.getAttributeMap();
+				this.policy = Arrays.toString(response
+						.getAuthenticationPolicies().toArray());
+			}
 
-                        for (Map.Entry<String, Object> entry : this.attributeMap.entrySet()) {
-                                LOG.debug("attribute: " + entry.getKey() + " value=" + entry.getValue());
-                        }
+			for (Map.Entry<String, Object> entry : this.attributeMap.entrySet()) {
+				LOG.debug("attribute: " + entry.getKey() + " value="
+						+ entry.getValue());
+			}
 
-                        // get photo
-                        if (this.attributeMap.containsKey(AttributeConstants.PHOTO_CLAIM_TYPE_URI)) {
-                                byte[] photoData = (byte[]) this.attributeMap
-                                        .get(AttributeConstants.PHOTO_CLAIM_TYPE_URI);
-                                this.session.setAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE,
-                                        photoData);
-                        } else {
-                                this.session.removeAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE);
-                        }
-                }
-                cleanupSession();
+			// get photo
+			if (this.attributeMap
+					.containsKey(AttributeConstants.PHOTO_CLAIM_TYPE_URI)) {
+				byte[] photoData = (byte[]) this.attributeMap
+						.get(AttributeConstants.PHOTO_CLAIM_TYPE_URI);
+				this.session.setAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE,
+						photoData);
+			} else {
+				this.session
+						.removeAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE);
+			}
+		}
+		cleanupSession();
 
+	}
 
-        }
+	public Map getAttributeMap() {
 
-        public Map getAttributeMap() {
+		return this.attributeMap;
+	}
 
-                return this.attributeMap;
-        }
+	public void setAttributeMap(Map value) {
+		// empty
+	}
 
-        public void setAttributeMap(Map value) {
-                // empty
-        }
+	public String getIdentifier() {
+		return this.identifier;
+	}
 
-        public String getIdentifier() {
-                return this.identifier;
-        }
+	public void setIdentifier(String identifier) {
+		// empty
+	}
 
-        public void setIdentifier(String identifier) {
-                // empty
-        }
+	private void cleanupSession() {
+		this.session.removeAttribute("Identifier");
+		this.session.removeAttribute("AttributeMap");
+		this.session.removeAttribute("Response");
+	}
 
-        private void cleanupSession() {
-                this.session.removeAttribute("Identifier");
-                this.session.removeAttribute("AttributeMap");
-                this.session.removeAttribute("Response");
-        }
+	public String getPolicy() {
+		return this.policy;
+	}
 
-        public String getPolicy() {
-                return this.policy;
-        }
-
-        public void setPolicy(String policy) {
-                // empty
-        }
+	public void setPolicy(String policy) {
+		// empty
+	}
 }

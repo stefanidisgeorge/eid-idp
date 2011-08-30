@@ -33,45 +33,45 @@ import java.io.StringWriter;
 
 public class PublicKeyServlet extends HttpServlet {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        private static final Log LOG = LogFactory.getLog(PublicKeyServlet.class);
+	private static final Log LOG = LogFactory.getLog(PublicKeyServlet.class);
 
-        @Override
-        protected void doGet(HttpServletRequest request,
-                             HttpServletResponse response) throws ServletException, IOException {
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 
-                LOG.debug("doGet");
-                String pemPrivate;
-                try {
-                        pemPrivate = toPem(PkiServlet.getPrivateKeyEntry().
-                                getCertificate().getPublicKey());
-                } catch (Exception e) {
-                        LOG.error(e);
-                        return;
-                }
+		LOG.debug("doGet");
+		String pemPrivate;
+		try {
+			pemPrivate = toPem(PkiServlet.getPrivateKeyEntry().getCertificate()
+					.getPublicKey());
+		} catch (Exception e) {
+			LOG.error(e);
+			return;
+		}
 
-                response.setContentType("text/plain");
-                PrintWriter out = response.getWriter();
-                out.print(pemPrivate);
-                out.close();
-        }
+		response.setContentType("text/plain");
+		PrintWriter out = response.getWriter();
+		out.print(pemPrivate);
+		out.close();
+	}
 
-        private static String toPem(Object object) {
+	private static String toPem(Object object) {
 
-                StringWriter buffer = new StringWriter();
-                try {
-                        PEMWriter writer = new PEMWriter(buffer);
-                        LOG.debug("toPem: " + object.getClass().getName());
-                        writer.writeObject(object);
-                        writer.close();
-                        return buffer.toString();
-                } catch (Exception e) {
-                        throw new RuntimeException("Cannot convert object to " +
-                                "PEM format: " + e.getMessage(), e);
-                } finally {
-                        IOUtils.closeQuietly(buffer);
-                }
-        }
+		StringWriter buffer = new StringWriter();
+		try {
+			PEMWriter writer = new PEMWriter(buffer);
+			LOG.debug("toPem: " + object.getClass().getName());
+			writer.writeObject(object);
+			writer.close();
+			return buffer.toString();
+		} catch (Exception e) {
+			throw new RuntimeException("Cannot convert object to "
+					+ "PEM format: " + e.getMessage(), e);
+		} finally {
+			IOUtils.closeQuietly(buffer);
+		}
+	}
 
 }

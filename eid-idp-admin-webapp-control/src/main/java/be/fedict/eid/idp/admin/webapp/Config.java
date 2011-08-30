@@ -29,80 +29,80 @@ import java.util.List;
 @Local
 public interface Config {
 
-        /*
-        * Accessors.
-        */
-        String getXkmsUrl();
+	/*
+	 * Accessors.
+	 */
+	String getXkmsUrl();
 
-        void setXkmsUrl(String xkmsUrl);
+	void setXkmsUrl(String xkmsUrl);
 
-        String getXkmsAuthTrustDomain();
+	String getXkmsAuthTrustDomain();
 
-        void setXkmsAuthTrustDomain(String xkmsAuthTrustDomain);
+	void setXkmsAuthTrustDomain(String xkmsAuthTrustDomain);
 
-        String getXkmsIdentTrustDomain();
+	String getXkmsIdentTrustDomain();
 
-        void setXkmsIdentTrustDomain(String xkmsIdentTrustDomain);
+	void setXkmsIdentTrustDomain(String xkmsIdentTrustDomain);
 
-        String getHmacSecret();
+	String getHmacSecret();
 
-        void setHmacSecret(String hmacSecret);
+	void setHmacSecret(String hmacSecret);
 
-        Boolean getHttpProxy();
+	Boolean getHttpProxy();
 
-        void setHttpProxy(Boolean httpProxy);
+	void setHttpProxy(Boolean httpProxy);
 
-        String getHttpProxyHost();
+	String getHttpProxyHost();
 
-        void setHttpProxyHost(String httpProxyHost);
+	void setHttpProxyHost(String httpProxyHost);
 
-        Integer getHttpProxyPort();
+	Integer getHttpProxyPort();
 
-        void setHttpProxyPort(Integer httpProxyPort);
+	void setHttpProxyPort(Integer httpProxyPort);
 
-        String getDefaultIssuer();
+	String getDefaultIssuer();
 
-        void setDefaultIssuer(String defaultIssuer);
+	void setDefaultIssuer(String defaultIssuer);
 
-        AppletConfigEntity getAppletConfig();
+	AppletConfigEntity getAppletConfig();
 
-        void setAppletConfig(AppletConfigEntity appletConfig);
+	void setAppletConfig(AppletConfigEntity appletConfig);
 
-        String getSelectedTab();
+	String getSelectedTab();
 
-        void setSelectedTab(String selectedTab);
+	void setSelectedTab(String selectedTab);
 
-        Integer getTokenValidity();
+	Integer getTokenValidity();
 
-        void setTokenValidity(Integer tokenValidity);
+	void setTokenValidity(Integer tokenValidity);
 
-        /*
-        * Listeners.
-        */
-        void uploadListener(UploadEvent event) throws IOException;
+	/*
+	 * Listeners.
+	 */
+	void uploadListener(UploadEvent event) throws IOException;
 
-        /*
-        * Factories
-        */
-        List<SelectItem> keyStoreTypeFactory();
+	/*
+	 * Factories
+	 */
+	List<SelectItem> keyStoreTypeFactory();
 
-        /*
-        * Actions.
-        */
-        String saveIdP();
+	/*
+	 * Actions.
+	 */
+	String saveIdP();
 
-        String saveXkms();
+	String saveXkms();
 
-        String saveNetwork();
+	String saveNetwork();
 
-        String saveApplet();
+	String saveApplet();
 
-        String removeApplet();
+	String removeApplet();
 
-        /*
-        * Lifecycle.
-        */
-        void destroy();
+	/*
+	 * Lifecycle.
+	 */
+	void destroy();
 
-        void postConstruct();
+	void postConstruct();
 }

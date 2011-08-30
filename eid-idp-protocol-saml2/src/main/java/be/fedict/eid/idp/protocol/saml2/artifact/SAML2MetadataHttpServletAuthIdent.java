@@ -20,17 +20,18 @@ package be.fedict.eid.idp.protocol.saml2.artifact;
 
 import org.opensaml.common.xml.SAMLConstants;
 
-public class SAML2MetadataHttpServletAuthIdent extends AbstractSAML2ArtifactMetadataHttpServlet {
+public class SAML2MetadataHttpServletAuthIdent extends
+		AbstractSAML2ArtifactMetadataHttpServlet {
 
-        private static final long serialVersionUID = -1118979011912912662L;
+	private static final long serialVersionUID = -1118979011912912662L;
 
-        @Override
-        protected String getPath() {
-                return "saml2/artifact/auth-ident";
-        }
+	@Override
+	protected String getPath() {
+		return "saml2/artifact/auth-ident";
+	}
 
-        @Override
-        protected String getBinding() {
-                return SAMLConstants.SAML2_ARTIFACT_BINDING_URI;
-        }
+	@Override
+	protected String getBinding() {
+		return SAMLConstants.SAML2_ARTIFACT_BINDING_URI;
+	}
 }

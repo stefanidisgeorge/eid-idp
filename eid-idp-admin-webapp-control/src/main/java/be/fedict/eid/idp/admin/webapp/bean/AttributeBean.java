@@ -39,47 +39,46 @@ import java.util.List;
 @LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT + "AttributeBean")
 public class AttributeBean implements Attribute {
 
-        private static final String ATTRIBUTE_URI_LIST_NAME = "idpAttributeUriList";
+	private static final String ATTRIBUTE_URI_LIST_NAME = "idpAttributeUriList";
 
-        @Logger
-        private Log log;
+	@Logger
+	private Log log;
 
-        @EJB
-        private AttributeService attributeService;
+	@EJB
+	private AttributeService attributeService;
 
-        @In
-        FacesMessages facesMessages;
+	@In
+	FacesMessages facesMessages;
 
+	@DataModel(ATTRIBUTE_URI_LIST_NAME)
+	private List<AttributeProtocolUriEntity> attributeUriList;
 
-        @DataModel(ATTRIBUTE_URI_LIST_NAME)
-        private List<AttributeProtocolUriEntity> attributeUriList;
+	@Override
+	@PostConstruct
+	public void postConstruct() {
 
-        @Override
-        @PostConstruct
-        public void postConstruct() {
+	}
 
-        }
+	@Override
+	@Factory(ATTRIBUTE_URI_LIST_NAME)
+	public void attributeUriFactory() {
 
-        @Override
-        @Factory(ATTRIBUTE_URI_LIST_NAME)
-        public void attributeUriFactory() {
+		this.attributeUriList = this.attributeService.listAttributeUris();
+	}
 
-                this.attributeUriList = this.attributeService.listAttributeUris();
-        }
+	@Override
+	public String save() {
 
-        @Override
-        public String save() {
+		this.log.debug("save");
+		this.attributeService.saveAttributeUris(this.attributeUriList);
+		return "success";
+	}
 
-                this.log.debug("save");
-                this.attributeService.saveAttributeUris(this.attributeUriList);
-                return "success";
-        }
+	@Override
+	@Remove
+	@Destroy
+	public void destroy() {
 
-        @Override
-        @Remove
-        @Destroy
-        public void destroy() {
-
-                this.attributeUriList = null;
-        }
+		this.attributeUriList = null;
+	}
 }

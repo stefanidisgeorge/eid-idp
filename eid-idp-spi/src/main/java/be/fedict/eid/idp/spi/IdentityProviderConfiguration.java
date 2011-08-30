@@ -23,45 +23,44 @@ import java.util.List;
 
 /**
  * Interface towards the configuration of the eID IdP.
- *
+ * 
  * @author Frank Cornelis
  */
 public interface IdentityProviderConfiguration {
 
-        /**
-         * Gives back the secret used to HMAC the user identifiers.
-         *
-         * @return secret, or <code>null</code> if not set.
-         */
-        byte[] getHmacSecret();
+	/**
+	 * Gives back the secret used to HMAC the user identifiers.
+	 * 
+	 * @return secret, or <code>null</code> if not set.
+	 */
+	byte[] getHmacSecret();
 
-        /**
-         * @return the identity of this eID IdP system.
-         */
-        IdPIdentity findIdentity();
+	/**
+	 * @return the identity of this eID IdP system.
+	 */
+	IdPIdentity findIdentity();
 
-        /**
-         * @return certificate chain of the eID IdP identity.
-         */
-        List<X509Certificate> getIdentityCertificateChain();
+	/**
+	 * @return certificate chain of the eID IdP identity.
+	 */
+	List<X509Certificate> getIdentityCertificateChain();
 
-        /**
-         * @return default issuer name of the eID IdP system,
-         *         or <code>null</code> if not set.
-         */
-        String getDefaultIssuer();
+	/**
+	 * @return default issuer name of the eID IdP system, or <code>null</code>
+	 *         if not set.
+	 */
+	String getDefaultIssuer();
 
-        /**
-         * @param protocolId protocol ID
-         * @return list of all configured eID IdP Attributes.
-         */
-        List<AttributeConfig> getAttributes(String protocolId);
+	/**
+	 * @param protocolId
+	 *            protocol ID
+	 * @return list of all configured eID IdP Attributes.
+	 */
+	List<AttributeConfig> getAttributes(String protocolId);
 
-        /**
-         * @return validity time in minutes of the returned authentication
-         *         response token.
-         */
-        Integer getResponseTokenValidity();
+	/**
+	 * @return validity time in minutes of the returned authentication response
+	 *         token.
+	 */
+	Integer getResponseTokenValidity();
 }
-
-

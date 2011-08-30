@@ -46,209 +46,191 @@ import java.util.Set;
  * Client SOAP handler for the SAML v2.0 Artifact Binding Service.
  * <p/>
  * Used for optionally signing the SAML v2.0 Artifact Resolve request.
- *
+ * 
  * @author Wim Vandenhaute
  */
-public class ArtifactServiceClientHandler implements SOAPHandler<SOAPMessageContext> {
+public class ArtifactServiceClientHandler implements
+		SOAPHandler<SOAPMessageContext> {
 
-        private static final Log LOG = LogFactory
-                .getLog(ArtifactServiceClientHandler.class);
+	private static final Log LOG = LogFactory
+			.getLog(ArtifactServiceClientHandler.class);
 
-        private static final String XPATH_ARTIFACT_RESOLVE =
-                "/soap:Envelope/soap:Body/samlp:ArtifactResolve";
-        private static final String XPATH_ARTIFACT =
-                "/soap:Envelope/soap:Body/samlp:ArtifactResolve/samlp:Artifact";
+	private static final String XPATH_ARTIFACT_RESOLVE = "/soap:Envelope/soap:Body/samlp:ArtifactResolve";
+	private static final String XPATH_ARTIFACT = "/soap:Envelope/soap:Body/samlp:ArtifactResolve/samlp:Artifact";
 
-        private static final String XPATH_ARTIFACT_RESPONSE =
-                "/soap:Envelope/soap:Body/samlp:ArtifactResponse";
-        private static final String XPATH_ARTIFACT_RESPONSE_SIGNATURE =
-                "/soap:Envelope/soap:Body/samlp:ArtifactResponse/ds:Signature";
+	private static final String XPATH_ARTIFACT_RESPONSE = "/soap:Envelope/soap:Body/samlp:ArtifactResponse";
+	private static final String XPATH_ARTIFACT_RESPONSE_SIGNATURE = "/soap:Envelope/soap:Body/samlp:ArtifactResponse/ds:Signature";
 
-        private static final String XPATH_RESPONSE =
-                "/soap:Envelope/soap:Body/samlp:ArtifactResponse/samlp:Response";
-        private static final String XPATH_RESPONSE_ASSERTION =
-                "/soap:Envelope/soap:Body/samlp:ArtifactResponse/samlp:Response/saml:Assertion";
+	private static final String XPATH_RESPONSE = "/soap:Envelope/soap:Body/samlp:ArtifactResponse/samlp:Response";
+	private static final String XPATH_RESPONSE_ASSERTION = "/soap:Envelope/soap:Body/samlp:ArtifactResponse/samlp:Response/saml:Assertion";
 
-        private final KeyStore.PrivateKeyEntry spIdentity;
-        private Response response;
+	private final KeyStore.PrivateKeyEntry spIdentity;
+	private Response response;
 
-        /**
-         * Main constructor.
-         *
-         * @param spIdentity optional SP Identity for signing outgoing artifact
-         *                   resolve requests.
-         */
-        public ArtifactServiceClientHandler(KeyStore.PrivateKeyEntry spIdentity) {
-                this.spIdentity = spIdentity;
-        }
+	/**
+	 * Main constructor.
+	 * 
+	 * @param spIdentity
+	 *            optional SP Identity for signing outgoing artifact resolve
+	 *            requests.
+	 */
+	public ArtifactServiceClientHandler(KeyStore.PrivateKeyEntry spIdentity) {
+		this.spIdentity = spIdentity;
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public Set<QName> getHeaders() {
-                return new HashSet<QName>();
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<QName> getHeaders() {
+		return new HashSet<QName>();
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public boolean handleMessage(SOAPMessageContext soapMessageContext) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean handleMessage(SOAPMessageContext soapMessageContext) {
 
-                Boolean outbound = (Boolean) soapMessageContext
-                        .get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+		Boolean outbound = (Boolean) soapMessageContext
+				.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
-                SOAPMessage soapMessage = soapMessageContext.getMessage();
-                SOAPPart soapPart = soapMessage.getSOAPPart();
+		SOAPMessage soapMessage = soapMessageContext.getMessage();
+		SOAPPart soapPart = soapMessage.getSOAPPart();
 
-                if (outbound) {
+		if (outbound) {
 
-                        handleOutboundDocument(soapPart);
-                } else {
-                        handleInboundDocument(soapPart);
-                }
+			handleOutboundDocument(soapPart);
+		} else {
+			handleInboundDocument(soapPart);
+		}
 
-                return true;
+		return true;
 
-        }
+	}
 
-        private void handleOutboundDocument(SOAPPart soapPart) {
+	private void handleOutboundDocument(SOAPPart soapPart) {
 
-                LOG.debug("handle outbound");
+		LOG.debug("handle outbound");
 
-                // find ArtifactResolve and Artifact elements
-                Element artifactResolve =
-                        (Element) Saml2Util.find(soapPart, XPATH_ARTIFACT_RESOLVE);
-                if (null == artifactResolve) {
-                        throw new RuntimeException("No ArtifactResolve ?!");
-                }
-                Element artifact =
-                        (Element) Saml2Util.find(soapPart, XPATH_ARTIFACT);
-                if (null == artifact) {
-                        throw new RuntimeException("No Artifact ?!");
-                }
+		// find ArtifactResolve and Artifact elements
+		Element artifactResolve = (Element) Saml2Util.find(soapPart,
+				XPATH_ARTIFACT_RESOLVE);
+		if (null == artifactResolve) {
+			throw new RuntimeException("No ArtifactResolve ?!");
+		}
+		Element artifact = (Element) Saml2Util.find(soapPart, XPATH_ARTIFACT);
+		if (null == artifact) {
+			throw new RuntimeException("No Artifact ?!");
+		}
 
-                // sign
-                try {
-                        Saml2Util.signDocument(artifactResolve,
-                                artifact, this.spIdentity);
-                } catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException(e);
-                } catch (InvalidAlgorithmParameterException e) {
-                        throw new RuntimeException(e);
-                } catch (MarshalException e) {
-                        throw new RuntimeException(e);
-                } catch (XMLSignatureException e) {
-                        throw new RuntimeException(e);
-                }
+		// sign
+		try {
+			Saml2Util.signDocument(artifactResolve, artifact, this.spIdentity);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		} catch (InvalidAlgorithmParameterException e) {
+			throw new RuntimeException(e);
+		} catch (MarshalException e) {
+			throw new RuntimeException(e);
+		} catch (XMLSignatureException e) {
+			throw new RuntimeException(e);
+		}
 
+	}
 
-        }
+	private void handleInboundDocument(SOAPPart soapPart) {
 
-        private void handleInboundDocument(SOAPPart soapPart) {
+		LOG.debug("handle inbound");
 
-                LOG.debug("handle inbound");
+		// find and validate ArtifactResponse,Response,Assertion signature
+		if (null != Saml2Util.find(soapPart, XPATH_ARTIFACT_RESPONSE_SIGNATURE)) {
 
-                // find and validate ArtifactResponse,Response,Assertion signature
-                if (null != Saml2Util.find(soapPart, XPATH_ARTIFACT_RESPONSE_SIGNATURE)) {
+			try {
 
-                        try {
+				Element artifactResponseElement = (Element) Saml2Util.find(
+						soapPart, XPATH_ARTIFACT_RESPONSE);
+				ArtifactResponse artifactResponse = Saml2Util
+						.unmarshall(artifactResponseElement);
+				LOG.debug("validate ArtifactResponse signature");
+				Saml2Util.validateSignature(artifactResponse.getSignature());
 
-                                Element artifactResponseElement =
-                                        (Element) Saml2Util.find(soapPart,
-                                                XPATH_ARTIFACT_RESPONSE);
-                                ArtifactResponse artifactResponse =
-                                        Saml2Util.unmarshall(artifactResponseElement);
-                                LOG.debug("validate ArtifactResponse signature");
-                                Saml2Util.validateSignature(
-                                        artifactResponse.getSignature());
+				Element responseElement = (Element) Saml2Util.find(soapPart,
+						XPATH_RESPONSE);
+				if (null != responseElement) {
+					Response tempResponse = Saml2Util
+							.unmarshall(responseElement);
+					LOG.debug("validate Response signature");
+					Saml2Util.validateSignature(tempResponse.getSignature());
+				}
 
-                                Element responseElement =
-                                        (Element) Saml2Util.find(soapPart,
-                                                XPATH_RESPONSE);
-                                if (null != responseElement) {
-                                        Response tempResponse =
-                                                Saml2Util.unmarshall(responseElement);
-                                        LOG.debug("validate Response signature");
-                                        Saml2Util.validateSignature(
-                                                tempResponse.getSignature());
-                                }
+				Element assertionElement = (Element) Saml2Util.find(soapPart,
+						XPATH_RESPONSE_ASSERTION);
+				if (null != assertionElement) {
+					Assertion assertion = Saml2Util
+							.unmarshall(assertionElement);
+					LOG.debug("validate Assertion signature");
+					Saml2Util.validateSignature(assertion.getSignature());
+				}
 
-                                Element assertionElement =
-                                        (Element) Saml2Util.find(soapPart,
-                                                XPATH_RESPONSE_ASSERTION);
-                                if (null != assertionElement) {
-                                        Assertion assertion =
-                                                Saml2Util.unmarshall(assertionElement);
-                                        LOG.debug("validate Assertion signature");
-                                        Saml2Util.validateSignature(
-                                                assertion.getSignature());
-                                }
+			} catch (CertificateException e) {
 
-                        } catch (CertificateException e) {
+				throw createSOAPFaultException("Error parsing certificates from XML"
+						+ "signature");
+			} catch (ValidationException e) {
+				throw createSOAPFaultException("Validation failed on XML signature");
+			}
+		}
 
-                                throw createSOAPFaultException(
-                                        "Error parsing certificates from XML" +
-                                                "signature");
-                        } catch (ValidationException e) {
-                                throw createSOAPFaultException(
-                                        "Validation failed on XML signature");
-                        }
-                }
+		// fetch response
+		Element responseElement = (Element) Saml2Util.find(soapPart,
+				XPATH_RESPONSE);
+		if (null != responseElement) {
+			Saml2Util.unmarshall(responseElement);
 
-                // fetch response
-                Element responseElement = (Element) Saml2Util.find(soapPart,
-                        XPATH_RESPONSE);
-                if (null != responseElement) {
-                        Saml2Util.unmarshall(responseElement);
+			// to string and back again so we do not
+			// run into problems trying to marshall
+			String responseString = Saml2Util.domToString(responseElement,
+					false);
 
-                        // to string and back again so we do not
-                        // run into problems trying to marshall
-                        String responseString =
-                                Saml2Util.domToString(responseElement,
-                                        false);
+			this.response = Saml2Util.unmarshall(Saml2Util.parseDocument(
+					responseString).getDocumentElement());
+		}
+	}
 
-                        this.response = Saml2Util.unmarshall(
-                                Saml2Util.parseDocument(responseString)
-                                        .getDocumentElement());
-                }
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean handleFault(SOAPMessageContext soapMessageContext) {
+		return true;
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public boolean handleFault(SOAPMessageContext soapMessageContext) {
-                return true;
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public void close(MessageContext messageContext) {
+		// empty
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public void close(MessageContext messageContext) {
-                // empty
-        }
+	private SOAPFaultException createSOAPFaultException(String faultString) {
 
+		SOAPFault soapFault;
+		try {
+			SOAPFactory soapFactory = SOAPFactory.newInstance();
+			soapFault = soapFactory.createFault();
+			soapFault.setFaultString(faultString);
+		} catch (SOAPException e) {
+			throw new RuntimeException("SOAP error");
+		}
 
-        private SOAPFaultException createSOAPFaultException(String faultString) {
+		return new SOAPFaultException(soapFault);
+	}
 
-                SOAPFault soapFault;
-                try {
-                        SOAPFactory soapFactory = SOAPFactory.newInstance();
-                        soapFault = soapFactory.createFault();
-                        soapFault.setFaultString(faultString);
-                } catch (SOAPException e) {
-                        throw new RuntimeException("SOAP error");
-                }
-
-                return new SOAPFaultException(soapFault);
-        }
-
-        /**
-         * We return the SAML v2.0 Response through the SOAP handler as JAXB will
-         * break XML Signatures when unmarshalling.
-         *
-         * @return the validated SAML v2.0 Response.
-         */
-        public Response getResponse() {
-                return this.response;
-        }
+	/**
+	 * We return the SAML v2.0 Response through the SOAP handler as JAXB will
+	 * break XML Signatures when unmarshalling.
+	 * 
+	 * @return the validated SAML v2.0 Response.
+	 */
+	public Response getResponse() {
+		return this.response;
+	}
 }

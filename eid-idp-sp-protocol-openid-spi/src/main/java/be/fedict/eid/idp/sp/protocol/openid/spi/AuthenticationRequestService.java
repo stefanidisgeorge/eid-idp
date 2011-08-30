@@ -24,39 +24,39 @@ import java.security.cert.X509Certificate;
  * OpenID SPI for authentication request services. Using an authentication
  * request service allows for run-time configuration of the OpenID
  * AuthenticationRequestServlet.
- *
+ * 
  * @author Wim Vandenhaute.
  */
 public interface AuthenticationRequestService {
 
-        /**
-         * Gives back the Service Provider destination endpoint that will handle
-         * the returned OpenID Response.
-         *
-         * @return SP OpenID response handling location.
-         */
-        String getSPDestination();
+	/**
+	 * Gives back the Service Provider destination endpoint that will handle the
+	 * returned OpenID Response.
+	 * 
+	 * @return SP OpenID response handling location.
+	 */
+	String getSPDestination();
 
-        /**
-         * Gives back the destination URL of the eID IdP OpenID protocol entry point.
-         *
-         * @return eID IdP OpenID entry point
-         */
-        String getUserIdentifier();
+	/**
+	 * Gives back the destination URL of the eID IdP OpenID protocol entry
+	 * point.
+	 * 
+	 * @return eID IdP OpenID entry point
+	 */
+	String getUserIdentifier();
 
-        /**
-         * Gives back the trusted TLS certifacte of the eID IdP Service.
-         *
-         * @return the trusted eID IdP TLS certificate
-         */
-        X509Certificate getServerCertificate();
+	/**
+	 * Gives back the trusted TLS certifacte of the eID IdP Service.
+	 * 
+	 * @return the trusted eID IdP TLS certificate
+	 */
+	X509Certificate getServerCertificate();
 
-        /**
-         * Optional comma-seperated list of preferred languages.
-         * Will be communicated and if available used by the eID IdP pages.
-         *
-         * @return preferred languages or <code>null</code> if browser locale
-         *         is ok.
-         */
-        String getPreferredLanguages();
+	/**
+	 * Optional comma-seperated list of preferred languages. Will be
+	 * communicated and if available used by the eID IdP pages.
+	 * 
+	 * @return preferred languages or <code>null</code> if browser locale is ok.
+	 */
+	String getPreferredLanguages();
 }

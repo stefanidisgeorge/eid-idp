@@ -27,10 +27,10 @@ import java.util.List;
 @Local
 public interface AttributeServiceManager {
 
-        List<IdentityProviderAttributeType> getAttributeServiceTypes();
+	List<IdentityProviderAttributeType> getAttributeServiceTypes();
 
-        List<IdentityProviderAttributeService> getAttributeServices();
+	List<IdentityProviderAttributeService> getAttributeServices();
 
-        IdentityProviderAttributeService getAttributeService(
-                IdentityProviderAttributeType identityProviderAttribute);
+	IdentityProviderAttributeService getAttributeService(
+			IdentityProviderAttributeType identityProviderAttribute);
 }

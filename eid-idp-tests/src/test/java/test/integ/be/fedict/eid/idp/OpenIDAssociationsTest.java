@@ -18,7 +18,7 @@
 
 package test.integ.be.fedict.eid.idp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.net.HttpURLConnection;
 import java.util.Map;
@@ -30,7 +30,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Test;
 import org.openid4java.association.Association;
 import org.openid4java.association.AssociationSessionType;

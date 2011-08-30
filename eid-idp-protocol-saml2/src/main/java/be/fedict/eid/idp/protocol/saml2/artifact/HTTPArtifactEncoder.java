@@ -27,53 +27,55 @@ import org.opensaml.ws.message.MessageContext;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.http.HTTPTransportUtils;
 
-public class HTTPArtifactEncoder extends org.opensaml.saml2.binding.encoding.HTTPArtifactEncoder {
+public class HTTPArtifactEncoder extends
+		org.opensaml.saml2.binding.encoding.HTTPArtifactEncoder {
 
-        private static final Log LOG = LogFactory.getLog(HTTPArtifactEncoder.class);
+	private static final Log LOG = LogFactory.getLog(HTTPArtifactEncoder.class);
 
-        /**
-         * Constructor.
-         *
-         * @param artifactMap artifact map used to store artifact/message bindings
-         */
-        public HTTPArtifactEncoder(SAMLArtifactMap artifactMap) {
-                super(null, null, artifactMap);
-        }
+	/**
+	 * Constructor.
+	 * 
+	 * @param artifactMap
+	 *            artifact map used to store artifact/message bindings
+	 */
+	public HTTPArtifactEncoder(SAMLArtifactMap artifactMap) {
+		super(null, null, artifactMap);
+	}
 
-        @Override
-        protected void doEncode(MessageContext messageContext)
-                throws MessageEncodingException {
+	@Override
+	protected void doEncode(MessageContext messageContext)
+			throws MessageEncodingException {
 
-                LOG.debug("doEncode");
+		LOG.debug("doEncode");
 
-                if (!(messageContext instanceof SAMLMessageContext)) {
-                        String message = "Invalid message context type, " +
-                                "this encoder only support SAMLMessageContext";
-                        LOG.error(message);
-                        throw new MessageEncodingException(message);
-                }
-                SAMLMessageContext samlMessageContext = (SAMLMessageContext) messageContext;
+		if (!(messageContext instanceof SAMLMessageContext)) {
+			String message = "Invalid message context type, "
+					+ "this encoder only support SAMLMessageContext";
+			LOG.error(message);
+			throw new MessageEncodingException(message);
+		}
+		SAMLMessageContext samlMessageContext = (SAMLMessageContext) messageContext;
 
-                signMessage(samlMessageContext);
+		signMessage(samlMessageContext);
 
-                if (!(messageContext.getOutboundMessageTransport() instanceof HTTPOutTransport)) {
-                        String message = "Invalid outbound message transport type, " +
-                                "this encoder only support HTTPOutTransport";
-                        LOG.error(message);
-                        throw new MessageEncodingException(message);
-                }
-                HTTPOutTransport httpOutTransport = (HTTPOutTransport) messageContext
-                        .getOutboundMessageTransport();
+		if (!(messageContext.getOutboundMessageTransport() instanceof HTTPOutTransport)) {
+			String message = "Invalid outbound message transport type, "
+					+ "this encoder only support HTTPOutTransport";
+			LOG.error(message);
+			throw new MessageEncodingException(message);
+		}
+		HTTPOutTransport httpOutTransport = (HTTPOutTransport) messageContext
+				.getOutboundMessageTransport();
 
-                SAMLMessageContext artifactContext = (SAMLMessageContext) messageContext;
+		SAMLMessageContext artifactContext = (SAMLMessageContext) messageContext;
 
-                httpOutTransport.addParameter("SAMLart",
-                        buildArtifact(artifactContext).base64Encode());
+		httpOutTransport.addParameter("SAMLart", buildArtifact(artifactContext)
+				.base64Encode());
 
-                String relayState = samlMessageContext.getRelayState();
-                if (null != relayState) {
-                        httpOutTransport.addParameter("RelayState",
-                                HTTPTransportUtils.urlEncode(relayState));
-                }
-        }
+		String relayState = samlMessageContext.getRelayState();
+		if (null != relayState) {
+			httpOutTransport.addParameter("RelayState",
+					HTTPTransportUtils.urlEncode(relayState));
+		}
+	}
 }

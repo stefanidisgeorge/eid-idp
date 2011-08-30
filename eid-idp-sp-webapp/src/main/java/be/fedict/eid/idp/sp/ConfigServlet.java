@@ -30,134 +30,139 @@ import java.io.PrintWriter;
 
 public class ConfigServlet extends HttpServlet {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        private static final Log LOG = LogFactory.getLog(ConfigServlet.class);
+	private static final Log LOG = LogFactory.getLog(ConfigServlet.class);
 
-        private static final String PATH = "configuration";
-        private static final String IDENTITY = "identity";
-        private static final String IDP_BASE_LOCATION = "idpBaseLocation";
-        private static final String ENCRYPT = "encrypt";
-        private static final String USE_KEK = "useKeK";
+	private static final String PATH = "configuration";
+	private static final String IDENTITY = "identity";
+	private static final String IDP_BASE_LOCATION = "idpBaseLocation";
+	private static final String ENCRYPT = "encrypt";
+	private static final String USE_KEK = "useKeK";
 
-        private static String idpIdentity = null;
-        private static String idpBaseLocation = null;
-        private static boolean encrypt = false;
-        private static boolean useKeK = false;
+	private static String idpIdentity = null;
+	private static String idpBaseLocation = null;
+	private static boolean encrypt = false;
+	private static boolean useKeK = false;
 
-        public static String getIdpIdentity() {
-                return idpIdentity;
-        }
+	public static String getIdpIdentity() {
+		return idpIdentity;
+	}
 
-        public static String getIdpBaseLocation(HttpServletRequest request) {
+	public static String getIdpBaseLocation(HttpServletRequest request) {
 
-                String baseLocation = idpBaseLocation;
-                if (null == baseLocation || baseLocation.trim().isEmpty()) {
-                        baseLocation = "https://" + request.getServerName()
-                                + ":" + request.getServerPort() + "/eid-idp/";
-                }
-                if (!baseLocation.endsWith("/")) {
-                        baseLocation += '/';
-                }
-                idpBaseLocation = baseLocation;
-                return baseLocation;
-        }
+		String baseLocation = idpBaseLocation;
+		if (null == baseLocation || baseLocation.trim().isEmpty()) {
+			baseLocation = "https://" + request.getServerName() + ":"
+					+ request.getServerPort() + "/eid-idp/";
+		}
+		if (!baseLocation.endsWith("/")) {
+			baseLocation += '/';
+		}
+		idpBaseLocation = baseLocation;
+		return baseLocation;
+	}
 
-        public static boolean isEncrypt() {
-                return encrypt;
-        }
+	public static boolean isEncrypt() {
+		return encrypt;
+	}
 
-        public static boolean isUseKeK() {
-                return useKeK;
-        }
+	public static boolean isUseKeK() {
+		return useKeK;
+	}
 
-        @Override
-        protected void doPost(HttpServletRequest request,
-                              HttpServletResponse response) throws ServletException, IOException {
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 
-                LOG.debug("doPost");
+		LOG.debug("doPost");
 
-                onSaveConfig(request);
+		onSaveConfig(request);
 
-                doGet(request, response);
-        }
+		doGet(request, response);
+	}
 
-        private void onSaveConfig(HttpServletRequest request) {
+	private void onSaveConfig(HttpServletRequest request) {
 
-                LOG.debug("save config");
+		LOG.debug("save config");
 
-                idpIdentity = request.getParameter(IDENTITY);
-                idpBaseLocation = request.getParameter(IDP_BASE_LOCATION);
-                if (idpBaseLocation.trim().isEmpty()) {
-                        idpBaseLocation = null;
-                }
-                encrypt = null != request.getParameter(ENCRYPT);
-                useKeK = null != request.getParameter(USE_KEK);
-        }
+		idpIdentity = request.getParameter(IDENTITY);
+		idpBaseLocation = request.getParameter(IDP_BASE_LOCATION);
+		if (idpBaseLocation.trim().isEmpty()) {
+			idpBaseLocation = null;
+		}
+		encrypt = null != request.getParameter(ENCRYPT);
+		useKeK = null != request.getParameter(USE_KEK);
+	}
 
-        @Override
-        protected void doGet(HttpServletRequest request,
-                             HttpServletResponse response) throws ServletException, IOException {
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 
-                LOG.debug("doGet");
+		LOG.debug("doGet");
 
-                response.setContentType("text/html");
-                PrintWriter out = response.getWriter();
+		response.setContentType("text/html");
+		PrintWriter out = response.getWriter();
 
-                out.println("<title>Test SP Configuration</title>");
-                out.println("<body>");
+		out.println("<title>Test SP Configuration</title>");
+		out.println("<body>");
 
-                out.println("<h1>Test SP Configuration</h1>");
+		out.println("<h1>Test SP Configuration</h1>");
 
-                out.println("<hr/>");
+		out.println("<hr/>");
 
-                out.println("<form action=\"" + PATH + "\" method=\"POST\">");
+		out.println("<form action=\"" + PATH + "\" method=\"POST\">");
 
-                // IdP Identity Thumbprint
-                addTextInput(out, "IdP Identity Thumbprint", IDENTITY, idpIdentity);
+		// IdP Identity Thumbprint
+		addTextInput(out, "IdP Identity Thumbprint", IDENTITY, idpIdentity);
 
-                // IdP Base Location
-                addTextInput(out, "IdP Base Location ( e.g. https://www.e-contract.be/eid-idp/ )",
-                        IDP_BASE_LOCATION, getIdpBaseLocation(request));
+		// IdP Base Location
+		addTextInput(
+				out,
+				"IdP Base Location ( e.g. https://www.e-contract.be/eid-idp/ )",
+				IDP_BASE_LOCATION, getIdpBaseLocation(request));
 
-                // Encryption Configuration
-                addCheckbox(out, "Encrypt", ENCRYPT, encrypt);
-                addCheckbox(out, "Use KeK", USE_KEK, useKeK);
+		// Encryption Configuration
+		addCheckbox(out, "Encrypt", ENCRYPT, encrypt);
+		addCheckbox(out, "Use KeK", USE_KEK, useKeK);
 
-                // Submit
-                addSubmit(out);
+		// Submit
+		addSubmit(out);
 
-                // Home link
-                out.println("<p />");
-                out.println("<a href=\"./\">Home</a>");
+		// Home link
+		out.println("<p />");
+		out.println("<a href=\"./\">Home</a>");
 
-                out.println("</body>");
-                out.close();
-        }
+		out.println("</body>");
+		out.close();
+	}
 
-        private void addTextInput(PrintWriter out, String label, String name, String value) {
+	private void addTextInput(PrintWriter out, String label, String name,
+			String value) {
 
-                out.print(label + "&nbsp; &nbsp;");
-                String valueString = null != value ? value : "";
-                out.println("<input type=\"text\" size=\"40\" name=\"" + name + "\" value=\"" + valueString + "\" />");
-                out.println("<br />");
-        }
+		out.print(label + "&nbsp; &nbsp;");
+		String valueString = null != value ? value : "";
+		out.println("<input type=\"text\" size=\"40\" name=\"" + name
+				+ "\" value=\"" + valueString + "\" />");
+		out.println("<br />");
+	}
 
-        private void addCheckbox(PrintWriter out, String label, String name, boolean checked) {
+	private void addCheckbox(PrintWriter out, String label, String name,
+			boolean checked) {
 
-                out.print(label + "&nbsp; &nbsp;");
-                if (checked) {
-                        out.println("<input type=\"checkbox\" name=\"" + name +
-                                "\" value=\"" + name + "\" checked=\"yes\" />");
-                } else {
-                        out.println("<input type=\"checkbox\" name=\"" + name +
-                                "\" value=\"" + name + "\" />");
-                }
-                out.println("<br />");
-        }
+		out.print(label + "&nbsp; &nbsp;");
+		if (checked) {
+			out.println("<input type=\"checkbox\" name=\"" + name
+					+ "\" value=\"" + name + "\" checked=\"yes\" />");
+		} else {
+			out.println("<input type=\"checkbox\" name=\"" + name
+					+ "\" value=\"" + name + "\" />");
+		}
+		out.println("<br />");
+	}
 
-        private void addSubmit(PrintWriter out) {
-                out.println("<input name=\"action\" type=\"submit\" value=\"save\"/>");
-                out.println("<br />");
-        }
+	private void addSubmit(PrintWriter out) {
+		out.println("<input name=\"action\" type=\"submit\" value=\"save\"/>");
+		out.println("<br />");
+	}
 }

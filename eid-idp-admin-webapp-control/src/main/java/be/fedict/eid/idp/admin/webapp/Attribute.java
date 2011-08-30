@@ -23,24 +23,24 @@ import javax.ejb.Local;
 @Local
 public interface Attribute {
 
-        /*
-        * Accessors
-        */
+	/*
+	 * Accessors
+	 */
 
-        /*
-        * Factories
-        */
-        void attributeUriFactory();
+	/*
+	 * Factories
+	 */
+	void attributeUriFactory();
 
-        /*
-        * Actions.
-        */
-        String save();
+	/*
+	 * Actions.
+	 */
+	String save();
 
-        /*
-        * Lifecycle.
-        */
-        void destroy();
+	/*
+	 * Lifecycle.
+	 */
+	void destroy();
 
-        void postConstruct();
+	void postConstruct();
 }

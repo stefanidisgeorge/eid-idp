@@ -35,7 +35,8 @@ import org.jboss.ejb3.annotation.Service;
 @Service
 public class IdentityProviderMBean implements IdentityProviderMBeanLocal {
 
-	private static final Log LOG = LogFactory.getLog(IdentityProviderMBean.class);
+	private static final Log LOG = LogFactory
+			.getLog(IdentityProviderMBean.class);
 
 	private Provider managedProvider;
 

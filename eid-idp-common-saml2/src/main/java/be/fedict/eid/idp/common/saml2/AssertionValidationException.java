@@ -20,23 +20,22 @@ package be.fedict.eid.idp.common.saml2;
 
 /**
  * Exception thrown if validation of a SAML v2.0 Assertion fails.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public class AssertionValidationException extends Exception {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        public AssertionValidationException(String message,
-                                            Throwable cause) {
-                super(message, cause);
-        }
+	public AssertionValidationException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-        public AssertionValidationException(Throwable cause) {
-                super(cause);
-        }
+	public AssertionValidationException(Throwable cause) {
+		super(cause);
+	}
 
-        public AssertionValidationException(String message) {
-                super(message);
-        }
+	public AssertionValidationException(String message) {
+		super(message);
+	}
 }

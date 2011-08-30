@@ -28,68 +28,68 @@ import java.io.Serializable;
 @Embeddable
 public class RPAttributePK implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        public static final String RP_COLUMN_NAME = "rpId";
-        public static final String ATTRIBUTE_COLUMN_NAME = "attributeUri";
+	public static final String RP_COLUMN_NAME = "rpId";
+	public static final String ATTRIBUTE_COLUMN_NAME = "attributeUri";
 
-        private Long rpId;
-        private String attributeUri;
+	private Long rpId;
+	private String attributeUri;
 
-        public RPAttributePK() {
-                super();
-        }
+	public RPAttributePK() {
+		super();
+	}
 
-        public RPAttributePK(RPEntity rp, AttributeEntity attribute) {
+	public RPAttributePK(RPEntity rp, AttributeEntity attribute) {
 
-                this.rpId = rp.getId();
-                this.attributeUri = attribute.getUri();
-        }
+		this.rpId = rp.getId();
+		this.attributeUri = attribute.getUri();
+	}
 
-        public String getAttributeUri() {
-                return attributeUri;
-        }
+	public String getAttributeUri() {
+		return attributeUri;
+	}
 
-        public void setAttributeUri(String attributeUri) {
-                this.attributeUri = attributeUri;
-        }
+	public void setAttributeUri(String attributeUri) {
+		this.attributeUri = attributeUri;
+	}
 
-        public Long getRpId() {
-                return rpId;
-        }
+	public Long getRpId() {
+		return rpId;
+	}
 
-        public void setRpId(Long rpId) {
-                this.rpId = rpId;
-        }
+	public void setRpId(Long rpId) {
+		this.rpId = rpId;
+	}
 
-        @Override
-        public boolean equals(Object obj) {
+	@Override
+	public boolean equals(Object obj) {
 
-                if (null == obj) {
-                        return false;
-                }
-                if (this == obj) {
-                        return true;
-                }
-                if (!(obj instanceof RPAttributePK)) {
-                        return false;
-                }
-                RPAttributePK rhs = (RPAttributePK) obj;
-                return new EqualsBuilder().append(this.rpId, rhs.rpId)
-                        .append(this.attributeUri, rhs.attributeUri).isEquals();
-        }
+		if (null == obj) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof RPAttributePK)) {
+			return false;
+		}
+		RPAttributePK rhs = (RPAttributePK) obj;
+		return new EqualsBuilder().append(this.rpId, rhs.rpId)
+				.append(this.attributeUri, rhs.attributeUri).isEquals();
+	}
 
-        @Override
-        public int hashCode() {
+	@Override
+	public int hashCode() {
 
-                return new HashCodeBuilder().append(this.rpId).append(
-                        this.attributeUri).toHashCode();
-        }
+		return new HashCodeBuilder().append(this.rpId)
+				.append(this.attributeUri).toHashCode();
+	}
 
-        @Override
-        public String toString() {
+	@Override
+	public String toString() {
 
-                return new ToStringBuilder(this).append("RP",
-                        this.rpId).append("attribute", this.attributeUri).toString();
-        }
+		return new ToStringBuilder(this).append("RP", this.rpId)
+				.append("attribute", this.attributeUri).toString();
+	}
 }

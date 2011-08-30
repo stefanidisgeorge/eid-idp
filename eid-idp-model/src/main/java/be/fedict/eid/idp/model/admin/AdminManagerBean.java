@@ -34,75 +34,76 @@ import java.util.List;
 @Stateless
 public class AdminManagerBean implements AdminManager {
 
-    private static final Log LOG = LogFactory.getLog(AdminManagerBean.class);
+	private static final Log LOG = LogFactory.getLog(AdminManagerBean.class);
 
-    @PersistenceContext
-    private EntityManager entityManager;
+	@PersistenceContext
+	private EntityManager entityManager;
 
-    public boolean isAdmin(X509Certificate certificate) {
+	public boolean isAdmin(X509Certificate certificate) {
 
-        String id = getId(certificate);
-        AdministratorEntity adminEntity = this.entityManager.find(
-                AdministratorEntity.class, id);
-        if (null != adminEntity && !adminEntity.isPending()) {
-            return true;
-        } else if (null != adminEntity) {
-            // admin exist but is not yet approvied
-            return false;
-        }
-        if (AdministratorEntity.hasAdmins(this.entityManager)) {
-            /*
-             * We register a 'pending' admin.
-             */
-            String name = certificate.getSubjectX500Principal().toString();
-            adminEntity = new AdministratorEntity(id, name, true);
-            this.entityManager.persist(adminEntity);
-            return false;
-        }
-        /*
-         * Else we bootstrap the admin.
-         */
-        String name = certificate.getSubjectX500Principal().toString();
-        adminEntity = new AdministratorEntity(id, name);
-        this.entityManager.persist(adminEntity);
-        return true;
-    }
+		String id = getId(certificate);
+		AdministratorEntity adminEntity = this.entityManager.find(
+				AdministratorEntity.class, id);
+		if (null != adminEntity && !adminEntity.isPending()) {
+			return true;
+		} else if (null != adminEntity) {
+			// admin exist but is not yet approvied
+			return false;
+		}
+		if (AdministratorEntity.hasAdmins(this.entityManager)) {
+			/*
+			 * We register a 'pending' admin.
+			 */
+			String name = certificate.getSubjectX500Principal().toString();
+			adminEntity = new AdministratorEntity(id, name, true);
+			this.entityManager.persist(adminEntity);
+			return false;
+		}
+		/*
+		 * Else we bootstrap the admin.
+		 */
+		String name = certificate.getSubjectX500Principal().toString();
+		adminEntity = new AdministratorEntity(id, name);
+		this.entityManager.persist(adminEntity);
+		return true;
+	}
 
-    @Override
-    public List<AdministratorEntity> listAdmins() {
+	@Override
+	public List<AdministratorEntity> listAdmins() {
 
-        return AdministratorEntity.listAdmins(this.entityManager);
-    }
+		return AdministratorEntity.listAdmins(this.entityManager);
+	}
 
-    @Override
-    public void register(AdministratorEntity admin) {
+	@Override
+	public void register(AdministratorEntity admin) {
 
-        LOG.debug("register pending admin: " + admin.getName());
+		LOG.debug("register pending admin: " + admin.getName());
 
-        AdministratorEntity attachedAdmin = this.entityManager.find(
-                AdministratorEntity.class, admin.getId());
-        attachedAdmin.setPending(false);
-    }
+		AdministratorEntity attachedAdmin = this.entityManager.find(
+				AdministratorEntity.class, admin.getId());
+		attachedAdmin.setPending(false);
+	}
 
-    @Override
-    public void remove(AdministratorEntity admin) throws RemoveLastAdminException {
+	@Override
+	public void remove(AdministratorEntity admin)
+			throws RemoveLastAdminException {
 
-        LOG.debug("remove admin: " + admin.getName());
+		LOG.debug("remove admin: " + admin.getName());
 
-        // check not last administrator
-        if (listAdmins().size() == 1) {
-            LOG.error("cannot remove last administrator");
-            throw new RemoveLastAdminException();
-        }
+		// check not last administrator
+		if (listAdmins().size() == 1) {
+			LOG.error("cannot remove last administrator");
+			throw new RemoveLastAdminException();
+		}
 
-        AdministratorEntity attachedAdmin = this.entityManager.find(
-                AdministratorEntity.class, admin.getId());
-        this.entityManager.remove(attachedAdmin);
-    }
+		AdministratorEntity attachedAdmin = this.entityManager.find(
+				AdministratorEntity.class, admin.getId());
+		this.entityManager.remove(attachedAdmin);
+	}
 
-    private String getId(X509Certificate certificate) {
-        PublicKey publicKey = certificate.getPublicKey();
-        return DigestUtils.shaHex(publicKey.getEncoded());
-    }
+	private String getId(X509Certificate certificate) {
+		PublicKey publicKey = certificate.getPublicKey();
+		return DigestUtils.shaHex(publicKey.getEncoded());
+	}
 
 }

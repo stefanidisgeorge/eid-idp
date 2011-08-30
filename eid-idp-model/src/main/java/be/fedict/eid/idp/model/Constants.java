@@ -20,10 +20,10 @@ package be.fedict.eid.idp.model;
 
 public abstract class Constants {
 
-        public static final String IDP_JNDI_CONTEXT = "be/fedict/eid/idp/";
+	public static final String IDP_JNDI_CONTEXT = "be/fedict/eid/idp/";
 
-        public static final String IDP_FLOW_SESSION_ATTRIBUTE =
-                Constants.class.getName() + ".IdpFlow";
-        public static final String RP_SESSION_ATTRIBUTE =
-                Constants.class.getName() + ".RP";
+	public static final String IDP_FLOW_SESSION_ATTRIBUTE = Constants.class
+			.getName() + ".IdpFlow";
+	public static final String RP_SESSION_ATTRIBUTE = Constants.class.getName()
+			+ ".RP";
 }

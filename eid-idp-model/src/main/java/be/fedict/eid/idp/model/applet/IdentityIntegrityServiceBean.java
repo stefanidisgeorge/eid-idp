@@ -37,78 +37,79 @@ import java.util.List;
 
 /**
  * eID Applet Service Identity Integrity Service implementation.
- *
+ * 
  * @author Frank Cornelis
  */
 @Stateless
 @Local(IdentityIntegrityService.class)
-@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "IdentityIntegrityServiceBean")
+@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT
+		+ "IdentityIntegrityServiceBean")
 public class IdentityIntegrityServiceBean implements IdentityIntegrityService {
 
-        private static final Log LOG = LogFactory
-                .getLog(IdentityIntegrityServiceBean.class);
+	private static final Log LOG = LogFactory
+			.getLog(IdentityIntegrityServiceBean.class);
 
-        @EJB
-        private Configuration configuration;
+	@EJB
+	private Configuration configuration;
 
-        public void checkNationalRegistrationCertificate(
-                List<X509Certificate> certificateChain) throws SecurityException {
-                LOG.debug("validate national registry certificate: "
-                        + certificateChain.get(0).getSubjectX500Principal());
+	public void checkNationalRegistrationCertificate(
+			List<X509Certificate> certificateChain) throws SecurityException {
+		LOG.debug("validate national registry certificate: "
+				+ certificateChain.get(0).getSubjectX500Principal());
 
-                String xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
-                        String.class);
-                if (null == xkmsUrl || xkmsUrl.trim().isEmpty()) {
-                        LOG.warn("no XKMS URL configured!");
-                        return;
-                }
+		String xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
+				String.class);
+		if (null == xkmsUrl || xkmsUrl.trim().isEmpty()) {
+			LOG.warn("no XKMS URL configured!");
+			return;
+		}
 
-                RPEntity rp = AppletUtil.getSessionAttribute(Constants.RP_SESSION_ATTRIBUTE);
-                String xkmsTrustDomain = null;
-                if (null != rp) {
-                        xkmsTrustDomain = rp.getIdentityTrustDomain();
-                }
-                if (null == xkmsTrustDomain || xkmsTrustDomain.trim().isEmpty()) {
-                        xkmsTrustDomain = this.configuration
-                                .getValue(ConfigProperty.XKMS_IDENT_TRUST_DOMAIN,
-                                        String.class);
-                }
-                if (null != xkmsTrustDomain) {
-                        if (xkmsTrustDomain.trim().isEmpty()) {
-                                xkmsTrustDomain = null;
-                        }
-                }
-                LOG.debug("Trust domain=" + xkmsTrustDomain);
+		RPEntity rp = AppletUtil
+				.getSessionAttribute(Constants.RP_SESSION_ATTRIBUTE);
+		String xkmsTrustDomain = null;
+		if (null != rp) {
+			xkmsTrustDomain = rp.getIdentityTrustDomain();
+		}
+		if (null == xkmsTrustDomain || xkmsTrustDomain.trim().isEmpty()) {
+			xkmsTrustDomain = this.configuration.getValue(
+					ConfigProperty.XKMS_IDENT_TRUST_DOMAIN, String.class);
+		}
+		if (null != xkmsTrustDomain) {
+			if (xkmsTrustDomain.trim().isEmpty()) {
+				xkmsTrustDomain = null;
+			}
+		}
+		LOG.debug("Trust domain=" + xkmsTrustDomain);
 
-                XKMS2Client xkms2Client = new XKMS2Client(xkmsUrl);
+		XKMS2Client xkms2Client = new XKMS2Client(xkmsUrl);
 
-                Boolean useHttpProxy = this.configuration.getValue(
-                        ConfigProperty.HTTP_PROXY_ENABLED, Boolean.class);
-                if (null != useHttpProxy && useHttpProxy) {
-                        String httpProxyHost = this.configuration.getValue(
-                                ConfigProperty.HTTP_PROXY_HOST, String.class);
-                        int httpProxyPort = this.configuration.getValue(
-                                ConfigProperty.HTTP_PROXY_PORT, Integer.class);
-                        LOG.debug("use proxy: " + httpProxyHost + ":" + httpProxyPort);
-                        xkms2Client.setProxy(httpProxyHost, httpProxyPort);
-                } else {
-                        // disable previously set proxy
-                        xkms2Client.setProxy(null, 0);
-                }
+		Boolean useHttpProxy = this.configuration.getValue(
+				ConfigProperty.HTTP_PROXY_ENABLED, Boolean.class);
+		if (null != useHttpProxy && useHttpProxy) {
+			String httpProxyHost = this.configuration.getValue(
+					ConfigProperty.HTTP_PROXY_HOST, String.class);
+			int httpProxyPort = this.configuration.getValue(
+					ConfigProperty.HTTP_PROXY_PORT, Integer.class);
+			LOG.debug("use proxy: " + httpProxyHost + ":" + httpProxyPort);
+			xkms2Client.setProxy(httpProxyHost, httpProxyPort);
+		} else {
+			// disable previously set proxy
+			xkms2Client.setProxy(null, 0);
+		}
 
-                try {
-                        LOG.debug("validating certificate chain");
-                        if (null != xkmsTrustDomain) {
-                                xkms2Client.validate(xkmsTrustDomain, certificateChain);
-                        } else {
-                                xkms2Client.validate(certificateChain);
-                        }
-                } catch (ValidationFailedException e) {
-                        LOG.warn("invalid certificate");
-                        throw new SecurityException("invalid certificate");
-                } catch (Exception e) {
-                        LOG.warn("eID Trust Service error: " + e.getMessage(), e);
-                        throw new SecurityException("eID Trust Service error");
-                }
-        }
+		try {
+			LOG.debug("validating certificate chain");
+			if (null != xkmsTrustDomain) {
+				xkms2Client.validate(xkmsTrustDomain, certificateChain);
+			} else {
+				xkms2Client.validate(certificateChain);
+			}
+		} catch (ValidationFailedException e) {
+			LOG.warn("invalid certificate");
+			throw new SecurityException("invalid certificate");
+		} catch (Exception e) {
+			LOG.warn("eID Trust Service error: " + e.getMessage(), e);
+			throw new SecurityException("eID Trust Service error");
+		}
+	}
 }

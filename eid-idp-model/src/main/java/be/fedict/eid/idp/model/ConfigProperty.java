@@ -21,45 +21,45 @@ package be.fedict.eid.idp.model;
 /**
  * Enumeration of all possible configuration properties. This enumeration also
  * keeps track of the type of each property.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public enum ConfigProperty {
 
-        DEFAULT_ISSUER("default-issuer", String.class),
-        TOKEN_VALIDITY("token-validity", Integer.class),
+	DEFAULT_ISSUER("default-issuer", String.class), TOKEN_VALIDITY(
+			"token-validity", Integer.class),
 
-        XKMS_URL("xkms-url", String.class),
-        XKMS_AUTH_TRUST_DOMAIN("xkms-auth-trust-domain", String.class),
-        XKMS_IDENT_TRUST_DOMAIN("xkms-ident-trust-domain", String.class),
+	XKMS_URL("xkms-url", String.class), XKMS_AUTH_TRUST_DOMAIN(
+			"xkms-auth-trust-domain", String.class), XKMS_IDENT_TRUST_DOMAIN(
+			"xkms-ident-trust-domain", String.class),
 
-        HTTP_PROXY_ENABLED("http-proxy", Boolean.class),
-        HTTP_PROXY_HOST("http-proxy-host", String.class),
-        HTTP_PROXY_PORT("http-proxy-port", Integer.class),
+	HTTP_PROXY_ENABLED("http-proxy", Boolean.class), HTTP_PROXY_HOST(
+			"http-proxy-host", String.class), HTTP_PROXY_PORT(
+			"http-proxy-port", Integer.class),
 
-        HMAC_SECRET("hmac-secret", String.class),
+	HMAC_SECRET("hmac-secret", String.class),
 
-        ACTIVE_IDENTITY("active-identity", String.class),
-        KEY_STORE_TYPE("key-store-type", KeyStoreType.class),
-        KEY_STORE_PATH("key-store-path", String.class),
-        KEY_STORE_SECRET("key-store-secret", String.class),
-        KEY_ENTRY_SECRET("key-entry-secret", String.class),
-        KEY_ENTRY_ALIAS("key-entry-alias", String.class);
+	ACTIVE_IDENTITY("active-identity", String.class), KEY_STORE_TYPE(
+			"key-store-type", KeyStoreType.class), KEY_STORE_PATH(
+			"key-store-path", String.class), KEY_STORE_SECRET(
+			"key-store-secret", String.class), KEY_ENTRY_SECRET(
+			"key-entry-secret", String.class), KEY_ENTRY_ALIAS(
+			"key-entry-alias", String.class);
 
-        private final String name;
+	private final String name;
 
-        private final Class<?> type;
+	private final Class<?> type;
 
-        private ConfigProperty(String name, Class<?> type) {
-                this.name = name;
-                this.type = type;
-        }
+	private ConfigProperty(String name, Class<?> type) {
+		this.name = name;
+		this.type = type;
+	}
 
-        public String getName() {
-                return this.name;
-        }
+	public String getName() {
+		return this.name;
+	}
 
-        public Class<?> getType() {
-                return this.type;
-        }
+	public Class<?> getType() {
+		return this.type;
+	}
 }

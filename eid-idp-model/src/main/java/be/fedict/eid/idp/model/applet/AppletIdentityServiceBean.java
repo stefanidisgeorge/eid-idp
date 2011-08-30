@@ -28,34 +28,35 @@ import javax.ejb.Stateless;
 
 @Stateless
 @Local(be.fedict.eid.applet.service.spi.IdentityService.class)
-@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "AppletIdentityServiceBean")
-public class AppletIdentityServiceBean implements be.fedict.eid.applet.service.spi.IdentityService {
+@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT
+		+ "AppletIdentityServiceBean")
+public class AppletIdentityServiceBean implements
+		be.fedict.eid.applet.service.spi.IdentityService {
 
-        @Override
-        public IdentityRequest getIdentityRequest() {
+	@Override
+	public IdentityRequest getIdentityRequest() {
 
-                boolean includeIdentity = false;
-                boolean includeAddress = false;
-                boolean includePhoto = false;
-                boolean includeCertificates = true;
-                IdentityProviderFlow idpFlow = AppletUtil
-                        .getSessionAttribute(Constants.IDP_FLOW_SESSION_ATTRIBUTE);
-                switch (idpFlow) {
+		boolean includeIdentity = false;
+		boolean includeAddress = false;
+		boolean includePhoto = false;
+		boolean includeCertificates = true;
+		IdentityProviderFlow idpFlow = AppletUtil
+				.getSessionAttribute(Constants.IDP_FLOW_SESSION_ATTRIBUTE);
+		switch (idpFlow) {
 
+		case IDENTIFICATION:
+		case AUTHENTICATION_WITH_IDENTIFICATION:
+			includeIdentity = true;
+			includeAddress = true;
+			includePhoto = true;
+			break;
+		case AUTHENTICATION:
+			includeIdentity = false;
+			includeAddress = false;
+			includePhoto = false;
+		}
 
-                        case IDENTIFICATION:
-                        case AUTHENTICATION_WITH_IDENTIFICATION:
-                                includeIdentity = true;
-                                includeAddress = true;
-                                includePhoto = true;
-                                break;
-                        case AUTHENTICATION:
-                                includeIdentity = false;
-                                includeAddress = false;
-                                includePhoto = false;
-                }
-
-                return new IdentityRequest(includeIdentity, includeAddress,
-                        includePhoto, includeCertificates);
-        }
+		return new IdentityRequest(includeIdentity, includeAddress,
+				includePhoto, includeCertificates);
+	}
 }

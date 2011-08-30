@@ -25,21 +25,21 @@ import org.opensaml.saml2.metadata.EntityDescriptor;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class SAML2ProtocolServiceAuth extends AbstractSAML2ArtifactProtocolService {
+public class SAML2ProtocolServiceAuth extends
+		AbstractSAML2ArtifactProtocolService {
 
-        @Override
-        protected IdentityProviderFlow getAuthenticationFlow() {
-                return IdentityProviderFlow.AUTHENTICATION;
-        }
+	@Override
+	protected IdentityProviderFlow getAuthenticationFlow() {
+		return IdentityProviderFlow.AUTHENTICATION;
+	}
 
-        @Override
-        protected EntityDescriptor getEntityDescriptor(HttpServletRequest request) {
+	@Override
+	protected EntityDescriptor getEntityDescriptor(HttpServletRequest request) {
 
-                IdentityProviderConfiguration configuration =
-                        AbstractSAML2ProtocolService.getIdPConfiguration(
-                                request.getSession().getServletContext());
+		IdentityProviderConfiguration configuration = AbstractSAML2ProtocolService
+				.getIdPConfiguration(request.getSession().getServletContext());
 
-                return new SAML2MetadataHttpServletAuth()
-                        .getEntityDescriptor(request, configuration);
-        }
+		return new SAML2MetadataHttpServletAuth().getEntityDescriptor(request,
+				configuration);
+	}
 }

@@ -31,32 +31,32 @@ import javax.faces.event.PhaseListener;
 /**
  * Via this JSF phase listener we clean-up the HTTP session when the eID DSS
  * hits the protocol-response-post.xhtml page.
- *
+ * 
  * @author Frank Cornelis
  */
 public class SessionCleanupPhaseListener implements PhaseListener {
 
-    private static final Log LOG = LogFactory
-            .getLog(SessionCleanupPhaseListener.class);
+	private static final Log LOG = LogFactory
+			.getLog(SessionCleanupPhaseListener.class);
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public void afterPhase(PhaseEvent event) {
-        FacesContext facesContext = event.getFacesContext();
-        UIViewRoot viewRoot = facesContext.getViewRoot();
-        String viewId = viewRoot.getViewId();
-        LOG.debug("view ID: " + viewId);
-        if ("/protocol-response-post.xhtml".equals(viewId)) {
-            LOG.debug("invalidating the HTTP session");
-            Session seamSession = Session.getInstance();
-            seamSession.invalidate();
-        }
-    }
+	public void afterPhase(PhaseEvent event) {
+		FacesContext facesContext = event.getFacesContext();
+		UIViewRoot viewRoot = facesContext.getViewRoot();
+		String viewId = viewRoot.getViewId();
+		LOG.debug("view ID: " + viewId);
+		if ("/protocol-response-post.xhtml".equals(viewId)) {
+			LOG.debug("invalidating the HTTP session");
+			Session seamSession = Session.getInstance();
+			seamSession.invalidate();
+		}
+	}
 
-    public void beforePhase(PhaseEvent event) {
-    }
+	public void beforePhase(PhaseEvent event) {
+	}
 
-    public PhaseId getPhaseId() {
-        return PhaseId.RENDER_RESPONSE;
-    }
+	public PhaseId getPhaseId() {
+		return PhaseId.RENDER_RESPONSE;
+	}
 }

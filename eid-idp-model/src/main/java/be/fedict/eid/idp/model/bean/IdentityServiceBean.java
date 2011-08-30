@@ -38,183 +38,181 @@ import java.util.List;
 @Stateless
 public class IdentityServiceBean implements IdentityService {
 
-        @EJB
-        private IdentityServiceSingletonBean identityServiceSingletonBean;
+	@EJB
+	private IdentityServiceSingletonBean identityServiceSingletonBean;
 
-        @EJB
-        private Configuration configuration;
+	@EJB
+	private Configuration configuration;
 
-        @EJB
-        private AttributeService attributeService;
+	@EJB
+	private AttributeService attributeService;
 
-        /**
-         * {@inheritDoc}
-         */
-        public byte[] getHmacSecret() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public byte[] getHmacSecret() {
 
-                String secretValue =
-                        this.configuration.getValue(ConfigProperty.HMAC_SECRET, String.class);
-                if (null == secretValue || secretValue.trim().isEmpty()) {
-                        return null;
-                }
-                try {
-                        return Hex.decodeHex(secretValue.toCharArray());
-                } catch (DecoderException e) {
-                        throw new RuntimeException("HEX decoder error: " + e.getMessage(),
-                                e);
-                }
-        }
+		String secretValue = this.configuration.getValue(
+				ConfigProperty.HMAC_SECRET, String.class);
+		if (null == secretValue || secretValue.trim().isEmpty()) {
+			return null;
+		}
+		try {
+			return Hex.decodeHex(secretValue.toCharArray());
+		} catch (DecoderException e) {
+			throw new RuntimeException("HEX decoder error: " + e.getMessage(),
+					e);
+		}
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public void reloadIdentity() throws KeyStoreLoadException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void reloadIdentity() throws KeyStoreLoadException {
 
-                this.identityServiceSingletonBean.reloadIdentity();
-        }
+		this.identityServiceSingletonBean.reloadIdentity();
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public void setActiveIdentity(String name) throws KeyStoreLoadException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setActiveIdentity(String name) throws KeyStoreLoadException {
 
-                this.identityServiceSingletonBean.setActiveIdentity(name);
-        }
+		this.identityServiceSingletonBean.setActiveIdentity(name);
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isIdentityConfigured() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isIdentityConfigured() {
 
-                return this.identityServiceSingletonBean.isIdentityConfigured();
-        }
+		return this.identityServiceSingletonBean.isIdentityConfigured();
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public List<String> getIdentities() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getIdentities() {
 
-                return this.identityServiceSingletonBean.getIdentities();
-        }
+		return this.identityServiceSingletonBean.getIdentities();
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public IdPIdentity findIdentity() {
-                return this.identityServiceSingletonBean.findIdentity();
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public IdPIdentity findIdentity() {
+		return this.identityServiceSingletonBean.findIdentity();
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public IdPIdentity setIdentity(IdPIdentityConfig idPIdentityConfig)
-                throws KeyStoreLoadException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public IdPIdentity setIdentity(IdPIdentityConfig idPIdentityConfig)
+			throws KeyStoreLoadException {
 
-                return this.identityServiceSingletonBean
-                        .setIdentity(idPIdentityConfig);
-        }
+		return this.identityServiceSingletonBean.setIdentity(idPIdentityConfig);
+	}
 
-        @Override
-        public IdPIdentity loadIdentity(IdPIdentityConfig idPIdentityConfig)
-                throws KeyStoreLoadException {
+	@Override
+	public IdPIdentity loadIdentity(IdPIdentityConfig idPIdentityConfig)
+			throws KeyStoreLoadException {
 
-                return this.identityServiceSingletonBean
-                        .loadIdentity(idPIdentityConfig);
-        }
+		return this.identityServiceSingletonBean
+				.loadIdentity(idPIdentityConfig);
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public IdPIdentityConfig findIdentityConfig() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public IdPIdentityConfig findIdentityConfig() {
 
-                return this.identityServiceSingletonBean.findIdentityConfig();
-        }
+		return this.identityServiceSingletonBean.findIdentityConfig();
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public IdPIdentityConfig findIdentityConfig(String name) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public IdPIdentityConfig findIdentityConfig(String name) {
 
-                return this.identityServiceSingletonBean.findIdentityConfig(name);
-        }
+		return this.identityServiceSingletonBean.findIdentityConfig(name);
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public void removeIdentityConfig(String name) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeIdentityConfig(String name) {
 
-                this.identityServiceSingletonBean.removeIdentityConfig(name);
-        }
+		this.identityServiceSingletonBean.removeIdentityConfig(name);
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public List<X509Certificate> getIdentityCertificateChain() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<X509Certificate> getIdentityCertificateChain() {
 
-                IdPIdentity identity = findIdentity();
-                List<X509Certificate> identityCertificateChain = new LinkedList<X509Certificate>();
-                if (null == identity) {
-                        return identityCertificateChain;
-                }
-                Certificate[] certificateChain = identity.getPrivateKeyEntry().
-                        getCertificateChain();
-                if (null == certificateChain) {
-                        return identityCertificateChain;
-                }
-                for (Certificate certificate : certificateChain) {
-                        identityCertificateChain.add((X509Certificate) certificate);
-                }
-                return identityCertificateChain;
-        }
+		IdPIdentity identity = findIdentity();
+		List<X509Certificate> identityCertificateChain = new LinkedList<X509Certificate>();
+		if (null == identity) {
+			return identityCertificateChain;
+		}
+		Certificate[] certificateChain = identity.getPrivateKeyEntry()
+				.getCertificateChain();
+		if (null == certificateChain) {
+			return identityCertificateChain;
+		}
+		for (Certificate certificate : certificateChain) {
+			identityCertificateChain.add((X509Certificate) certificate);
+		}
+		return identityCertificateChain;
+	}
 
-        @Override
-        public String getDefaultIssuer() {
+	@Override
+	public String getDefaultIssuer() {
 
-                return this.configuration.getValue(ConfigProperty.DEFAULT_ISSUER,
-                        String.class);
-        }
+		return this.configuration.getValue(ConfigProperty.DEFAULT_ISSUER,
+				String.class);
+	}
 
-        @Override
-        public List<AttributeConfig> getAttributes(String protocolId) {
+	@Override
+	public List<AttributeConfig> getAttributes(String protocolId) {
 
-                List<AttributeConfig> attributes = new LinkedList<AttributeConfig>();
-                for (AttributeEntity attribute : this.attributeService.listAttributes()) {
+		List<AttributeConfig> attributes = new LinkedList<AttributeConfig>();
+		for (AttributeEntity attribute : this.attributeService.listAttributes()) {
 
-                        attributes.add(new AttributeConfig(attribute.getName(),
-                                attribute.getDescription(),
-                                this.attributeService.getUri(protocolId,
-                                        attribute.getUri())));
-                }
-                return attributes;
-        }
+			attributes.add(new AttributeConfig(attribute.getName(), attribute
+					.getDescription(), this.attributeService.getUri(protocolId,
+					attribute.getUri())));
+		}
+		return attributes;
+	}
 
-        @Override
-        public Integer getResponseTokenValidity() {
+	@Override
+	public Integer getResponseTokenValidity() {
 
-                return this.configuration.getValue(ConfigProperty.TOKEN_VALIDITY,
-                        Integer.class);
-        }
+		return this.configuration.getValue(ConfigProperty.TOKEN_VALIDITY,
+				Integer.class);
+	}
 
-        /**
-         * {@inheritDoc}
-         */
-        public String getIdentityFingerprint() {
-                IdPIdentity identity = findIdentity();
-                if (null == identity) {
-                        return null;
-                }
-                X509Certificate certificate = (X509Certificate) identity
-                        .getPrivateKeyEntry().getCertificate();
-                if (null == certificate) {
-                        return null;
-                }
-                String fingerprint;
-                try {
-                        fingerprint = DigestUtils.shaHex(certificate.getEncoded());
-                } catch (CertificateEncodingException e) {
-                        return null;
-                }
-                return fingerprint;
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getIdentityFingerprint() {
+		IdPIdentity identity = findIdentity();
+		if (null == identity) {
+			return null;
+		}
+		X509Certificate certificate = (X509Certificate) identity
+				.getPrivateKeyEntry().getCertificate();
+		if (null == certificate) {
+			return null;
+		}
+		String fingerprint;
+		try {
+			fingerprint = DigestUtils.shaHex(certificate.getEncoded());
+		} catch (CertificateEncodingException e) {
+			return null;
+		}
+		return fingerprint;
+	}
 
 }

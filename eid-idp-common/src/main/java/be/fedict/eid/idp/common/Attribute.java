@@ -20,67 +20,68 @@ package be.fedict.eid.idp.common;
 
 /**
  * Attribute data object.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public class Attribute {
 
-        private String uri;
-        private final AttributeType attributeType;
-        private final Object value;
-        private boolean encrypted;
+	private String uri;
+	private final AttributeType attributeType;
+	private final Object value;
+	private boolean encrypted;
 
-        public Attribute(String uri, AttributeType attributeType,
-                         Object value) {
-                this.uri = uri;
-                this.attributeType = attributeType;
-                this.value = value;
-                this.encrypted = false;
-        }
+	public Attribute(String uri, AttributeType attributeType, Object value) {
+		this.uri = uri;
+		this.attributeType = attributeType;
+		this.value = value;
+		this.encrypted = false;
+	}
 
-        /**
-         * @return attribute URI
-         */
-        public String getUri() {
-                return this.uri;
-        }
+	/**
+	 * @return attribute URI
+	 */
+	public String getUri() {
+		return this.uri;
+	}
 
-        /**
-         * Set the attribute URI to a possibly protocol specific URI
-         *
-         * @param uri uri
-         */
-        public void setUri(String uri) {
-                this.uri = uri;
-        }
+	/**
+	 * Set the attribute URI to a possibly protocol specific URI
+	 * 
+	 * @param uri
+	 *            uri
+	 */
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
 
-        /**
-         * @return the attribute value's type
-         */
-        public AttributeType getAttributeType() {
-                return attributeType;
-        }
+	/**
+	 * @return the attribute value's type
+	 */
+	public AttributeType getAttributeType() {
+		return attributeType;
+	}
 
-        /**
-         * @return the attribute's value
-         */
-        public Object getValue() {
-                return this.value;
-        }
+	/**
+	 * @return the attribute's value
+	 */
+	public Object getValue() {
+		return this.value;
+	}
 
-        /**
-         * @return does attribute need to be returned encrypted
-         */
-        public boolean isEncrypted() {
-                return encrypted;
-        }
+	/**
+	 * @return does attribute need to be returned encrypted
+	 */
+	public boolean isEncrypted() {
+		return encrypted;
+	}
 
-        /**
-         * Set if attribute needs to be returned encrypted
-         *
-         * @param encrypted encrypted or not
-         */
-        public void setEncrypted(boolean encrypted) {
-                this.encrypted = encrypted;
-        }
+	/**
+	 * Set if attribute needs to be returned encrypted
+	 * 
+	 * @param encrypted
+	 *            encrypted or not
+	 */
+	public void setEncrypted(boolean encrypted) {
+		this.encrypted = encrypted;
+	}
 }

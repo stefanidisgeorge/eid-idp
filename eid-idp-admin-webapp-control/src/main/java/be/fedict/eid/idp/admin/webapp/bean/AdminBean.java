@@ -43,79 +43,78 @@ import java.util.List;
 @LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT + "AdminBean")
 public class AdminBean implements Admin {
 
-        private static final String ADMIN_LIST_NAME = "idpAdminList";
-        private static final String SELECTED_ADMIN = "selectedAdmin";
+	private static final String ADMIN_LIST_NAME = "idpAdminList";
+	private static final String SELECTED_ADMIN = "selectedAdmin";
 
-        @Logger
-        private Log log;
+	@Logger
+	private Log log;
 
-        @EJB
-        private AdminManager adminManager;
+	@EJB
+	private AdminManager adminManager;
 
-        @In
-        FacesMessages facesMessages;
+	@In
+	FacesMessages facesMessages;
 
+	@SuppressWarnings("unused")
+	@DataModel(ADMIN_LIST_NAME)
+	private List<AdministratorEntity> adminList;
 
-        @SuppressWarnings("unused")
-        @DataModel(ADMIN_LIST_NAME)
-        private List<AdministratorEntity> adminList;
+	@DataModelSelection(ADMIN_LIST_NAME)
+	@In(value = SELECTED_ADMIN, required = false)
+	@Out(value = SELECTED_ADMIN, required = false, scope = ScopeType.PAGE)
+	private AdministratorEntity selectedAdmin;
 
-        @DataModelSelection(ADMIN_LIST_NAME)
-        @In(value = SELECTED_ADMIN, required = false)
-        @Out(value = SELECTED_ADMIN, required = false, scope = ScopeType.PAGE)
-        private AdministratorEntity selectedAdmin;
+	@Override
+	@PostConstruct
+	public void postConstruct() {
+	}
 
-        @Override
-        @PostConstruct
-        public void postConstruct() {
-        }
+	@Override
+	@Remove
+	@Destroy
+	public void destroy() {
+	}
 
-        @Override
-        @Remove
-        @Destroy
-        public void destroy() {
-        }
+	@Override
+	@Factory(ADMIN_LIST_NAME)
+	public void adminListFactory() {
 
-        @Override
-        @Factory(ADMIN_LIST_NAME)
-        public void adminListFactory() {
+		this.log.debug("admin list factory");
+		this.adminList = this.adminManager.listAdmins();
+	}
 
-                this.log.debug("admin list factory");
-                this.adminList = this.adminManager.listAdmins();
-        }
+	@Override
+	public String registerPending() {
 
-        @Override
-        public String registerPending() {
+		this.log.debug("register pending admin");
+		this.adminManager.register(this.selectedAdmin);
+		adminListFactory();
+		return "success";
+	}
 
-                this.log.debug("register pending admin");
-                this.adminManager.register(this.selectedAdmin);
-                adminListFactory();
-                return "success";
-        }
+	@Override
+	public void select() {
 
-        @Override
-        public void select() {
+		this.log.debug("selected admin: #0", this.selectedAdmin.getName());
+	}
 
-                this.log.debug("selected admin: #0", this.selectedAdmin.getName());
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public String remove() {
 
-        /**
-         * {@inheritDoc}
-         */
-        public String remove() {
+		this.log.debug("remove administrator");
 
-                this.log.debug("remove administrator");
+		try {
+			this.adminManager.remove(this.selectedAdmin);
+		} catch (RemoveLastAdminException e) {
+			this.log.error("cannot remove last administrator");
+			this.facesMessages.add(StatusMessage.Severity.ERROR,
+					"Cannot remove the last administrator");
+			return null;
+		}
 
-                try {
-                        this.adminManager.remove(this.selectedAdmin);
-                } catch (RemoveLastAdminException e) {
-                        this.log.error("cannot remove last administrator");
-                        this.facesMessages.add(StatusMessage.Severity.ERROR,
-                                "Cannot remove the last administrator");
-                        return null;
-                }
-
-                adminListFactory();
-                return "success";
-        }
+		adminListFactory();
+		return "success";
+	}
 }

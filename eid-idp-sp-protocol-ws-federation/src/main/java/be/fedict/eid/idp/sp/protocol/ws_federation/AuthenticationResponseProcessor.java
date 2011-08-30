@@ -42,263 +42,264 @@ import java.util.List;
 
 /**
  * WS-Federation Authentication Response Processor.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public class AuthenticationResponseProcessor {
 
-        protected static final Log LOG = LogFactory
-                .getLog(AuthenticationResponseProcessor.class);
+	protected static final Log LOG = LogFactory
+			.getLog(AuthenticationResponseProcessor.class);
 
-        private final AuthenticationResponseService service;
+	private final AuthenticationResponseService service;
 
-        /**
-         * Main Constructor
-         *
-         * @param service optional {@link AuthenticationResponseService} for
-         *                validation of certificate chain in returned
-         *                SAML v2.0 Assertion.
-         */
-        public AuthenticationResponseProcessor(AuthenticationResponseService service) {
+	/**
+	 * Main Constructor
+	 * 
+	 * @param service
+	 *            optional {@link AuthenticationResponseService} for validation
+	 *            of certificate chain in returned SAML v2.0 Assertion.
+	 */
+	public AuthenticationResponseProcessor(AuthenticationResponseService service) {
 
-                this.service = service;
-        }
+		this.service = service;
+	}
 
-        /**
-         * Process the incoming WS-Federation response.
-         *
-         * @param recipient                 recipient, should match SAML v2.0 assertions's
-         *                                  AudienceRestriction
-         * @param context                   optional expected context
-         * @param requiresResponseSignature do we expect a signature on the
-         *                                  response or not, or
-         *                                  <code>null</code> if to be retrieved
-         *                                  from the
-         *                                  {@link AuthenticationResponseService}.
-         * @param request                   the HTTP servlet request that holds the SAML2 response.
-         * @return the {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse}
-         * @throws AuthenticationResponseProcessorException
-         *          case something went wrong
-         */
-        public AuthenticationResponse process(String recipient,
-                                              String context,
-                                              Boolean requiresResponseSignature,
-                                              HttpServletRequest request)
-                throws AuthenticationResponseProcessorException {
+	/**
+	 * Process the incoming WS-Federation response.
+	 * 
+	 * @param recipient
+	 *            recipient, should match SAML v2.0 assertions's
+	 *            AudienceRestriction
+	 * @param context
+	 *            optional expected context
+	 * @param requiresResponseSignature
+	 *            do we expect a signature on the response or not, or
+	 *            <code>null</code> if to be retrieved from the
+	 *            {@link AuthenticationResponseService}.
+	 * @param request
+	 *            the HTTP servlet request that holds the SAML2 response.
+	 * @return the {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse}
+	 * @throws AuthenticationResponseProcessorException
+	 *             case something went wrong
+	 */
+	public AuthenticationResponse process(String recipient, String context,
+			Boolean requiresResponseSignature, HttpServletRequest request)
+			throws AuthenticationResponseProcessorException {
 
-                DateTime now = new DateTime();
-                SecretKey secretKey = null;
-                PrivateKey privateKey = null;
-                int maxOffset = 5;
-                boolean expectAssertionSigned =
-                        null != requiresResponseSignature ?
-                                requiresResponseSignature : false;
+		DateTime now = new DateTime();
+		SecretKey secretKey = null;
+		PrivateKey privateKey = null;
+		int maxOffset = 5;
+		boolean expectAssertionSigned = null != requiresResponseSignature ? requiresResponseSignature
+				: false;
 
-                if (null != this.service) {
-                        secretKey = this.service.getAttributeSecretKey();
-                        privateKey = this.service.getAttributePrivateKey();
-                        maxOffset = this.service.getMaximumTimeOffset();
-                        expectAssertionSigned = this.service.requiresResponseSignature();
-                }
+		if (null != this.service) {
+			secretKey = this.service.getAttributeSecretKey();
+			privateKey = this.service.getAttributePrivateKey();
+			maxOffset = this.service.getMaximumTimeOffset();
+			expectAssertionSigned = this.service.requiresResponseSignature();
+		}
 
-                // force UTF8 encoding!
-                try {
-                        request.setCharacterEncoding("UTF8");
-                } catch (UnsupportedEncodingException e) {
-                        throw new AuthenticationResponseProcessorException(e);
-                }
+		// force UTF8 encoding!
+		try {
+			request.setCharacterEncoding("UTF8");
+		} catch (UnsupportedEncodingException e) {
+			throw new AuthenticationResponseProcessorException(e);
+		}
 
-                // check wa
-                String wa = request.getParameter("wa");
-                if (null == wa) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Missing \"wa\" param.");
-                }
-                if (!wa.equals("wsignin1.0")) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Unexpected value for \"wa\" param.");
-                }
+		// check wa
+		String wa = request.getParameter("wa");
+		if (null == wa) {
+			throw new AuthenticationResponseProcessorException(
+					"Missing \"wa\" param.");
+		}
+		if (!wa.equals("wsignin1.0")) {
+			throw new AuthenticationResponseProcessorException(
+					"Unexpected value for \"wa\" param.");
+		}
 
-                // validate optional ctx
-                validateContext(context, request.getParameter("wctx"));
+		// validate optional ctx
+		validateContext(context, request.getParameter("wctx"));
 
-                // get wresult
-                String wresult = request.getParameter("wresult");
-                LOG.debug("wresult=\"" + wresult + "\"");
+		// get wresult
+		String wresult = request.getParameter("wresult");
+		LOG.debug("wresult=\"" + wresult + "\"");
 
-                if (null == wresult) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Missing \"wresult\" param.");
-                }
-                RequestSecurityTokenResponseCollection rstCollections = Saml2Util.unmarshall(
-                        Saml2Util.parseDocument(wresult).getDocumentElement());
+		if (null == wresult) {
+			throw new AuthenticationResponseProcessorException(
+					"Missing \"wresult\" param.");
+		}
+		RequestSecurityTokenResponseCollection rstCollections = Saml2Util
+				.unmarshall(Saml2Util.parseDocument(wresult)
+						.getDocumentElement());
 
-                if (rstCollections.getRequestSecurityTokenResponses().size() != 1) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Expected exactly 1 RequestSecurityTokenResponse");
-                }
+		if (rstCollections.getRequestSecurityTokenResponses().size() != 1) {
+			throw new AuthenticationResponseProcessorException(
+					"Expected exactly 1 RequestSecurityTokenResponse");
+		}
 
-                RequestSecurityTokenResponse rstResponse =
-                        rstCollections.getRequestSecurityTokenResponses().get(0);
+		RequestSecurityTokenResponse rstResponse = rstCollections
+				.getRequestSecurityTokenResponses().get(0);
 
-                // context
-                validateContext(context, rstResponse.getContext());
+		// context
+		validateContext(context, rstResponse.getContext());
 
-                // tokentype
-                validateTokenType(rstResponse);
+		// tokentype
+		validateTokenType(rstResponse);
 
-                // requesttype
-                validateRequestType(rstResponse);
+		// requesttype
+		validateRequestType(rstResponse);
 
-                // keytype
-                validateKeyType(rstResponse);
+		// keytype
+		validateKeyType(rstResponse);
 
-                // validate security token
-                Assertion assertion = validateSecurityToken(rstResponse);
+		// validate security token
+		Assertion assertion = validateSecurityToken(rstResponse);
 
-                // validate assertion
-                AuthenticationResponse authenticationResponse;
-                try {
-                        authenticationResponse = Saml2Util.validateAssertion(
-                                assertion, now, maxOffset, recipient, recipient,
-                                null, secretKey, privateKey);
-                } catch (AssertionValidationException e) {
-                        throw new AuthenticationResponseProcessorException(e);
-                }
+		// validate assertion
+		AuthenticationResponse authenticationResponse;
+		try {
+			authenticationResponse = Saml2Util.validateAssertion(assertion,
+					now, maxOffset, recipient, recipient, null, secretKey,
+					privateKey);
+		} catch (AssertionValidationException e) {
+			throw new AuthenticationResponseProcessorException(e);
+		}
 
-                // check if SP expects a signature and if there is one
-                if (null == assertion.getSignature() && expectAssertionSigned) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Expected a signed assertion but was not so! ");
-                }
+		// check if SP expects a signature and if there is one
+		if (null == assertion.getSignature() && expectAssertionSigned) {
+			throw new AuthenticationResponseProcessorException(
+					"Expected a signed assertion but was not so! ");
+		}
 
-                // validate assertion's signature if any
-                if (null != assertion.getSignature()) {
-                        try {
-                                List<X509Certificate> certificateChain =
-                                        Saml2Util.validateSignature(assertion.getSignature());
+		// validate assertion's signature if any
+		if (null != assertion.getSignature()) {
+			try {
+				List<X509Certificate> certificateChain = Saml2Util
+						.validateSignature(assertion.getSignature());
 
-                                if (null != this.service) {
-                                        this.service.validateServiceCertificate(
-                                                authenticationResponse
-                                                        .getAuthenticationPolicy(),
-                                                certificateChain);
-                                }
+				if (null != this.service) {
+					this.service.validateServiceCertificate(
+							authenticationResponse.getAuthenticationPolicy(),
+							certificateChain);
+				}
 
-                        } catch (CertificateException e) {
-                                throw new AuthenticationResponseProcessorException(e);
-                        } catch (ValidationException e) {
-                                throw new AuthenticationResponseProcessorException(e);
-                        } catch (Exception e) {
+			} catch (CertificateException e) {
+				throw new AuthenticationResponseProcessorException(e);
+			} catch (ValidationException e) {
+				throw new AuthenticationResponseProcessorException(e);
+			} catch (Exception e) {
 
-                                if ("javax.ejb.EJBException".equals(e.getClass().getName())) {
-                                        Exception exception;
-                                        try {
-                                                Method getCausedByExceptionMethod = e.getClass().getMethod(
-                                                        "getCausedByException", new Class[]{});
-                                                exception = (Exception) getCausedByExceptionMethod.invoke(
-                                                        e, new Object[]{});
-                                        } catch (Exception e2) {
-                                                LOG.debug("error: " + e.getMessage(), e);
-                                                throw new AuthenticationResponseProcessorException(
-                                                        "error retrieving the root cause: "
-                                                                + e2.getMessage());
-                                        }
+				if ("javax.ejb.EJBException".equals(e.getClass().getName())) {
+					Exception exception;
+					try {
+						Method getCausedByExceptionMethod = e.getClass()
+								.getMethod("getCausedByException",
+										new Class[] {});
+						exception = (Exception) getCausedByExceptionMethod
+								.invoke(e, new Object[] {});
+					} catch (Exception e2) {
+						LOG.debug("error: " + e.getMessage(), e);
+						throw new AuthenticationResponseProcessorException(
+								"error retrieving the root cause: "
+										+ e2.getMessage());
+					}
 
-                                        throw new AuthenticationResponseProcessorException(
-                                                "Validation exception: " +
-                                                        (null != exception ? exception.getMessage() : e.getMessage()));
-                                }
+					throw new AuthenticationResponseProcessorException(
+							"Validation exception: "
+									+ (null != exception ? exception
+											.getMessage() : e.getMessage()));
+				}
 
-                                throw new AuthenticationResponseProcessorException(e);
-                        }
-                }
+				throw new AuthenticationResponseProcessorException(e);
+			}
+		}
 
-                return authenticationResponse;
-        }
+		return authenticationResponse;
+	}
 
-        private Assertion validateSecurityToken(RequestSecurityTokenResponse rstResponse)
-                throws AuthenticationResponseProcessorException {
+	private Assertion validateSecurityToken(
+			RequestSecurityTokenResponse rstResponse)
+			throws AuthenticationResponseProcessorException {
 
-                List<XMLObject> securityTokens =
-                        rstResponse.getUnknownXMLObjects(RequestedSecurityToken.ELEMENT_NAME);
-                if (securityTokens.size() != 1) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Expected exactly 1 RequestedSecurityToken " +
-                                        "element.");
-                }
+		List<XMLObject> securityTokens = rstResponse
+				.getUnknownXMLObjects(RequestedSecurityToken.ELEMENT_NAME);
+		if (securityTokens.size() != 1) {
+			throw new AuthenticationResponseProcessorException(
+					"Expected exactly 1 RequestedSecurityToken " + "element.");
+		}
 
-                RequestedSecurityToken securityToken =
-                        (RequestedSecurityToken) securityTokens.get(0);
+		RequestedSecurityToken securityToken = (RequestedSecurityToken) securityTokens
+				.get(0);
 
-                if (!(securityToken.getUnknownXMLObject() instanceof Assertion)) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Expected a SAML v2.0 Assertion as " +
-                                        "SecurityToken!");
-                }
+		if (!(securityToken.getUnknownXMLObject() instanceof Assertion)) {
+			throw new AuthenticationResponseProcessorException(
+					"Expected a SAML v2.0 Assertion as " + "SecurityToken!");
+		}
 
-                return (Assertion) securityToken.getUnknownXMLObject();
-        }
+		return (Assertion) securityToken.getUnknownXMLObject();
+	}
 
-        private void validateKeyType(RequestSecurityTokenResponse rstResponse)
-                throws AuthenticationResponseProcessorException {
+	private void validateKeyType(RequestSecurityTokenResponse rstResponse)
+			throws AuthenticationResponseProcessorException {
 
-                List<XMLObject> keyTypes =
-                        rstResponse.getUnknownXMLObjects(KeyType.ELEMENT_NAME);
-                if (keyTypes.size() != 1) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Expected exactly 1 KeyType element.");
-                }
-                if (!((KeyType) keyTypes.get(0)).getValue().equals(
-                        "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer")) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Unexpected KeyType value.");
-                }
-        }
+		List<XMLObject> keyTypes = rstResponse
+				.getUnknownXMLObjects(KeyType.ELEMENT_NAME);
+		if (keyTypes.size() != 1) {
+			throw new AuthenticationResponseProcessorException(
+					"Expected exactly 1 KeyType element.");
+		}
+		if (!((KeyType) keyTypes.get(0)).getValue().equals(
+				"http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer")) {
+			throw new AuthenticationResponseProcessorException(
+					"Unexpected KeyType value.");
+		}
+	}
 
-        private void validateRequestType(RequestSecurityTokenResponse rstResponse)
-                throws AuthenticationResponseProcessorException {
+	private void validateRequestType(RequestSecurityTokenResponse rstResponse)
+			throws AuthenticationResponseProcessorException {
 
-                List<XMLObject> requestTypes =
-                        rstResponse.getUnknownXMLObjects(RequestType.ELEMENT_NAME);
-                if (requestTypes.size() != 1) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Expected exactly 1 RequestType element.");
-                }
-                if (!((RequestType) requestTypes.get(0)).getValue().equals(
-                        "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue")) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Unexpected RequestType value.");
-                }
-        }
+		List<XMLObject> requestTypes = rstResponse
+				.getUnknownXMLObjects(RequestType.ELEMENT_NAME);
+		if (requestTypes.size() != 1) {
+			throw new AuthenticationResponseProcessorException(
+					"Expected exactly 1 RequestType element.");
+		}
+		if (!((RequestType) requestTypes.get(0)).getValue().equals(
+				"http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue")) {
+			throw new AuthenticationResponseProcessorException(
+					"Unexpected RequestType value.");
+		}
+	}
 
-        private void validateTokenType(RequestSecurityTokenResponse rstResponse)
-                throws AuthenticationResponseProcessorException {
+	private void validateTokenType(RequestSecurityTokenResponse rstResponse)
+			throws AuthenticationResponseProcessorException {
 
-                List<XMLObject> tokenTypes =
-                        rstResponse.getUnknownXMLObjects(TokenType.ELEMENT_NAME);
-                if (tokenTypes.size() != 1) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Expected exactly 1 TokenType element.");
-                }
-                if (!((TokenType) tokenTypes.get(0)).getValue().equals(SAMLConstants.SAML20_NS)) {
-                        throw new AuthenticationResponseProcessorException(
-                                "Unexpected TokenType value.");
-                }
-        }
+		List<XMLObject> tokenTypes = rstResponse
+				.getUnknownXMLObjects(TokenType.ELEMENT_NAME);
+		if (tokenTypes.size() != 1) {
+			throw new AuthenticationResponseProcessorException(
+					"Expected exactly 1 TokenType element.");
+		}
+		if (!((TokenType) tokenTypes.get(0)).getValue().equals(
+				SAMLConstants.SAML20_NS)) {
+			throw new AuthenticationResponseProcessorException(
+					"Unexpected TokenType value.");
+		}
+	}
 
-        private void validateContext(String expectedContext, String context)
-                throws AuthenticationResponseProcessorException {
+	private void validateContext(String expectedContext, String context)
+			throws AuthenticationResponseProcessorException {
 
-                if (null != expectedContext) {
-                        if (null == context) {
-                                throw new AuthenticationResponseProcessorException(
-                                        "Missing wctx in response.");
-                        } else if (!expectedContext.equals(context)) {
-                                throw new AuthenticationResponseProcessorException(
-                                        "Wrong wctx in response.");
-                        }
-                }
+		if (null != expectedContext) {
+			if (null == context) {
+				throw new AuthenticationResponseProcessorException(
+						"Missing wctx in response.");
+			} else if (!expectedContext.equals(context)) {
+				throw new AuthenticationResponseProcessorException(
+						"Wrong wctx in response.");
+			}
+		}
 
-        }
+	}
 }

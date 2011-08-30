@@ -27,49 +27,51 @@ import java.util.List;
 
 /**
  * WS-Federation SPI for authentication response services.
- *
+ * 
  * @author Wim Vandenhaute.
  */
 public interface AuthenticationResponseService {
 
-        /**
-         * Callback to the SAML v2.0 SDK whether the SP expects a response to
-         * be signed or not
-         *
-         * @return true if expect a signed response.
-         */
-        boolean requiresResponseSignature();
+	/**
+	 * Callback to the SAML v2.0 SDK whether the SP expects a response to be
+	 * signed or not
+	 * 
+	 * @return true if expect a signed response.
+	 */
+	boolean requiresResponseSignature();
 
-        /**
-         * Validation of the certificate chain in the SAML v2.0 assertion signature.
-         *
-         * @param authenticationPolicy SAML v2.0 authentication policy.
-         * @param certificateChain     the service certificate chain
-         * @throws SecurityException in case the certificate is invalid/not accepted
-         */
-        void validateServiceCertificate(SamlAuthenticationPolicy authenticationPolicy,
-                                        List<X509Certificate> certificateChain)
-                throws SecurityException;
+	/**
+	 * Validation of the certificate chain in the SAML v2.0 assertion signature.
+	 * 
+	 * @param authenticationPolicy
+	 *            SAML v2.0 authentication policy.
+	 * @param certificateChain
+	 *            the service certificate chain
+	 * @throws SecurityException
+	 *             in case the certificate is invalid/not accepted
+	 */
+	void validateServiceCertificate(
+			SamlAuthenticationPolicy authenticationPolicy,
+			List<X509Certificate> certificateChain) throws SecurityException;
 
-        /**
-         * @return the maximum offset allowed on the SAML v2.0 assertion
-         *         condition fields. Specified in minutes. A negative value
-         *         results in skipping validation of the condition's time
-         *         fields.
-         */
-        int getMaximumTimeOffset();
+	/**
+	 * @return the maximum offset allowed on the SAML v2.0 assertion condition
+	 *         fields. Specified in minutes. A negative value results in
+	 *         skipping validation of the condition's time fields.
+	 */
+	int getMaximumTimeOffset();
 
-        /**
-         * @return the optional symmetric {@link javax.crypto.SecretKey} used to decrypt
-         *         attributes if configured so. Return <code>null</code>
-         *         if not applicable.
-         */
-        SecretKey getAttributeSecretKey();
+	/**
+	 * @return the optional symmetric {@link javax.crypto.SecretKey} used to
+	 *         decrypt attributes if configured so. Return <code>null</code> if
+	 *         not applicable.
+	 */
+	SecretKey getAttributeSecretKey();
 
-        /**
-         * @return the optional asymmetric {@link java.security.PrivateKey} used to decrypt
-         *         attributes if configured so. Return <code>null</code> if not
-         *         applicable.
-         */
-        PrivateKey getAttributePrivateKey();
+	/**
+	 * @return the optional asymmetric {@link java.security.PrivateKey} used to
+	 *         decrypt attributes if configured so. Return <code>null</code> if
+	 *         not applicable.
+	 */
+	PrivateKey getAttributePrivateKey();
 }

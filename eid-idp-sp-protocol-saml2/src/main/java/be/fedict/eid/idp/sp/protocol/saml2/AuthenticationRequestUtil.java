@@ -54,152 +54,156 @@ import java.util.UUID;
 
 /**
  * Utility class for generating and sending SAML v2.0 Auhentication Requests.
- *
+ * 
  * @author Wim Vandenhaute
  */
 public class AuthenticationRequestUtil {
 
-        private static final Log LOG = LogFactory
-                .getLog(AuthenticationRequestUtil.class);
+	private static final Log LOG = LogFactory
+			.getLog(AuthenticationRequestUtil.class);
 
-        static {
-                try {
-                        DefaultBootstrap.bootstrap();
-                } catch (ConfigurationException e) {
-                        throw new RuntimeException("could not bootstrap the OpenSAML2 library", e);
-                }
-        }
+	static {
+		try {
+			DefaultBootstrap.bootstrap();
+		} catch (ConfigurationException e) {
+			throw new RuntimeException(
+					"could not bootstrap the OpenSAML2 library", e);
+		}
+	}
 
-        private AuthenticationRequestUtil() {
-                // empty
-        }
+	private AuthenticationRequestUtil() {
+		// empty
+	}
 
-        /**
-         * Generates a SAML v2.0 Authentication Request and performs a browser
-         * POST to the specified idpDestination.
-         *
-         * @param issuerName     issuer of the SAML v2.0 AuthnRequest
-         * @param idpDestination required eID IdP destination
-         * @param spDestination  Service Provider landing URL where the IdP will
-         *                       post the SAML2 Response to.
-         * @param relayState     optional relay state
-         * @param spIdentity     optional Service Provider Identity. If specified
-         *                       the authentication request will be signed.
-         * @param response       response used for posting the request to the IdP
-         * @param language       optional language hint
-         * @return the SAML v2.0 AuthnRequest just sent over.
-         * @throws ServletException something went wrong.
-         */
-        @SuppressWarnings("unchecked")
-        public static AuthnRequest sendRequest(String issuerName,
-                                               String idpDestination,
-                                               String spDestination,
-                                               String relayState,
-                                               KeyStore.PrivateKeyEntry spIdentity,
-                                               HttpServletResponse response,
-                                               String language)
-                throws ServletException {
+	/**
+	 * Generates a SAML v2.0 Authentication Request and performs a browser POST
+	 * to the specified idpDestination.
+	 * 
+	 * @param issuerName
+	 *            issuer of the SAML v2.0 AuthnRequest
+	 * @param idpDestination
+	 *            required eID IdP destination
+	 * @param spDestination
+	 *            Service Provider landing URL where the IdP will post the SAML2
+	 *            Response to.
+	 * @param relayState
+	 *            optional relay state
+	 * @param spIdentity
+	 *            optional Service Provider Identity. If specified the
+	 *            authentication request will be signed.
+	 * @param response
+	 *            response used for posting the request to the IdP
+	 * @param language
+	 *            optional language hint
+	 * @return the SAML v2.0 AuthnRequest just sent over.
+	 * @throws ServletException
+	 *             something went wrong.
+	 */
+	@SuppressWarnings("unchecked")
+	public static AuthnRequest sendRequest(String issuerName,
+			String idpDestination, String spDestination, String relayState,
+			KeyStore.PrivateKeyEntry spIdentity, HttpServletResponse response,
+			String language) throws ServletException {
 
-                if (null == idpDestination) {
-                        throw new ServletException("No IdP Destination specified");
-                }
-                if (null == spDestination) {
-                        throw new ServletException("No SP Destination specified");
-                }
+		if (null == idpDestination) {
+			throw new ServletException("No IdP Destination specified");
+		}
+		if (null == spDestination) {
+			throw new ServletException("No SP Destination specified");
+		}
 
-                LOG.debug("Issuer: " + issuerName);
-                LOG.debug("IdP destination: " + idpDestination);
-                LOG.debug("SP destination: " + spDestination);
-                LOG.debug("relay state: " + relayState);
-                LOG.debug("SP identity: " + spIdentity);
+		LOG.debug("Issuer: " + issuerName);
+		LOG.debug("IdP destination: " + idpDestination);
+		LOG.debug("SP destination: " + spDestination);
+		LOG.debug("relay state: " + relayState);
+		LOG.debug("SP identity: " + spIdentity);
 
-                String idpEndpoint = idpDestination;
-                if (null != language) {
-                        idpEndpoint += "?language=" + language;
-                }
+		String idpEndpoint = idpDestination;
+		if (null != language) {
+			idpEndpoint += "?language=" + language;
+		}
 
-                XMLObjectBuilderFactory builderFactory = Configuration
-                        .getBuilderFactory();
+		XMLObjectBuilderFactory builderFactory = Configuration
+				.getBuilderFactory();
 
-                SAMLObjectBuilder<AuthnRequest> requestBuilder = (SAMLObjectBuilder<AuthnRequest>) builderFactory
-                        .getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
-                AuthnRequest authnRequest = requestBuilder.buildObject();
-                authnRequest.setID("authn-request-" + UUID.randomUUID().toString());
-                authnRequest.setVersion(SAMLVersion.VERSION_20);
-                authnRequest.setIssueInstant(new DateTime());
-                authnRequest.setDestination(idpDestination);
-                authnRequest.setAssertionConsumerServiceURL(spDestination);
-                authnRequest.setForceAuthn(true);
-                authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+		SAMLObjectBuilder<AuthnRequest> requestBuilder = (SAMLObjectBuilder<AuthnRequest>) builderFactory
+				.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
+		AuthnRequest authnRequest = requestBuilder.buildObject();
+		authnRequest.setID("authn-request-" + UUID.randomUUID().toString());
+		authnRequest.setVersion(SAMLVersion.VERSION_20);
+		authnRequest.setIssueInstant(new DateTime());
+		authnRequest.setDestination(idpDestination);
+		authnRequest.setAssertionConsumerServiceURL(spDestination);
+		authnRequest.setForceAuthn(true);
+		authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
 
-                SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory
-                        .getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
-                Issuer issuer = issuerBuilder.buildObject();
-                issuer.setValue(issuerName);
-                authnRequest.setIssuer(issuer);
+		SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory
+				.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
+		Issuer issuer = issuerBuilder.buildObject();
+		issuer.setValue(issuerName);
+		authnRequest.setIssuer(issuer);
 
-                SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
-                        .getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
-                Endpoint samlEndpoint = endpointBuilder.buildObject();
-                samlEndpoint.setLocation(idpEndpoint);
-                samlEndpoint.setResponseLocation(spDestination);
+		SAMLObjectBuilder<Endpoint> endpointBuilder = (SAMLObjectBuilder<Endpoint>) builderFactory
+				.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
+		Endpoint samlEndpoint = endpointBuilder.buildObject();
+		samlEndpoint.setLocation(idpEndpoint);
+		samlEndpoint.setResponseLocation(spDestination);
 
-                OutTransport outTransport = new HttpServletResponseAdapter(response,
-                        true);
+		OutTransport outTransport = new HttpServletResponseAdapter(response,
+				true);
 
-                BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
-                messageContext.setOutboundMessageTransport(outTransport);
-                messageContext.setPeerEntityEndpoint(samlEndpoint);
-                messageContext.setOutboundSAMLMessage(authnRequest);
-                messageContext.setRelayState(relayState);
+		BasicSAMLMessageContext messageContext = new BasicSAMLMessageContext();
+		messageContext.setOutboundMessageTransport(outTransport);
+		messageContext.setPeerEntityEndpoint(samlEndpoint);
+		messageContext.setOutboundSAMLMessage(authnRequest);
+		messageContext.setRelayState(relayState);
 
-                // sign request if a SP identity is specified
-                if (null != spIdentity) {
+		// sign request if a SP identity is specified
+		if (null != spIdentity) {
 
-                        List<X509Certificate> certChain = new LinkedList<X509Certificate>();
-                        for (Certificate certificate : spIdentity.getCertificateChain()) {
-                                certChain.add((X509Certificate) certificate);
-                        }
+			List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+			for (Certificate certificate : spIdentity.getCertificateChain()) {
+				certChain.add((X509Certificate) certificate);
+			}
 
-                        BasicX509Credential credential = new BasicX509Credential();
-                        credential.setPrivateKey(spIdentity.getPrivateKey());
-                        credential.setEntityCertificateChain(certChain);
+			BasicX509Credential credential = new BasicX509Credential();
+			credential.setPrivateKey(spIdentity.getPrivateKey());
+			credential.setEntityCertificateChain(certChain);
 
-                        // enable adding the cert.chain as KeyInfo
-                        X509KeyInfoGeneratorFactory factory =
-                                (X509KeyInfoGeneratorFactory) org.opensaml.xml.Configuration.getGlobalSecurityConfiguration().
-                                        getKeyInfoGeneratorManager().getDefaultManager().
-                                        getFactory(credential);
-                        factory.setEmitEntityCertificateChain(true);
+			// enable adding the cert.chain as KeyInfo
+			X509KeyInfoGeneratorFactory factory = (X509KeyInfoGeneratorFactory) org.opensaml.xml.Configuration
+					.getGlobalSecurityConfiguration()
+					.getKeyInfoGeneratorManager().getDefaultManager()
+					.getFactory(credential);
+			factory.setEmitEntityCertificateChain(true);
 
-                        messageContext.setOutboundSAMLMessageSigningCredential(credential);
-                }
+			messageContext.setOutboundSAMLMessageSigningCredential(credential);
+		}
 
+		VelocityEngine velocityEngine = new VelocityEngine();
+		velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
+				"classpath");
+		velocityEngine
+				.setProperty("classpath.resource.loader.class",
+						"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		velocityEngine.setProperty(
+				RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+				Log4JLogChute.class.getName());
+		try {
+			velocityEngine.init();
+		} catch (Exception e) {
+			throw new ServletException("velocity engine init error: "
+					+ e.getMessage(), e);
+		}
+		HTTPPostEncoder encoder = new HTTPPostEncoder(velocityEngine,
+				"/templates/saml2-post-binding.vm");
+		try {
+			encoder.encode(messageContext);
+		} catch (MessageEncodingException e) {
+			throw new ServletException(
+					"SAML encoding error: " + e.getMessage(), e);
+		}
 
-                VelocityEngine velocityEngine = new VelocityEngine();
-                velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
-                        "classpath");
-                velocityEngine
-                        .setProperty("classpath.resource.loader.class",
-                                "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-                velocityEngine.setProperty(
-                        RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        Log4JLogChute.class.getName());
-                try {
-                        velocityEngine.init();
-                } catch (Exception e) {
-                        throw new ServletException("velocity engine init error: "
-                                + e.getMessage(), e);
-                }
-                HTTPPostEncoder encoder = new HTTPPostEncoder(velocityEngine,
-                        "/templates/saml2-post-binding.vm");
-                try {
-                        encoder.encode(messageContext);
-                } catch (MessageEncodingException e) {
-                        throw new ServletException(
-                                "SAML encoding error: " + e.getMessage(), e);
-                }
-
-                return authnRequest;
-        }
+		return authnRequest;
+	}
 }

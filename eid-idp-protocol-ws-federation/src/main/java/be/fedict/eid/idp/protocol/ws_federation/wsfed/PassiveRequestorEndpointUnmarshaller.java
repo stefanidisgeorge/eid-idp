@@ -7,19 +7,19 @@ import org.opensaml.xml.io.UnmarshallingException;
 
 public class PassiveRequestorEndpointUnmarshaller extends EndpointUnmarshaller {
 
-    /**
-     * {@inheritDoc}
-     */
-    protected void processChildElement(XMLObject parentSAMLObject, XMLObject childSAMLObject)
-            throws UnmarshallingException {
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void processChildElement(XMLObject parentSAMLObject,
+			XMLObject childSAMLObject) throws UnmarshallingException {
 
-        PassiveRequestorEndpoint passiveRequestorEndpoint =
-                (PassiveRequestorEndpoint) parentSAMLObject;
+		PassiveRequestorEndpoint passiveRequestorEndpoint = (PassiveRequestorEndpoint) parentSAMLObject;
 
-        if (childSAMLObject instanceof EndpointReference) {
-            passiveRequestorEndpoint.setEndpointReference((EndpointReference) childSAMLObject);
-        } else {
-            super.processChildElement(parentSAMLObject, childSAMLObject);
-        }
-    }
+		if (childSAMLObject instanceof EndpointReference) {
+			passiveRequestorEndpoint
+					.setEndpointReference((EndpointReference) childSAMLObject);
+		} else {
+			super.processChildElement(parentSAMLObject, childSAMLObject);
+		}
+	}
 }

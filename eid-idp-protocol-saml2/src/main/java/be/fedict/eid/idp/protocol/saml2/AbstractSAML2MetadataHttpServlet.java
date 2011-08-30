@@ -40,97 +40,98 @@ import java.io.OutputStream;
 
 public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
 
-        private static final long serialVersionUID = 3945029803660891205L;
+	private static final long serialVersionUID = 3945029803660891205L;
 
-        private static final Log LOG = LogFactory
-                .getLog(AbstractSAML2MetadataHttpServlet.class);
+	private static final Log LOG = LogFactory
+			.getLog(AbstractSAML2MetadataHttpServlet.class);
 
-        static {
-                /*
-                * Next is because Sun loves to endorse crippled versions of Xerces.
-                */
-                System.setProperty("javax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema",
-                        "org.apache.xerces.jaxp.validation.XMLSchemaFactory");
-                try {
-                        DefaultBootstrap.bootstrap();
-                } catch (ConfigurationException e) {
-                        throw new RuntimeException("could not bootstrap the OpenSAML2 library", e);
-                }
-        }
+	static {
+		/*
+		 * Next is because Sun loves to endorse crippled versions of Xerces.
+		 */
+		System.setProperty(
+				"javax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema",
+				"org.apache.xerces.jaxp.validation.XMLSchemaFactory");
+		try {
+			DefaultBootstrap.bootstrap();
+		} catch (ConfigurationException e) {
+			throw new RuntimeException(
+					"could not bootstrap the OpenSAML2 library", e);
+		}
+	}
 
-        @Override
-        protected void doGet(HttpServletRequest request,
-                             HttpServletResponse response) throws ServletException, IOException {
-                LOG.debug("doGet");
-                response.setContentType("application/samlmetadata+xml; charset=UTF-8");
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		LOG.debug("doGet");
+		response.setContentType("application/samlmetadata+xml; charset=UTF-8");
 
-                IdentityProviderConfiguration configuration = IdentityProviderConfigurationFactory
-                        .getInstance(request);
+		IdentityProviderConfiguration configuration = IdentityProviderConfigurationFactory
+				.getInstance(request);
 
-                OutputStream outputStream = response.getOutputStream();
-                try {
-                        writeMetadata(request, configuration, outputStream);
-                } catch (Exception e) {
-                        throw new ServletException("error: " + e.getMessage(), e);
-                }
-        }
+		OutputStream outputStream = response.getOutputStream();
+		try {
+			writeMetadata(request, configuration, outputStream);
+		} catch (Exception e) {
+			throw new ServletException("error: " + e.getMessage(), e);
+		}
+	}
 
-        private void writeMetadata(HttpServletRequest request,
-                                   IdentityProviderConfiguration configuration,
-                                   OutputStream outputStream)
+	private void writeMetadata(HttpServletRequest request,
+			IdentityProviderConfiguration configuration,
+			OutputStream outputStream)
 
-                throws ServletException, TransformerException, IOException {
+	throws ServletException, TransformerException, IOException {
 
+		IdPIdentity identity = configuration.findIdentity();
 
-                IdPIdentity identity = configuration.findIdentity();
+		// Add a descriptor for our node (the SAMLv2 Entity).
+		EntityDescriptor entityDescriptor = getEntityDescriptor(request,
+				configuration);
 
-                // Add a descriptor for our node (the SAMLv2 Entity).
-                EntityDescriptor entityDescriptor = getEntityDescriptor(
-                        request, configuration);
+		// Marshall & sign the entity descriptor.
+		Element element;
+		if (null != identity) {
 
-                // Marshall & sign the entity descriptor.
-                Element element;
-                if (null != identity) {
+			LOG.debug("sign SAML2 Metadata");
+			element = Saml2Util.signAsElement(entityDescriptor,
+					entityDescriptor, identity.getPrivateKeyEntry());
+		} else {
 
-                        LOG.debug("sign SAML2 Metadata");
-                        element = Saml2Util.signAsElement(entityDescriptor, entityDescriptor,
-                                identity.getPrivateKeyEntry());
-                } else {
+			LOG.warn("SAML2 Metadata NOT signed!");
+			element = Saml2Util.marshall(entityDescriptor);
+		}
 
-                        LOG.warn("SAML2 Metadata NOT signed!");
-                        element = Saml2Util.marshall(entityDescriptor);
-                }
+		Saml2Util.writeDocument(element.getOwnerDocument(), outputStream);
+	}
 
-                Saml2Util.writeDocument(element.getOwnerDocument(), outputStream);
-        }
+	public EntityDescriptor getEntityDescriptor(HttpServletRequest request,
+			IdentityProviderConfiguration configuration) {
 
-        public EntityDescriptor getEntityDescriptor(HttpServletRequest request,
-                                                    IdentityProviderConfiguration configuration) {
+		String location = getLocation(request);
 
-                String location = getLocation(request);
+		IdPIdentity identity = configuration.findIdentity();
 
-                IdPIdentity identity = configuration.findIdentity();
+		return Saml2Util.getEntityDescriptor(
+				AbstractSAML2ProtocolService.getResponseIssuer(configuration),
+				location, getBinding(),
+				null != identity ? identity.getPrivateKeyEntry() : null);
+	}
 
-                return Saml2Util.getEntityDescriptor(
-                        AbstractSAML2ProtocolService.getResponseIssuer(configuration),
-                        location, getBinding(),
-                        null != identity ? identity.getPrivateKeyEntry() : null);
-        }
+	private String getLocation(HttpServletRequest request) {
 
-        private String getLocation(HttpServletRequest request) {
+		String location = "https://" + request.getServerName();
+		if (request.getServerPort() != 443) {
+			location += ":" + request.getServerPort();
+		}
+		location += request.getContextPath()
+				+ IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH + "/"
+				+ getPath();
+		LOG.debug("location: " + location);
+		return location;
+	}
 
-                String location = "https://" + request.getServerName();
-                if (request.getServerPort() != 443) {
-                        location += ":" + request.getServerPort();
-                }
-                location += request.getContextPath()
-                        + IdentityProviderProtocolService.PROTOCOL_ENDPOINT_PATH
-                        + "/" + getPath();
-                LOG.debug("location: " + location);
-                return location;
-        }
+	protected abstract String getPath();
 
-        protected abstract String getPath();
-
-        protected abstract String getBinding();
+	protected abstract String getBinding();
 }

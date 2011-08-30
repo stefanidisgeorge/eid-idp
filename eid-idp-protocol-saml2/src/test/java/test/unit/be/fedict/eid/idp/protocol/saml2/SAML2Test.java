@@ -69,362 +69,368 @@ import static org.junit.Assert.*;
 
 public class SAML2Test {
 
-        private static final Log LOG = LogFactory
-                .getLog(SAML2Test.class);
-
-        @BeforeClass
-        public static void before() {
-                Security.addProvider(new BouncyCastleProvider());
-        }
-
-        @Test
-        public void testAttributEncryptionSymmetric() throws Exception {
-
-                // Setup
-                String algorithm = EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128;
-
-                KeyGenerator kgen = KeyGenerator.getInstance("AES");
-                kgen.init(128);
-                SecretKey key = kgen.generateKey();
-
-                Encrypter encrypter = Saml2Util.getEncrypter(algorithm, key);
-
-                // Operate: encrypt
-                EncryptedAttribute encTarget;
-                XMLObject encObject = null;
-                try {
-                        encObject = encrypter.encrypt(getAttribute());
-                } catch (EncryptionException e) {
-                        fail("Object encryption failed: " + e);
-                }
-
-                // Verify
-                LOG.debug(Saml2Util.domToString(Saml2Util.marshall(encObject), true));
-
-                assertNotNull("Encrypted object was null", encObject);
-                assertTrue("Encrypted object was not an instance of the expected type",
-                        encObject instanceof EncryptedAttribute);
-                encTarget = (EncryptedAttribute) encObject;
-
-                assertEquals("Type attribute", EncryptionConstants.TYPE_ELEMENT, encTarget.getEncryptedData().getType());
-                assertEquals("Algorithm attribute", algorithm,
-                        encTarget.getEncryptedData().getEncryptionMethod().getAlgorithm());
-                assertNotNull("KeyInfo", encTarget.getEncryptedData().getKeyInfo());
-
-                assertEquals("Number of EncryptedKeys", 0,
-                        encTarget.getEncryptedData().getKeyInfo().getEncryptedKeys().size());
-
-                assertFalse("EncryptedData ID attribute was empty",
-                        DatatypeHelper.isEmpty(encTarget.getEncryptedData().getID()));
-
-                // Setup
-                Decrypter decrypter = Saml2Util.getDecrypter(key);
-
-                // Operate: decrypt
-                SAMLObject decryptedTarget = null;
-                try {
-                        decryptedTarget = decrypter.decrypt(encTarget);
-                } catch (DecryptionException e) {
-                        fail("Error on decryption of encrypted SAML 2 type to element: " + e);
-                }
-
-                // Verify
-                assertNotNull("Decrypted target was null", decryptedTarget);
-                assertTrue("Decrypted target was not the expected type", decryptedTarget instanceof Attribute);
-                LOG.debug(Saml2Util.domToString(Saml2Util.marshall(decryptedTarget), true));
-        }
-
-        @Test
-        public void testAttributEncryptionAsymmetric() throws Exception {
-
-                // Setup
-                KeyPair keyPair = generateKeyPair();
-                Encrypter encrypter = Saml2Util.getEncrypter(null, null, keyPair.getPublic());
-
-                // Operate: encrypt
-                EncryptedAttribute encTarget;
-                XMLObject encObject = null;
-                try {
-                        encObject = encrypter.encrypt(getAttribute());
-                } catch (EncryptionException e) {
-                        fail("Object encryption failed: " + e);
-                }
-
-                // Verify
-                LOG.debug(Saml2Util.domToString(Saml2Util.marshall(encObject), true));
-
-                assertNotNull("Encrypted object was null", encObject);
-                assertTrue("Encrypted object was not an instance of the expected type",
-                        encObject instanceof EncryptedAttribute);
-                encTarget = (EncryptedAttribute) encObject;
-
-                assertEquals("Type attribute", EncryptionConstants.TYPE_ELEMENT,
-                        encTarget.getEncryptedData().getType());
-                assertEquals("Algorithm attribute", EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128,
-                        encTarget.getEncryptedData().getEncryptionMethod()
-                                .getAlgorithm());
-                assertNotNull("KeyInfo", encTarget.getEncryptedData().getKeyInfo());
-                assertEquals(1, encTarget.getEncryptedData().getKeyInfo()
-                        .getRetrievalMethods().size());
-                assertEquals(XMLConstants.XMLENC_NS +
-                        EncryptedKey.DEFAULT_ELEMENT_LOCAL_NAME,
-                        encTarget.getEncryptedData().getKeyInfo()
-                                .getRetrievalMethods().get(0).getType());
-
-                assertEquals("Number of EncryptedKeys", 1,
-                        encTarget.getEncryptedKeys().size());
-                assertEquals(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15,
-                        encTarget.getEncryptedKeys().get(0)
-                                .getEncryptionMethod().getAlgorithm());
-
-                assertFalse("EncryptedData ID attribute was empty",
-                        DatatypeHelper.isEmpty(encTarget.getEncryptedData().getID()));
-
-                // Setup
-                Decrypter decrypter = Saml2Util.getDecrypter(keyPair.getPrivate());
-
-                // Operate: decrypt
-                SAMLObject decryptedTarget = null;
-                try {
-                        decryptedTarget = decrypter.decrypt(encTarget);
-                } catch (DecryptionException e) {
-                        fail("Error on decryption of encrypted SAML 2 type to element: " + e);
-                }
-
-                // Verify
-                assertNotNull("Decrypted target was null", decryptedTarget);
-                assertTrue("Decrypted target was not the expected type", decryptedTarget instanceof Attribute);
-                LOG.debug(Saml2Util.domToString(Saml2Util.marshall(decryptedTarget), true));
-        }
-
-        @Test
-        public void testAttributEncryptionAsymmetric2() throws Exception {
-
-                // Setup
-                String algorithm = EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128;
-
-                KeyGenerator kgen = KeyGenerator.getInstance("AES");
-                kgen.init(128);
-                SecretKey key = kgen.generateKey();
-
-                KeyPair keyPair = generateKeyPair();
-                Encrypter encrypter = Saml2Util.getEncrypter(algorithm, key, keyPair.getPublic());
-
-                // Operate: encrypt
-                EncryptedAttribute encTarget;
-                XMLObject encObject = null;
-                try {
-                        encObject = encrypter.encrypt(getAttribute());
-                } catch (EncryptionException e) {
-                        fail("Object encryption failed: " + e);
-                }
-
-                // Verify
-                LOG.debug(Saml2Util.domToString(Saml2Util.marshall(encObject), true));
-
-                assertNotNull("Encrypted object was null", encObject);
-                assertTrue("Encrypted object was not an instance of the expected type",
-                        encObject instanceof EncryptedAttribute);
-                encTarget = (EncryptedAttribute) encObject;
-
-                assertEquals("Type attribute", EncryptionConstants.TYPE_ELEMENT,
-                        encTarget.getEncryptedData().getType());
-                assertEquals("Algorithm attribute", algorithm,
-                        encTarget.getEncryptedData().getEncryptionMethod()
-                                .getAlgorithm());
-                assertNotNull("KeyInfo", encTarget.getEncryptedData().getKeyInfo());
-                assertEquals(1, encTarget.getEncryptedData().getKeyInfo()
-                        .getRetrievalMethods().size());
-                assertEquals(XMLConstants.XMLENC_NS +
-                        EncryptedKey.DEFAULT_ELEMENT_LOCAL_NAME,
-                        encTarget.getEncryptedData().getKeyInfo()
-                                .getRetrievalMethods().get(0).getType());
-
-                assertEquals("Number of EncryptedKeys", 1,
-                        encTarget.getEncryptedKeys().size());
-                assertEquals(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15,
-                        encTarget.getEncryptedKeys().get(0)
-                                .getEncryptionMethod().getAlgorithm());
-
-                assertFalse("EncryptedData ID attribute was empty",
-                        DatatypeHelper.isEmpty(encTarget.getEncryptedData().getID()));
-
-                // Setup
-                Decrypter decrypter = Saml2Util.getDecrypter(keyPair.getPrivate());
-
-                // Operate: decrypt
-                SAMLObject decryptedTarget = null;
-                try {
-                        decryptedTarget = decrypter.decrypt(encTarget);
-                } catch (DecryptionException e) {
-                        fail("Error on decryption of encrypted SAML 2 type to element: " + e);
-                }
-
-                // Verify
-                assertNotNull("Decrypted target was null", decryptedTarget);
-                assertTrue("Decrypted target was not the expected type", decryptedTarget instanceof Attribute);
-                LOG.debug(Saml2Util.domToString(Saml2Util.marshall(decryptedTarget), true));
-        }
-
-        private Attribute getAttribute() {
-
-                Attribute attribute = Saml2Util.buildXMLObject(Attribute.class,
-                        Attribute.DEFAULT_ELEMENT_NAME);
-                attribute.setName("test-attribute-name");
-
-                XMLObjectBuilder<XSString> builder =
-                        Configuration.getBuilderFactory().getBuilder(XSString.TYPE_NAME);
-                XSString xmlAttributeValue = builder.buildObject(
-                        AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
-                xmlAttributeValue.setValue("test-value");
-                attribute.getAttributeValues().add(xmlAttributeValue);
-                return attribute;
-        }
-
-        @Test
-        public void testAssertionSigning() throws Exception {
-
-                // Setup
-                DateTime notBefore = new DateTime();
-                DateTime notAfter = notBefore.plusMonths(1);
-
-                KeyPair rootKeyPair = generateKeyPair();
-                X509Certificate rootCertificate = generateSelfSignedCertificate(
-                        rootKeyPair, "CN=TestRoot", notBefore, notAfter);
-
-                KeyPair endKeyPair = generateKeyPair();
-                X509Certificate endCertificate = generateCertificate(
-                        endKeyPair.getPublic(), "CN=Test", notBefore, notAfter,
-                        rootCertificate, rootKeyPair.getPrivate());
-
-                Certificate[] certChain = {endCertificate, rootCertificate};
-
-                KeyStore.PrivateKeyEntry idpIdentity =
-                        new KeyStore.PrivateKeyEntry(endKeyPair.getPrivate(),
-                                certChain);
-
-                // Operate: sign
-                Assertion assertion = Saml2Util.getAssertion("test-issuer",
-                        "test-in-response-to", "test-audience", "test-recipient",
-                        5, new DateTime(), SamlAuthenticationPolicy.AUTHENTICATION,
-                        UUID.randomUUID().toString(),
-                        new HashMap<String, be.fedict.eid.idp.common.Attribute>(),
-                        null, null);
-                Assertion signedAssertion = (Assertion) Saml2Util.sign(assertion,
-                        idpIdentity);
-
-                // Verify
-                String result = Saml2Util.domToString(Saml2Util.marshall(signedAssertion), true);
-                LOG.debug("DOM signed assertion: " + result);
-                String result2 = Saml2Util.domToString(Saml2Util.marshall(assertion), true);
-                LOG.debug("signed assertion: " + result2);
-                assertEquals(result, result2);
-
-                // Operate: validate
-                Saml2Util.validateSignature(signedAssertion.getSignature());
-        }
-
-        @Test
-        public void testGetAlgorithm() throws Exception {
-
-                KeyGenerator kgen = KeyGenerator.getInstance("AES");
-                kgen.init(128);
-                SecretKey key = kgen.generateKey();
-                LOG.debug("Algorithm AES-128: " + key.getAlgorithm());
-
-        }
-
-        private KeyPair generateKeyPair() throws Exception {
-                KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-                SecureRandom random = new SecureRandom();
-                keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
-                        RSAKeyGenParameterSpec.F4), random);
-                return keyPairGenerator.generateKeyPair();
-        }
-
-        private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
-                throws IOException {
-                ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
-                        .getEncoded());
-                SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-                        (ASN1Sequence) new ASN1InputStream(bais).readObject());
-                return new SubjectKeyIdentifier(info);
-        }
-
-        private AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
-                throws IOException {
-
-                ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
-                        .getEncoded());
-                SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-                        (ASN1Sequence) new ASN1InputStream(bais).readObject());
-
-                return new AuthorityKeyIdentifier(info);
-        }
-
-        private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
-                                                              String subjectDn, DateTime notBefore, DateTime notAfter)
-                throws Exception {
-
-                return generateCertificate(keyPair.getPublic(), subjectDn,
-                        notBefore, notAfter, null, keyPair.getPrivate());
-        }
-
-        private X509Certificate generateCertificate(PublicKey subjectPublicKey,
-                                                    String subjectDn,
-                                                    DateTime notBefore,
-                                                    DateTime notAfter,
-                                                    X509Certificate issuerCertificate,
-                                                    PrivateKey issuerPrivateKey)
-                throws Exception {
-
-                X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
-                certificateGenerator.reset();
-                certificateGenerator.setPublicKey(subjectPublicKey);
-                certificateGenerator.setSignatureAlgorithm("SHA1WithRSAEncryption");
-                certificateGenerator.setNotBefore(notBefore.toDate());
-                certificateGenerator.setNotAfter(notAfter.toDate());
-
-                X509Principal issuerDN;
-                if (null != issuerCertificate) {
-                        issuerDN = new X509Principal(issuerCertificate
-                                .getSubjectX500Principal().toString());
-                } else {
-                        issuerDN = new X509Principal(subjectDn);
-                }
-                certificateGenerator.setIssuerDN(issuerDN);
-                certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
-                certificateGenerator.setSerialNumber(new BigInteger(128,
-                        new SecureRandom()));
-
-                certificateGenerator.addExtension(
-                        X509Extensions.SubjectKeyIdentifier, false,
-                        createSubjectKeyId(subjectPublicKey));
-
-                PublicKey issuerPublicKey;
-                if (null != issuerCertificate) {
-                        issuerPublicKey = issuerCertificate.getPublicKey();
-                } else {
-                        issuerPublicKey = subjectPublicKey;
-                }
-                certificateGenerator.addExtension(
-                        X509Extensions.AuthorityKeyIdentifier, false,
-                        createAuthorityKeyId(issuerPublicKey));
-
-                X509Certificate certificate;
-                certificate = certificateGenerator.generate(issuerPrivateKey);
-
-                /*
-                 * Next certificate factory trick is needed to make sure that the
-                 * certificate delivered to the caller is provided by the default
-                 * security provider instead of BouncyCastle. If we don't do this trick
-                 * we might run into trouble when trying to use the CertPath validator.
-                 */
-                CertificateFactory certificateFactory = CertificateFactory
-                        .getInstance("X.509");
-                certificate = (X509Certificate) certificateFactory
-                        .generateCertificate(new ByteArrayInputStream(certificate
-                                .getEncoded()));
-                return certificate;
-        }
+	private static final Log LOG = LogFactory.getLog(SAML2Test.class);
+
+	@BeforeClass
+	public static void before() {
+		Security.addProvider(new BouncyCastleProvider());
+	}
+
+	@Test
+	public void testAttributEncryptionSymmetric() throws Exception {
+
+		// Setup
+		String algorithm = EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128;
+
+		KeyGenerator kgen = KeyGenerator.getInstance("AES");
+		kgen.init(128);
+		SecretKey key = kgen.generateKey();
+
+		Encrypter encrypter = Saml2Util.getEncrypter(algorithm, key);
+
+		// Operate: encrypt
+		EncryptedAttribute encTarget;
+		XMLObject encObject = null;
+		try {
+			encObject = encrypter.encrypt(getAttribute());
+		} catch (EncryptionException e) {
+			fail("Object encryption failed: " + e);
+		}
+
+		// Verify
+		LOG.debug(Saml2Util.domToString(Saml2Util.marshall(encObject), true));
+
+		assertNotNull("Encrypted object was null", encObject);
+		assertTrue("Encrypted object was not an instance of the expected type",
+				encObject instanceof EncryptedAttribute);
+		encTarget = (EncryptedAttribute) encObject;
+
+		assertEquals("Type attribute", EncryptionConstants.TYPE_ELEMENT,
+				encTarget.getEncryptedData().getType());
+		assertEquals("Algorithm attribute", algorithm, encTarget
+				.getEncryptedData().getEncryptionMethod().getAlgorithm());
+		assertNotNull("KeyInfo", encTarget.getEncryptedData().getKeyInfo());
+
+		assertEquals("Number of EncryptedKeys", 0, encTarget.getEncryptedData()
+				.getKeyInfo().getEncryptedKeys().size());
+
+		assertFalse("EncryptedData ID attribute was empty",
+				DatatypeHelper.isEmpty(encTarget.getEncryptedData().getID()));
+
+		// Setup
+		Decrypter decrypter = Saml2Util.getDecrypter(key);
+
+		// Operate: decrypt
+		SAMLObject decryptedTarget = null;
+		try {
+			decryptedTarget = decrypter.decrypt(encTarget);
+		} catch (DecryptionException e) {
+			fail("Error on decryption of encrypted SAML 2 type to element: "
+					+ e);
+		}
+
+		// Verify
+		assertNotNull("Decrypted target was null", decryptedTarget);
+		assertTrue("Decrypted target was not the expected type",
+				decryptedTarget instanceof Attribute);
+		LOG.debug(Saml2Util.domToString(Saml2Util.marshall(decryptedTarget),
+				true));
+	}
+
+	@Test
+	public void testAttributEncryptionAsymmetric() throws Exception {
+
+		// Setup
+		KeyPair keyPair = generateKeyPair();
+		Encrypter encrypter = Saml2Util.getEncrypter(null, null,
+				keyPair.getPublic());
+
+		// Operate: encrypt
+		EncryptedAttribute encTarget;
+		XMLObject encObject = null;
+		try {
+			encObject = encrypter.encrypt(getAttribute());
+		} catch (EncryptionException e) {
+			fail("Object encryption failed: " + e);
+		}
+
+		// Verify
+		LOG.debug(Saml2Util.domToString(Saml2Util.marshall(encObject), true));
+
+		assertNotNull("Encrypted object was null", encObject);
+		assertTrue("Encrypted object was not an instance of the expected type",
+				encObject instanceof EncryptedAttribute);
+		encTarget = (EncryptedAttribute) encObject;
+
+		assertEquals("Type attribute", EncryptionConstants.TYPE_ELEMENT,
+				encTarget.getEncryptedData().getType());
+		assertEquals("Algorithm attribute",
+				EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128, encTarget
+						.getEncryptedData().getEncryptionMethod()
+						.getAlgorithm());
+		assertNotNull("KeyInfo", encTarget.getEncryptedData().getKeyInfo());
+		assertEquals(1, encTarget.getEncryptedData().getKeyInfo()
+				.getRetrievalMethods().size());
+		assertEquals(XMLConstants.XMLENC_NS
+				+ EncryptedKey.DEFAULT_ELEMENT_LOCAL_NAME, encTarget
+				.getEncryptedData().getKeyInfo().getRetrievalMethods().get(0)
+				.getType());
+
+		assertEquals("Number of EncryptedKeys", 1, encTarget.getEncryptedKeys()
+				.size());
+		assertEquals(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15, encTarget
+				.getEncryptedKeys().get(0).getEncryptionMethod().getAlgorithm());
+
+		assertFalse("EncryptedData ID attribute was empty",
+				DatatypeHelper.isEmpty(encTarget.getEncryptedData().getID()));
+
+		// Setup
+		Decrypter decrypter = Saml2Util.getDecrypter(keyPair.getPrivate());
+
+		// Operate: decrypt
+		SAMLObject decryptedTarget = null;
+		try {
+			decryptedTarget = decrypter.decrypt(encTarget);
+		} catch (DecryptionException e) {
+			fail("Error on decryption of encrypted SAML 2 type to element: "
+					+ e);
+		}
+
+		// Verify
+		assertNotNull("Decrypted target was null", decryptedTarget);
+		assertTrue("Decrypted target was not the expected type",
+				decryptedTarget instanceof Attribute);
+		LOG.debug(Saml2Util.domToString(Saml2Util.marshall(decryptedTarget),
+				true));
+	}
+
+	@Test
+	public void testAttributEncryptionAsymmetric2() throws Exception {
+
+		// Setup
+		String algorithm = EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128;
+
+		KeyGenerator kgen = KeyGenerator.getInstance("AES");
+		kgen.init(128);
+		SecretKey key = kgen.generateKey();
+
+		KeyPair keyPair = generateKeyPair();
+		Encrypter encrypter = Saml2Util.getEncrypter(algorithm, key,
+				keyPair.getPublic());
+
+		// Operate: encrypt
+		EncryptedAttribute encTarget;
+		XMLObject encObject = null;
+		try {
+			encObject = encrypter.encrypt(getAttribute());
+		} catch (EncryptionException e) {
+			fail("Object encryption failed: " + e);
+		}
+
+		// Verify
+		LOG.debug(Saml2Util.domToString(Saml2Util.marshall(encObject), true));
+
+		assertNotNull("Encrypted object was null", encObject);
+		assertTrue("Encrypted object was not an instance of the expected type",
+				encObject instanceof EncryptedAttribute);
+		encTarget = (EncryptedAttribute) encObject;
+
+		assertEquals("Type attribute", EncryptionConstants.TYPE_ELEMENT,
+				encTarget.getEncryptedData().getType());
+		assertEquals("Algorithm attribute", algorithm, encTarget
+				.getEncryptedData().getEncryptionMethod().getAlgorithm());
+		assertNotNull("KeyInfo", encTarget.getEncryptedData().getKeyInfo());
+		assertEquals(1, encTarget.getEncryptedData().getKeyInfo()
+				.getRetrievalMethods().size());
+		assertEquals(XMLConstants.XMLENC_NS
+				+ EncryptedKey.DEFAULT_ELEMENT_LOCAL_NAME, encTarget
+				.getEncryptedData().getKeyInfo().getRetrievalMethods().get(0)
+				.getType());
+
+		assertEquals("Number of EncryptedKeys", 1, encTarget.getEncryptedKeys()
+				.size());
+		assertEquals(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15, encTarget
+				.getEncryptedKeys().get(0).getEncryptionMethod().getAlgorithm());
+
+		assertFalse("EncryptedData ID attribute was empty",
+				DatatypeHelper.isEmpty(encTarget.getEncryptedData().getID()));
+
+		// Setup
+		Decrypter decrypter = Saml2Util.getDecrypter(keyPair.getPrivate());
+
+		// Operate: decrypt
+		SAMLObject decryptedTarget = null;
+		try {
+			decryptedTarget = decrypter.decrypt(encTarget);
+		} catch (DecryptionException e) {
+			fail("Error on decryption of encrypted SAML 2 type to element: "
+					+ e);
+		}
+
+		// Verify
+		assertNotNull("Decrypted target was null", decryptedTarget);
+		assertTrue("Decrypted target was not the expected type",
+				decryptedTarget instanceof Attribute);
+		LOG.debug(Saml2Util.domToString(Saml2Util.marshall(decryptedTarget),
+				true));
+	}
+
+	private Attribute getAttribute() {
+
+		Attribute attribute = Saml2Util.buildXMLObject(Attribute.class,
+				Attribute.DEFAULT_ELEMENT_NAME);
+		attribute.setName("test-attribute-name");
+
+		XMLObjectBuilder<XSString> builder = Configuration.getBuilderFactory()
+				.getBuilder(XSString.TYPE_NAME);
+		XSString xmlAttributeValue = builder.buildObject(
+				AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+		xmlAttributeValue.setValue("test-value");
+		attribute.getAttributeValues().add(xmlAttributeValue);
+		return attribute;
+	}
+
+	@Test
+	public void testAssertionSigning() throws Exception {
+
+		// Setup
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+
+		KeyPair rootKeyPair = generateKeyPair();
+		X509Certificate rootCertificate = generateSelfSignedCertificate(
+				rootKeyPair, "CN=TestRoot", notBefore, notAfter);
+
+		KeyPair endKeyPair = generateKeyPair();
+		X509Certificate endCertificate = generateCertificate(
+				endKeyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		Certificate[] certChain = { endCertificate, rootCertificate };
+
+		KeyStore.PrivateKeyEntry idpIdentity = new KeyStore.PrivateKeyEntry(
+				endKeyPair.getPrivate(), certChain);
+
+		// Operate: sign
+		Assertion assertion = Saml2Util.getAssertion("test-issuer",
+				"test-in-response-to", "test-audience", "test-recipient", 5,
+				new DateTime(), SamlAuthenticationPolicy.AUTHENTICATION, UUID
+						.randomUUID().toString(),
+				new HashMap<String, be.fedict.eid.idp.common.Attribute>(),
+				null, null);
+		Assertion signedAssertion = (Assertion) Saml2Util.sign(assertion,
+				idpIdentity);
+
+		// Verify
+		String result = Saml2Util.domToString(
+				Saml2Util.marshall(signedAssertion), true);
+		LOG.debug("DOM signed assertion: " + result);
+		String result2 = Saml2Util.domToString(Saml2Util.marshall(assertion),
+				true);
+		LOG.debug("signed assertion: " + result2);
+		assertEquals(result, result2);
+
+		// Operate: validate
+		Saml2Util.validateSignature(signedAssertion.getSignature());
+	}
+
+	@Test
+	public void testGetAlgorithm() throws Exception {
+
+		KeyGenerator kgen = KeyGenerator.getInstance("AES");
+		kgen.init(128);
+		SecretKey key = kgen.generateKey();
+		LOG.debug("Algorithm AES-128: " + key.getAlgorithm());
+
+	}
+
+	private KeyPair generateKeyPair() throws Exception {
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		SecureRandom random = new SecureRandom();
+		keyPairGenerator.initialize(new RSAKeyGenParameterSpec(1024,
+				RSAKeyGenParameterSpec.F4), random);
+		return keyPairGenerator.generateKeyPair();
+	}
+
+	private SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
+			throws IOException {
+		ByteArrayInputStream bais = new ByteArrayInputStream(
+				publicKey.getEncoded());
+		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+				(ASN1Sequence) new ASN1InputStream(bais).readObject());
+		return new SubjectKeyIdentifier(info);
+	}
+
+	private AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
+			throws IOException {
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(
+				publicKey.getEncoded());
+		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+				(ASN1Sequence) new ASN1InputStream(bais).readObject());
+
+		return new AuthorityKeyIdentifier(info);
+	}
+
+	private X509Certificate generateSelfSignedCertificate(KeyPair keyPair,
+			String subjectDn, DateTime notBefore, DateTime notAfter)
+			throws Exception {
+
+		return generateCertificate(keyPair.getPublic(), subjectDn, notBefore,
+				notAfter, null, keyPair.getPrivate());
+	}
+
+	private X509Certificate generateCertificate(PublicKey subjectPublicKey,
+			String subjectDn, DateTime notBefore, DateTime notAfter,
+			X509Certificate issuerCertificate, PrivateKey issuerPrivateKey)
+			throws Exception {
+
+		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+		certificateGenerator.reset();
+		certificateGenerator.setPublicKey(subjectPublicKey);
+		certificateGenerator.setSignatureAlgorithm("SHA1WithRSAEncryption");
+		certificateGenerator.setNotBefore(notBefore.toDate());
+		certificateGenerator.setNotAfter(notAfter.toDate());
+
+		X509Principal issuerDN;
+		if (null != issuerCertificate) {
+			issuerDN = new X509Principal(issuerCertificate
+					.getSubjectX500Principal().toString());
+		} else {
+			issuerDN = new X509Principal(subjectDn);
+		}
+		certificateGenerator.setIssuerDN(issuerDN);
+		certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
+		certificateGenerator.setSerialNumber(new BigInteger(128,
+				new SecureRandom()));
+
+		certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
+				false, createSubjectKeyId(subjectPublicKey));
+
+		PublicKey issuerPublicKey;
+		if (null != issuerCertificate) {
+			issuerPublicKey = issuerCertificate.getPublicKey();
+		} else {
+			issuerPublicKey = subjectPublicKey;
+		}
+		certificateGenerator.addExtension(
+				X509Extensions.AuthorityKeyIdentifier, false,
+				createAuthorityKeyId(issuerPublicKey));
+
+		X509Certificate certificate;
+		certificate = certificateGenerator.generate(issuerPrivateKey);
+
+		/*
+		 * Next certificate factory trick is needed to make sure that the
+		 * certificate delivered to the caller is provided by the default
+		 * security provider instead of BouncyCastle. If we don't do this trick
+		 * we might run into trouble when trying to use the CertPath validator.
+		 */
+		CertificateFactory certificateFactory = CertificateFactory
+				.getInstance("X.509");
+		certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(certificate
+						.getEncoded()));
+		return certificate;
+	}
 }

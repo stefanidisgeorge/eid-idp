@@ -43,228 +43,231 @@ import java.util.List;
 @LocalBinding(jndiBinding = AdminConstants.ADMIN_JNDI_CONTEXT + "IdentityBean")
 public class IdentityBean implements Identity {
 
-        private static final String ADD_IDENTITY_LABEL = "Add...";
+	private static final String ADD_IDENTITY_LABEL = "Add...";
 
-        @Logger
-        private Log log;
+	@Logger
+	private Log log;
 
-        @EJB
-        private IdentityService identityService;
+	@EJB
+	private IdentityService identityService;
 
-        @In
-        FacesMessages facesMessages;
+	@In
+	FacesMessages facesMessages;
 
-        @In(value = "idp.identity.name", required = false, scope = ScopeType.SESSION)
-        @Out(value = "idp.identity.name", required = false, scope = ScopeType.SESSION)
-        private String name;
+	@In(value = "idp.identity.name", required = false, scope = ScopeType.SESSION)
+	@Out(value = "idp.identity.name", required = false, scope = ScopeType.SESSION)
+	private String name;
 
-        private boolean nameReadOnly = true;
+	private boolean nameReadOnly = true;
 
-        private List<String> identityNames;
-        private IdPIdentityConfig idPIdentityConfig;
+	private List<String> identityNames;
+	private IdPIdentityConfig idPIdentityConfig;
 
+	@Override
+	@Create
+	public void create() {
 
-        @Override
-        @Create
-        public void create() {
+		// Identity Config
+		if (null != this.name) {
+			this.idPIdentityConfig = this.identityService
+					.findIdentityConfig(this.name);
+			if (null == this.idPIdentityConfig) {
+				this.idPIdentityConfig = new IdPIdentityConfig(this.name);
+			}
+		} else {
+			this.idPIdentityConfig = this.identityService.findIdentityConfig();
+			if (null == this.idPIdentityConfig) {
+				this.idPIdentityConfig = new IdPIdentityConfig("");
+			}
+		}
+		this.name = this.idPIdentityConfig.getName();
+		this.identityNames = this.identityService.getIdentities();
 
-                // Identity Config
-                if (null != this.name) {
-                        this.idPIdentityConfig = this.identityService.findIdentityConfig(this.name);
-                        if (null == this.idPIdentityConfig) {
-                                this.idPIdentityConfig = new IdPIdentityConfig(this.name);
-                        }
-                } else {
-                        this.idPIdentityConfig = this.identityService.findIdentityConfig();
-                        if (null == this.idPIdentityConfig) {
-                                this.idPIdentityConfig = new IdPIdentityConfig("");
-                        }
-                }
-                this.name = this.idPIdentityConfig.getName();
-                this.identityNames = this.identityService.getIdentities();
+		this.nameReadOnly = !this.name.isEmpty();
+	}
 
-                this.nameReadOnly = !this.name.isEmpty();
-        }
+	@Override
+	@Remove
+	@Destroy
+	public void destroy() {
+	}
 
-        @Override
-        @Remove
-        @Destroy
-        public void destroy() {
-        }
+	@Override
+	public String save() {
+		this.log.debug("save");
 
-        @Override
-        public String save() {
-                this.log.debug("save");
+		try {
+			// Identity Config
+			this.identityService.setIdentity(this.idPIdentityConfig);
 
-                try {
-                        // Identity Config
-                        this.identityService.setIdentity(this.idPIdentityConfig);
+			if (this.idPIdentityConfig.isActive()) {
+				this.identityService.reloadIdentity();
+			}
+			this.identityNames = this.identityService.getIdentities();
+			return "success";
+		} catch (KeyStoreLoadException e) {
+			this.facesMessages.add(StatusMessage.Severity.ERROR,
+					"Failed to load keystore: " + e.getMessage());
+			return null;
+		}
+	}
 
-                        if (this.idPIdentityConfig.isActive()) {
-                                this.identityService.reloadIdentity();
-                        }
-                        this.identityNames = this.identityService.getIdentities();
-                        return "success";
-                } catch (KeyStoreLoadException e) {
-                        this.facesMessages.add(StatusMessage.Severity.ERROR,
-                                "Failed to load keystore: " + e.getMessage());
-                        return null;
-                }
-        }
+	@Override
+	public String activate() {
+		this.log.debug("activate: " + this.name);
 
-        @Override
-        public String activate() {
-                this.log.debug("activate: " + this.name);
+		try {
+			this.idPIdentityConfig.setActive(true);
+			this.identityService.setActiveIdentity(this.name);
+			return "success";
+		} catch (KeyStoreLoadException e) {
+			this.facesMessages.add(StatusMessage.Severity.ERROR,
+					"Failed to load keystore: " + e.getMessage());
+			return null;
+		}
+	}
 
-                try {
-                        this.idPIdentityConfig.setActive(true);
-                        this.identityService.setActiveIdentity(this.name);
-                        return "success";
-                } catch (KeyStoreLoadException e) {
-                        this.facesMessages.add(StatusMessage.Severity.ERROR,
-                                "Failed to load keystore: " + e.getMessage());
-                        return null;
-                }
-        }
+	@Override
+	public String remove() {
+		this.log.debug("remove: " + this.name);
 
-        @Override
-        public String remove() {
-                this.log.debug("remove: " + this.name);
+		// disallow removing currently active
+		if (this.idPIdentityConfig.isActive() && this.identityNames.size() != 1) {
+			this.facesMessages.add(StatusMessage.Severity.ERROR,
+					"Identity is currently active, cannot remove.");
+			return null;
+		}
 
-                // disallow removing currently active
-                if (this.idPIdentityConfig.isActive() && this.identityNames.size() != 1) {
-                        this.facesMessages.add(StatusMessage.Severity.ERROR,
-                                "Identity is currently active, cannot remove.");
-                        return null;
-                }
+		// remove
+		this.identityService.removeIdentityConfig(this.name);
 
-                // remove
-                this.identityService.removeIdentityConfig(this.name);
+		// load default config and list of identities
+		this.idPIdentityConfig = this.identityService.findIdentityConfig();
+		if (null == this.idPIdentityConfig) {
+			this.idPIdentityConfig = new IdPIdentityConfig("");
+		}
+		this.name = this.idPIdentityConfig.getName();
+		this.identityNames = this.identityService.getIdentities();
+		return "success";
+	}
 
-                // load default config and list of identities
-                this.idPIdentityConfig = this.identityService.findIdentityConfig();
-                if (null == this.idPIdentityConfig) {
-                        this.idPIdentityConfig = new IdPIdentityConfig("");
-                }
-                this.name = this.idPIdentityConfig.getName();
-                this.identityNames = this.identityService.getIdentities();
-                return "success";
-        }
+	@Override
+	public String test() {
 
-        @Override
-        public String test() {
+		this.log.debug("test " + this.name);
+		try {
+			this.identityService.loadIdentity(this.idPIdentityConfig);
+		} catch (KeyStoreLoadException e) {
+			this.facesMessages.add(StatusMessage.Severity.ERROR,
+					"Failed to load keystore: " + e.getMessage());
+			return null;
+		}
+		this.facesMessages.add(StatusMessage.Severity.INFO,
+				"Keystore loaded ok.");
+		return "success";
+	}
 
-                this.log.debug("test " + this.name);
-                try {
-                        this.identityService.loadIdentity(this.idPIdentityConfig);
-                } catch (KeyStoreLoadException e) {
-                        this.facesMessages.add(StatusMessage.Severity.ERROR,
-                                "Failed to load keystore: " + e.getMessage());
-                        return null;
-                }
-                this.facesMessages.add(StatusMessage.Severity.INFO,
-                        "Keystore loaded ok.");
-                return "success";
-        }
+	@Override
+	public List<SelectItem> getIdentityNames() {
 
-        @Override
-        public List<SelectItem> getIdentityNames() {
+		List<SelectItem> selectItems = new LinkedList<SelectItem>();
+		selectItems.add(new SelectItem(ADD_IDENTITY_LABEL));
+		for (String identityName : identityNames) {
+			selectItems.add(new SelectItem(identityName));
+		}
+		return selectItems;
+	}
 
-                List<SelectItem> selectItems = new LinkedList<SelectItem>();
-                selectItems.add(new SelectItem(ADD_IDENTITY_LABEL));
-                for (String identityName : identityNames) {
-                        selectItems.add(new SelectItem(identityName));
-                }
-                return selectItems;
-        }
+	@Override
+	public String getIdentityLabel() {
+		return "Identity"
+				+ (this.idPIdentityConfig.isActive() ? " (Active)" : "");
+	}
 
-        @Override
-        public String getIdentityLabel() {
-                return "Identity" + (this.idPIdentityConfig.isActive() ? " (Active)" : "");
-        }
+	@Override
+	public String getName() {
 
-        @Override
-        public String getName() {
+		return this.name;
+	}
 
-                return this.name;
-        }
+	@Override
+	public void setName(String name) {
 
-        @Override
-        public void setName(String name) {
+		if (name.equals(ADD_IDENTITY_LABEL)) {
+			this.idPIdentityConfig = new IdPIdentityConfig("");
+			this.nameReadOnly = false;
+			this.name = this.idPIdentityConfig.getName();
+		} else {
+			IdPIdentityConfig idPIdentityConfig = this.identityService
+					.findIdentityConfig(name);
+			if (null != idPIdentityConfig) {
+				this.idPIdentityConfig = idPIdentityConfig;
+				this.name = this.idPIdentityConfig.getName();
+			} else {
+				this.name = name;
+				this.idPIdentityConfig.setName(name);
+			}
+		}
+	}
 
-                if (name.equals(ADD_IDENTITY_LABEL)) {
-                        this.idPIdentityConfig = new IdPIdentityConfig("");
-                        this.nameReadOnly = false;
-                        this.name = this.idPIdentityConfig.getName();
-                } else {
-                        IdPIdentityConfig idPIdentityConfig = this.identityService.findIdentityConfig(name);
-                        if (null != idPIdentityConfig) {
-                                this.idPIdentityConfig = idPIdentityConfig;
-                                this.name = this.idPIdentityConfig.getName();
-                        } else {
-                                this.name = name;
-                                this.idPIdentityConfig.setName(name);
-                        }
-                }
-        }
+	@Override
+	public Boolean isNameReadOnly() {
+		return this.nameReadOnly;
+	}
 
-        @Override
-        public Boolean isNameReadOnly() {
-                return this.nameReadOnly;
-        }
+	@Override
+	public String getKeyStoreType() {
+		return idPIdentityConfig.getKeyStoreType().name();
+	}
 
-        @Override
-        public String getKeyStoreType() {
-                return idPIdentityConfig.getKeyStoreType().name();
-        }
+	@Override
+	public void setKeyStoreType(String keyStoreType) {
+		this.idPIdentityConfig.setKeyStoreType(KeyStoreType
+				.valueOf(keyStoreType));
+	}
 
-        @Override
-        public void setKeyStoreType(String keyStoreType) {
-                this.idPIdentityConfig.setKeyStoreType(KeyStoreType.valueOf(keyStoreType));
-        }
+	@Override
+	public String getKeyStorePath() {
+		return this.idPIdentityConfig.getKeyStorePath();
+	}
 
-        @Override
-        public String getKeyStorePath() {
-                return this.idPIdentityConfig.getKeyStorePath();
-        }
+	@Override
+	public void setKeyStorePath(String keyStorePath) {
+		this.idPIdentityConfig.setKeyStorePath(keyStorePath);
+	}
 
-        @Override
-        public void setKeyStorePath(String keyStorePath) {
-                this.idPIdentityConfig.setKeyStorePath(keyStorePath);
-        }
+	@Override
+	public String getKeyStorePassword() {
+		return this.idPIdentityConfig.getKeyStorePassword();
+	}
 
-        @Override
-        public String getKeyStorePassword() {
-                return this.idPIdentityConfig.getKeyStorePassword();
-        }
+	@Override
+	public void setKeyStorePassword(String keyStorePassword) {
+		this.idPIdentityConfig.setKeyStorePassword(keyStorePassword);
+	}
 
-        @Override
-        public void setKeyStorePassword(String keyStorePassword) {
-                this.idPIdentityConfig.setKeyStorePassword(keyStorePassword);
-        }
+	@Override
+	public String getKeyEntryPassword() {
+		return this.idPIdentityConfig.getKeyEntryPassword();
+	}
 
-        @Override
-        public String getKeyEntryPassword() {
-                return this.idPIdentityConfig.getKeyEntryPassword();
-        }
+	@Override
+	public void setKeyEntryPassword(String keyEntryPassword) {
+		this.idPIdentityConfig.setKeyEntryPassword(keyEntryPassword);
+	}
 
-        @Override
-        public void setKeyEntryPassword(String keyEntryPassword) {
-                this.idPIdentityConfig.setKeyEntryPassword(keyEntryPassword);
-        }
+	@Override
+	public String getKeyEntryAlias() {
+		return this.idPIdentityConfig.getKeyEntryAlias();
+	}
 
-        @Override
-        public String getKeyEntryAlias() {
-                return this.idPIdentityConfig.getKeyEntryAlias();
-        }
+	@Override
+	public void setKeyEntryAlias(String keyEntryAlias) {
+		this.idPIdentityConfig.setKeyEntryAlias(keyEntryAlias);
+	}
 
-        @Override
-        public void setKeyEntryAlias(String keyEntryAlias) {
-                this.idPIdentityConfig.setKeyEntryAlias(keyEntryAlias);
-        }
-
-        @Override
-        public boolean isActive() {
-                return this.idPIdentityConfig.isActive();
-        }
+	@Override
+	public boolean isActive() {
+		return this.idPIdentityConfig.isActive();
+	}
 }

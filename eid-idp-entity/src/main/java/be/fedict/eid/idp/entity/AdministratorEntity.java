@@ -30,76 +30,77 @@ import java.util.List;
  */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "admin")
-@NamedQueries({@NamedQuery(name = AdministratorEntity.LIST_ALL, query = "FROM AdministratorEntity ")})
+@NamedQueries({ @NamedQuery(name = AdministratorEntity.LIST_ALL, query = "FROM AdministratorEntity ") })
 public class AdministratorEntity implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        public static final String LIST_ALL = "idp.admin.list.all";
+	public static final String LIST_ALL = "idp.admin.list.all";
 
-        private String id;
+	private String id;
 
-        private String name;
+	private String name;
 
-        private boolean pending;
+	private boolean pending;
 
-        public AdministratorEntity(String id, String name) {
+	public AdministratorEntity(String id, String name) {
 
-                this(id, name, false);
-        }
+		this(id, name, false);
+	}
 
-        public AdministratorEntity(String id, String name, boolean pending) {
-                this.id = id;
-                this.name = name;
-                this.pending = pending;
-        }
+	public AdministratorEntity(String id, String name, boolean pending) {
+		this.id = id;
+		this.name = name;
+		this.pending = pending;
+	}
 
-        public AdministratorEntity() {
-                super();
-        }
+	public AdministratorEntity() {
+		super();
+	}
 
-        @Id
-        public String getId() {
-                return this.id;
-        }
+	@Id
+	public String getId() {
+		return this.id;
+	}
 
-        public void setId(String id) {
-                this.id = id;
-        }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-        /**
-         * @return name of the administrator. This is the Subject of the
-         *         authentication certificate
-         */
-        @Column(nullable = false)
-        public String getName() {
-                return this.name;
-        }
+	/**
+	 * @return name of the administrator. This is the Subject of the
+	 *         authentication certificate
+	 */
+	@Column(nullable = false)
+	public String getName() {
+		return this.name;
+	}
 
-        public void setName(String name) {
-                this.name = name;
-        }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-        /**
-         * @return whether or not this is a pending administrator.
-         */
-        public boolean isPending() {
-                return this.pending;
-        }
+	/**
+	 * @return whether or not this is a pending administrator.
+	 */
+	public boolean isPending() {
+		return this.pending;
+	}
 
-        public void setPending(boolean pending) {
-                this.pending = pending;
-        }
+	public void setPending(boolean pending) {
+		this.pending = pending;
+	}
 
-        public static boolean hasAdmins(EntityManager entityManager) {
-                Query query = entityManager.createNamedQuery(LIST_ALL);
-                return 0 != query.getResultList().size();
-        }
+	public static boolean hasAdmins(EntityManager entityManager) {
+		Query query = entityManager.createNamedQuery(LIST_ALL);
+		return 0 != query.getResultList().size();
+	}
 
-        @SuppressWarnings("unchecked")
-        public static List<AdministratorEntity> listAdmins(EntityManager entityManager) {
+	@SuppressWarnings("unchecked")
+	public static List<AdministratorEntity> listAdmins(
+			EntityManager entityManager) {
 
-                Query query = entityManager.createNamedQuery(LIST_ALL);
-                return query.getResultList();
-        }
+		Query query = entityManager.createNamedQuery(LIST_ALL);
+		return query.getResultList();
+	}
 }

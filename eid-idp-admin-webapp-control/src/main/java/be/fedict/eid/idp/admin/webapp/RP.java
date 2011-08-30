@@ -30,73 +30,72 @@ import java.util.List;
 @Local
 public interface RP {
 
-        /*
-        * Accessors
-        */
-        List<String> getSourceAttributes();
+	/*
+	 * Accessors
+	 */
+	List<String> getSourceAttributes();
 
-        void setSourceAttributes(List<String> sourceAttributes);
+	void setSourceAttributes(List<String> sourceAttributes);
 
-        List<String> getSelectedAttributes();
+	List<String> getSelectedAttributes();
 
-        void setSelectedAttributes(List<String> selectedAttributes);
+	void setSelectedAttributes(List<String> selectedAttributes);
 
-        String getSelectedTab();
+	String getSelectedTab();
 
-        void setSelectedTab(String selectedTab);
+	void setSelectedTab(String selectedTab);
 
-        PublicKey getAttributePublicKey();
+	PublicKey getAttributePublicKey();
 
-        void paint(OutputStream stream, Object object) throws IOException;
+	void paint(OutputStream stream, Object object) throws IOException;
 
-        long getTimeStamp();
+	long getTimeStamp();
 
+	/*
+	 * Listeners.
+	 */
+	void uploadListener(UploadEvent event) throws IOException;
 
-        /*
-        * Listeners.
-        */
-        void uploadListener(UploadEvent event) throws IOException;
+	void uploadListenerPublic(UploadEvent event) throws IOException;
 
-        void uploadListenerPublic(UploadEvent event) throws IOException;
+	void uploadListenerLogo(UploadEvent event) throws IOException;
 
-        void uploadListenerLogo(UploadEvent event) throws IOException;
+	/*
+	 * Factories
+	 */
+	void rpListFactory();
 
-        /*
-        * Factories
-        */
-        void rpListFactory();
+	List<SelectItem> secretAlgorithmsFactory();
 
-        List<SelectItem> secretAlgorithmsFactory();
+	/*
+	 * Actions.
+	 */
+	String add();
 
-        /*
-        * Actions.
-        */
-        String add();
+	String modify();
 
-        String modify();
+	String save();
 
-        String save();
+	void select();
 
-        void select();
+	String remove();
 
-        String remove();
+	String removeAttributePublic();
 
-        String removeAttributePublic();
+	String removeCertificate();
 
-        String removeCertificate();
+	String back();
 
-        String back();
+	String selectAttributes();
 
-        String selectAttributes();
+	String saveSelect();
 
-        String saveSelect();
+	void initSelect();
 
-        void initSelect();
+	/*
+	 * Lifecycle.
+	 */
+	void destroy();
 
-        /*
-        * Lifecycle.
-        */
-        void destroy();
-
-        void postConstruct();
+	void postConstruct();
 }

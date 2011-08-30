@@ -28,73 +28,82 @@ import java.util.List;
 @Local
 public interface IdentityService extends IdentityProviderConfiguration {
 
-        /**
-         * Reload the currently configured identity
-         *
-         * @throws KeyStoreLoadException failed to load keystore
-         */
-        void reloadIdentity() throws KeyStoreLoadException;
+	/**
+	 * Reload the currently configured identity
+	 * 
+	 * @throws KeyStoreLoadException
+	 *             failed to load keystore
+	 */
+	void reloadIdentity() throws KeyStoreLoadException;
 
-        /**
-         * Sets specified identity as the active eID IdP Identity
-         *
-         * @param name name of the identity to become active
-         * @throws KeyStoreLoadException failed to load the identity.
-         */
-        void setActiveIdentity(String name) throws KeyStoreLoadException;
+	/**
+	 * Sets specified identity as the active eID IdP Identity
+	 * 
+	 * @param name
+	 *            name of the identity to become active
+	 * @throws KeyStoreLoadException
+	 *             failed to load the identity.
+	 */
+	void setActiveIdentity(String name) throws KeyStoreLoadException;
 
-        /**
-         * Update/add an eID IdP Identity
-         *
-         * @param idPIdentityConfig the identity configuration
-         * @return the identity
-         * @throws KeyStoreLoadException failed to load the identity.
-         */
-        IdPIdentity setIdentity(IdPIdentityConfig idPIdentityConfig)
-                throws KeyStoreLoadException;
+	/**
+	 * Update/add an eID IdP Identity
+	 * 
+	 * @param idPIdentityConfig
+	 *            the identity configuration
+	 * @return the identity
+	 * @throws KeyStoreLoadException
+	 *             failed to load the identity.
+	 */
+	IdPIdentity setIdentity(IdPIdentityConfig idPIdentityConfig)
+			throws KeyStoreLoadException;
 
-        /**
-         * Test if specified IdP Identity configuration is valid.
-         *
-         * @param idPIdentityConfig the identity configuration
-         * @return the identity
-         * @throws KeyStoreLoadException failed to load the identity.
-         */
-        IdPIdentity loadIdentity(IdPIdentityConfig idPIdentityConfig)
-                throws KeyStoreLoadException;
+	/**
+	 * Test if specified IdP Identity configuration is valid.
+	 * 
+	 * @param idPIdentityConfig
+	 *            the identity configuration
+	 * @return the identity
+	 * @throws KeyStoreLoadException
+	 *             failed to load the identity.
+	 */
+	IdPIdentity loadIdentity(IdPIdentityConfig idPIdentityConfig)
+			throws KeyStoreLoadException;
 
-        /**
-         * @return the currently active eID IdP Identity config
-         *         or <code>null</code> if none is active
-         */
-        IdPIdentityConfig findIdentityConfig();
+	/**
+	 * @return the currently active eID IdP Identity config or <code>null</code>
+	 *         if none is active
+	 */
+	IdPIdentityConfig findIdentityConfig();
 
-        /**
-         * @param name identity's name
-         * @return the identity config or <code>null</code> if not found.
-         */
-        IdPIdentityConfig findIdentityConfig(String name);
+	/**
+	 * @param name
+	 *            identity's name
+	 * @return the identity config or <code>null</code> if not found.
+	 */
+	IdPIdentityConfig findIdentityConfig(String name);
 
-        /**
-         * Remove specified identity configuration
-         *
-         * @param name name of the identity config to be removed
-         */
-        void removeIdentityConfig(String name);
+	/**
+	 * Remove specified identity configuration
+	 * 
+	 * @param name
+	 *            name of the identity config to be removed
+	 */
+	void removeIdentityConfig(String name);
 
-        /**
-         * @return all configured identity names
-         */
-        List<String> getIdentities();
+	/**
+	 * @return all configured identity names
+	 */
+	List<String> getIdentities();
 
-        /**
-         * @return if the IdP's identity is configured or not.
-         */
-        boolean isIdentityConfigured();
+	/**
+	 * @return if the IdP's identity is configured or not.
+	 */
+	boolean isIdentityConfigured();
 
-        /**
-         * @return digest of the active identity's certificate.
-         */
-        String getIdentityFingerprint();
+	/**
+	 * @return digest of the active identity's certificate.
+	 */
+	String getIdentityFingerprint();
 
 }

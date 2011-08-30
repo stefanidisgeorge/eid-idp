@@ -30,20 +30,21 @@ import java.security.cert.X509Certificate;
 
 /**
  * eID Applet Channel Binding Service implementation.
- *
+ * 
  * @author Wim Vandenhaute
  */
 @Stateless
 @Local(ChannelBindingService.class)
-@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT + "ChannelBindingServiceBean")
+@LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT
+		+ "ChannelBindingServiceBean")
 public class ChannelBindingServiceBean implements ChannelBindingService {
 
-        @EJB
-        private Configuration configuration;
+	@EJB
+	private Configuration configuration;
 
-        @Override
-        public X509Certificate getServerCertificate() {
+	@Override
+	public X509Certificate getServerCertificate() {
 
-                return this.configuration.getAppletConfig().getServerCertificate();
-        }
+		return this.configuration.getAppletConfig().getServerCertificate();
+	}
 }

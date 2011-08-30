@@ -22,20 +22,20 @@ import java.security.KeyStore;
 
 public class IdPIdentity {
 
-        private final String name;
-        private final KeyStore.PrivateKeyEntry privateKeyEntry;
+	private final String name;
+	private final KeyStore.PrivateKeyEntry privateKeyEntry;
 
-        public IdPIdentity(String name, KeyStore.PrivateKeyEntry privateKeyEntry) {
+	public IdPIdentity(String name, KeyStore.PrivateKeyEntry privateKeyEntry) {
 
-                this.name = name;
-                this.privateKeyEntry = privateKeyEntry;
-        }
+		this.name = name;
+		this.privateKeyEntry = privateKeyEntry;
+	}
 
-        public String getName() {
-                return name;
-        }
+	public String getName() {
+		return name;
+	}
 
-        public KeyStore.PrivateKeyEntry getPrivateKeyEntry() {
-                return privateKeyEntry;
-        }
+	public KeyStore.PrivateKeyEntry getPrivateKeyEntry() {
+		return privateKeyEntry;
+	}
 }

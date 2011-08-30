@@ -25,8 +25,7 @@ import javax.servlet.http.HttpSession;
 public class IdentityProviderConfigurationFactory {
 
 	public static final String IDENTITY_PROVIDER_CONFIGURATION_CONTEXT_ATTRIBUTE = IdentityProviderConfigurationFactory.class
-			.getName()
-			+ ".IdentityProviderConfiguration";
+			.getName() + ".IdentityProviderConfiguration";
 
 	private IdentityProviderConfigurationFactory() {
 		super();

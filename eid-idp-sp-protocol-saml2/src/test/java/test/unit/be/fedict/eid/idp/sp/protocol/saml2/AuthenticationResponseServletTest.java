@@ -36,62 +36,67 @@ import static org.junit.Assert.assertEquals;
 
 public class AuthenticationResponseServletTest {
 
-        private static final Log LOG = LogFactory
-                .getLog(AuthenticationResponseServletTest.class);
+	private static final Log LOG = LogFactory
+			.getLog(AuthenticationResponseServletTest.class);
 
-        private ServletTester servletTester;
+	private ServletTester servletTester;
 
-        private String responseLocation;
+	private String responseLocation;
 
-        @Before
-        public void setUp() throws Exception {
-                this.servletTester = new ServletTester();
+	@Before
+	public void setUp() throws Exception {
+		this.servletTester = new ServletTester();
 
-                ServletHolder requestServletHolder = this.servletTester.addServlet(
-                        AuthenticationRequestServlet.class, "/request");
-                requestServletHolder.setInitParameter("IdPDestination", "http://idp.be");
-                requestServletHolder.setInitParameter("SPDestination", "http://sp.be");
+		ServletHolder requestServletHolder = this.servletTester.addServlet(
+				AuthenticationRequestServlet.class, "/request");
+		requestServletHolder
+				.setInitParameter("IdPDestination", "http://idp.be");
+		requestServletHolder.setInitParameter("SPDestination", "http://sp.be");
 
+		// response servlet
+		ServletHolder responseServletHolder = this.servletTester.addServlet(
+				AuthenticationResponseServlet.class, "/response");
 
-                // response servlet
-                ServletHolder responseServletHolder = this.servletTester.addServlet(
-                        AuthenticationResponseServlet.class, "/response");
+		// required init params
+		responseServletHolder
+				.setInitParameter(
+						AuthenticationResponseServlet.RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM,
+						"response");
+		responseServletHolder.setInitParameter(
+				AuthenticationResponseServlet.REDIRECT_PAGE_INIT_PARAM,
+				"/target-page");
+		responseServletHolder.setInitParameter(
+				AuthenticationResponseServlet.ERROR_PAGE_INIT_PARAM,
+				"/error-page");
+		responseServletHolder
+				.setInitParameter(
+						AuthenticationResponseServlet.ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM,
+						"ErrorMessage");
 
-                // required init params
-                responseServletHolder.setInitParameter(AuthenticationResponseServlet.
-                        RESPONSE_SESSION_ATTRIBUTE_INIT_PARAM, "response");
-                responseServletHolder.setInitParameter(AuthenticationResponseServlet.
-                        REDIRECT_PAGE_INIT_PARAM, "/target-page");
-                responseServletHolder.setInitParameter(AuthenticationResponseServlet.
-                        ERROR_PAGE_INIT_PARAM, "/error-page");
-                responseServletHolder.setInitParameter(AuthenticationResponseServlet.
-                        ERROR_MESSAGE_SESSION_ATTRIBUTE_INIT_PARAM, "ErrorMessage");
+		this.servletTester.start();
+		String context = this.servletTester.createSocketConnector(true);
 
-                this.servletTester.start();
-                String context = this.servletTester.createSocketConnector(true);
+		this.responseLocation = context + "/response";
+	}
 
+	@After
+	public void tearDown() throws Exception {
+		this.servletTester.stop();
+	}
 
-                this.responseLocation = context + "/response";
-        }
+	@Test
+	public void testDoGet() throws Exception {
+		// setup
+		LOG.debug("URL: " + this.responseLocation);
+		HttpClient httpClient = new HttpClient();
+		GetMethod getMethod = new GetMethod(this.responseLocation);
 
-        @After
-        public void tearDown() throws Exception {
-                this.servletTester.stop();
-        }
+		// operate
+		int result = httpClient.executeMethod(getMethod);
 
-        @Test
-        public void testDoGet() throws Exception {
-                // setup
-                LOG.debug("URL: " + this.responseLocation);
-                HttpClient httpClient = new HttpClient();
-                GetMethod getMethod = new GetMethod(this.responseLocation);
+		// verify
+		LOG.debug("result: " + result);
 
-                // operate
-                int result = httpClient.executeMethod(getMethod);
-
-                // verify
-                LOG.debug("result: " + result);
-
-                assertEquals(HttpServletResponse.SC_NOT_FOUND, result);
-        }
+		assertEquals(HttpServletResponse.SC_NOT_FOUND, result);
+	}
 }

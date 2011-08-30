@@ -28,50 +28,50 @@ import java.util.List;
  */
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "configuration")
-@NamedQueries(@NamedQuery(name = ConfigPropertyEntity.LIST_INDEXES,
-        query = "FROM ConfigPropertyEntity WHERE name LIKE :name"))
+@NamedQueries(@NamedQuery(name = ConfigPropertyEntity.LIST_INDEXES, query = "FROM ConfigPropertyEntity WHERE name LIKE :name"))
 public class ConfigPropertyEntity implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        public static final String LIST_INDEXES = "idp.config.list.idx";
+	public static final String LIST_INDEXES = "idp.config.list.idx";
 
-        private String name;
+	private String name;
 
-        private String value;
+	private String value;
 
-        public ConfigPropertyEntity() {
-                super();
-        }
+	public ConfigPropertyEntity() {
+		super();
+	}
 
-        public ConfigPropertyEntity(String name, String value) {
-                this.name = name;
-                this.value = value;
-        }
+	public ConfigPropertyEntity(String name, String value) {
+		this.name = name;
+		this.value = value;
+	}
 
-        @Id
-        public String getName() {
-                return this.name;
-        }
+	@Id
+	public String getName() {
+		return this.name;
+	}
 
-        public void setName(String name) {
-                this.name = name;
-        }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-        public String getValue() {
-                return this.value;
-        }
+	public String getValue() {
+		return this.value;
+	}
 
-        public void setValue(String value) {
-                this.value = value;
-        }
+	public void setValue(String value) {
+		this.value = value;
+	}
 
-        @SuppressWarnings("unchecked")
-        public static List<ConfigPropertyEntity> listConfigsWhereNameLike(
-                EntityManager entityManager, String name) {
+	@SuppressWarnings("unchecked")
+	public static List<ConfigPropertyEntity> listConfigsWhereNameLike(
+			EntityManager entityManager, String name) {
 
-                return entityManager.createNamedQuery(ConfigPropertyEntity.LIST_INDEXES)
-                        .setParameter("name", "%" + name + "%").getResultList();
-        }
+		return entityManager
+				.createNamedQuery(ConfigPropertyEntity.LIST_INDEXES)
+				.setParameter("name", "%" + name + "%").getResultList();
+	}
 
 }
