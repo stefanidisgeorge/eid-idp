@@ -5,14 +5,13 @@
 	xmlns:rich="http://richfaces.org/rich"
 	xmlns:f="http://java.sun.com/jsf/core">
 <body>
-<ui:composition template="/WEB-INF/template.xhtml">
-	<ui:param name="activeMenu" value="main" />
-	<ui:define name="body">
-		<h2>Welcome</h2>
-		<p>
-            Welcome to the administrator portal, version: ${project.version}
-        </p>
-	</ui:define>
-</ui:composition>
+	<ui:composition template="/WEB-INF/template.xhtml">
+		<ui:param name="activeMenu" value="main" />
+		<ui:define name="body">
+			<h2>Welcome</h2>
+			<p>Welcome to the administrator portal, version:
+				${project.version}</p>
+		</ui:define>
+	</ui:composition>
 </body>
 </html>
