@@ -1,4 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>be.fedict</groupId>
@@ -26,7 +28,7 @@
 				<artifactId>maven-jaxb2-plugin</artifactId>
 				<executions>
 					<execution>
-                        <id>protocol</id>
+						<id>protocol</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
@@ -36,23 +38,23 @@
 							</schemaIncludes>
 							<debug>false</debug>
 							<verbose>true</verbose>
-                            <generateDirectory>${project.build.directory}/generated-sources/protocol</generateDirectory>
+							<generateDirectory>${project.build.directory}/generated-sources/protocol</generateDirectory>
 						</configuration>
 					</execution>
-                    <execution>
-                        <id>attribute</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <schemaIncludes>
-                                <schemaInclude>eid-idp-attribute.xsd</schemaInclude>
-                            </schemaIncludes>
-                            <debug>false</debug>
-                            <verbose>true</verbose>
-                            <generateDirectory>${project.build.directory}/generated-sources/attribute</generateDirectory>
-                        </configuration>
-                    </execution>
+					<execution>
+						<id>attribute</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<schemaIncludes>
+								<schemaInclude>eid-idp-attribute.xsd</schemaInclude>
+							</schemaIncludes>
+							<debug>false</debug>
+							<verbose>true</verbose>
+							<generateDirectory>${project.build.directory}/generated-sources/attribute</generateDirectory>
+						</configuration>
+					</execution>
 				</executions>
 				<dependencies>
 					<dependency>
@@ -65,11 +67,11 @@
 		</plugins>
 	</build>
 	<dependencies>
-        <dependency>
-            <groupId>be.fedict.eid-idp</groupId>
-            <artifactId>eid-idp-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>be.fedict.eid-idp</groupId>
+			<artifactId>eid-idp-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging-api</artifactId>

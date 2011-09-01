@@ -1,50 +1,50 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:a4j="http://richfaces.org/a4j"
-      xmlns:s="http://jboss.com/products/seam/taglib"
-      xmlns:rich="http://richfaces.org/rich"
-      xmlns:f="http://java.sun.com/jsf/core">
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:s="http://jboss.com/products/seam/taglib"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:f="http://java.sun.com/jsf/core">
 <body>
-<ui:composition template="/WEB-INF/template-applet.xhtml">
+	<ui:composition template="/WEB-INF/template-applet.xhtml">
 
-    <ui:define name="body_title">
-        <h2>#{messages.authentication}</h2>
+		<ui:define name="body_title">
+			<h2>#{messages.authentication}</h2>
 
-        <p>#{messages.authenticationInfo}</p>
-    </ui:define>
+			<p>#{messages.authenticationInfo}</p>
+		</ui:define>
 
-    <ui:define name="applet">
+		<ui:define name="applet">
 
-        <script>
-            var attributes = {
-                code :'be.fedict.eid.applet.Applet.class',
-                archive :'eid-applet-package-${eid-applet.version}.jar',
-                width :600,
-                height :300
-            };
-            var javaArgs = '';
-            if (navigator.userAgent.indexOf('Mac OS X 10_6') != -1 ||
-                navigator.userAgent.indexOf('Mac OS X 10.6') != -1) {
-                javaArgs += '-d32';
-            }
-            var parameters = {
-                TargetPage :'protocol-exit',
-                AppletService :'applet-authentication-service',
-                Language :'#{localeSelector.language}',
-                NavigatorUserAgent : navigator.userAgent,
-                NavigatorAppName : navigator.appName,
-                NavigatorAppVersion : navigator.appVersion,
-                java_arguments: javaArgs
-            };
-            var version = '1.6';
-            deployJava.runApplet(attributes, parameters, version);
-        </script>
+			<script>
+				var attributes = {
+					code : 'be.fedict.eid.applet.Applet.class',
+					archive : 'eid-applet-package-${eid-applet.version}.jar',
+					width : 600,
+					height : 300
+				};
+				var javaArgs = '';
+				if (navigator.userAgent.indexOf('Mac OS X 10_6') != -1
+						|| navigator.userAgent.indexOf('Mac OS X 10.6') != -1) {
+					javaArgs += '-d32';
+				}
+				var parameters = {
+					TargetPage : 'protocol-exit',
+					AppletService : 'applet-authentication-service',
+					Language : '#{localeSelector.language}',
+					NavigatorUserAgent : navigator.userAgent,
+					NavigatorAppName : navigator.appName,
+					NavigatorAppVersion : navigator.appVersion,
+					java_arguments : javaArgs
+				};
+				var version = '1.6';
+				deployJava.runApplet(attributes, parameters, version);
+			</script>
 
-    </ui:define>
+		</ui:define>
 
-</ui:composition>
+	</ui:composition>
 </body>
 </html>
