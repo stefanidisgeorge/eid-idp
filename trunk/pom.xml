@@ -167,6 +167,11 @@
             </dependency>
             <dependency>
                 <groupId>be.fedict.eid-applet</groupId>
+                <artifactId>eid-applet-js</artifactId>
+                <version>${eid-applet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>be.fedict.eid-applet</groupId>
                 <artifactId>eid-applet-service</artifactId>
                 <version>${eid-applet.version}</version>
             </dependency>
@@ -273,7 +278,7 @@
         </repository>
     </repositories>
     <properties>
-        <eid-applet.version>1.0.4.Beta2</eid-applet.version>
+        <eid-applet.version>1.0.4-SNAPSHOT</eid-applet.version>
         <eid-trust-service.version>1.0.0.RC9</eid-trust-service.version>
         <openid4java.version>0.9.6</openid4java.version>
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
