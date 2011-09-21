@@ -158,7 +158,7 @@ public abstract class AbstractOpenIDProtocolService implements
 			LOG.debug("HTTP Referer check: referer=\"" + refererUrl.getHost()
 					+ "\" return_to=\"" + returnToUrl.getHost() + "\"");
 
-			if (!refererUrl.getHost().equals(returnToUrl.getHost())) {
+			if (!refererUrl.getHost().equalsIgnoreCase(returnToUrl.getHost())) {
 				throw new IllegalArgumentException("Invalid referer!");
 			}
 		}

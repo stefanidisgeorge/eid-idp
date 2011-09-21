@@ -123,7 +123,7 @@ public abstract class AbstractWSFederationProtocolService implements
 			LOG.debug("HTTP Referer check: referer=\"" + refererUrl.getHost()
 					+ "\" wtrealm=\"" + wtRealmUrl.getHost() + "\"");
 
-			if (!refererUrl.getHost().equals(wtRealmUrl.getHost())) {
+			if (!refererUrl.getHost().equalsIgnoreCase(wtRealmUrl.getHost())) {
 				throw new IllegalArgumentException("Invalid referer!");
 			}
 		}
