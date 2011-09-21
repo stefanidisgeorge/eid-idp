@@ -174,7 +174,7 @@ public abstract class AbstractSAML2ProtocolService implements
 			LOG.debug("HTTP Referer check: referer=\"" + refererUrl.getHost()
 					+ "\" request.acs=\"" + acsUrl.getHost() + "\"");
 
-			if (!refererUrl.getHost().equals(acsUrl.getHost())) {
+			if (!refererUrl.getHost().equalsIgnoreCase(acsUrl.getHost())) {
 				throw new IllegalArgumentException("Invalid referer!");
 			}
 		}
