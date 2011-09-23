@@ -3,14 +3,14 @@
 	<parent>
 		<groupId>be.fedict</groupId>
 		<artifactId>eid-idp</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.0.RC6</version>
 	</parent>
 	<name>FedICT eID IdP WS-Federation Protocol Service</name>
 	<description>WS-Federation Protocol Service for eID Identity Provider
     </description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-protocol-ws-federation</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0.RC6</version>
 	<packaging>jar</packaging>
 	<build>
 		<plugins>
