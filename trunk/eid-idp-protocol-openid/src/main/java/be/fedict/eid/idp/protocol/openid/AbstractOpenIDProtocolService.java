@@ -18,16 +18,38 @@
 
 package be.fedict.eid.idp.protocol.openid;
 
-import be.fedict.eid.idp.common.Attribute;
-import be.fedict.eid.idp.common.OpenIDAXConstants;
-import be.fedict.eid.idp.sp.protocol.openid.UserInterfaceMessage;
-import be.fedict.eid.idp.spi.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.PublicKey;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.crypto.SecretKey;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.association.AssociationException;
 import org.openid4java.association.AssociationSessionType;
 import org.openid4java.discovery.UrlIdentifier;
-import org.openid4java.message.*;
+import org.openid4java.message.AssociationRequest;
+import org.openid4java.message.AuthRequest;
+import org.openid4java.message.AuthSuccess;
+import org.openid4java.message.Message;
+import org.openid4java.message.MessageException;
+import org.openid4java.message.MessageExtension;
+import org.openid4java.message.ParameterList;
 import org.openid4java.message.ax.AxMessage;
 import org.openid4java.message.ax.FetchRequest;
 import org.openid4java.message.ax.FetchResponse;
@@ -36,19 +58,15 @@ import org.openid4java.server.InMemoryServerAssociationStore;
 import org.openid4java.server.RealmVerifier;
 import org.openid4java.server.ServerManager;
 
-import javax.crypto.SecretKey;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.PublicKey;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.common.OpenIDAXConstants;
+import be.fedict.eid.idp.sp.protocol.openid.UserInterfaceMessage;
+import be.fedict.eid.idp.spi.DefaultAttribute;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.IncomingRequest;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 /**
  * OpenID protocol service.
@@ -378,11 +396,16 @@ public abstract class AbstractOpenIDProtocolService implements
 
 		String destinationUrl = rpTargetUrl;
 		if (null == destinationUrl) {
-			destinationUrl = message.getDestinationUrl(true);
+			destinationUrl = authRequest.getReturnTo();
 		}
 		LOG.debug("destination URL: " + destinationUrl);
-		response.sendRedirect(destinationUrl);
-		return null;
+		Map<String, String> parameters = message.getParameterMap();
+		ReturnResponse returnResponse = new ReturnResponse(destinationUrl);
+		for (String paramKey : parameters.keySet()) {
+			String paramValue = parameters.get(paramKey);
+			returnResponse.addAttribute(paramKey, paramValue);
+		}
+		return returnResponse;
 	}
 
 	private String findAttribute(String typeUri,
