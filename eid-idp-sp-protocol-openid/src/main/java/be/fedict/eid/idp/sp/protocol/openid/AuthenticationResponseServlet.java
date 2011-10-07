@@ -116,6 +116,16 @@ public class AuthenticationResponseServlet extends HttpServlet {
 		}
 	}
 
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		try {
+			doIdRes(request, response);
+		} catch (Exception e) {
+			showErrorPage(e.getMessage(), e, request, response);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private void doIdRes(HttpServletRequest request,
 			HttpServletResponse response) throws MessageException,
