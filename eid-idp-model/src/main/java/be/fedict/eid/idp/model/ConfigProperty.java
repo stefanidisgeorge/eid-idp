@@ -44,7 +44,9 @@ public enum ConfigProperty {
 			"key-store-path", String.class), KEY_STORE_SECRET(
 			"key-store-secret", String.class), KEY_ENTRY_SECRET(
 			"key-entry-secret", String.class), KEY_ENTRY_ALIAS(
-			"key-entry-alias", String.class);
+			"key-entry-alias", String.class),
+
+	REMOVE_CARD("remove-card", Boolean.class);
 
 	private final String name;
 

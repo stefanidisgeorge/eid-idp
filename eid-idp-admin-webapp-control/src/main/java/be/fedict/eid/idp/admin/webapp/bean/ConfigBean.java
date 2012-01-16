@@ -88,6 +88,7 @@ public class ConfigBean implements Config {
 	private Integer httpProxyPort;
 
 	private AppletConfigEntity appletConfig;
+	private Boolean removeCard;
 
 	@Override
 	@PostConstruct
@@ -119,6 +120,8 @@ public class ConfigBean implements Config {
 
 		// Applet config
 		this.appletConfig = this.configuration.getAppletConfig();
+		this.removeCard = this.configuration.getValue(
+				ConfigProperty.REMOVE_CARD, Boolean.class);
 	}
 
 	@Override
@@ -217,6 +220,9 @@ public class ConfigBean implements Config {
 			}
 			this.configuration.setAppletConfig(this.appletConfig);
 		}
+
+		this.configuration
+				.setValue(ConfigProperty.REMOVE_CARD, this.removeCard);
 
 		this.selectedTab = ConfigurationTab.tab_applet.name();
 		return "success";
@@ -378,5 +384,15 @@ public class ConfigBean implements Config {
 				.getInstance("X.509");
 		return (X509Certificate) certificateFactory
 				.generateCertificate(new ByteArrayInputStream(certificateBytes));
+	}
+
+	@Override
+	public Boolean getRemoveCard() {
+		return this.removeCard;
+	}
+
+	@Override
+	public void setRemoveCard(Boolean removeCard) {
+		this.removeCard = removeCard;
 	}
 }
