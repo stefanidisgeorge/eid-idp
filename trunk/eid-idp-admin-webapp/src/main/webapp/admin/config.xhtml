@@ -78,6 +78,10 @@
 								maxFilesQuantity="1" id="upload" immediateUpload="true">
 							</rich:fileUpload>
 
+							<h:outputLabel for="removeCard" value="Remove eID card" />
+							<h:selectBooleanCheckbox id="removeCard"
+								value="#{idpConfig.removeCard}" />
+
 						</h:panelGrid>
 						<h:panelGrid columns="2">
 							<h:commandButton value="Save" action="#{idpConfig.saveApplet}" />

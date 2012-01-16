@@ -76,6 +76,10 @@ public interface Config {
 
 	void setTokenValidity(Integer tokenValidity);
 
+	Boolean getRemoveCard();
+
+	void setRemoveCard(Boolean removeCard);
+
 	/*
 	 * Listeners.
 	 */

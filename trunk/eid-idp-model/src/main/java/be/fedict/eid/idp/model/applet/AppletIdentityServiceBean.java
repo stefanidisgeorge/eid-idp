@@ -18,20 +18,32 @@
 
 package be.fedict.eid.idp.model.applet;
 
-import be.fedict.eid.applet.service.spi.IdentityRequest;
-import be.fedict.eid.idp.model.Constants;
-import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import org.jboss.ejb3.annotation.LocalBinding;
-
+import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jboss.ejb3.annotation.LocalBinding;
+
+import be.fedict.eid.applet.service.spi.IdentityRequest;
+import be.fedict.eid.applet.service.spi.IdentityService;
+import be.fedict.eid.idp.model.ConfigProperty;
+import be.fedict.eid.idp.model.Configuration;
+import be.fedict.eid.idp.model.Constants;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
+
 @Stateless
-@Local(be.fedict.eid.applet.service.spi.IdentityService.class)
+@Local(IdentityService.class)
 @LocalBinding(jndiBinding = Constants.IDP_JNDI_CONTEXT
 		+ "AppletIdentityServiceBean")
-public class AppletIdentityServiceBean implements
-		be.fedict.eid.applet.service.spi.IdentityService {
+public class AppletIdentityServiceBean implements IdentityService {
+
+	private static final Log LOG = LogFactory
+			.getLog(AppletIdentityServiceBean.class);
+
+	@EJB
+	private Configuration configuration;
 
 	@Override
 	public IdentityRequest getIdentityRequest() {
@@ -40,10 +52,17 @@ public class AppletIdentityServiceBean implements
 		boolean includeAddress = false;
 		boolean includePhoto = false;
 		boolean includeCertificates = true;
+
+		Boolean removeCard = this.configuration.getValue(
+				ConfigProperty.REMOVE_CARD, Boolean.class);
+		if (null == removeCard) {
+			removeCard = false;
+		}
+		LOG.debug("remove card: " + removeCard);
+
 		IdentityProviderFlow idpFlow = AppletUtil
 				.getSessionAttribute(Constants.IDP_FLOW_SESSION_ATTRIBUTE);
 		switch (idpFlow) {
-
 		case IDENTIFICATION:
 		case AUTHENTICATION_WITH_IDENTIFICATION:
 			includeIdentity = true;
@@ -57,6 +76,6 @@ public class AppletIdentityServiceBean implements
 		}
 
 		return new IdentityRequest(includeIdentity, includeAddress,
-				includePhoto, includeCertificates);
+				includePhoto, includeCertificates, removeCard);
 	}
 }
