@@ -18,11 +18,19 @@
 
 package be.fedict.eid.idp.protocol.saml2;
 
-import be.fedict.eid.idp.common.Attribute;
-import be.fedict.eid.idp.common.AttributeConstants;
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.spi.*;
+import java.net.URL;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.crypto.SecretKey;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.DefaultBootstrap;
@@ -37,17 +45,16 @@ import org.opensaml.saml2.core.Response;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.ConfigurationException;
 
-import javax.crypto.SecretKey;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.net.URL;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.spi.DefaultAttribute;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.IncomingRequest;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 /**
  * SAML2 Browser POST Profile protocol service.
@@ -321,14 +328,7 @@ public abstract class AbstractSAML2ProtocolService implements
 	 */
 	public static String getResponseIssuer(
 			IdentityProviderConfiguration configuration) {
-
-		IdPIdentity idpIdentity = configuration.findIdentity();
-		String issuerName;
-		if (null != idpIdentity) {
-			issuerName = idpIdentity.getName();
-		} else {
-			issuerName = configuration.getDefaultIssuer();
-		}
+		String issuerName = configuration.getDefaultIssuer();
 		if (null == issuerName || issuerName.trim().isEmpty()) {
 			issuerName = "Default";
 		}
