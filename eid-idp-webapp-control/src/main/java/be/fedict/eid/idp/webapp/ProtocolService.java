@@ -39,4 +39,6 @@ public interface ProtocolService {
 	 * Accessors
 	 */
 	String getThumbprint();
+
+	String getIdentityCertificateChain();
 }

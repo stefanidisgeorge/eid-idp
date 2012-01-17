@@ -18,12 +18,14 @@
 
 package be.fedict.eid.idp.webapp;
 
-import be.fedict.eid.idp.model.Constants;
-import be.fedict.eid.idp.model.IdentityService;
-import be.fedict.eid.idp.model.ProtocolServiceManager;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.protocol.EndpointType;
-import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
+import java.security.cert.X509Certificate;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.ejb.Remove;
+import javax.ejb.Stateful;
+
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.Factory;
@@ -32,11 +34,12 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.datamodel.DataModel;
 import org.jboss.seam.log.Log;
 
-import javax.ejb.EJB;
-import javax.ejb.Remove;
-import javax.ejb.Stateful;
-import java.util.LinkedList;
-import java.util.List;
+import be.fedict.eid.idp.model.Constants;
+import be.fedict.eid.idp.model.IdentityService;
+import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.protocol.EndpointType;
+import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 
 @Stateful
 @Name("idpProtocolService")
@@ -106,5 +109,16 @@ public class ProtocolServiceBean implements ProtocolService {
 			return "<No identity configured>";
 		}
 		return thumbprint;
+	}
+
+	@Override
+	public String getIdentityCertificateChain() {
+		List<X509Certificate> certChain = this.identityService
+				.getIdentityCertificateChain();
+		StringBuffer stringBuffer = new StringBuffer();
+		for (X509Certificate cert : certChain) {
+			stringBuffer.append(cert.toString());
+		}
+		return stringBuffer.toString();
 	}
 }

@@ -29,7 +29,7 @@
 
 			<h2>#{messages.serviceIdentity}</h2>
 			<p>
-				#{messages.identityThumbprint} :
+				#{messages.identityThumbprint}:
 				<h:outputText value="#{idpProtocolService.thumbprint}" />
 			</p>
 
@@ -38,6 +38,16 @@
 					<h:outputText value="#{messages.identityCertificateChain}" />
 				</h:outputLink>
 			</p>
+
+			<h:panelGrid columns="1">
+				<rich:simpleTogglePanel switchType="client"
+					label="#{messages.identityCertificateChain}" opened="false">
+					<pre>
+						<h:outputText
+							value="#{idpProtocolService.identityCertificateChain}" />
+					</pre>
+				</rich:simpleTogglePanel>
+			</h:panelGrid>
 
 		</ui:define>
 	</ui:composition>
