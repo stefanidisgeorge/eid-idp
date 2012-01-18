@@ -142,6 +142,9 @@ public class SAML2ArtifactProtocolServiceTest {
 				idpIdentity);
 		EasyMock.expect(mockConfiguration.getIdentityCertificateChain())
 				.andStubReturn(Collections.singletonList(certificate));
+		EasyMock.expect(mockConfiguration.getDefaultIssuer()).andStubReturn(
+				"TestIssuer");
+
 		EasyMock.expect(mockHttpServletRequest.getSession())
 				.andReturn(mockHttpSession).times(3);
 		EasyMock.expect(
