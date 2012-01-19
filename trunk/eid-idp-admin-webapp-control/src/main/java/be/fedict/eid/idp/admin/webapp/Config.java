@@ -60,9 +60,9 @@ public interface Config {
 
 	void setHttpProxyPort(Integer httpProxyPort);
 
-	String getDefaultIssuer();
+	String getIssuer();
 
-	void setDefaultIssuer(String defaultIssuer);
+	void setIssuer(String issuer);
 
 	AppletConfigEntity getAppletConfig();
 

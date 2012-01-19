@@ -19,8 +19,8 @@
 
 					<rich:tab name="tab_idp" label="IdP Default Configuration">
 						<h:panelGrid columns="2">
-							<h:outputText value="Default authentication token issuer name:" />
-							<h:inputText value="#{idpConfig.defaultIssuer}" />
+							<h:outputText value="Token issuer name:" />
+							<h:inputText value="#{idpConfig.issuer}" />
 
 							<h:outputText
 								value="Default HMAC-SHA1 identifier secret (hexadecimal):" />
