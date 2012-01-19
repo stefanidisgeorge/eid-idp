@@ -18,28 +18,6 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
-import be.fedict.eid.idp.admin.webapp.AdminConstants;
-import be.fedict.eid.idp.admin.webapp.Config;
-import be.fedict.eid.idp.entity.AppletConfigEntity;
-import be.fedict.eid.idp.model.ConfigProperty;
-import be.fedict.eid.idp.model.Configuration;
-import be.fedict.eid.idp.model.CryptoUtil;
-import be.fedict.eid.idp.model.KeyStoreType;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.io.FileUtils;
-import org.jboss.ejb3.annotation.LocalBinding;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.log.Log;
-import org.richfaces.event.UploadEvent;
-import org.richfaces.model.UploadItem;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.Remove;
-import javax.ejb.Stateful;
-import javax.faces.model.SelectItem;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -48,6 +26,37 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.Remove;
+import javax.ejb.Stateful;
+import javax.faces.model.SelectItem;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.io.FileUtils;
+import org.jboss.ejb3.annotation.LocalBinding;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.Begin;
+import org.jboss.seam.annotations.Destroy;
+import org.jboss.seam.annotations.End;
+import org.jboss.seam.annotations.Factory;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Out;
+import org.jboss.seam.faces.FacesMessages;
+import org.jboss.seam.log.Log;
+import org.richfaces.event.UploadEvent;
+import org.richfaces.model.UploadItem;
+
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
+import be.fedict.eid.idp.admin.webapp.Config;
+import be.fedict.eid.idp.entity.AppletConfigEntity;
+import be.fedict.eid.idp.model.ConfigProperty;
+import be.fedict.eid.idp.model.Configuration;
+import be.fedict.eid.idp.model.CryptoUtil;
+import be.fedict.eid.idp.model.KeyStoreType;
 
 @Stateful
 @Name("idpConfig")
@@ -75,7 +84,7 @@ public class ConfigBean implements Config {
 		tab_xkms, tab_idp, tab_network, tab_applet
 	}
 
-	private String defaultIssuer;
+	private String issuer;
 	private String hmacSecret;
 	private Integer tokenValidity;
 
@@ -95,8 +104,8 @@ public class ConfigBean implements Config {
 	public void postConstruct() {
 
 		// IdP Config
-		this.defaultIssuer = this.configuration.getValue(
-				ConfigProperty.DEFAULT_ISSUER, String.class);
+		this.issuer = this.configuration.getValue(ConfigProperty.ISSUER,
+				String.class);
 		this.hmacSecret = this.configuration.getValue(
 				ConfigProperty.HMAC_SECRET, String.class);
 		this.tokenValidity = this.configuration.getValue(
@@ -153,8 +162,7 @@ public class ConfigBean implements Config {
 		this.log.debug("save idp");
 
 		// IdP Config
-		this.configuration.setValue(ConfigProperty.DEFAULT_ISSUER,
-				this.defaultIssuer);
+		this.configuration.setValue(ConfigProperty.ISSUER, this.issuer);
 		this.configuration.setValue(ConfigProperty.TOKEN_VALIDITY,
 				this.tokenValidity);
 
@@ -331,13 +339,13 @@ public class ConfigBean implements Config {
 	}
 
 	@Override
-	public String getDefaultIssuer() {
-		return defaultIssuer;
+	public String getIssuer() {
+		return this.issuer;
 	}
 
 	@Override
-	public void setDefaultIssuer(String defaultIssuer) {
-		this.defaultIssuer = defaultIssuer;
+	public void setIssuer(String issuer) {
+		this.issuer = issuer;
 	}
 
 	@Override

@@ -169,7 +169,7 @@ public class IdentityServiceBean implements IdentityService {
 	@Override
 	public String getDefaultIssuer() {
 
-		return this.configuration.getValue(ConfigProperty.DEFAULT_ISSUER,
+		return this.configuration.getValue(ConfigProperty.ISSUER,
 				String.class);
 	}
 
