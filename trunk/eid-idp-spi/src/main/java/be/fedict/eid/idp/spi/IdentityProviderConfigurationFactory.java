@@ -35,6 +35,12 @@ public class IdentityProviderConfigurationFactory {
 			HttpServletRequest httpServletRequest) {
 		HttpSession httpSession = httpServletRequest.getSession();
 		ServletContext servletContext = httpSession.getServletContext();
+		IdentityProviderConfiguration identityProviderConfiguration = getInstance(servletContext);
+		return identityProviderConfiguration;
+	}
+
+	public static IdentityProviderConfiguration getInstance(
+			ServletContext servletContext) {
 		IdentityProviderConfiguration identityProviderConfiguration = (IdentityProviderConfiguration) servletContext
 				.getAttribute(IDENTITY_PROVIDER_CONFIGURATION_CONTEXT_ATTRIBUTE);
 		return identityProviderConfiguration;

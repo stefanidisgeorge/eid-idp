@@ -18,22 +18,28 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.entity.AttributeEntity;
-import be.fedict.eid.idp.model.*;
-import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
-import be.fedict.eid.idp.spi.AttributeConfig;
-import be.fedict.eid.idp.spi.IdPIdentity;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
+
+import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.model.AttributeService;
+import be.fedict.eid.idp.model.ConfigProperty;
+import be.fedict.eid.idp.model.Configuration;
+import be.fedict.eid.idp.model.IdPIdentityConfig;
+import be.fedict.eid.idp.model.IdentityService;
+import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
+import be.fedict.eid.idp.spi.AttributeConfig;
+import be.fedict.eid.idp.spi.IdPIdentity;
 
 @Stateless
 public class IdentityServiceBean implements IdentityService {
@@ -168,9 +174,12 @@ public class IdentityServiceBean implements IdentityService {
 
 	@Override
 	public String getDefaultIssuer() {
-
-		return this.configuration.getValue(ConfigProperty.ISSUER,
+		String issuerName = this.configuration.getValue(ConfigProperty.ISSUER,
 				String.class);
+		if (null == issuerName || issuerName.trim().isEmpty()) {
+			issuerName = "Default";
+		}
+		return issuerName;
 	}
 
 	@Override

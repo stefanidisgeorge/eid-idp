@@ -18,27 +18,42 @@
 
 package be.fedict.eid.idp.sp.protocol.ws_federation;
 
-import be.fedict.eid.idp.common.saml2.AssertionValidationException;
-import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.ws.wstrust.*;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.validation.ValidationException;
-
-import javax.crypto.SecretKey;
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.crypto.SecretKey;
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.ws.wstrust.KeyType;
+import org.opensaml.ws.wstrust.RequestSecurityTokenResponse;
+import org.opensaml.ws.wstrust.RequestSecurityTokenResponseCollection;
+import org.opensaml.ws.wstrust.RequestType;
+import org.opensaml.ws.wstrust.RequestedSecurityToken;
+import org.opensaml.ws.wstrust.TokenType;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.validation.ValidationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import be.fedict.eid.idp.common.saml2.AssertionValidationException;
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.ValidationService;
+import be.fedict.eid.idp.sp.protocol.ws_federation.sts.SecurityTokenServiceClient;
 
 /**
  * WS-Federation Authentication Response Processor.
@@ -92,12 +107,14 @@ public class AuthenticationResponseProcessor {
 		int maxOffset = 5;
 		boolean expectAssertionSigned = null != requiresResponseSignature ? requiresResponseSignature
 				: false;
+		ValidationService validationService = null;
 
 		if (null != this.service) {
 			secretKey = this.service.getAttributeSecretKey();
 			privateKey = this.service.getAttributePrivateKey();
 			maxOffset = this.service.getMaximumTimeOffset();
 			expectAssertionSigned = this.service.requiresResponseSignature();
+			validationService = this.service.getValidationService();
 		}
 
 		// force UTF8 encoding!
@@ -129,9 +146,9 @@ public class AuthenticationResponseProcessor {
 			throw new AuthenticationResponseProcessorException(
 					"Missing \"wresult\" param.");
 		}
+		Document responseDocument = Saml2Util.parseDocument(wresult);
 		RequestSecurityTokenResponseCollection rstCollections = Saml2Util
-				.unmarshall(Saml2Util.parseDocument(wresult)
-						.getDocumentElement());
+				.unmarshall(responseDocument.getDocumentElement());
 
 		if (rstCollections.getRequestSecurityTokenResponses().size() != 1) {
 			throw new AuthenticationResponseProcessorException(
@@ -178,6 +195,39 @@ public class AuthenticationResponseProcessor {
 				List<X509Certificate> certificateChain = Saml2Util
 						.validateSignature(assertion.getSignature());
 
+				if (null != validationService) {
+					// have to reparse the document here
+					NodeList assertionNodeList = Saml2Util.parseDocument(
+							wresult).getElementsByTagNameNS(
+							"urn:oasis:names:tc:SAML:2.0:assertion",
+							"Assertion");
+					LOG.debug("number of SAML2 assertions: "
+							+ assertionNodeList.getLength());
+					if (1 != assertionNodeList.getLength()) {
+						throw new AuthenticationResponseProcessorException(
+								"missing SAML2 Assertion");
+					}
+					Element assertionElement = (Element) assertionNodeList
+							.item(0);
+
+					DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+							.newInstance();
+					documentBuilderFactory.setNamespaceAware(true);
+					DocumentBuilder documentBuilder = documentBuilderFactory
+							.newDocumentBuilder();
+					Document tokenDocument = documentBuilder.newDocument();
+					Node assertionTokenNode = tokenDocument.importNode(
+							assertionElement, true);
+					tokenDocument.appendChild(assertionTokenNode);
+
+					String validationServiceLocation = validationService
+							.getLocation();
+					String expectedAudience = validationService.getExpectedAudience();
+					SecurityTokenServiceClient securityTokenServiceClient = new SecurityTokenServiceClient(
+							validationServiceLocation);
+					securityTokenServiceClient.validateToken(tokenDocument
+							.getDocumentElement(), expectedAudience);
+				}
 				if (null != this.service) {
 					this.service.validateServiceCertificate(
 							authenticationResponse.getAuthenticationPolicy(),
@@ -300,6 +350,5 @@ public class AuthenticationResponseProcessor {
 						"Wrong wctx in response.");
 			}
 		}
-
 	}
 }

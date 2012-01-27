@@ -329,9 +329,6 @@ public abstract class AbstractSAML2ProtocolService implements
 	public static String getResponseIssuer(
 			IdentityProviderConfiguration configuration) {
 		String issuerName = configuration.getDefaultIssuer();
-		if (null == issuerName || issuerName.trim().isEmpty()) {
-			issuerName = "Default";
-		}
 		return issuerName;
 	}
 

@@ -18,11 +18,16 @@
 
 package test.unit.be.fedict.eid.idp.sp.protocol.ws_federation;
 
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
-import be.fedict.eid.idp.sp.protocol.ws_federation.AuthenticationResponseProcessor;
-import be.fedict.eid.idp.sp.protocol.ws_federation.AuthenticationResponseProcessorException;
-import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,12 +35,11 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-import javax.servlet.http.HttpServletRequest;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
+import be.fedict.eid.idp.sp.protocol.ws_federation.AuthenticationResponseProcessor;
+import be.fedict.eid.idp.sp.protocol.ws_federation.AuthenticationResponseProcessorException;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
 
 public class AuthenticationResponseProcessorTest {
 
@@ -63,6 +67,7 @@ public class AuthenticationResponseProcessorTest {
 		EasyMock.expect(mockService.getAttributePrivateKey()).andStubReturn(
 				null);
 		EasyMock.expect(mockService.getMaximumTimeOffset()).andStubReturn(-1);
+		EasyMock.expect(mockService.getValidationService()).andStubReturn(null);
 
 		mockRequest.setCharacterEncoding("UTF8");
 		EasyMock.expect(mockRequest.getParameter("wa")).andStubReturn(
@@ -123,6 +128,7 @@ public class AuthenticationResponseProcessorTest {
 		EasyMock.expect(mockService.getAttributePrivateKey()).andStubReturn(
 				null);
 		EasyMock.expect(mockService.getMaximumTimeOffset()).andStubReturn(-1);
+		EasyMock.expect(mockService.getValidationService()).andStubReturn(null);
 
 		mockRequest.setCharacterEncoding("UTF8");
 		EasyMock.expect(mockRequest.getParameter("wa")).andStubReturn(

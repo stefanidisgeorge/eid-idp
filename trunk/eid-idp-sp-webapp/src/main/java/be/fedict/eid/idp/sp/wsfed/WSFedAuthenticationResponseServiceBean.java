@@ -18,21 +18,24 @@
 
 package be.fedict.eid.idp.sp.wsfed;
 
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-import be.fedict.eid.idp.sp.ConfigServlet;
-import be.fedict.eid.idp.sp.PkiServlet;
-import be.fedict.eid.idp.sp.SPBean;
-import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.crypto.SecretKey;
 import java.io.Serializable;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.crypto.SecretKey;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.sp.ConfigServlet;
+import be.fedict.eid.idp.sp.PkiServlet;
+import be.fedict.eid.idp.sp.SPBean;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.ValidationService;
 
 public class WSFedAuthenticationResponseServiceBean implements
 		AuthenticationResponseService, Serializable {
@@ -40,6 +43,10 @@ public class WSFedAuthenticationResponseServiceBean implements
 	private static final Log LOG = LogFactory
 			.getLog(WSFedAuthenticationResponseServiceBean.class);
 	private static final long serialVersionUID = -27408002115429526L;
+
+	private String validationServiceLocation;
+
+	private String expectedAudience;
 
 	@Override
 	public boolean requiresResponseSignature() {
@@ -104,5 +111,29 @@ public class WSFedAuthenticationResponseServiceBean implements
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public ValidationService getValidationService() {
+		return new ValidationService() {
+
+			@Override
+			public String getLocation() {
+				return WSFedAuthenticationResponseServiceBean.this.validationServiceLocation;
+			}
+
+			@Override
+			public String getExpectedAudience() {
+				return WSFedAuthenticationResponseServiceBean.this.expectedAudience;
+			}
+		};
+	}
+
+	public void setValidationServiceLocation(String validationServiceLocation) {
+		this.validationServiceLocation = validationServiceLocation;
+	}
+
+	public void setExpectedAudience(String expectedAudience) {
+		this.expectedAudience = expectedAudience;
 	}
 }

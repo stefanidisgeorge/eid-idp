@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.sp.wsfed;
 
-import be.fedict.eid.idp.sp.ConfigServlet;
-import be.fedict.eid.idp.sp.StartupServletContextListener;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.servlet.http.HttpServletRequest;
+import be.fedict.eid.idp.sp.ConfigServlet;
+import be.fedict.eid.idp.sp.StartupServletContextListener;
 
 public class WSFedBean {
 
@@ -40,17 +41,31 @@ public class WSFedBean {
 						+ idPEntryPoint);
 	}
 
+	public void setIdPValidationService(String idpValidationService) {
+		LOG.debug("set IdP validation service: " + idpValidationService);
+		String validationServiceLocation = "http://localhost/eid-idp/"
+				+ idpValidationService;
+		LOG.debug("STS location: " + validationServiceLocation);
+		WSFedAuthenticationResponseServiceBean wsFedResponseBean = StartupServletContextListener
+				.getWSFedResponseBean();
+		wsFedResponseBean
+				.setValidationServiceLocation(validationServiceLocation);
+	}
+
 	public void setSpResponseEndpoint(String spResponseEndpoint) {
 
 		LOG.debug("set SP Response Endpoint: " + spResponseEndpoint);
 
+		String fullSpResponseEndpoint = this.request.getScheme() + "://"
+				+ this.request.getServerName() + ":"
+				+ this.request.getServerPort() + this.request.getContextPath()
+				+ "/" + spResponseEndpoint;
 		StartupServletContextListener.getWSFedRequestBean()
-				.setSpResponseEndpoint(
-						this.request.getScheme() + "://"
-								+ this.request.getServerName() + ":"
-								+ this.request.getServerPort()
-								+ this.request.getContextPath() + "/"
-								+ spResponseEndpoint);
+				.setSpResponseEndpoint(fullSpResponseEndpoint);
+
+		WSFedAuthenticationResponseServiceBean wsFedResponseBean = StartupServletContextListener
+				.getWSFedResponseBean();
+		wsFedResponseBean.setExpectedAudience(fullSpResponseEndpoint);
 	}
 
 	public HttpServletRequest getRequest() {

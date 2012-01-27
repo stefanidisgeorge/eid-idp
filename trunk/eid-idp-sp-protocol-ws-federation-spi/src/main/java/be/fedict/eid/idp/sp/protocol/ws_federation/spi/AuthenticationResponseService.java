@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.sp.protocol.ws_federation.spi;
 
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-
-import javax.crypto.SecretKey;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.crypto.SecretKey;
+
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 
 /**
  * WS-Federation SPI for authentication response services.
@@ -74,4 +75,10 @@ public interface AuthenticationResponseService {
 	 *         not applicable.
 	 */
 	PrivateKey getAttributePrivateKey();
+
+	/**
+	 * @return the information of the WS-Trust STS validation service. Return
+	 *         <code>null</code> if not applicable.
+	 */
+	ValidationService getValidationService();
 }

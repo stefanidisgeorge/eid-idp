@@ -44,6 +44,7 @@
         <module>eid-idp-sp-webapp</module>
         <module>eid-idp-deploy</module>
         <module>eid-idp-attribute-age</module>
+        <module>eid-idp-ws-trust</module>
     </modules>
     <profiles>
         <profile>

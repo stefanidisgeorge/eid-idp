@@ -36,7 +36,7 @@
 		<li><a href="ws-federation/ident.jsp">Identification</a></li>
 		<li><a href="ws-federation/auth.jsp">Authentication</a></li>
 		<li><a href="ws-federation/auth-ident.jsp">Authentication +
-				Identification </a></li>
+				Identification (validation via STS)</a></li>
 	</ul>
 
 	<h2>OpenID v2.0</h2>
