@@ -141,6 +141,9 @@ public class WSFederationProtocolServiceTest {
 				mockIdentityProviderConfiguration.getResponseTokenValidity())
 				.andStubReturn(5);
 
+		EasyMock.expect(mockIdentityProviderConfiguration.getDefaultIssuer())
+				.andStubReturn("test-eid-idp-issuer");
+
 		// prepare
 		EasyMock.replay(mockHttpSession, mockRequest, mockResponse,
 				mockIdentityProviderConfiguration);

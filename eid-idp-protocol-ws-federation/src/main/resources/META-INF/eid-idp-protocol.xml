@@ -44,5 +44,12 @@
                 <ContextPath>/ws-federation/metadata/auth-ident-metadata.xml</ContextPath>
             </Endpoint>
         </Endpoints>
+        <WSEndpoints>
+            <WSEndpoint>
+                <Name>WS-Trust STS web service</Name>
+                <WSImplClass>be.fedict.eid.idp.protocol.ws_federation.sts.SecurityTokenServicePortImpl</WSImplClass>
+                <ContextPath>/sts</ContextPath>
+            </WSEndpoint>
+        </WSEndpoints>
     </IdentityProviderProtocol>
 </IdentityProviderProtocols>

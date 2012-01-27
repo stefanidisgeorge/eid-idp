@@ -18,18 +18,13 @@
 
 package be.fedict.eid.idp.protocol.ws_federation;
 
-import be.fedict.eid.idp.common.Attribute;
-import be.fedict.eid.idp.common.AttributeConstants;
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.spi.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.ws.wstrust.*;
-import org.w3c.dom.Element;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.security.PublicKey;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 import javax.servlet.ServletContext;
@@ -38,13 +33,31 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.transform.TransformerException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.security.PublicKey;
-import java.util.Collections;
-import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.ws.wstrust.KeyType;
+import org.opensaml.ws.wstrust.RequestSecurityTokenResponse;
+import org.opensaml.ws.wstrust.RequestSecurityTokenResponseCollection;
+import org.opensaml.ws.wstrust.RequestType;
+import org.opensaml.ws.wstrust.RequestedSecurityToken;
+import org.opensaml.ws.wstrust.TokenType;
+import org.w3c.dom.Element;
+
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.spi.DefaultAttribute;
+import be.fedict.eid.idp.spi.IdPIdentity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderFlow;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.IncomingRequest;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 /**
  * WS-Federation Web (Passive) Requestors. We could use OpenAM (OpenSS0), but
@@ -209,16 +222,7 @@ public abstract class AbstractWSFederationProtocolService implements
 		requestSecurityTokenResponse.getUnknownXMLObjects().add(
 				requestedSecurityToken);
 
-		IdPIdentity idpIdentity = this.configuration.findIdentity();
-		String issuerName;
-		if (null != idpIdentity) {
-			issuerName = idpIdentity.getName();
-		} else {
-			issuerName = this.configuration.getDefaultIssuer();
-		}
-		if (null == issuerName) {
-			issuerName = "Default";
-		}
+		String issuerName = this.configuration.getDefaultIssuer();
 
 		DateTime issueInstantDateTime = new DateTime();
 		Assertion assertion = Saml2Util.getAssertion(issuerName, null, wtrealm,
@@ -229,6 +233,7 @@ public abstract class AbstractWSFederationProtocolService implements
 		requestedSecurityToken.setUnknownXMLObject(assertion);
 
 		Element element;
+		IdPIdentity idpIdentity = this.configuration.findIdentity();
 		if (null != idpIdentity) {
 
 			LOG.debug("sign assertion");
