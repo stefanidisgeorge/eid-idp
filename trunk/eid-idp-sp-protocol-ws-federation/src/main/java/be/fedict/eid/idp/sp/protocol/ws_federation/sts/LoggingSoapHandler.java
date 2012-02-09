@@ -29,6 +29,12 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.io.ByteArrayOutputStream;
 import java.util.Set;
 
+/**
+ * JAX-WS SOAP handler that provides SOAP logging.
+ * 
+ * @author Frank Cornelis
+ * 
+ */
 public class LoggingSoapHandler implements SOAPHandler<SOAPMessageContext> {
 
 	private static final Log LOG = LogFactory.getLog(LoggingSoapHandler.class);
@@ -42,6 +48,9 @@ public class LoggingSoapHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 
 	public boolean handleFault(SOAPMessageContext context) {
+		if (false == LOG.isDebugEnabled()) {
+			return true;
+		}
 		Boolean outboundProperty = (Boolean) context
 				.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 		LOG.debug("outbound message: " + outboundProperty);
@@ -57,6 +66,9 @@ public class LoggingSoapHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 
 	public boolean handleMessage(SOAPMessageContext context) {
+		if (false == LOG.isDebugEnabled()) {
+			return true;
+		}
 		LOG.debug("handle message");
 		Boolean outboundProperty = (Boolean) context
 				.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
