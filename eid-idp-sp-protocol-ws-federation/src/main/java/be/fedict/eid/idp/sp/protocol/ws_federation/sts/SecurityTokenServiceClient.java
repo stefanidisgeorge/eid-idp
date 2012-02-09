@@ -46,6 +46,12 @@ import be.fedict.eid.idp.wstrust.jaxb.wstrust.ValidateTargetType;
 import be.fedict.eid.idp.wstrust.jaxws.SecurityTokenService;
 import be.fedict.eid.idp.wstrust.jaxws.SecurityTokenServicePort;
 
+/**
+ * WS-Trust STS client to validate SAML tokens via the eID IdP.
+ * 
+ * @author Frank Cornelis
+ * 
+ */
 public class SecurityTokenServiceClient {
 
 	private static final Log LOG = LogFactory
@@ -64,6 +70,12 @@ public class SecurityTokenServiceClient {
 
 	private final be.fedict.eid.idp.wstrust.jaxb.wsse.ObjectFactory wsseObjectFactory;
 
+	/**
+	 * Main constructor.
+	 * 
+	 * @param location
+	 *            the location of the STS service.
+	 */
 	public SecurityTokenServiceClient(String location) {
 		SecurityTokenService securityTokenService = SecurityTokenServiceFactory
 				.getInstance();
@@ -85,12 +97,24 @@ public class SecurityTokenServiceClient {
 		this.wsseObjectFactory = new be.fedict.eid.idp.wstrust.jaxb.wsse.ObjectFactory();
 	}
 
+	/**
+	 * Validates the given SAML assertion via the eID IdP WS-Trust STS
+	 * validation service.
+	 * 
+	 * @param samlAssertionElement
+	 *            the SAML assertion DOM element to be validated.
+	 * @see SecurityTokenServiceClient#validateToken(Element, String)
+	 */
 	public void validateToken(Element samlAssertionElement) {
 		validateToken(samlAssertionElement, null);
 	}
 
 	/**
+	 * Validates the given SAML assertion via the eID IdP WS-Trust STS
+	 * validation service.
+	 * 
 	 * @param samlAssertionElement
+	 *            the SAML assertion DOM element to be validated.
 	 * @param expectedSAMLAudience
 	 *            the optional (but recommended) expected value for SAML
 	 *            Audience.

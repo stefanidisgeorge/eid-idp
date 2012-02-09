@@ -68,6 +68,14 @@ import be.fedict.eid.idp.wstrust.jaxb.wstrust.StatusType;
 import be.fedict.eid.idp.wstrust.jaxb.wstrust.ValidateTargetType;
 import be.fedict.eid.idp.wstrust.jaxws.SecurityTokenServicePort;
 
+/**
+ * Implementation of WS-Trust STS token validation service. Via this web service
+ * relying parties can validate the SAML assertions produced by the
+ * WS-Federation web passive authentication protocol.
+ * 
+ * @author Frank Cornelis
+ * 
+ */
 @WebService(endpointInterface = "be.fedict.eid.idp.wstrust.jaxws.SecurityTokenServicePort")
 @BindingType("http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/")
 @HandlerChain(file = "sts-ws-handlers.xml")

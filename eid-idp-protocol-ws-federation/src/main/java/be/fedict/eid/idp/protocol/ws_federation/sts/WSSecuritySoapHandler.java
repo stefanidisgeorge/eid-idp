@@ -39,6 +39,8 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ws.security.message.WSSecHeader;
+import org.apache.ws.security.message.WSSecTimestamp;
 import org.w3c.dom.Element;
 
 import be.fedict.eid.idp.wstrust.WSTrustConstants;
@@ -117,8 +119,23 @@ public class WSSecuritySoapHandler implements SOAPHandler<SOAPMessageContext> {
 		}
 	}
 
-	private void handleOutboundMessage(SOAPMessageContext context) {
+	private void handleOutboundMessage(SOAPMessageContext context)
+			throws SOAPException {
+		SOAPMessage soapMessage = context.getMessage();
+		SOAPPart soapPart = soapMessage.getSOAPPart();
+		SOAPHeader soapHeader = soapMessage.getSOAPHeader();
+		if (null == soapHeader) {
+			SOAPEnvelope soapEnvelope = soapPart.getEnvelope();
+			soapHeader = soapEnvelope.addHeader();
+		}
 
+		WSSecHeader wsSecHeader = new WSSecHeader();
+		Element securityElement = wsSecHeader.insertSecurityHeader(soapPart);
+		soapHeader.removeChild(securityElement);
+		soapHeader.appendChild(securityElement);
+
+		WSSecTimestamp wsSecTimeStamp = new WSSecTimestamp();
+		wsSecTimeStamp.build(soapPart, wsSecHeader);
 	}
 
 	@Override

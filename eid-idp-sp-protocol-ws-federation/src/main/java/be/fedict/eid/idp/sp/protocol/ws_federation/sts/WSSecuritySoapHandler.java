@@ -18,6 +18,8 @@
 
 package be.fedict.eid.idp.sp.protocol.ws_federation.sts;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +36,10 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
+import org.apache.ws.security.WSSecurityEngine;
+import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.message.token.Timestamp;
 import org.w3c.dom.Element;
 
 import be.fedict.eid.idp.wstrust.WSTrustConstants;
@@ -58,8 +64,39 @@ public class WSSecuritySoapHandler implements SOAPHandler<SOAPMessageContext> {
 			} catch (Exception e) {
 				throw new ProtocolException("error: " + e.getMessage(), e);
 			}
+		} else {
+			try {
+				handleInboundMessage(context);
+			} catch (Exception e) {
+				throw new ProtocolException("error: " + e.getMessage(), e);
+			}
 		}
 		return true;
+	}
+
+	private void handleInboundMessage(SOAPMessageContext context)
+			throws WSSecurityException {
+		SOAPMessage soapMessage = context.getMessage();
+		SOAPPart soapPart = soapMessage.getSOAPPart();
+		WSSecurityEngine secEngine = new WSSecurityEngine();
+		List<WSSecurityEngineResult> results = secEngine.processSecurityHeader(
+				soapPart, null, null, null);
+		if (null == results) {
+			throw new SecurityException("no WS-Security results");
+		}
+
+		Timestamp timestamp = null;
+		for (WSSecurityEngineResult result : results) {
+			Timestamp resultTimestamp = (Timestamp) result
+					.get(WSSecurityEngineResult.TAG_TIMESTAMP);
+			if (null != resultTimestamp) {
+				timestamp = resultTimestamp;
+			}
+		}
+
+		if (null == timestamp) {
+			throw new SecurityException("no WS-Security timestamp");
+		}
 	}
 
 	private void handleOutboundMessage(SOAPMessageContext context)
@@ -96,7 +133,10 @@ public class WSSecuritySoapHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 
 	public Set<QName> getHeaders() {
-		return null;
+		Set<QName> headers = new HashSet<QName>();
+		headers.add(new QName(WSTrustConstants.WS_SECURITY_NAMESPACE,
+				"Security"));
+		return headers;
 	}
 
 	public static void setAssertion(Element assertionElement,

@@ -30,6 +30,7 @@ import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
  * WS-Federation SPI for authentication response services.
  * 
  * @author Wim Vandenhaute.
+ * @author Frank Cornelis
  */
 public interface AuthenticationResponseService {
 
