@@ -82,6 +82,11 @@
 							<h:selectBooleanCheckbox id="removeCard"
 								value="#{idpConfig.removeCard}" />
 
+							<h:outputLabel for="transactionMessageSigning"
+								value="Transaction message signing (eID secure pinpad reader)" />
+							<h:selectBooleanCheckbox id="transactionMessageSigning"
+								value="#{idpConfig.transactionMessageSigning}" />
+
 						</h:panelGrid>
 						<h:panelGrid columns="2">
 							<h:commandButton value="Save" action="#{idpConfig.saveApplet}" />

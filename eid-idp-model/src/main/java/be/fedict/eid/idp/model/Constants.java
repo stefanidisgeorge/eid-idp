@@ -26,4 +26,6 @@ public abstract class Constants {
 			.getName() + ".IdpFlow";
 	public static final String RP_SESSION_ATTRIBUTE = Constants.class.getName()
 			+ ".RP";
+	public static final String RP_DOMAIN_SESSION_ATTRIBUTE = Constants.class
+			.getName() + ".relyingPartyDomain";
 }
