@@ -98,6 +98,7 @@ public class ConfigBean implements Config {
 
 	private AppletConfigEntity appletConfig;
 	private Boolean removeCard;
+	private Boolean transactionMessageSigning;
 
 	@Override
 	@PostConstruct
@@ -131,6 +132,8 @@ public class ConfigBean implements Config {
 		this.appletConfig = this.configuration.getAppletConfig();
 		this.removeCard = this.configuration.getValue(
 				ConfigProperty.REMOVE_CARD, Boolean.class);
+		this.transactionMessageSigning = this.configuration.getValue(
+				ConfigProperty.TRANSACTION_MESSAGE_SIGNING, Boolean.class);
 	}
 
 	@Override
@@ -231,6 +234,8 @@ public class ConfigBean implements Config {
 
 		this.configuration
 				.setValue(ConfigProperty.REMOVE_CARD, this.removeCard);
+		this.configuration.setValue(ConfigProperty.TRANSACTION_MESSAGE_SIGNING,
+				this.transactionMessageSigning);
 
 		this.selectedTab = ConfigurationTab.tab_applet.name();
 		return "success";
@@ -402,5 +407,15 @@ public class ConfigBean implements Config {
 	@Override
 	public void setRemoveCard(Boolean removeCard) {
 		this.removeCard = removeCard;
+	}
+
+	@Override
+	public Boolean getTransactionMessageSigning() {
+		return this.transactionMessageSigning;
+	}
+
+	@Override
+	public void setTransactionMessageSigning(Boolean transactionMessageSigning) {
+		this.transactionMessageSigning = transactionMessageSigning;
 	}
 }

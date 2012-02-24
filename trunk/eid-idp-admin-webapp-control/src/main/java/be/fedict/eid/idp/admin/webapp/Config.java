@@ -80,6 +80,10 @@ public interface Config {
 
 	void setRemoveCard(Boolean removeCard);
 
+	Boolean getTransactionMessageSigning();
+
+	void setTransactionMessageSigning(Boolean transactionMessageSigning);
+
 	/*
 	 * Listeners.
 	 */

@@ -18,18 +18,11 @@
 
 package be.fedict.eid.idp.webapp;
 
-import be.fedict.eid.idp.entity.AttributeEntity;
-import be.fedict.eid.idp.entity.RPAttributeEntity;
-import be.fedict.eid.idp.entity.RPEntity;
-import be.fedict.eid.idp.model.*;
-import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.IncomingRequest;
-import be.fedict.eid.idp.spi.attribute.IdentityProviderAttributeType;
-import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletConfig;
@@ -39,11 +32,26 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.security.cert.CertificateEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.entity.RPAttributeEntity;
+import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.model.AccountingService;
+import be.fedict.eid.idp.model.AttributeService;
+import be.fedict.eid.idp.model.AttributeServiceManager;
+import be.fedict.eid.idp.model.Constants;
+import be.fedict.eid.idp.model.IdentityService;
+import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.model.RPService;
+import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.IncomingRequest;
+import be.fedict.eid.idp.spi.attribute.IdentityProviderAttributeType;
+import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
 
 /**
  * The main entry point for authentication protocols. This servlet serves as a
@@ -306,6 +314,9 @@ public class ProtocolEntryServlet extends HttpServlet {
 
 			// optionally authenticate RP
 			LOG.debug("SP Domain: " + incomingRequest.getSpDomain());
+			request.getSession().setAttribute(
+					Constants.RP_DOMAIN_SESSION_ATTRIBUTE,
+					incomingRequest.getSpDomain());
 			RPEntity rp = this.rpService.find(incomingRequest.getSpDomain());
 			if (null != rp) {
 
