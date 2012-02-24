@@ -43,9 +43,16 @@ public class WSFedBean {
 
 	public void setIdPValidationService(String idpValidationService) {
 		LOG.debug("set IdP validation service: " + idpValidationService);
-		String validationServiceLocation = "http://localhost/eid-idp/"
-				+ idpValidationService;
-		LOG.debug("STS location: " + validationServiceLocation);
+
+		String validationServiceLocation;
+		if (null == idpValidationService || idpValidationService.isEmpty()) {
+			validationServiceLocation = null;
+		} else {
+			validationServiceLocation = "http://localhost/eid-idp/"
+					+ idpValidationService;
+			LOG.debug("STS location: " + validationServiceLocation);
+		}
+
 		WSFedAuthenticationResponseServiceBean wsFedResponseBean = StartupServletContextListener
 				.getWSFedResponseBean();
 		wsFedResponseBean

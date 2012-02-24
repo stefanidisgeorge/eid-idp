@@ -115,6 +115,9 @@ public class WSFedAuthenticationResponseServiceBean implements
 
 	@Override
 	public ValidationService getValidationService() {
+		if (null == this.validationServiceLocation) {
+			return null;
+		}
 		return new ValidationService() {
 
 			@Override

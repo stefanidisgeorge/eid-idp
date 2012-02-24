@@ -8,13 +8,14 @@
 </head>
 <body>
 
-	<jsp:useBean id="saml2" scope="request"
+	<jsp:useBean id="wsfed" scope="request"
 		class="be.fedict.eid.idp.sp.wsfed.WSFedBean" />
-	<jsp:setProperty name="saml2" property="request" value="<%= request %>" />
-	<jsp:setProperty name="saml2" property="idPEntryPoint"
+	<jsp:setProperty name="wsfed" property="request" value="<%= request %>" />
+	<jsp:setProperty name="wsfed" property="idPEntryPoint"
 		value="ws-federation/auth" />
-	<jsp:setProperty name="saml2" property="spResponseEndpoint"
+	<jsp:setProperty name="wsfed" property="spResponseEndpoint"
 		value="wsfed-landing" />
+	<jsp:setProperty name="wsfed" property="idPValidationService" value="" />
 	<c:redirect url="../wsfed-request" />
 
 </body>
