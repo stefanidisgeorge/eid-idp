@@ -42,4 +42,9 @@ public abstract class OpenIDAXConstants {
 	public static final String AX_GENDER_TYPE = "http://axschema.org/person/gender";
 	public static final String AX_NATIONALITY_TYPE = "http://axschema.org/eid/nationality";
 	public static final String AX_PLACE_OF_BIRTH_TYPE = "http://axschema.org/eid/pob";
+
+	// card attributes
+	public static final String AX_CARD_NUMBER_TYPE = "http://axschema.org/eid/card-number";
+	public static final String AX_CARD_VALIDITY_BEGIN_TYPE = "http://axschema.org/eid/card-validity/begin";
+	public static final String AX_CARD_VALIDITY_END_TYPE = "http://axschema.org/eid/card-validity/end";
 }

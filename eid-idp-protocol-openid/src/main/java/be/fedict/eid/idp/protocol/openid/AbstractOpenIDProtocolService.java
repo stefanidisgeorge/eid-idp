@@ -479,6 +479,12 @@ public abstract class AbstractOpenIDProtocolService implements
 			case IDENTIFIER:
 			case PHOTO:
 				return null;
+			case CARD_NUMBER:
+				return OpenIDAXConstants.AX_CARD_NUMBER_TYPE;
+			case CARD_VALIDITY_BEGIN:
+				return OpenIDAXConstants.AX_CARD_VALIDITY_BEGIN_TYPE;
+			case CARD_VALIDITY_END:
+				return OpenIDAXConstants.AX_CARD_VALIDITY_END_TYPE;
 			}
 		}
 		return null;

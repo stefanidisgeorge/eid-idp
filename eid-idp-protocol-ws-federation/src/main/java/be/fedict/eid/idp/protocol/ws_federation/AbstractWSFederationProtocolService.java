@@ -295,6 +295,12 @@ public abstract class AbstractWSFederationProtocolService implements
 				return AttributeConstants.PLACE_OF_BIRTH_CLAIM_TYPE_URI;
 			case PHOTO:
 				return AttributeConstants.PHOTO_CLAIM_TYPE_URI;
+			case CARD_NUMBER:
+				return AttributeConstants.CARD_NUMBER_TYPE_URI;
+			case CARD_VALIDITY_BEGIN:
+				return AttributeConstants.CARD_VALIDITY_BEGIN_TYPE_URI;
+			case CARD_VALIDITY_END:
+				return AttributeConstants.CARD_VALIDITY_END_TYPE_URI;
 			}
 		}
 		return null;

@@ -72,7 +72,16 @@ public enum DefaultAttribute {
 			"be:fedict:eid:idp:pob", AttributeType.STRING),
 
 	PHOTO("Photo", "Base64 encoded photo of the named object.",
-			"be:fedict:eid:idp:photo", AttributeType.BINARY);
+			"be:fedict:eid:idp:photo", AttributeType.BINARY),
+
+	CARD_NUMBER("CardNumber", "The eID card number.",
+			"be:fedict:eid:idp:card-number", AttributeType.STRING),
+
+	CARD_VALIDITY_BEGIN("CardValidityBegin", "The card validity begin.",
+			"be:fedict:eid:idp:card-validity:begin", AttributeType.DATE),
+
+	CARD_VALIDITY_END("CardValidityEnd", "The card validity end.",
+			"be:fedict:eid:idp:card-validity:end", AttributeType.DATE);
 
 	private final String name;
 	private final String description;

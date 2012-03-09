@@ -18,9 +18,22 @@
 
 package be.fedict.eid.idp.sp.protocol.openid;
 
-import be.fedict.eid.idp.common.OpenIDAXConstants;
-import be.fedict.eid.idp.common.ServiceLocator;
-import be.fedict.eid.idp.sp.protocol.openid.spi.AuthenticationRequestService;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.cert.X509Certificate;
+import java.util.List;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -38,20 +51,9 @@ import org.openid4java.server.NonceGenerator;
 import org.openid4java.server.RealmVerifierFactory;
 import org.openid4java.util.HttpFetcherFactory;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.cert.X509Certificate;
-import java.util.List;
+import be.fedict.eid.idp.common.OpenIDAXConstants;
+import be.fedict.eid.idp.common.ServiceLocator;
+import be.fedict.eid.idp.sp.protocol.openid.spi.AuthenticationRequestService;
 
 /**
  * Generates and sends out a OpenID Authentication Request.
@@ -334,6 +336,12 @@ public class AuthenticationRequestServlet extends HttpServlet {
 					false);
 			fetchRequest.addAttribute(OpenIDAXConstants.AX_BIRTHDATE_TYPE,
 					false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_CARD_NUMBER_TYPE,
+					false);
+			fetchRequest.addAttribute(
+					OpenIDAXConstants.AX_CARD_VALIDITY_BEGIN_TYPE, false);
+			fetchRequest.addAttribute(
+					OpenIDAXConstants.AX_CARD_VALIDITY_END_TYPE, false);
 
 			authRequest.addExtension(fetchRequest);
 
