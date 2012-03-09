@@ -18,19 +18,12 @@
 
 package be.fedict.eid.idp.webapp;
 
-import be.fedict.eid.applet.service.Address;
-import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.applet.service.impl.handler.AuthenticationDataMessageHandler;
-import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
-import be.fedict.eid.idp.common.Attribute;
-import be.fedict.eid.idp.entity.RPAttributeEntity;
-import be.fedict.eid.idp.entity.RPEntity;
-import be.fedict.eid.idp.model.*;
-import be.fedict.eid.idp.spi.*;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -42,12 +35,29 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.applet.service.Address;
+import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.applet.service.impl.handler.AuthenticationDataMessageHandler;
+import be.fedict.eid.applet.service.impl.handler.IdentityDataMessageHandler;
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.entity.RPAttributeEntity;
+import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.model.AttributeService;
+import be.fedict.eid.idp.model.AttributeServiceManager;
+import be.fedict.eid.idp.model.Constants;
+import be.fedict.eid.idp.model.CryptoUtil;
+import be.fedict.eid.idp.model.IdentityService;
+import be.fedict.eid.idp.spi.DefaultAttribute;
+import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.IdpUtil;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 /**
  * Protocol Exit Servlet. Operates as a broker towards protocol services.
@@ -406,6 +416,21 @@ public class ProtocolExitServlet extends HttpServlet {
 					DefaultAttribute.PLACE_OF_BIRTH.getUri(),
 					getAttribute(DefaultAttribute.PLACE_OF_BIRTH,
 							identity.getPlaceOfBirth()));
+
+			attributes.put(
+					DefaultAttribute.CARD_NUMBER.getUri(),
+					getAttribute(DefaultAttribute.CARD_NUMBER,
+							identity.cardNumber));
+
+			attributes.put(
+					DefaultAttribute.CARD_VALIDITY_BEGIN.getUri(),
+					getAttribute(DefaultAttribute.CARD_VALIDITY_BEGIN,
+							identity.cardValidityDateBegin));
+
+			attributes.put(
+					DefaultAttribute.CARD_VALIDITY_END.getUri(),
+					getAttribute(DefaultAttribute.CARD_VALIDITY_END,
+							identity.cardValidityDateEnd));
 		}
 
 		if (null != photo) {

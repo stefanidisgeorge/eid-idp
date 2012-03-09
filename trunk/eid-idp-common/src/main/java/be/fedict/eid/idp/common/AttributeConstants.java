@@ -19,7 +19,7 @@
 package be.fedict.eid.idp.common;
 
 /**
- * eID Default Attribute Constants.
+ * eID Default Attribute Constants. Used in a SAML2 assertion context.
  * <p/>
  * 
  * @author Wim Vandenhaute
@@ -50,4 +50,9 @@ public abstract class AttributeConstants {
 	// custom attributes
 	public static final String COUNTRY_CLAIM_TYPE_URI = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/country";
 	public static final String PPID_CLAIM_TYPE_URI = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier";
+
+	// card attributes
+	public static final String CARD_NUMBER_TYPE_URI = "be:fedict:eid:idp:card-number";
+	public static final String CARD_VALIDITY_BEGIN_TYPE_URI = "be:fedict:eid:idp:card-validity:begin";
+	public static final String CARD_VALIDITY_END_TYPE_URI = "be:fedict:eid:idp:card-validity:end";
 }
