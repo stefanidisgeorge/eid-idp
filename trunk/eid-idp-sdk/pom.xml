@@ -3,12 +3,12 @@
 	<parent>
 		<groupId>be.fedict</groupId>
 		<artifactId>eid-idp</artifactId>
-		<version>1.0.1.Beta4</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<name>FedICT eID Identity Provider SDK Package</name>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-sdk</artifactId>
-	<version>1.0.1.Beta4</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<build>
