@@ -18,7 +18,22 @@
 
 package be.fedict.eid.idp.model.applet;
 
-import be.fedict.eid.applet.service.spi.*;
+import java.security.cert.X509Certificate;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.ejb.Local;
+import javax.ejb.Stateless;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jboss.ejb3.annotation.LocalBinding;
+
+import be.fedict.eid.applet.service.spi.AuthenticationService;
+import be.fedict.eid.applet.service.spi.CertificateSecurityException;
+import be.fedict.eid.applet.service.spi.ExpiredCertificateSecurityException;
+import be.fedict.eid.applet.service.spi.RevokedCertificateSecurityException;
+import be.fedict.eid.applet.service.spi.TrustCertificateSecurityException;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
@@ -26,15 +41,6 @@ import be.fedict.eid.idp.model.Constants;
 import be.fedict.trust.client.XKMS2Client;
 import be.fedict.trust.client.exception.ValidationFailedException;
 import be.fedict.trust.xkms2.XKMSConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jboss.ejb3.annotation.LocalBinding;
-
-import javax.ejb.EJB;
-import javax.ejb.Local;
-import javax.ejb.Stateless;
-import java.security.cert.X509Certificate;
-import java.util.List;
 
 /**
  * eID Applet Service Authentication Service implementation.

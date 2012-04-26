@@ -18,13 +18,14 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.artifact;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.opensaml.saml2.core.Response;
+
 import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseProcessor;
 import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseProcessorException;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.artifact.ArtifactAuthenticationResponseService;
-import org.opensaml.saml2.core.Response;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * SAML v2.0 Authentication response processor for the HTTP Artifact binding.

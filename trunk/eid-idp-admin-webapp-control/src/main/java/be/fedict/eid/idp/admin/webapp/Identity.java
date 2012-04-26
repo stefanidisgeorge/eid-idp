@@ -18,9 +18,10 @@
 
 package be.fedict.eid.idp.admin.webapp;
 
+import java.util.List;
+
 import javax.ejb.Local;
 import javax.faces.model.SelectItem;
-import java.util.List;
 
 @Local
 public interface Identity {

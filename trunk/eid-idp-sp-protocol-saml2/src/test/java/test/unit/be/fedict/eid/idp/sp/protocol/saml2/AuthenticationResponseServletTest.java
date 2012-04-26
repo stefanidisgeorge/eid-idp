@@ -18,8 +18,10 @@
 
 package test.unit.be.fedict.eid.idp.sp.protocol.saml2;
 
-import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet;
-import be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseServlet;
+import static org.junit.Assert.assertEquals;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
@@ -30,9 +32,8 @@ import org.junit.Test;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.testing.ServletTester;
 
-import javax.servlet.http.HttpServletResponse;
-
-import static org.junit.Assert.assertEquals;
+import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet;
+import be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseServlet;
 
 public class AuthenticationResponseServletTest {
 

@@ -18,21 +18,27 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
-import be.fedict.eid.idp.admin.webapp.Accounting;
-import be.fedict.eid.idp.admin.webapp.AdminConstants;
-import be.fedict.eid.idp.entity.AccountingEntity;
-import be.fedict.eid.idp.model.AccountingService;
-import org.jboss.ejb3.annotation.LocalBinding;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.datamodel.DataModel;
-import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.log.Log;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
-import java.util.List;
+
+import org.jboss.ejb3.annotation.LocalBinding;
+import org.jboss.seam.annotations.Destroy;
+import org.jboss.seam.annotations.Factory;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.datamodel.DataModel;
+import org.jboss.seam.faces.FacesMessages;
+import org.jboss.seam.log.Log;
+
+import be.fedict.eid.idp.admin.webapp.Accounting;
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
+import be.fedict.eid.idp.entity.AccountingEntity;
+import be.fedict.eid.idp.model.AccountingService;
 
 @Stateful
 @Name("idpAccounting")

@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.sp.openid;
 
-import be.fedict.eid.idp.sp.ConfigServlet;
-import be.fedict.eid.idp.sp.StartupServletContextListener;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.servlet.http.HttpServletRequest;
+import be.fedict.eid.idp.sp.ConfigServlet;
+import be.fedict.eid.idp.sp.StartupServletContextListener;
 
 public class OpenIDBean {
 

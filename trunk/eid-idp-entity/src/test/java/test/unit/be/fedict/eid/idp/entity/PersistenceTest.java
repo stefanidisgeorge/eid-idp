@@ -18,7 +18,10 @@
 
 package test.unit.be.fedict.eid.idp.entity;
 
-import be.fedict.eid.idp.entity.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ejb.Ejb3Configuration;
@@ -26,9 +29,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
+import be.fedict.eid.idp.entity.AccountingEntity;
+import be.fedict.eid.idp.entity.AdministratorEntity;
+import be.fedict.eid.idp.entity.AppletConfigEntity;
+import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.entity.AttributeProtocolUriEntity;
+import be.fedict.eid.idp.entity.ConfigPropertyEntity;
+import be.fedict.eid.idp.entity.RPAttributeEntity;
+import be.fedict.eid.idp.entity.RPEntity;
 
 public class PersistenceTest {
 

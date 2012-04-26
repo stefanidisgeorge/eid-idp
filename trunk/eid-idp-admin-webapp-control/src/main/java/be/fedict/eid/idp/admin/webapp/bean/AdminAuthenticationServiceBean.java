@@ -18,16 +18,18 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
-import be.fedict.eid.applet.service.spi.AuthenticationService;
-import be.fedict.eid.idp.admin.webapp.AdminConstants;
+import java.security.cert.X509Certificate;
+import java.util.List;
+
+import javax.ejb.Local;
+import javax.ejb.Stateless;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
 
-import javax.ejb.Local;
-import javax.ejb.Stateless;
-import java.security.cert.X509Certificate;
-import java.util.List;
+import be.fedict.eid.applet.service.spi.AuthenticationService;
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
 
 /**
  * eID Applet Service Authentication Service implementation for the admin

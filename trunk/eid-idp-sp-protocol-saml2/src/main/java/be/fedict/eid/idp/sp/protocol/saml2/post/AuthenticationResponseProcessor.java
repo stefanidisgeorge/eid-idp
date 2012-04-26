@@ -18,10 +18,10 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.post;
 
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseProcessor;
-import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseProcessorException;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
+import java.security.cert.CertificateException;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
@@ -31,8 +31,10 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.validation.ValidationException;
 
-import javax.servlet.http.HttpServletRequest;
-import java.security.cert.CertificateException;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseProcessor;
+import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseProcessorException;
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 
 /**
  * SAML v2.0 Authentication response processor for the Browser HTTP POST

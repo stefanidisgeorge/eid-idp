@@ -18,8 +18,9 @@
 
 package be.fedict.eid.idp.saml2.ws;
 
-import javax.xml.namespace.QName;
 import java.net.URL;
+
+import javax.xml.namespace.QName;
 
 public class ArtifactServiceFactory {
 

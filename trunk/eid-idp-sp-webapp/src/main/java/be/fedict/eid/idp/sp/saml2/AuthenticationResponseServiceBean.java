@@ -18,17 +18,6 @@
 
 package be.fedict.eid.idp.sp.saml2;
 
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-import be.fedict.eid.idp.sp.ConfigServlet;
-import be.fedict.eid.idp.sp.PkiServlet;
-import be.fedict.eid.idp.sp.SPBean;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.artifact.ArtifactAuthenticationResponseService;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.crypto.SecretKey;
-import javax.ejb.EJBException;
 import java.io.Serializable;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -36,6 +25,19 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.crypto.SecretKey;
+import javax.ejb.EJBException;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.sp.ConfigServlet;
+import be.fedict.eid.idp.sp.PkiServlet;
+import be.fedict.eid.idp.sp.SPBean;
+import be.fedict.eid.idp.sp.protocol.saml2.spi.artifact.ArtifactAuthenticationResponseService;
 
 public class AuthenticationResponseServiceBean implements
 		ArtifactAuthenticationResponseService, Serializable {

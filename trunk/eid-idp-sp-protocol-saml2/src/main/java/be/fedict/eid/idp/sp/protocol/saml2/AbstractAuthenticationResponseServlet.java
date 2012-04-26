@@ -18,9 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
-import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -28,7 +26,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
 
 /**
  * Abstract authentication response servlet for SAML v2.0 bindings.
@@ -38,6 +40,7 @@ import java.io.IOException;
  * {@link be.fedict.eid.idp.common.saml2.AuthenticationResponse} on the HTTP
  * Session.
  * 
+ * @author Frank Cornelis
  * @author Wim Vandenhaute
  */
 public abstract class AbstractAuthenticationResponseServlet extends HttpServlet {

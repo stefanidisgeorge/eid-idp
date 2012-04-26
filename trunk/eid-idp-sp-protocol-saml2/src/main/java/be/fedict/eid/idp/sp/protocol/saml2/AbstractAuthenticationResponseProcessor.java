@@ -18,10 +18,15 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
-import be.fedict.eid.idp.common.saml2.AssertionValidationException;
-import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
+import java.lang.reflect.Method;
+import java.security.PrivateKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.List;
+
+import javax.crypto.SecretKey;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -33,13 +38,10 @@ import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 
-import javax.crypto.SecretKey;
-import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Method;
-import java.security.PrivateKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.List;
+import be.fedict.eid.idp.common.saml2.AssertionValidationException;
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 
 /**
  * Processor for SAML v2.0 Responses, used by
@@ -54,6 +56,7 @@ import java.util.List;
  * On complete of this response, will returned an {@link AuthenticationResponse}
  * containing all available details of the authenticated subject.
  * 
+ * @author Frank Cornelis
  * @author Wim Vandenhaute
  */
 public abstract class AbstractAuthenticationResponseProcessor {

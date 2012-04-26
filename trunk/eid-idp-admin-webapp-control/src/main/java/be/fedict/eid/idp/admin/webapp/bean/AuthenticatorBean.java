@@ -18,9 +18,11 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
-import be.fedict.eid.idp.admin.webapp.AdminConstants;
-import be.fedict.eid.idp.admin.webapp.Authenticator;
-import be.fedict.eid.idp.model.admin.AdminManager;
+import java.security.cert.X509Certificate;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+
 import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.ScopeType;
@@ -28,9 +30,9 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.security.Identity;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import java.security.cert.X509Certificate;
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
+import be.fedict.eid.idp.admin.webapp.Authenticator;
+import be.fedict.eid.idp.model.admin.AdminManager;
 
 @Stateless
 @Name("idpAuthenticator")

@@ -18,24 +18,26 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.model.ProtocolServiceManager;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
-import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolsType;
-import be.fedict.eid.idp.spi.protocol.ObjectFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.model.ProtocolServiceManager;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
+import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolsType;
+import be.fedict.eid.idp.spi.protocol.ObjectFactory;
 
 @Stateless
 public class ProtocolServiceManagerBean implements ProtocolServiceManager {

@@ -18,18 +18,20 @@
 
 package be.fedict.eid.idp.attribute.age;
 
-import be.fedict.eid.idp.common.Attribute;
-import be.fedict.eid.idp.common.AttributeType;
-import be.fedict.eid.idp.spi.DefaultAttribute;
-import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
+import java.util.GregorianCalendar;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.Years;
 
-import javax.servlet.ServletContext;
-import java.util.GregorianCalendar;
-import java.util.Map;
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.common.AttributeType;
+import be.fedict.eid.idp.spi.DefaultAttribute;
+import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
 
 /**
  * Age Attribute service.

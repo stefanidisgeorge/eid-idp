@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.sp.openid;
 
-import be.fedict.eid.idp.sp.protocol.openid.spi.AuthenticationRequestService;
+import java.io.Serializable;
+import java.security.cert.X509Certificate;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.Serializable;
-import java.security.cert.X509Certificate;
+import be.fedict.eid.idp.sp.protocol.openid.spi.AuthenticationRequestService;
 
 public class OpenIDAuthenticationRequestServiceBean implements
 		AuthenticationRequestService, Serializable {

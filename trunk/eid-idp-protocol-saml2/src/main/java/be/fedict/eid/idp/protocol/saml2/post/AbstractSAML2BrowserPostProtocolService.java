@@ -18,17 +18,18 @@
 
 package be.fedict.eid.idp.protocol.saml2.post;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.ws.transport.OutTransport;
+
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
 import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.ReturnResponse;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.ws.transport.OutTransport;
-
-import javax.servlet.http.HttpServletRequest;
 
 public abstract class AbstractSAML2BrowserPostProtocolService extends
 		AbstractSAML2ProtocolService {

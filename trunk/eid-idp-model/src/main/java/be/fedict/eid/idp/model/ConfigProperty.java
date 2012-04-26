@@ -1,6 +1,6 @@
 /*
- * eID Digital Signature Service Project.
- * Copyright (C) 2010 FedICT.
+ * eID Identity Provider Project.
+ * Copyright (C) 2010-1012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version

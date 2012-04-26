@@ -18,9 +18,17 @@
 
 package be.fedict.eid.idp.entity;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Query;
+import javax.persistence.Table;
 
 /**
  * Administrator entity. Represents a registered or pending administrator.

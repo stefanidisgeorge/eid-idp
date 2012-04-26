@@ -1,6 +1,6 @@
 /*
- * eID Digital Signature Service Project.
- * Copyright (C) 2010 FedICT.
+ * eID Identity Provider Project.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,28 +18,34 @@
 
 package be.fedict.eid.idp.model.bean;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
+import java.util.Enumeration;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.ejb.EJBException;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import sun.security.pkcs11.SunPKCS11;
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.IdPIdentityConfig;
 import be.fedict.eid.idp.model.KeyStoreType;
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import be.fedict.eid.idp.spi.IdPIdentity;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import sun.security.pkcs11.SunPKCS11;
-
-import javax.ejb.EJB;
-import javax.ejb.EJBException;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.*;
-import java.security.KeyStore.PrivateKeyEntry;
-import java.security.cert.CertificateException;
-import java.util.Enumeration;
-import java.util.List;
 
 @Singleton
 @Startup

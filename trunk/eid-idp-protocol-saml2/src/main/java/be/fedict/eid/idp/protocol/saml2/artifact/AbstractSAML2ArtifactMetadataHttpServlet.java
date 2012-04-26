@@ -18,10 +18,8 @@
 
 package be.fedict.eid.idp.protocol.saml2.artifact;
 
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.protocol.saml2.AbstractSAML2MetadataHttpServlet;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.common.xml.SAMLConstants;
@@ -29,7 +27,10 @@ import org.opensaml.saml2.metadata.ArtifactResolutionService;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 
-import javax.servlet.http.HttpServletRequest;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.protocol.saml2.AbstractSAML2MetadataHttpServlet;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 
 public abstract class AbstractSAML2ArtifactMetadataHttpServlet extends
 		AbstractSAML2MetadataHttpServlet {

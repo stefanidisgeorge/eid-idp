@@ -18,18 +18,20 @@
 
 package be.fedict.eid.idp.sp;
 
-import be.fedict.eid.idp.common.AttributeConstants;
-import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.sp.protocol.openid.OpenIDAuthenticationResponse;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.xml.validation.ValidationException;
 
-import javax.servlet.http.HttpSession;
-import java.security.cert.CertificateException;
-import java.util.Arrays;
-import java.util.Map;
+import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.sp.protocol.openid.OpenIDAuthenticationResponse;
 
 public class ResponseBean {
 

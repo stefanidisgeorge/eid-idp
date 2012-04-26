@@ -18,9 +18,26 @@
 
 package be.fedict.eid.idp.protocol.ws_federation;
 
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.protocol.ws_federation.wsfed.*;
-import be.fedict.eid.idp.spi.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.UUID;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBException;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.XMLSignatureException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
@@ -36,24 +53,36 @@ import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 import org.w3c.dom.Element;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBException;
-import javax.xml.crypto.MarshalException;
-import javax.xml.crypto.dsig.XMLSignatureException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.UUID;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.ClaimType;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.ClaimTypeBuilder;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.ClaimTypeMarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.ClaimTypeUnmarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.ClaimTypesOffered;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.ClaimTypesOfferedBuilder;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.ClaimTypesOfferedMarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.ClaimTypesOfferedUnmarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.Description;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.DescriptionBuilder;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.DescriptionMarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.DescriptionUnmarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.DisplayName;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.DisplayNameBuilder;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.DisplayNameMarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.DisplayNameUnmarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.PassiveRequestorEndpoint;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.PassiveRequestorEndpointBuilder;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.PassiveRequestorEndpointMarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.PassiveRequestorEndpointUnmarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.SecurityTokenService;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.SecurityTokenServiceBuilder;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.SecurityTokenServiceMarshaller;
+import be.fedict.eid.idp.protocol.ws_federation.wsfed.SecurityTokenServiceUnmarshaller;
+import be.fedict.eid.idp.spi.AttributeConfig;
+import be.fedict.eid.idp.spi.IdPIdentity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 
 public abstract class AbstractWSFederationMetadataHttpServlet extends
 		HttpServlet {

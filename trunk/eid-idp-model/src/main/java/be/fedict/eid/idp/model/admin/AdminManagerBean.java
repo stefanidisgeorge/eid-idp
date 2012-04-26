@@ -18,18 +18,20 @@
 
 package be.fedict.eid.idp.model.admin;
 
-import be.fedict.eid.idp.entity.AdministratorEntity;
-import be.fedict.eid.idp.model.exception.RemoveLastAdminException;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-import java.util.List;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.entity.AdministratorEntity;
+import be.fedict.eid.idp.model.exception.RemoveLastAdminException;
 
 @Stateless
 public class AdminManagerBean implements AdminManager {

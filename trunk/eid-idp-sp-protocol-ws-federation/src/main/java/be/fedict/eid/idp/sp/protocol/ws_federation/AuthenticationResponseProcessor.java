@@ -222,11 +222,13 @@ public class AuthenticationResponseProcessor {
 
 					String validationServiceLocation = validationService
 							.getLocation();
-					String expectedAudience = validationService.getExpectedAudience();
+					String expectedAudience = validationService
+							.getExpectedAudience();
 					SecurityTokenServiceClient securityTokenServiceClient = new SecurityTokenServiceClient(
 							validationServiceLocation);
-					securityTokenServiceClient.validateToken(tokenDocument
-							.getDocumentElement(), expectedAudience);
+					securityTokenServiceClient.validateToken(
+							tokenDocument.getDocumentElement(),
+							expectedAudience);
 				}
 				if (null != this.service) {
 					this.service.validateServiceCertificate(

@@ -18,7 +18,6 @@
 
 package be.fedict.eid.idp.entity;
 
-import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -29,6 +28,26 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
+import javax.persistence.OneToMany;
+import javax.persistence.Query;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Relying Party (RP) entity.

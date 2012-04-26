@@ -18,11 +18,12 @@
 
 package be.fedict.eid.idp.model;
 
-import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
-import be.fedict.eid.idp.spi.attribute.IdentityProviderAttributeType;
+import java.util.List;
 
 import javax.ejb.Local;
-import java.util.List;
+
+import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
+import be.fedict.eid.idp.spi.attribute.IdentityProviderAttributeType;
 
 @Local
 public interface AttributeServiceManager {

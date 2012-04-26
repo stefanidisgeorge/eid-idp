@@ -18,15 +18,26 @@
 
 package be.fedict.eid.idp.entity;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Query;
+import javax.persistence.Table;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = Constants.DATABASE_TABLE_PREFIX + "attributes")

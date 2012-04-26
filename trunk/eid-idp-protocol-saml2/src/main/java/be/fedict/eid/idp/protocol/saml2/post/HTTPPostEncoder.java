@@ -20,7 +20,6 @@ package be.fedict.eid.idp.protocol.saml2.post;
 
 import java.io.UnsupportedEncodingException;
 
-import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.Init;
@@ -35,6 +34,8 @@ import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.util.XMLHelper;
 import org.w3c.dom.Element;
+
+import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
 
 public class HTTPPostEncoder extends BaseSAML2MessageEncoder {
 

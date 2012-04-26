@@ -1,17 +1,36 @@
+/*
+ * eID Identity Provider Project.
+ * Copyright (C) 2010 FedICT.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License version
+ * 3.0 as published by the Free Software Foundation.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, see 
+ * http://www.gnu.org/licenses/.
+ */
+
 package be.fedict.eid.idp.webapp;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletContext;
+import javax.xml.ws.WebServiceException;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.ResourceLoader;
 import com.sun.xml.ws.api.server.BoundEndpoint;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.transport.http.servlet.ServletModule;
-
-import javax.servlet.ServletContext;
-import javax.xml.ws.WebServiceException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Provides access to {@link javax.servlet.ServletContext} via

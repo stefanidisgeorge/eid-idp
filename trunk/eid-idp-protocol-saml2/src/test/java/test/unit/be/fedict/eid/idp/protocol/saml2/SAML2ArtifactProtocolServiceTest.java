@@ -18,16 +18,34 @@
 
 package test.unit.be.fedict.eid.idp.protocol.saml2;
 
-import be.fedict.eid.applet.service.Gender;
-import be.fedict.eid.applet.service.Identity;
-import be.fedict.eid.idp.common.Attribute;
-import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
-import be.fedict.eid.idp.protocol.saml2.artifact.AbstractSAML2ArtifactProtocolService;
-import be.fedict.eid.idp.protocol.saml2.artifact.SAML2ProtocolServiceAuthIdent;
-import be.fedict.eid.idp.spi.IdPIdentity;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.NameValuePair;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,22 +63,16 @@ import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import be.fedict.eid.applet.service.Gender;
+import be.fedict.eid.applet.service.Identity;
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
+import be.fedict.eid.idp.protocol.saml2.artifact.AbstractSAML2ArtifactProtocolService;
+import be.fedict.eid.idp.protocol.saml2.artifact.SAML2ProtocolServiceAuthIdent;
+import be.fedict.eid.idp.spi.IdPIdentity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.NameValuePair;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 public class SAML2ArtifactProtocolServiceTest {
 

@@ -18,8 +18,32 @@
 
 package test.unit.be.fedict.eid.idp.protocol.saml2;
 
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.HashMap;
+import java.util.UUID;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -52,20 +76,8 @@ import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.util.DatatypeHelper;
 import org.opensaml.xml.util.XMLConstants;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.HashMap;
-import java.util.UUID;
-
-import static org.junit.Assert.*;
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
 
 public class SAML2Test {
 

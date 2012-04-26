@@ -18,9 +18,10 @@
 
 package be.fedict.eid.idp.webapp;
 
-import javax.ejb.Local;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import javax.ejb.Local;
 
 @Local
 public interface SP {

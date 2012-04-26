@@ -18,10 +18,9 @@
 
 package be.fedict.eid.idp.protocol.saml2.artifact;
 
-import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
-import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.ReturnResponse;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.artifact.BasicSAMLArtifactMap;
 import org.opensaml.common.binding.artifact.SAMLArtifactMap;
@@ -30,8 +29,10 @@ import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.util.storage.MapBasedStorageService;
 import org.opensaml.ws.transport.OutTransport;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
+import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.ReturnResponse;
 
 public abstract class AbstractSAML2ArtifactProtocolService extends
 		AbstractSAML2ProtocolService {

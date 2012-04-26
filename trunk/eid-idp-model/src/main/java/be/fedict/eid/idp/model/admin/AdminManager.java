@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.model.admin;
 
-import be.fedict.eid.idp.entity.AdministratorEntity;
-import be.fedict.eid.idp.model.exception.RemoveLastAdminException;
-
-import javax.ejb.Local;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.ejb.Local;
+
+import be.fedict.eid.idp.entity.AdministratorEntity;
+import be.fedict.eid.idp.model.exception.RemoveLastAdminException;
 
 @Local
 public interface AdminManager {

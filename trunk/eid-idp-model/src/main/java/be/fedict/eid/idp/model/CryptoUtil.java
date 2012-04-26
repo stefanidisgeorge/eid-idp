@@ -18,25 +18,32 @@
 
 package be.fedict.eid.idp.model;
 
-import be.fedict.eid.idp.entity.SecretKeyAlgorithm;
-import be.fedict.eid.idp.model.exception.KeyLoadException;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.openssl.PEMReader;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.openssl.PEMReader;
+
+import be.fedict.eid.idp.entity.SecretKeyAlgorithm;
+import be.fedict.eid.idp.model.exception.KeyLoadException;
 
 /**
  * Some PKI/encryption utility methods
