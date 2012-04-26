@@ -8,7 +8,6 @@
 	xmlns:s="http://jboss.com/products/seam/taglib">
 <body>
 	<ui:composition template="/WEB-INF/template.xhtml">
-		<ui:param name="activeMenu" value="config" />
 		<ui:define name="body">
 			<h2>Configuration</h2>
 
@@ -17,7 +16,7 @@
 				<rich:tabPanel switchType="client"
 					selectedTab="#{idpConfig.selectedTab}">
 
-					<rich:tab name="tab_idp" label="IdP Default Configuration">
+					<rich:tab name="tab_idp" label="Generic">
 						<h:panelGrid columns="2">
 							<h:outputText value="Token issuer name:" />
 							<h:inputText value="#{idpConfig.issuer}" />
