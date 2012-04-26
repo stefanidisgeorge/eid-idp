@@ -116,15 +116,24 @@ public class ProtocolExitServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		LOG.debug("doGet");
-		IdentityProviderProtocolService protocolService = ProtocolEntryServlet
-				.getProtocolService(request);
+		HttpSession httpSession = request.getSession();
+		IdentityProviderProtocolService protocolService;
+		try {
+			protocolService = ProtocolEntryServlet.getProtocolService(request);
+		} catch (ServletException e) {
+			httpSession.setAttribute(
+					this.protocolErrorMessageSessionAttributeInitParam,
+					e.getMessage());
+			response.sendRedirect(request.getContextPath()
+					+ this.protocolErrorPageInitParam);
+			return;
+		}
 
 		// get optional RP from Http Session
 		RPEntity rp = (RPEntity) request.getSession().getAttribute(
 				Constants.RP_SESSION_ATTRIBUTE);
 
 		// get eID data from Http Session
-		HttpSession httpSession = request.getSession();
 		Identity identity = (Identity) httpSession
 				.getAttribute(IdentityDataMessageHandler.IDENTITY_SESSION_ATTRIBUTE);
 		Address address = (Address) httpSession
