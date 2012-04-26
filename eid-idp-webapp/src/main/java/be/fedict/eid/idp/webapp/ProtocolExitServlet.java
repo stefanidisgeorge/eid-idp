@@ -53,6 +53,7 @@ import be.fedict.eid.idp.model.AttributeServiceManager;
 import be.fedict.eid.idp.model.Constants;
 import be.fedict.eid.idp.model.CryptoUtil;
 import be.fedict.eid.idp.model.IdentityService;
+import be.fedict.eid.idp.model.Statistics;
 import be.fedict.eid.idp.spi.DefaultAttribute;
 import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
@@ -88,6 +89,9 @@ public class ProtocolExitServlet extends HttpServlet {
 
 	@EJB
 	AttributeServiceManager attributeServiceManager;
+
+	@EJB
+	private Statistics statistics;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -128,6 +132,9 @@ public class ProtocolExitServlet extends HttpServlet {
 					+ this.protocolErrorPageInitParam);
 			return;
 		}
+
+		String protocolId = protocolService.getId();
+		this.statistics.countAuthentication(protocolId);
 
 		// get optional RP from Http Session
 		RPEntity rp = (RPEntity) request.getSession().getAttribute(

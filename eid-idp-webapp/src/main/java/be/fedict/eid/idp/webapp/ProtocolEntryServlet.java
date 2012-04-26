@@ -394,7 +394,7 @@ public class ProtocolEntryServlet extends HttpServlet {
 			}
 
 			// accounting
-			accountingService.addRequest(incomingRequest.getSpDomain());
+			this.accountingService.addRequest(incomingRequest.getSpDomain());
 
 		} catch (Exception e) {
 			LOG.error("protocol error: " + e.getMessage(), e);
