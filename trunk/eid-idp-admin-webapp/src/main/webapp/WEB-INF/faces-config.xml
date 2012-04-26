@@ -8,4 +8,8 @@
 		<view-handler>com.sun.facelets.FaceletViewHandler</view-handler>
 	</application>
 
+	<lifecycle>
+		<phase-listener>be.fedict.eid.idp.admin.webapp.SessionTimeoutPhaseListener</phase-listener>
+	</lifecycle>
+
 </faces-config>
