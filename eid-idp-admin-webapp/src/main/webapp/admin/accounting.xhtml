@@ -28,7 +28,7 @@
 				</h:panelGrid>
 
 				<rich:dataTable id="data" var="item" value="#{idpAccountingList}"
-					rows="10" rendered="#{idpAccountingList.rowCount > 0}">
+					rows="20" rendered="#{idpAccountingList.rowCount > 0}">
 
 					<rich:column sortBy="#{item.domain}">
 						<f:facet name="header">Domain</f:facet>
