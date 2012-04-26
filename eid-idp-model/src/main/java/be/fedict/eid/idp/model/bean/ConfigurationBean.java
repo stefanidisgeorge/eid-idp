@@ -18,16 +18,17 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.entity.AppletConfigEntity;
-import be.fedict.eid.idp.entity.ConfigPropertyEntity;
-import be.fedict.eid.idp.model.ConfigProperty;
-import be.fedict.eid.idp.model.Configuration;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.LinkedList;
-import java.util.List;
+
+import be.fedict.eid.idp.entity.AppletConfigEntity;
+import be.fedict.eid.idp.entity.ConfigPropertyEntity;
+import be.fedict.eid.idp.model.ConfigProperty;
+import be.fedict.eid.idp.model.Configuration;
 
 @Stateless
 public class ConfigurationBean implements Configuration {

@@ -18,13 +18,18 @@
 
 package be.fedict.eid.idp.sp.protocol.openid;
 
-import com.google.inject.internal.AbstractIterator;
-import org.openid4java.message.*;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.openid4java.message.MessageException;
+import org.openid4java.message.MessageExtension;
+import org.openid4java.message.MessageExtensionFactory;
+import org.openid4java.message.Parameter;
+import org.openid4java.message.ParameterList;
+
+import com.google.inject.internal.AbstractIterator;
 
 /**
  * OpenID User Interface Extension v1.0

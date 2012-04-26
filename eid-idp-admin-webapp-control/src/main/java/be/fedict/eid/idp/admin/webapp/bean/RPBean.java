@@ -18,6 +18,40 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.Remove;
+import javax.ejb.Stateful;
+import javax.faces.model.SelectItem;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.io.FileUtils;
+import org.jboss.ejb3.annotation.LocalBinding;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.Begin;
+import org.jboss.seam.annotations.Destroy;
+import org.jboss.seam.annotations.End;
+import org.jboss.seam.annotations.Factory;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Out;
+import org.jboss.seam.annotations.datamodel.DataModel;
+import org.jboss.seam.annotations.datamodel.DataModelSelection;
+import org.jboss.seam.faces.FacesMessages;
+import org.jboss.seam.log.Log;
+import org.richfaces.event.UploadEvent;
+import org.richfaces.model.UploadItem;
+
 import be.fedict.eid.idp.admin.webapp.AdminConstants;
 import be.fedict.eid.idp.admin.webapp.RP;
 import be.fedict.eid.idp.entity.AttributeEntity;
@@ -28,31 +62,6 @@ import be.fedict.eid.idp.model.AttributeService;
 import be.fedict.eid.idp.model.CryptoUtil;
 import be.fedict.eid.idp.model.RPService;
 import be.fedict.eid.idp.model.exception.KeyLoadException;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.io.FileUtils;
-import org.jboss.ejb3.annotation.LocalBinding;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.datamodel.DataModel;
-import org.jboss.seam.annotations.datamodel.DataModelSelection;
-import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.log.Log;
-import org.richfaces.event.UploadEvent;
-import org.richfaces.model.UploadItem;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.Remove;
-import javax.ejb.Stateful;
-import javax.faces.model.SelectItem;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.PublicKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.LinkedList;
-import java.util.List;
 
 @Stateful
 @Name("idpRP")

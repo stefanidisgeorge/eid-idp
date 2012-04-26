@@ -18,11 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.ws_federation;
 
-import be.fedict.eid.idp.common.ServiceLocator;
-import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
-import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -30,7 +26,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.common.ServiceLocator;
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationResponseService;
 
 /**
  * WS-Federation Authentication Response Servlet.

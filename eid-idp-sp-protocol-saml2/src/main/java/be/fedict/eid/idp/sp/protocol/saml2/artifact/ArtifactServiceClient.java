@@ -18,6 +18,41 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.artifact;
 
+import java.net.ProxySelector;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.xml.bind.JAXBElement;
+import javax.xml.ws.Binding;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.soap.SOAPHandler;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opensaml.saml2.core.Artifact;
+import org.opensaml.saml2.core.ArtifactResolve;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.StatusCode;
+
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.saml2.ws.ArtifactService;
 import be.fedict.eid.idp.saml2.ws.ArtifactServiceFactory;
@@ -27,25 +62,8 @@ import be.fedict.eid.idp.saml2.ws.jaxb.ArtifactResolveType;
 import be.fedict.eid.idp.saml2.ws.jaxb.ArtifactResponseType;
 import be.fedict.eid.idp.saml2.ws.jaxb.ResponseType;
 import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseProcessorException;
-import com.sun.xml.ws.developer.JAXWSProperties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opensaml.saml2.core.*;
 
-import javax.net.ssl.*;
-import javax.xml.bind.JAXBElement;
-import javax.xml.ws.Binding;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import java.net.ProxySelector;
-import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import com.sun.xml.ws.developer.JAXWSProperties;
 
 /**
  * Client for the SAML v2.0 HTTP-Artifact Binding Web Service.

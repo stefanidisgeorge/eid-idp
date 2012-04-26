@@ -18,6 +18,26 @@
 
 package be.fedict.eid.idp.webapp;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletRegistration.Dynamic;
+import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.xml.sax.EntityResolver;
+
 import be.fedict.eid.idp.entity.AttributeEntity;
 import be.fedict.eid.idp.model.AttributeService;
 import be.fedict.eid.idp.model.AttributeServiceManager;
@@ -28,7 +48,12 @@ import be.fedict.eid.idp.spi.DefaultAttribute;
 import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
 import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 import be.fedict.eid.idp.spi.attribute.IdentityProviderAttributeType;
-import be.fedict.eid.idp.spi.protocol.*;
+import be.fedict.eid.idp.spi.protocol.EndpointType;
+import be.fedict.eid.idp.spi.protocol.EndpointsType;
+import be.fedict.eid.idp.spi.protocol.IdentityProviderProtocolType;
+import be.fedict.eid.idp.spi.protocol.WSEndpointType;
+import be.fedict.eid.idp.spi.protocol.WSEndpointsType;
+
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.Container;
@@ -38,26 +63,12 @@ import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.ResourceLoader;
-import com.sun.xml.ws.transport.http.servlet.*;
+import com.sun.xml.ws.transport.http.servlet.JAXWSRIDeploymentProbeProvider;
+import com.sun.xml.ws.transport.http.servlet.ServletAdapter;
+import com.sun.xml.ws.transport.http.servlet.ServletAdapterList;
+import com.sun.xml.ws.transport.http.servlet.WSServlet;
+import com.sun.xml.ws.transport.http.servlet.WSServletDelegate;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.EntityResolver;
-
-import javax.ejb.EJB;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletRegistration.Dynamic;
-import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class IdentityProviderServletContextListener implements
 		ServletContextListener {

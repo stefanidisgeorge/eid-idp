@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.spi;
 
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-
-import javax.crypto.SecretKey;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.crypto.SecretKey;
+
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 
 /**
  * SAML v2.0 SPI for authentication response services.

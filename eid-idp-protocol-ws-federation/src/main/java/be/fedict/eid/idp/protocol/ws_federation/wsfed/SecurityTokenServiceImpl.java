@@ -1,14 +1,33 @@
+/*
+ * eID Identity Provider Project.
+ * Copyright (C) 2010-2012 FedICT.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License version
+ * 3.0 as published by the Free Software Foundation.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, see
+ * http://www.gnu.org/licenses/.
+ */
+
 package be.fedict.eid.idp.protocol.ws_federation.wsfed;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.xml.namespace.QName;
 
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.impl.RoleDescriptorImpl;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.util.XMLObjectChildrenList;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class SecurityTokenServiceImpl extends RoleDescriptorImpl implements
 		SecurityTokenService {

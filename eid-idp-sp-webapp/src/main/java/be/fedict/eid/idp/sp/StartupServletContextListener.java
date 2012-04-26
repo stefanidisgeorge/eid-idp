@@ -18,17 +18,22 @@
 
 package be.fedict.eid.idp.sp;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NameClassPair;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import be.fedict.eid.idp.sp.openid.OpenIDAuthenticationRequestServiceBean;
 import be.fedict.eid.idp.sp.saml2.AuthenticationRequestServiceBean;
 import be.fedict.eid.idp.sp.saml2.AuthenticationResponseServiceBean;
 import be.fedict.eid.idp.sp.wsfed.WSFedAuthenticationRequestServiceBean;
 import be.fedict.eid.idp.sp.wsfed.WSFedAuthenticationResponseServiceBean;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.naming.*;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 
 public class StartupServletContextListener implements ServletContextListener {
 

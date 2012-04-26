@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.protocol.saml2.artifact;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.opensaml.saml2.metadata.EntityDescriptor;
+
 import be.fedict.eid.idp.protocol.saml2.AbstractSAML2ProtocolService;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class SAML2ProtocolServiceIdent extends
 		AbstractSAML2ArtifactProtocolService {

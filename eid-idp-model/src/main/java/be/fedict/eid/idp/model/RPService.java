@@ -18,10 +18,11 @@
 
 package be.fedict.eid.idp.model;
 
-import be.fedict.eid.idp.entity.RPEntity;
+import java.util.List;
 
 import javax.ejb.Local;
-import java.util.List;
+
+import be.fedict.eid.idp.entity.RPEntity;
 
 @Local
 public interface RPService {

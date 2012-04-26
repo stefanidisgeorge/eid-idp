@@ -18,8 +18,9 @@
 
 package be.fedict.eid.idp.protocol.saml2.post;
 
-import be.fedict.eid.idp.protocol.saml2.AbstractSAML2MetadataHttpServlet;
 import org.opensaml.common.xml.SAMLConstants;
+
+import be.fedict.eid.idp.protocol.saml2.AbstractSAML2MetadataHttpServlet;
 
 public class SAML2MetadataHttpServletAuth extends
 		AbstractSAML2MetadataHttpServlet {

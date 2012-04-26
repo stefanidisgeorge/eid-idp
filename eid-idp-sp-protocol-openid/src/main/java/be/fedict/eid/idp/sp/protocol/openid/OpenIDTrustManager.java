@@ -18,23 +18,24 @@
 
 package be.fedict.eid.idp.sp.protocol.openid;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * OpenID Trust Manager to install to override the default set of trusted SSL
  * certificates. Used by {@link OpenIDSSLSocketFactory}.
  * 
- * @author Wim Vandenhaute
+ * @author Frank Cornelis
  */
 public class OpenIDTrustManager implements X509TrustManager {
 

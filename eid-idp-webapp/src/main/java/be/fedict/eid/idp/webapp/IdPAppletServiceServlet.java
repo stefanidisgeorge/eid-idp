@@ -18,15 +18,17 @@
 
 package be.fedict.eid.idp.webapp;
 
-import be.fedict.eid.applet.service.AppletServiceServlet;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.applet.service.AppletServiceServlet;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 
 public class IdPAppletServiceServlet extends AppletServiceServlet {
 

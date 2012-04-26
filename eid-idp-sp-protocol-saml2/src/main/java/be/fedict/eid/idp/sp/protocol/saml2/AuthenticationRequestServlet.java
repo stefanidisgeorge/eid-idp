@@ -18,11 +18,8 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2;
 
-import be.fedict.eid.idp.common.ServiceLocator;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opensaml.saml2.core.AuthnRequest;
+import java.io.IOException;
+import java.security.KeyStore;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -30,8 +27,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.security.KeyStore;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opensaml.saml2.core.AuthnRequest;
+
+import be.fedict.eid.idp.common.ServiceLocator;
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
 
 /**
  * Generates and sends out a SAML v2.0 Authentication Request.
@@ -54,6 +56,7 @@ import java.security.KeyStore;
  * available, else the browser's locale will be used).</li>
  * </ul>
  * 
+ * @author Frank Cornelis
  * @author Wim Vandenhaute
  */
 public class AuthenticationRequestServlet extends HttpServlet {

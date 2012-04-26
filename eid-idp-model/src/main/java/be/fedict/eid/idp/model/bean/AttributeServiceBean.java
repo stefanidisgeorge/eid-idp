@@ -18,17 +18,23 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.entity.*;
-import be.fedict.eid.idp.model.AttributeService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.entity.AttributeProtocolUriEntity;
+import be.fedict.eid.idp.entity.AttributeProtocolUriPK;
+import be.fedict.eid.idp.entity.RPAttributeEntity;
+import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.model.AttributeService;
 
 @Stateless
 public class AttributeServiceBean implements AttributeService {

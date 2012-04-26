@@ -18,13 +18,14 @@
 
 package be.fedict.eid.idp.common.saml2;
 
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import java.io.Serializable;
+import java.util.Map;
+
 import org.apache.commons.codec.binary.Base64;
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Assertion;
 
-import java.io.Serializable;
-import java.util.Map;
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 
 /**
  * SAML2 Authentication Response DO containing all available information of the

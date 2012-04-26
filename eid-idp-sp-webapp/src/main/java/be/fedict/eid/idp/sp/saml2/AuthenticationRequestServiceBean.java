@@ -18,14 +18,15 @@
 
 package be.fedict.eid.idp.sp.saml2;
 
-import be.fedict.eid.idp.sp.PkiServlet;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.Serializable;
 import java.security.KeyStore;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.sp.PkiServlet;
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationRequestService;
 
 public class AuthenticationRequestServiceBean implements
 		AuthenticationRequestService, Serializable {

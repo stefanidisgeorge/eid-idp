@@ -18,15 +18,16 @@
 
 package be.fedict.eid.idp.spi;
 
-import be.fedict.eid.idp.common.Attribute;
+import java.security.PublicKey;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.security.PublicKey;
-import java.util.Map;
+
+import be.fedict.eid.idp.common.Attribute;
 
 /**
  * eID IdP Service Provider Interface for an identification/authentication

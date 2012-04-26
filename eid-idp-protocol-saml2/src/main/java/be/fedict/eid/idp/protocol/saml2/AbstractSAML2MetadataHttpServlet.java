@@ -18,11 +18,15 @@
 
 package be.fedict.eid.idp.protocol.saml2;
 
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.spi.IdPIdentity;
-import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
-import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.TransformerException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.DefaultBootstrap;
@@ -30,13 +34,11 @@ import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.xml.ConfigurationException;
 import org.w3c.dom.Element;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
-import java.io.OutputStream;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.spi.IdPIdentity;
+import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IdentityProviderConfigurationFactory;
+import be.fedict.eid.idp.spi.IdentityProviderProtocolService;
 
 public abstract class AbstractSAML2MetadataHttpServlet extends HttpServlet {
 

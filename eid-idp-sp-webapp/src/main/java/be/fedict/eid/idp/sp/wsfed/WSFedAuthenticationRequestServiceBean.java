@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.sp.wsfed;
 
-import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationRequestService;
+import java.io.Serializable;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.Serializable;
-import java.util.Map;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationRequestService;
 
 public class WSFedAuthenticationRequestServiceBean implements
 		AuthenticationRequestService, Serializable {

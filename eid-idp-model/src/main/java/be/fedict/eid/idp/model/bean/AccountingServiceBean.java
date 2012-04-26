@@ -18,15 +18,17 @@
 
 package be.fedict.eid.idp.model.bean;
 
-import be.fedict.eid.idp.entity.AccountingEntity;
-import be.fedict.eid.idp.model.AccountingService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.entity.AccountingEntity;
+import be.fedict.eid.idp.model.AccountingService;
 
 @Stateless
 public class AccountingServiceBean implements AccountingService {

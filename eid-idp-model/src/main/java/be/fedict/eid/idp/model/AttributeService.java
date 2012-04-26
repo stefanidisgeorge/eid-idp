@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.model;
 
+import java.util.List;
+
+import javax.ejb.Local;
+
 import be.fedict.eid.idp.entity.AttributeEntity;
 import be.fedict.eid.idp.entity.AttributeProtocolUriEntity;
 import be.fedict.eid.idp.entity.RPEntity;
-
-import javax.ejb.Local;
-import java.util.List;
 
 @Local
 public interface AttributeService {

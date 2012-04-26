@@ -18,7 +18,6 @@
 
 package be.fedict.eid.idp.protocol.saml2.artifact;
 
-import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.common.binding.SAMLMessageContext;
@@ -26,6 +25,8 @@ import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.ws.message.MessageContext;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.http.HTTPTransportUtils;
+
+import be.fedict.eid.idp.protocol.saml2.HTTPOutTransport;
 
 public class HTTPArtifactEncoder extends
 		org.opensaml.saml2.binding.encoding.HTTPArtifactEncoder {

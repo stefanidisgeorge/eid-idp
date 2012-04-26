@@ -18,13 +18,13 @@
 
 package be.fedict.eid.idp.sp.protocol.saml2.post;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
 import be.fedict.eid.idp.common.ServiceLocator;
 import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseProcessor;
 import be.fedict.eid.idp.sp.protocol.saml2.AbstractAuthenticationResponseServlet;
 import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 /**
  * Processes the response of the SAML v2.0 protocol with HTTP Post binding.

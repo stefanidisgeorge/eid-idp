@@ -18,7 +18,6 @@
 
 package be.fedict.eid.idp.protocol.saml2.post;
 
-import be.fedict.eid.idp.protocol.saml2.post.AbstractSAML2BrowserPostProtocolService;
 import be.fedict.eid.idp.spi.IdentityProviderFlow;
 
 public class SAML2ProtocolServiceAuth extends

@@ -20,8 +20,6 @@ package be.fedict.eid.idp.protocol.openid;
 
 import java.util.List;
 
-import be.fedict.eid.idp.protocol.openid.AbstractOpenIDIdentityHttpServlet;
-
 public class OpenIDIdentityHttpServletIdent extends
 		AbstractOpenIDIdentityHttpServlet {
 

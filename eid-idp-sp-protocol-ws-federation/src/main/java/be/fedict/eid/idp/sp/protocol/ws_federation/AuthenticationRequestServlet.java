@@ -18,10 +18,7 @@
 
 package be.fedict.eid.idp.sp.protocol.ws_federation;
 
-import be.fedict.eid.idp.common.ServiceLocator;
-import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationRequestService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -29,7 +26,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import be.fedict.eid.idp.common.ServiceLocator;
+import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationRequestService;
 
 /**
  * Generates and sends out a WS-Federation SignIn request.

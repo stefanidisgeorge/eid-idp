@@ -18,30 +18,36 @@
 
 package be.fedict.eid.idp.webapp;
 
-import be.fedict.eid.idp.entity.AttributeEntity;
-import be.fedict.eid.idp.entity.RPAttributeEntity;
-import be.fedict.eid.idp.entity.RPEntity;
-import be.fedict.eid.idp.model.AttributeService;
-import be.fedict.eid.idp.model.Constants;
-import org.jboss.ejb3.annotation.LocalBinding;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.datamodel.DataModel;
-import org.jboss.seam.contexts.SessionContext;
-import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.international.LocaleSelector;
-import org.jboss.seam.log.Log;
-
-import javax.ejb.EJB;
-import javax.ejb.Remove;
-import javax.ejb.Stateful;
-import javax.faces.context.FacesContext;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+
+import javax.ejb.EJB;
+import javax.ejb.Remove;
+import javax.ejb.Stateful;
+import javax.faces.context.FacesContext;
+
+import org.jboss.ejb3.annotation.LocalBinding;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.Destroy;
+import org.jboss.seam.annotations.Factory;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.datamodel.DataModel;
+import org.jboss.seam.contexts.SessionContext;
+import org.jboss.seam.faces.FacesMessages;
+import org.jboss.seam.international.LocaleSelector;
+import org.jboss.seam.log.Log;
+
+import be.fedict.eid.idp.entity.AttributeEntity;
+import be.fedict.eid.idp.entity.RPAttributeEntity;
+import be.fedict.eid.idp.entity.RPEntity;
+import be.fedict.eid.idp.model.AttributeService;
+import be.fedict.eid.idp.model.Constants;
 
 @Stateful
 @Name("idpSP")

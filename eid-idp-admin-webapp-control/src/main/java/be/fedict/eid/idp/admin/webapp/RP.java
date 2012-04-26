@@ -18,14 +18,15 @@
 
 package be.fedict.eid.idp.admin.webapp;
 
-import org.richfaces.event.UploadEvent;
-
-import javax.ejb.Local;
-import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.PublicKey;
 import java.util.List;
+
+import javax.ejb.Local;
+import javax.faces.model.SelectItem;
+
+import org.richfaces.event.UploadEvent;
 
 @Local
 public interface RP {

@@ -18,18 +18,18 @@
 
 package be.fedict.eid.idp.sp;
 
-import org.bouncycastle.util.encoders.Hex;
+import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
+
+import org.bouncycastle.util.encoders.Hex;
 
 public class SPBean {
 
 	public static SecretKey aes128SecretKey;
 
 	static {
-
 		try {
 			// generate some symmetric keys
 			KeyGenerator kgen = KeyGenerator.getInstance("AES");
@@ -39,11 +39,9 @@ public class SPBean {
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	public String getAes128SecretKey() {
-
 		return new String(Hex.encode(aes128SecretKey.getEncoded()));
 	}
 }

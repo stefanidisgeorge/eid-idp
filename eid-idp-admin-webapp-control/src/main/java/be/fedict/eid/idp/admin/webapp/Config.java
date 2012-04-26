@@ -18,13 +18,15 @@
 
 package be.fedict.eid.idp.admin.webapp;
 
-import be.fedict.eid.idp.entity.AppletConfigEntity;
-import org.richfaces.event.UploadEvent;
+import java.io.IOException;
+import java.util.List;
 
 import javax.ejb.Local;
 import javax.faces.model.SelectItem;
-import java.io.IOException;
-import java.util.List;
+
+import org.richfaces.event.UploadEvent;
+
+import be.fedict.eid.idp.entity.AppletConfigEntity;
 
 @Local
 public interface Config {

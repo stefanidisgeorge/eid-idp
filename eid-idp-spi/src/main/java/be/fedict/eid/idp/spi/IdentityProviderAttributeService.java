@@ -18,10 +18,11 @@
 
 package be.fedict.eid.idp.spi;
 
-import be.fedict.eid.idp.common.Attribute;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
-import java.util.Map;
+
+import be.fedict.eid.idp.common.Attribute;
 
 /**
  * eID IdP Service Attribute Interface for derived attributes.

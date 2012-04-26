@@ -18,10 +18,15 @@
 
 package be.fedict.eid.idp.protocol.saml2.artifact;
 
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.saml2.ws.ArtifactServicePortType;
-import be.fedict.eid.idp.saml2.ws.jaxb.ArtifactResolveType;
-import be.fedict.eid.idp.saml2.ws.jaxb.ArtifactResponseType;
+import java.util.UUID;
+
+import javax.annotation.Resource;
+import javax.jws.HandlerChain;
+import javax.jws.WebService;
+import javax.servlet.ServletContext;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -32,13 +37,10 @@ import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.saml2.core.StatusMessage;
 
-import javax.annotation.Resource;
-import javax.jws.HandlerChain;
-import javax.jws.WebService;
-import javax.servlet.ServletContext;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.MessageContext;
-import java.util.UUID;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.saml2.ws.ArtifactServicePortType;
+import be.fedict.eid.idp.saml2.ws.jaxb.ArtifactResolveType;
+import be.fedict.eid.idp.saml2.ws.jaxb.ArtifactResponseType;
 
 @WebService(endpointInterface = "be.fedict.eid.idp.saml2.ws.ArtifactServicePortType")
 @HandlerChain(file = "ws-handlers.xml")

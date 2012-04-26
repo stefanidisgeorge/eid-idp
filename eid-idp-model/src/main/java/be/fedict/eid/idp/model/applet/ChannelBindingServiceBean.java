@@ -18,15 +18,17 @@
 
 package be.fedict.eid.idp.model.applet;
 
-import be.fedict.eid.applet.service.spi.ChannelBindingService;
-import be.fedict.eid.idp.model.Configuration;
-import be.fedict.eid.idp.model.Constants;
-import org.jboss.ejb3.annotation.LocalBinding;
+import java.security.cert.X509Certificate;
 
 import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
-import java.security.cert.X509Certificate;
+
+import org.jboss.ejb3.annotation.LocalBinding;
+
+import be.fedict.eid.applet.service.spi.ChannelBindingService;
+import be.fedict.eid.idp.model.Configuration;
+import be.fedict.eid.idp.model.Constants;
 
 /**
  * eID Applet Channel Binding Service implementation.

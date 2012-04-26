@@ -18,14 +18,22 @@
 
 package test.unit.be.fedict.eid.idp.sp.protocol.saml2;
 
-import be.fedict.eid.idp.common.Attribute;
-import be.fedict.eid.idp.common.AttributeType;
-import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
-import be.fedict.eid.idp.common.saml2.Saml2Util;
-import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseProcessorException;
-import be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseProcessor;
-import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.utils.Base64;
@@ -34,19 +42,22 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.OneTimeUse;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.saml2.core.SubjectConfirmation;
 import org.opensaml.xml.util.IndexedXMLObjectChildrenList;
 import org.w3c.dom.Element;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.namespace.QName;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import be.fedict.eid.idp.common.Attribute;
+import be.fedict.eid.idp.common.AttributeType;
+import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
+import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
+import be.fedict.eid.idp.common.saml2.Saml2Util;
+import be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseProcessorException;
+import be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseProcessor;
+import be.fedict.eid.idp.sp.protocol.saml2.spi.AuthenticationResponseService;
 
 public class AuthenticationResponseProcessorTest {
 

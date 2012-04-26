@@ -18,12 +18,13 @@
 
 package be.fedict.eid.idp.model;
 
+import java.util.List;
+
+import javax.ejb.Local;
+
 import be.fedict.eid.idp.model.exception.KeyStoreLoadException;
 import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
-
-import javax.ejb.Local;
-import java.util.List;
 
 @Local
 public interface IdentityService extends IdentityProviderConfiguration {

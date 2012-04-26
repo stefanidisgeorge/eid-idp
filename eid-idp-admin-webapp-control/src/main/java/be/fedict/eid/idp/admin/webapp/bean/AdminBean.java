@@ -18,25 +18,32 @@
 
 package be.fedict.eid.idp.admin.webapp.bean;
 
-import be.fedict.eid.idp.admin.webapp.Admin;
-import be.fedict.eid.idp.admin.webapp.AdminConstants;
-import be.fedict.eid.idp.entity.AdministratorEntity;
-import be.fedict.eid.idp.model.admin.AdminManager;
-import be.fedict.eid.idp.model.exception.RemoveLastAdminException;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.Remove;
+import javax.ejb.Stateful;
+
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.Destroy;
+import org.jboss.seam.annotations.Factory;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Out;
 import org.jboss.seam.annotations.datamodel.DataModel;
 import org.jboss.seam.annotations.datamodel.DataModelSelection;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.international.StatusMessage;
 import org.jboss.seam.log.Log;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.Remove;
-import javax.ejb.Stateful;
-import java.util.List;
+import be.fedict.eid.idp.admin.webapp.Admin;
+import be.fedict.eid.idp.admin.webapp.AdminConstants;
+import be.fedict.eid.idp.entity.AdministratorEntity;
+import be.fedict.eid.idp.model.admin.AdminManager;
+import be.fedict.eid.idp.model.exception.RemoveLastAdminException;
 
 @Stateful
 @Name("idpAdmin")
