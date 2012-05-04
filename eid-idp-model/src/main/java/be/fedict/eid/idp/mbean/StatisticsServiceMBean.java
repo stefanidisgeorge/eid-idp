@@ -18,11 +18,11 @@
 
 package be.fedict.eid.idp.mbean;
 
-import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
 
 public interface StatisticsServiceMBean {
 
-	CompositeData getProtocolStatistics();
+	CompositeDataSupport getProtocolStatistics();
 
 	long getTotalAuthenticationCount();
 }
