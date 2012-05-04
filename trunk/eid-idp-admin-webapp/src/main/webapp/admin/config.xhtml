@@ -28,9 +28,6 @@
 									size="50" />
 								<h:message for="hmacsecret" styleClass="error" />
 							</s:decorate>
-
-							<h:outputText value="Response token validity (minutes): " />
-							<h:inputText value="#{idpConfig.tokenValidity}" size="10" />
 						</h:panelGrid>
 						<h:commandButton value="Save" action="#{idpConfig.saveIdP}" />
 					</rich:tab>
@@ -101,6 +98,17 @@
 									value="#{idpConfig.appletConfig.serverCertificate}" />
 							</rich:simpleTogglePanel>
 						</p>
+					</rich:tab>
+
+					<rich:tab name="tab_security" label="Security">
+						<h:panelGrid columns="2">
+							<h:outputText value="Response token validity (minutes): " />
+							<h:inputText value="#{idpConfig.tokenValidity}" size="10" />
+
+							<h:outputLabel for="hsts" value="HTTP Strict Transport Security" />
+							<h:selectBooleanCheckbox id="hsts" value="#{idpConfig.hsts}" />
+						</h:panelGrid>
+						<h:commandButton value="Save" action="#{idpConfig.saveSecurity}" />
 					</rich:tab>
 
 				</rich:tabPanel>

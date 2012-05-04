@@ -81,12 +81,13 @@ public class ConfigBean implements Config {
 	private byte[] certificateBytes;
 
 	enum ConfigurationTab {
-		tab_xkms, tab_idp, tab_network, tab_applet
+		tab_xkms, tab_idp, tab_network, tab_applet, tab_security
 	}
 
 	private String issuer;
 	private String hmacSecret;
 	private Integer tokenValidity;
+	private Boolean hsts;
 
 	private String xkmsUrl;
 	private String xkmsAuthTrustDomain;
@@ -109,8 +110,12 @@ public class ConfigBean implements Config {
 				String.class);
 		this.hmacSecret = this.configuration.getValue(
 				ConfigProperty.HMAC_SECRET, String.class);
+
+		// Security Config
 		this.tokenValidity = this.configuration.getValue(
 				ConfigProperty.TOKEN_VALIDITY, Integer.class);
+		this.hsts = this.configuration.getValue(ConfigProperty.HSTS,
+				Boolean.class);
 
 		// XKMS Config
 		this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
@@ -166,8 +171,6 @@ public class ConfigBean implements Config {
 
 		// IdP Config
 		this.configuration.setValue(ConfigProperty.ISSUER, this.issuer);
-		this.configuration.setValue(ConfigProperty.TOKEN_VALIDITY,
-				this.tokenValidity);
 
 		// check valid secret
 		if (null != this.hmacSecret && !this.hmacSecret.trim().isEmpty()) {
@@ -417,5 +420,24 @@ public class ConfigBean implements Config {
 	@Override
 	public void setTransactionMessageSigning(Boolean transactionMessageSigning) {
 		this.transactionMessageSigning = transactionMessageSigning;
+	}
+
+	@Override
+	public Boolean getHsts() {
+		return this.hsts;
+	}
+
+	@Override
+	public void setHsts(Boolean hsts) {
+		this.hsts = hsts;
+	}
+
+	@Override
+	public String saveSecurity() {
+		this.configuration.setValue(ConfigProperty.TOKEN_VALIDITY,
+				this.tokenValidity);
+		this.configuration.setValue(ConfigProperty.HSTS, this.hsts);
+		this.selectedTab = ConfigurationTab.tab_security.name();
+		return "success";
 	}
 }
