@@ -21,7 +21,7 @@ package be.fedict.eid.idp.mbean;
 import java.util.Map;
 
 import javax.ejb.EJB;
-import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
@@ -40,27 +40,28 @@ public class StatisticsService implements StatisticsServiceMBean {
 	private Statistics statistics;
 
 	@Override
-	public CompositeData getProtocolStatistics() {
+	public CompositeDataSupport getProtocolStatistics() {
 		Map<String, Long> protocolStatistics = this.statistics
 				.getProtocolStatistics();
-		String[] protocolIds = protocolStatistics.keySet().toArray(
-				new String[] {});
-		OpenType[] itemTypes = new OpenType[protocolIds.length];
-		for (int idx = 0; idx < itemTypes.length; idx++) {
-			itemTypes[idx] = SimpleType.LONG;
-		}
-		CompositeType compositeType;
 		try {
-			compositeType = new CompositeType("ProtocolStatistics",
-					"Statistics per authentication protocol.", protocolIds,
-					protocolIds, itemTypes);
+			String[] itemNames = protocolStatistics.keySet().toArray(
+					new String[] {});
+			OpenType<?>[] itemTypes = new OpenType<?>[itemNames.length];
+			Object[] itemValues = new Object[itemNames.length];
+			for (int idx = 0; idx < itemTypes.length; idx++) {
+				itemTypes[idx] = SimpleType.LONG;
+				itemValues[idx] = protocolStatistics.get(itemNames[idx]);
+			}
+			CompositeType compositeType = new CompositeType(
+					"ProtocolStatistic", "A row with protocol statistics.",
+					itemNames, itemNames, itemTypes);
+
+			CompositeDataSupport compositeData = new CompositeDataSupport(
+					compositeType, itemNames, itemValues);
+			return compositeData;
 		} catch (OpenDataException e) {
 			return null;
 		}
-		// TODO
-		// CompositeDataSupport compositeDataSupport = new
-		// CompositeDataSupport(compositeType, null);
-		return null;
 	}
 
 	@Override
