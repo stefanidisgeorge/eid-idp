@@ -27,7 +27,7 @@ package be.fedict.eid.idp.model;
 public enum ConfigProperty {
 
 	ISSUER("default-issuer", String.class), TOKEN_VALIDITY("token-validity",
-			Integer.class),
+			Integer.class), HSTS("hsts", Boolean.class),
 
 	XKMS_URL("xkms-url", String.class), XKMS_AUTH_TRUST_DOMAIN(
 			"xkms-auth-trust-domain", String.class), XKMS_IDENT_TRUST_DOMAIN(

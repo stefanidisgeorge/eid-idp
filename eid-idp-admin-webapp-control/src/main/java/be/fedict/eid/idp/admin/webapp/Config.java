@@ -86,6 +86,10 @@ public interface Config {
 
 	void setTransactionMessageSigning(Boolean transactionMessageSigning);
 
+	Boolean getHsts();
+
+	void setHsts(Boolean hsts);
+
 	/*
 	 * Listeners.
 	 */
@@ -108,6 +112,8 @@ public interface Config {
 	String saveApplet();
 
 	String removeApplet();
+
+	String saveSecurity();
 
 	/*
 	 * Lifecycle.

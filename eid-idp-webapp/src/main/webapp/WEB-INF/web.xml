@@ -104,6 +104,20 @@
         <servlet-name>ProtocolEntryServlet</servlet-name>
         <url-pattern>/protocol/*</url-pattern>
     </servlet-mapping>
+    
+    <!-- HSTS filter -->
+    <filter>
+    	<filter-name>HSTSFilter</filter-name>
+    	<filter-class>be.fedict.eid.applet.service.HSTSFilter</filter-class>
+    	<init-param>
+    		<param-name>TransportService</param-name>
+    		<param-value>be/fedict/eid/idp/TransportServiceBean</param-value>
+    	</init-param>
+    </filter>
+    <filter-mapping>
+    	<filter-name>HSTSFilter</filter-name>
+    	<servlet-name>ProtocolEntryServlet</servlet-name>
+    </filter-mapping>
 
     <!-- IdP protocol exit point -->
     <servlet>
