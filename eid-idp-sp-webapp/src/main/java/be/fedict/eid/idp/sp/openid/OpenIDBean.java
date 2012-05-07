@@ -55,6 +55,17 @@ public class OpenIDBean {
 								+ spResponseEndpoint);
 	}
 
+	public void setPreferredLanguages(String preferredLanguages) {
+		LOG.debug("set preferred languages: " + preferredLanguages);
+		OpenIDAuthenticationRequestServiceBean requestServiceBean = StartupServletContextListener
+				.getOpenIDRequestBean();
+		if (preferredLanguages.isEmpty()) {
+			requestServiceBean.setPreferredLanguages(null);
+		} else {
+			requestServiceBean.setPreferredLanguages(preferredLanguages);
+		}
+	}
+
 	public HttpServletRequest getRequest() {
 		return request;
 	}

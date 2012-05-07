@@ -16,6 +16,7 @@
 		value="openid/ident" />
 	<jsp:setProperty name="openid" property="spResponseEndpoint"
 		value="openid-landing" />
+	<jsp:setProperty name="openid" property="preferredLanguages" value="nl" />
 	<c:redirect url="../openid-request" />
 
 </body>

@@ -348,10 +348,11 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			/*
 			 * Piggy back UI Extension if any languages were specified
 			 */
-			UserInterfaceMessage uiMessage = new UserInterfaceMessage();
-			uiMessage.setLanguages(languages);
-
-			authRequest.addExtension(uiMessage);
+			if (null != languages) {
+				UserInterfaceMessage uiMessage = new UserInterfaceMessage();
+				uiMessage.setLanguages(languages);
+				authRequest.addExtension(uiMessage);
+			}
 
 			LOG.debug("redirecting to producer with authn request...");
 			response.sendRedirect(authRequest.getDestinationUrl(true));
