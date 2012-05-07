@@ -35,6 +35,7 @@ public class OpenIDAuthenticationRequestServiceBean implements
 
 	private String idPEntryPoint;
 	private String spResponseEndpoint;
+	private String preferredLanguages;
 
 	@Override
 	public String getSPDestination() {
@@ -57,8 +58,7 @@ public class OpenIDAuthenticationRequestServiceBean implements
 
 	@Override
 	public String getPreferredLanguages() {
-
-		return "nl";
+		return this.preferredLanguages;
 	}
 
 	public String getIdPEntryPoint() {
@@ -75,5 +75,9 @@ public class OpenIDAuthenticationRequestServiceBean implements
 
 	public void setSpResponseEndpoint(String spResponseEndpoint) {
 		this.spResponseEndpoint = spResponseEndpoint;
+	}
+
+	public void setPreferredLanguages(String preferredLanguages) {
+		this.preferredLanguages = preferredLanguages;
 	}
 }
