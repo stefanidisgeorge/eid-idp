@@ -17,6 +17,8 @@
 		value="wsfed-landing" />
 	<jsp:setProperty name="wsfed" property="idPValidationService"
 		value="ws/sts" />
+	<jsp:setProperty name="wsfed" property="spRealm"
+		value="urn:be:fedict:eid:idp:realm:test" />
 	<c:redirect url="../wsfed-request" />
 
 </body>

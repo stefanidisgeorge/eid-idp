@@ -44,7 +44,7 @@ import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationRequestServ
  * SP response handling location, SP identity for signing the authentication
  * request, context, language</li>
  * </ul>
- * or by provinding:
+ * or by providing:
  * <ul>
  * <li><tt>SPDestination</tt> or <tt>SPDestinationPage</tt>: Service Provider
  * destination that will handle the returned WS-Fedearation response. One of the
@@ -55,6 +55,7 @@ import be.fedict.eid.idp.sp.protocol.ws_federation.spi.AuthenticationRequestServ
  * </ul>
  * 
  * @author Wim Vandenhaute
+ * @author Frank Cornelis
  */
 public class AuthenticationRequestServlet extends HttpServlet {
 	private static final long serialVersionUID = -2118698465810671071L;
@@ -70,12 +71,14 @@ public class AuthenticationRequestServlet extends HttpServlet {
 	private static final String AUTHN_REQUEST_SERVICE_PARAM = "AuthenticationRequestService";
 	private static final String IDP_DESTINATION_PARAM = "IdPDestination";
 	private static final String SP_DESTINATION_PARAM = "SPDestination";
+	private static final String SP_REALM_PARAM = "SPRealm";
 	private static final String SP_DESTINATION_PAGE_PARAM = SP_DESTINATION_PARAM
 			+ "Page";
 	private static final String LANGUAGE_PARAM = "Language";
 
 	private String idpDestination;
 	private String spDestination;
+	private String spRealm;
 	private String spDestinationPage;
 	private String language;
 
@@ -89,6 +92,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 
 		this.idpDestination = config.getInitParameter(IDP_DESTINATION_PARAM);
 		this.spDestination = config.getInitParameter(SP_DESTINATION_PARAM);
+		this.spRealm = config.getInitParameter(SP_REALM_PARAM);
 		this.spDestinationPage = config
 				.getInitParameter(SP_DESTINATION_PAGE_PARAM);
 		this.language = config.getInitParameter(LANGUAGE_PARAM);
@@ -126,6 +130,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		String spDestination;
 		String context;
 		String language;
+		String spRealm;
 
 		AuthenticationRequestService service = this.authenticationRequestServiceLocator
 				.locateService();
@@ -134,6 +139,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			context = service.getContext(request.getParameterMap());
 			spDestination = service.getSPDestination();
 			language = service.getLanguage();
+			spRealm = service.getSPRealm();
 		} else {
 			idpDestination = this.idpDestination;
 			context = null;
@@ -146,10 +152,17 @@ public class AuthenticationRequestServlet extends HttpServlet {
 						+ this.spDestinationPage;
 			}
 			language = this.language;
+			spRealm = this.spRealm;
 		}
 
-		String targetUrl = idpDestination + "?wa=wsignin1.0" + "&wtrealm="
-				+ spDestination;
+		String targetUrl;
+		if (null == spRealm) {
+			targetUrl = idpDestination + "?wa=wsignin1.0" + "&wtrealm="
+					+ spDestination;
+		} else {
+			targetUrl = idpDestination + "?wa=wsignin1.0" + "&wtrealm="
+					+ spRealm + "&wreply=" + spDestination;
+		}
 
 		if (null != language && !language.trim().isEmpty()) {
 			targetUrl += "&language=" + language;
@@ -162,7 +175,11 @@ public class AuthenticationRequestServlet extends HttpServlet {
 		response.sendRedirect(targetUrl);
 
 		// save state on session
-		setRecipient(spDestination, request.getSession());
+		if (null == spRealm) {
+			setRecipient(spDestination, request.getSession());
+		} else {
+			setRecipient(spRealm, request.getSession());
+		}
 		setContext(context, request.getSession());
 	}
 

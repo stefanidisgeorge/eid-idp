@@ -38,6 +38,13 @@ public interface AuthenticationRequestService {
 	String getSPDestination();
 
 	/**
+	 * Gives back the optional realm of the Service Provider.
+	 * 
+	 * @return the optional realm.
+	 */
+	String getSPRealm();
+
+	/**
 	 * Gives back the destination URL of the eID IdP SAML2 protocol entry point.
 	 * 
 	 * @return eID IdP SAML2 entry point

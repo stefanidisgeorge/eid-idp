@@ -79,6 +79,9 @@ public abstract class AbstractWSFederationProtocolService implements
 	public static final String WTREALM_SESSION_ATTRIBUTE = AbstractWSFederationProtocolService.class
 			.getName() + ".wtrealm";
 
+	public static final String WREPLY_SESSION_ATTRIBUTE = AbstractWSFederationProtocolService.class
+			.getName() + ".wreply";
+
 	public static final String LANGUAGE_PARAM = "language";
 
 	private IdentityProviderConfiguration configuration;
@@ -92,13 +95,19 @@ public abstract class AbstractWSFederationProtocolService implements
 		return (String) httpSession.getAttribute(WCTX_SESSION_ATTRIBUTE);
 	}
 
-	private void storeWtrealm(String wtrealm, HttpServletRequest request) {
+	private void storeWtrealm(String wtrealm, String wreply,
+			HttpServletRequest request) {
 		HttpSession httpSession = request.getSession();
 		httpSession.setAttribute(WTREALM_SESSION_ATTRIBUTE, wtrealm);
+		httpSession.setAttribute(WREPLY_SESSION_ATTRIBUTE, wreply);
 	}
 
 	private String retrieveWtrealm(HttpSession httpSession) {
 		return (String) httpSession.getAttribute(WTREALM_SESSION_ATTRIBUTE);
+	}
+
+	private String retreiveWreply(HttpSession httpSession) {
+		return (String) httpSession.getAttribute(WREPLY_SESSION_ATTRIBUTE);
 	}
 
 	@Override
@@ -125,23 +134,30 @@ public abstract class AbstractWSFederationProtocolService implements
 			throw new ServletException("missing wtrealm parameter");
 		}
 		LOG.debug("wtrealm: " + wtrealm);
+		String wreply = request.getParameter("wreply");
+		LOG.debug("wreply: " + wreply);
 
 		// HTTP Referer check
 		String referer = request.getHeader("referer");
 		if (null != referer) {
 
 			URL refererUrl = new URL(referer);
-			URL wtRealmUrl = new URL(wtrealm);
+			URL targetUrl;
+			if (null == wreply) {
+				targetUrl = new URL(wtrealm);
+			} else {
+				targetUrl = new URL(wreply);
+			}
 
 			LOG.debug("HTTP Referer check: referer=\"" + refererUrl.getHost()
-					+ "\" wtrealm=\"" + wtRealmUrl.getHost() + "\"");
+					+ "\" target URL=\"" + targetUrl.getHost() + "\"");
 
-			if (!refererUrl.getHost().equalsIgnoreCase(wtRealmUrl.getHost())) {
+			if (!refererUrl.getHost().equalsIgnoreCase(targetUrl.getHost())) {
 				throw new IllegalArgumentException("Invalid referer!");
 			}
 		}
 
-		storeWtrealm(wtrealm, request);
+		storeWtrealm(wtrealm, wreply, request);
 		String wctx = request.getParameter("wctx");
 		LOG.debug("wctx: " + wctx);
 		storeWCtx(wctx, request);
@@ -165,9 +181,14 @@ public abstract class AbstractWSFederationProtocolService implements
 		LOG.debug("handleReturnResponse");
 
 		String wtrealm = retrieveWtrealm(httpSession);
+		String wreply = retreiveWreply(httpSession);
 		String targetUrl = rpTargetUrl;
 		if (null == targetUrl) {
-			targetUrl = wtrealm;
+			if (null != wreply) {
+				targetUrl = wreply;
+			} else {
+				targetUrl = wtrealm;
+			}
 		}
 		ReturnResponse returnResponse = new ReturnResponse(targetUrl);
 		returnResponse.addAttribute("wa", "wsignin1.0");

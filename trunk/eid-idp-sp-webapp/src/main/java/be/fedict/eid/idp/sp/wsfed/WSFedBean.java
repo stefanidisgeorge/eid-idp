@@ -75,6 +75,13 @@ public class WSFedBean {
 		wsFedResponseBean.setExpectedAudience(fullSpResponseEndpoint);
 	}
 
+	public void setSpRealm(String spRealm) {
+		LOG.debug("set SP realm: " + spRealm);
+		WSFedAuthenticationRequestServiceBean wsFedRequestBean = StartupServletContextListener
+				.getWSFedRequestBean();
+		wsFedRequestBean.setSPRealm(spRealm);
+	}
+
 	public HttpServletRequest getRequest() {
 		return request;
 	}

@@ -158,6 +158,10 @@ public class WSFederationProtocolServiceTest {
 				.andStubReturn("http://return.to.here");
 		EasyMock.expect(
 				mockHttpSession
+						.getAttribute(AbstractWSFederationProtocolService.WREPLY_SESSION_ATTRIBUTE))
+				.andStubReturn(null);
+		EasyMock.expect(
+				mockHttpSession
 						.getAttribute(AbstractWSFederationProtocolService.WCTX_SESSION_ATTRIBUTE))
 				.andStubReturn("some-context-identifier");
 		EasyMock.expect(mockIdentityProviderConfiguration.findIdentity())
