@@ -35,6 +35,7 @@ public class WSFedAuthenticationRequestServiceBean implements
 
 	private String idPEntryPoint;
 	private String spResponseEndpoint;
+	private String spRealm;
 
 	@Override
 	public String getSPDestination() {
@@ -74,5 +75,16 @@ public class WSFedAuthenticationRequestServiceBean implements
 
 	public void setSpResponseEndpoint(String spResponseEndpoint) {
 		this.spResponseEndpoint = spResponseEndpoint;
+	}
+
+	@Override
+	public String getSPRealm() {
+		LOG.debug("get SP realm: " + this.spRealm);
+		return this.spRealm;
+	}
+
+	public void setSPRealm(String spRealm) {
+		LOG.debug("set SP realm: " + spRealm);
+		this.spRealm = spRealm;
 	}
 }
