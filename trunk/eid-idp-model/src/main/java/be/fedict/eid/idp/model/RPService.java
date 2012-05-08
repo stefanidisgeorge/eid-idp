@@ -31,7 +31,11 @@ public interface RPService {
 
 	void remove(RPEntity rp);
 
-	RPEntity save(RPEntity rp);
+	RPEntity save(RPEntity rp, Boolean overrideRemoveCard, Boolean removeCard);
+
+	Boolean getOverrideRemoveCard(RPEntity rp);
+
+	Boolean getRemoveCard(RPEntity rp);
 
 	RPEntity find(String domain);
 }

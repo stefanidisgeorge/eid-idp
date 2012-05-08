@@ -28,6 +28,7 @@ import org.jboss.ejb3.annotation.LocalBinding;
 
 import be.fedict.eid.applet.service.spi.IdentityRequest;
 import be.fedict.eid.applet.service.spi.IdentityService;
+import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.Constants;
@@ -53,8 +54,24 @@ public class AppletIdentityServiceBean implements IdentityService {
 		boolean includePhoto = false;
 		boolean includeCertificates = true;
 
-		Boolean removeCard = this.configuration.getValue(
-				ConfigProperty.REMOVE_CARD, Boolean.class);
+		RPEntity relyingPartyEntity = AppletUtil
+				.getSessionAttribute(Constants.RP_SESSION_ATTRIBUTE);
+		Boolean removeCard;
+		if (null != relyingPartyEntity) {
+			String idx = relyingPartyEntity.getId().toString();
+			Boolean overrideRemoveCard = this.configuration.getValue(
+					ConfigProperty.OVERRIDE_REMOVE_CARD, idx, Boolean.class);
+			if (null != overrideRemoveCard && true == overrideRemoveCard) {
+				removeCard = this.configuration.getValue(
+						ConfigProperty.REMOVE_CARD, idx, Boolean.class);
+			} else {
+				removeCard = this.configuration.getValue(
+						ConfigProperty.REMOVE_CARD, Boolean.class);
+			}
+		} else {
+			removeCard = this.configuration.getValue(
+					ConfigProperty.REMOVE_CARD, Boolean.class);
+		}
 		if (null == removeCard) {
 			removeCard = false;
 		}

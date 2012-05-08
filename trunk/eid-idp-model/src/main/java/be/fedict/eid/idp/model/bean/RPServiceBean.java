@@ -20,6 +20,7 @@ package be.fedict.eid.idp.model.bean;
 
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -30,6 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.entity.SecretKeyAlgorithm;
+import be.fedict.eid.idp.model.ConfigProperty;
+import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.RPService;
 
 @Stateless
@@ -40,23 +43,28 @@ public class RPServiceBean implements RPService {
 	@PersistenceContext
 	private EntityManager entityManager;
 
+	@EJB
+	private Configuration configuration;
+
 	@Override
 	public List<RPEntity> listRPs() {
-
 		return RPEntity.listRPs(this.entityManager);
 	}
 
 	@Override
 	public void remove(RPEntity rp) {
-
+		String index = rp.getId().toString();
 		RPEntity attachedRp = this.entityManager.find(RPEntity.class,
 				rp.getId());
 		this.entityManager.remove(attachedRp);
+		this.configuration.removeValue(ConfigProperty.OVERRIDE_REMOVE_CARD,
+				index);
+		this.configuration.removeValue(ConfigProperty.REMOVE_CARD, index);
 	}
 
 	@Override
-	public RPEntity save(RPEntity rp) {
-
+	public RPEntity save(RPEntity rp, Boolean overrideRemoveCard,
+			Boolean removeCard) {
 		RPEntity attachedRp = null;
 		if (null != rp.getId()) {
 			attachedRp = this.entityManager.find(RPEntity.class, rp.getId());
@@ -134,7 +142,7 @@ public class RPServiceBean implements RPService {
 						.get(attachedRp.getAttributes().indexOf(rpAttribute))
 						.setEncrypted(rpAttribute.isEncrypted());
 			}
-
+			saveExtraAttribute(attachedRp, overrideRemoveCard, removeCard);
 			return attachedRp;
 		} else {
 			// add
@@ -163,12 +171,36 @@ public class RPServiceBean implements RPService {
 						rpAttribute.getAttribute());
 				this.entityManager.persist(newRpAttribute);
 			}
+			saveExtraAttribute(rp, overrideRemoveCard, removeCard);
 			return rp;
 		}
+	}
+
+	private void saveExtraAttribute(RPEntity attachedRp,
+			Boolean overrideRemoveCard, Boolean removeCard) {
+		String idx = attachedRp.getId().toString();
+		this.configuration.setValue(ConfigProperty.OVERRIDE_REMOVE_CARD, idx,
+				overrideRemoveCard);
+		this.configuration
+				.setValue(ConfigProperty.REMOVE_CARD, idx, removeCard);
 	}
 
 	@Override
 	public RPEntity find(String domain) {
 		return RPEntity.findRP(this.entityManager, domain);
+	}
+
+	@Override
+	public Boolean getOverrideRemoveCard(RPEntity rp) {
+		String idx = rp.getId().toString();
+		return this.configuration.getValue(ConfigProperty.OVERRIDE_REMOVE_CARD,
+				idx, Boolean.class);
+	}
+
+	@Override
+	public Boolean getRemoveCard(RPEntity rp) {
+		String idx = rp.getId().toString();
+		return this.configuration.getValue(ConfigProperty.REMOVE_CARD, idx,
+				Boolean.class);
 	}
 }

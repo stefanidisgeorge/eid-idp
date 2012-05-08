@@ -46,7 +46,8 @@ public enum ConfigProperty {
 			"key-entry-secret", String.class), KEY_ENTRY_ALIAS(
 			"key-entry-alias", String.class),
 
-	REMOVE_CARD("remove-card", Boolean.class), TRANSACTION_MESSAGE_SIGNING(
+	REMOVE_CARD("remove-card", Boolean.class), OVERRIDE_REMOVE_CARD(
+			"override-remove-card", Boolean.class), TRANSACTION_MESSAGE_SIGNING(
 			"transaction-message-signing", Boolean.class);
 
 	private final String name;

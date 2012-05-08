@@ -182,6 +182,16 @@
 
 					</rich:tab>
 
+					<rich:tab name="tab_applet" label="eID Applet">
+						<h:panelGrid columns="2">
+							<h:outputText value="Override Remove eID Card" />
+							<h:selectBooleanCheckbox value="#{idpRP.overrideRemoveCard}" />
+
+							<h:outputText value="Remove eID Card" />
+							<h:selectBooleanCheckbox value="#{idpRP.removeCard}" />
+						</h:panelGrid>
+					</rich:tab>
+
 				</rich:tabPanel>
 
 				<h:panelGrid columns="2" border="0">
