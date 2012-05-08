@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -51,6 +51,14 @@ public interface RP {
 	void paint(OutputStream stream, Object object) throws IOException;
 
 	long getTimeStamp();
+
+	Boolean getRemoveCard();
+
+	void setRemoveCard(Boolean removeCard);
+
+	Boolean getOverrideRemoveCard();
+
+	void setOverrideRemoveCard(Boolean overrideRemoveCard);
 
 	/*
 	 * Listeners.

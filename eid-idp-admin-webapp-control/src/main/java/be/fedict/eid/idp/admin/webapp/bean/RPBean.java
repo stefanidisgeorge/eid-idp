@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -104,14 +104,17 @@ public class RPBean implements RP {
 	private List<String> sourceAttributes;
 	private List<String> selectedAttributes;
 
+	private Boolean overrideRemoveCard;
+
+	private Boolean removeCard;
+
 	enum ConfigurationTab {
-		tab_config, tab_logo, tab_pki, tab_secret, tab_signing, tab_attributes
+		tab_config, tab_logo, tab_pki, tab_secret, tab_signing, tab_attributes, tab_applet
 	}
 
 	@Override
 	@PostConstruct
 	public void postConstruct() {
-
 		this.sourceAttributes = null;
 		this.selectedAttributes = new LinkedList<String>();
 	}
@@ -125,14 +128,12 @@ public class RPBean implements RP {
 	@Override
 	@Factory(RP_LIST_NAME)
 	public void rpListFactory() {
-
 		this.rpList = this.rpService.listRPs();
 	}
 
 	@Override
 	@Factory("secretAlgorithms")
 	public List<SelectItem> secretAlgorithmsFactory() {
-
 		List<SelectItem> secretAlgorithms = new LinkedList<SelectItem>();
 		for (SecretKeyAlgorithm algorithm : SecretKeyAlgorithm.values()) {
 			secretAlgorithms.add(new SelectItem(algorithm.name(), algorithm
@@ -144,7 +145,6 @@ public class RPBean implements RP {
 	@Override
 	@Begin(join = true)
 	public String add() {
-
 		this.log.debug("add RP");
 		this.selectedRP = new RPEntity();
 		this.log.debug("RP.id: " + this.selectedRP.getId());
@@ -158,15 +158,16 @@ public class RPBean implements RP {
 	@Override
 	@Begin(join = true)
 	public String modify() {
-
 		this.log.debug("modify RP: #0", this.selectedRP.getName());
+		this.overrideRemoveCard = this.rpService
+				.getOverrideRemoveCard(this.selectedRP);
+		this.removeCard = this.rpService.getRemoveCard(this.selectedRP);
 		return "modify";
 	}
 
 	@Override
 	@End
 	public String save() {
-
 		this.log.debug("save RP: #0", this.selectedRP.getName());
 
 		// check identifier secret if any
@@ -187,7 +188,8 @@ public class RPBean implements RP {
 			}
 		}
 
-		this.rpService.save(this.selectedRP);
+		this.rpService.save(this.selectedRP, this.overrideRemoveCard,
+				this.removeCard);
 		rpListFactory();
 		return "success";
 	}
@@ -195,17 +197,12 @@ public class RPBean implements RP {
 	@Override
 	@Begin(join = true)
 	public void select() {
-
 		this.log.debug("selected RP: #0", this.selectedRP.getName());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	@End
 	public String remove() {
-
 		this.log.debug("remove RP: #0", this.selectedRP.getName());
 		this.rpService.remove(this.selectedRP);
 		rpListFactory();
@@ -214,19 +211,19 @@ public class RPBean implements RP {
 
 	@Override
 	public String removeAttributePublic() {
-
 		this.log.debug("remove rp.attribute public");
 		this.selectedRP.setAttributePublicKey((byte[]) null);
-		this.rpService.save(this.selectedRP);
+		this.rpService.save(this.selectedRP, this.overrideRemoveCard,
+				this.removeCard);
 		return "success";
 	}
 
 	@Override
 	public String removeCertificate() {
-
 		this.log.debug("remove rp.certificate");
 		this.selectedRP.setEncodedCertificate(null);
-		this.rpService.save(this.selectedRP);
+		this.rpService.save(this.selectedRP, this.overrideRemoveCard,
+				this.removeCard);
 		return "success";
 	}
 
@@ -243,7 +240,6 @@ public class RPBean implements RP {
 
 	@Override
 	public String saveSelect() {
-
 		this.log.debug("save selected attributes: "
 				+ this.selectedAttributes.size());
 		this.selectedRP = this.attributeService.setAttributes(this.selectedRP,
@@ -255,7 +251,6 @@ public class RPBean implements RP {
 
 	@Override
 	public void initSelect() {
-
 		this.log.debug("init select");
 		if (null != this.selectedRP) {
 			this.selectedAttributes = new LinkedList<String>();
@@ -270,7 +265,6 @@ public class RPBean implements RP {
 	@Override
 	@Begin(join = true)
 	public void uploadListener(UploadEvent event) throws IOException {
-
 		UploadItem item = event.getUploadItem();
 		this.log.debug(item.getContentType());
 		this.log.debug(item.getFileSize());
@@ -296,7 +290,6 @@ public class RPBean implements RP {
 	@Override
 	@Begin(join = true)
 	public void uploadListenerPublic(UploadEvent event) throws IOException {
-
 		UploadItem item = event.getUploadItem();
 		this.log.debug(item.getContentType());
 		this.log.debug(item.getFileSize());
@@ -324,7 +317,6 @@ public class RPBean implements RP {
 	@Override
 	@Begin(join = true)
 	public void uploadListenerLogo(UploadEvent event) throws IOException {
-
 		UploadItem item = event.getUploadItem();
 		this.log.debug(item.getContentType());
 		this.log.debug(item.getFileSize());
@@ -343,7 +335,6 @@ public class RPBean implements RP {
 
 	@Override
 	public List<String> getSourceAttributes() {
-
 		List<AttributeEntity> attributes = this.attributeService
 				.listAttributes();
 		this.sourceAttributes = new LinkedList<String>();
@@ -361,20 +352,17 @@ public class RPBean implements RP {
 
 	@Override
 	public void setSourceAttributes(List<String> sourceAttributes) {
-
 		this.sourceAttributes = sourceAttributes;
 	}
 
 	@Override
 	public List<String> getSelectedAttributes() {
-
 		this.log.debug("get selectedAttributes: " + selectedAttributes.size());
 		return this.selectedAttributes;
 	}
 
 	@Override
 	public void setSelectedAttributes(List<String> selectedAttributes) {
-
 		this.log.debug("set selectedAttributes: " + selectedAttributes.size());
 		this.selectedAttributes = selectedAttributes;
 	}
@@ -391,7 +379,6 @@ public class RPBean implements RP {
 
 	@Override
 	public PublicKey getAttributePublicKey() {
-
 		if (null == this.selectedRP.getAttributePublicKey()) {
 			return null;
 		}
@@ -405,7 +392,6 @@ public class RPBean implements RP {
 
 	@Override
 	public void paint(OutputStream stream, Object object) throws IOException {
-
 		if (null != this.selectedRP && null != this.selectedRP.getLogo()) {
 			stream.write(this.selectedRP.getLogo());
 			stream.close();
@@ -414,7 +400,26 @@ public class RPBean implements RP {
 
 	@Override
 	public long getTimeStamp() {
-
 		return System.currentTimeMillis();
+	}
+
+	@Override
+	public Boolean getRemoveCard() {
+		return this.removeCard;
+	}
+
+	@Override
+	public void setRemoveCard(Boolean removeCard) {
+		this.removeCard = removeCard;
+	}
+
+	@Override
+	public Boolean getOverrideRemoveCard() {
+		return this.overrideRemoveCard;
+	}
+
+	@Override
+	public void setOverrideRemoveCard(Boolean overrideRemoveCard) {
+		this.overrideRemoveCard = overrideRemoveCard;
 	}
 }
