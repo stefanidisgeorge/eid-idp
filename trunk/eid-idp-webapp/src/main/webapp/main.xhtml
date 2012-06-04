@@ -28,10 +28,10 @@
 			</rich:dataTable>
 
 			<h2>#{messages.serviceIdentity}</h2>
-			<p>
-				#{messages.identityThumbprint}:
+			<h:panelGrid columns="2">
+				<h:outputText value="#{messages.identityThumbprint}:" />
 				<h:outputText value="#{idpProtocolService.thumbprint}" />
-			</p>
+			</h:panelGrid>
 
 			<p>
 				<h:outputLink value="./identity.pem">
