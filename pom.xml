@@ -279,7 +279,7 @@
         </repository>
     </repositories>
     <properties>
-        <eid-applet.version>1.0.5.Beta3</eid-applet.version>
+        <eid-applet.version>1.0.5-SNAPSHOT</eid-applet.version>
         <eid-trust-service.version>1.0.1.Beta2</eid-trust-service.version>
         <openid4java.version>0.9.6</openid4java.version>
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
