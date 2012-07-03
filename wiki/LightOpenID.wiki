@@ -1,0 +1,33 @@
+#summary eID IdP integration in PHP using LightOpenID
+
+= Introduction =
+
+The LightOpenID library can be used to integrate the eID IdP within your PHP application.
+
+http://code.google.com/p/lightopenid/
+
+= Example =
+
+The following code sample demonstrates a simple eID based authentication with readout of all available eID attributes.
+
+{{{
+<?php
+include "openid.php";
+$openid = new LightOpenID('localhost');
+if ($openid->mode) {
+    	echo $openid->validate() ? 'Logged in.' : 'Failed';
+	echo '<pre>';
+	echo print_r($openid->getAttributes(), true);
+	echo '</pre>';
+} else {
+	$openid->identity = 'https://www.e-contract.be/eid-idp/endpoints/openid/auth-ident';
+	$openid->required = array('namePerson/first', 'namePerson/last',
+		'namePerson', 'person/gender', 'contact/postalCode/home',
+		'contact/postalAddress/home', 'contact/city/home', 'eid/nationality',
+		'eid/pob', 'birthDate', 'eid/card-number', 'eid/card-validity/begin',
+		'eid/card-validity/end');
+	header('Location: ' . $openid->authUrl());
+}
+?>
+}}}
+It is always advised to have deep integration within the security layer of your used PHP framework if possible.
