@@ -30,7 +30,7 @@ $metadata['e-contract'] = array (
   'entityid' => 'e-contract',
   'metadata-set' => 'saml20-idp-remote',
   'SingleSignOnService' => 'https://www.e-contract.be/eid-idp/protocol/saml2/post/auth-ident',
-  'certFingerprint' => 'd838f129659ef5d2f3ea974221e0d8ae1bb5206b',
+  'certFingerprint' => '6ce7a376a1394a1be3585536685d7fdc7da19fb6',
   'OrganizationName' => 'e-Contract eID IDP',
   'OrganizationURL' => 'http://www.e-contract.be'
 );
