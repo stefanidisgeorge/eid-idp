@@ -102,6 +102,10 @@ public class ProtocolEntryServlet extends HttpServlet {
 
 	private String protocolErrorMessageSessionAttributeInitParam;
 
+	private String blockedPageInitParam;
+
+	private String blockedMessageSessionAttributeInitParam;
+
 	private String identificationPageInitParam;
 
 	private String authenticationPageInitParam;
@@ -161,6 +165,10 @@ public class ProtocolEntryServlet extends HttpServlet {
 				"IdentificationPage");
 		this.authenticationPageInitParam = getRequiredInitParameter(config,
 				"AuthenticationPage");
+		this.blockedPageInitParam = getRequiredInitParameter(config,
+				"BlockedPage");
+		this.blockedMessageSessionAttributeInitParam = getRequiredInitParameter(
+				config, "BlockedMessageSessionAttribute");
 
 		/*
 		 * Initialize the protocol services.
@@ -455,6 +463,25 @@ public class ProtocolEntryServlet extends HttpServlet {
 				return false;
 			}
 
+		}
+
+		// check whether relying party has been blocked
+		Boolean blocked = this.rpService.getBlocked(rp);
+		if (null != blocked) {
+			if (blocked) {
+				LOG.warn("blocked relying party: " + rp.getName());
+				String blockedMessage = this.rpService.getBlockedMessage(rp);
+				if (null == blockedMessage) {
+					blockedMessage = "Unknown reason.";
+				}
+				HttpSession httpSession = request.getSession();
+				httpSession.setAttribute(
+						this.blockedMessageSessionAttributeInitParam,
+						blockedMessage);
+				response.sendRedirect(request.getContextPath()
+						+ this.blockedPageInitParam);
+				return false;
+			}
 		}
 
 		request.getSession().setAttribute(Constants.RP_SESSION_ATTRIBUTE, rp);

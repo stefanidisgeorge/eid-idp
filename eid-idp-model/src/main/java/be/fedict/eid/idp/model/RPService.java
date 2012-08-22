@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -31,11 +31,16 @@ public interface RPService {
 
 	void remove(RPEntity rp);
 
-	RPEntity save(RPEntity rp, Boolean overrideRemoveCard, Boolean removeCard);
+	RPEntity save(RPEntity rp, Boolean overrideRemoveCard, Boolean removeCard,
+			Boolean blocked, String blockedMessage);
 
 	Boolean getOverrideRemoveCard(RPEntity rp);
 
 	Boolean getRemoveCard(RPEntity rp);
 
 	RPEntity find(String domain);
+
+	Boolean getBlocked(RPEntity rp);
+
+	String getBlockedMessage(RPEntity rp);
 }

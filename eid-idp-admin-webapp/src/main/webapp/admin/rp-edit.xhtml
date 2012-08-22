@@ -192,6 +192,17 @@
 						</h:panelGrid>
 					</rich:tab>
 
+					<rich:tab name="tab_blocked" label="Block">
+						<h:panelGrid columns="2">
+							<h:outputText value="Blocked" />
+							<h:selectBooleanCheckbox value="#{idpRP.blocked}" />
+
+							<h:outputText value="Message" />
+							<h:inputTextarea value="#{idpRP.blockedMessage}" cols="50"
+								rows="5" />
+						</h:panelGrid>
+					</rich:tab>
+
 				</rich:tabPanel>
 
 				<h:panelGrid columns="2" border="0">

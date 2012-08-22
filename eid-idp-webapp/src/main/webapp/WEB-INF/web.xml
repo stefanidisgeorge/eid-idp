@@ -109,6 +109,14 @@
             <param-name>AuthenticationPage</param-name>
             <param-value>/authentication</param-value>
         </init-param>
+        <init-param>
+        	<param-name>BlockedPage</param-name>
+        	<param-value>/blocked</param-value>
+        </init-param>
+        <init-param>
+        	<param-name>BlockedMessageSessionAttribute</param-name>
+        	<param-value>blockedMessage</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>ProtocolEntryServlet</servlet-name>

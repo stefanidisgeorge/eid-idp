@@ -48,7 +48,8 @@ public enum ConfigProperty {
 
 	REMOVE_CARD("remove-card", Boolean.class), OVERRIDE_REMOVE_CARD(
 			"override-remove-card", Boolean.class), TRANSACTION_MESSAGE_SIGNING(
-			"transaction-message-signing", Boolean.class);
+			"transaction-message-signing", Boolean.class), BLOCKED("blocked",
+			Boolean.class), BLOCKED_MESSAGE("blocked-message", String.class);
 
 	private final String name;
 

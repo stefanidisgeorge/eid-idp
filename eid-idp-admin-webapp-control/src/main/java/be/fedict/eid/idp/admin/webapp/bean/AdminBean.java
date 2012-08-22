@@ -62,7 +62,6 @@ public class AdminBean implements Admin {
 	@In
 	FacesMessages facesMessages;
 
-	@SuppressWarnings("unused")
 	@DataModel(ADMIN_LIST_NAME)
 	private List<AdministratorEntity> adminList;
 
