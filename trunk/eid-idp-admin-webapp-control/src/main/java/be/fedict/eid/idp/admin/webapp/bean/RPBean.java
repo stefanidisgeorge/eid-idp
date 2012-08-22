@@ -84,7 +84,6 @@ public class RPBean implements RP {
 	@In
 	FacesMessages facesMessages;
 
-	@SuppressWarnings("unused")
 	@DataModel(RP_LIST_NAME)
 	private List<RPEntity> rpList;
 
@@ -108,8 +107,12 @@ public class RPBean implements RP {
 
 	private Boolean removeCard;
 
+	private Boolean blocked;
+
+	private String blockedMessage;
+
 	enum ConfigurationTab {
-		tab_config, tab_logo, tab_pki, tab_secret, tab_signing, tab_attributes, tab_applet
+		tab_config, tab_logo, tab_pki, tab_secret, tab_signing, tab_attributes, tab_applet, tab_blocked
 	}
 
 	@Override
@@ -162,6 +165,8 @@ public class RPBean implements RP {
 		this.overrideRemoveCard = this.rpService
 				.getOverrideRemoveCard(this.selectedRP);
 		this.removeCard = this.rpService.getRemoveCard(this.selectedRP);
+		this.blocked = this.rpService.getBlocked(this.selectedRP);
+		this.blockedMessage = this.rpService.getBlockedMessage(this.selectedRP);
 		return "modify";
 	}
 
@@ -189,7 +194,7 @@ public class RPBean implements RP {
 		}
 
 		this.rpService.save(this.selectedRP, this.overrideRemoveCard,
-				this.removeCard);
+				this.removeCard, this.blocked, this.blockedMessage);
 		rpListFactory();
 		return "success";
 	}
@@ -214,7 +219,7 @@ public class RPBean implements RP {
 		this.log.debug("remove rp.attribute public");
 		this.selectedRP.setAttributePublicKey((byte[]) null);
 		this.rpService.save(this.selectedRP, this.overrideRemoveCard,
-				this.removeCard);
+				this.removeCard, this.blocked, this.blockedMessage);
 		return "success";
 	}
 
@@ -223,7 +228,7 @@ public class RPBean implements RP {
 		this.log.debug("remove rp.certificate");
 		this.selectedRP.setEncodedCertificate(null);
 		this.rpService.save(this.selectedRP, this.overrideRemoveCard,
-				this.removeCard);
+				this.removeCard, this.blocked, this.blockedMessage);
 		return "success";
 	}
 
@@ -421,5 +426,25 @@ public class RPBean implements RP {
 	@Override
 	public void setOverrideRemoveCard(Boolean overrideRemoveCard) {
 		this.overrideRemoveCard = overrideRemoveCard;
+	}
+
+	@Override
+	public Boolean getBlocked() {
+		return this.blocked;
+	}
+
+	@Override
+	public void setBlocked(Boolean blocked) {
+		this.blocked = blocked;
+	}
+
+	@Override
+	public String getBlockedMessage() {
+		return this.blockedMessage;
+	}
+
+	@Override
+	public void setBlockedMessage(String blockedMessage) {
+		this.blockedMessage = blockedMessage;
 	}
 }

@@ -37,4 +37,8 @@
 		<rewrite pattern="/protocol-response-post" />
 	</page>
 
+	<page view-id="/blocked.seam">
+		<rewrite pattern="/blocked" />
+	</page>
+
 </pages>

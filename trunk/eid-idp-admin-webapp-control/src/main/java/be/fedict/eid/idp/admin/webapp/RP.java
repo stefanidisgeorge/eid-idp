@@ -60,6 +60,14 @@ public interface RP {
 
 	void setOverrideRemoveCard(Boolean overrideRemoveCard);
 
+	Boolean getBlocked();
+
+	void setBlocked(Boolean blocked);
+
+	String getBlockedMessage();
+
+	void setBlockedMessage(String blockedMessage);
+
 	/*
 	 * Listeners.
 	 */

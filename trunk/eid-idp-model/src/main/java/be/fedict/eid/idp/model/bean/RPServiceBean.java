@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,9 +25,6 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import be.fedict.eid.idp.entity.RPAttributeEntity;
 import be.fedict.eid.idp.entity.RPEntity;
 import be.fedict.eid.idp.entity.SecretKeyAlgorithm;
@@ -37,8 +34,6 @@ import be.fedict.eid.idp.model.RPService;
 
 @Stateless
 public class RPServiceBean implements RPService {
-
-	private static Log LOG = LogFactory.getLog(RPServiceBean.class);
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -60,11 +55,13 @@ public class RPServiceBean implements RPService {
 		this.configuration.removeValue(ConfigProperty.OVERRIDE_REMOVE_CARD,
 				index);
 		this.configuration.removeValue(ConfigProperty.REMOVE_CARD, index);
+		this.configuration.removeValue(ConfigProperty.BLOCKED, index);
+		this.configuration.removeValue(ConfigProperty.BLOCKED_MESSAGE);
 	}
 
 	@Override
 	public RPEntity save(RPEntity rp, Boolean overrideRemoveCard,
-			Boolean removeCard) {
+			Boolean removeCard, Boolean blocked, String blockedMessage) {
 		RPEntity attachedRp = null;
 		if (null != rp.getId()) {
 			attachedRp = this.entityManager.find(RPEntity.class, rp.getId());
@@ -142,7 +139,8 @@ public class RPServiceBean implements RPService {
 						.get(attachedRp.getAttributes().indexOf(rpAttribute))
 						.setEncrypted(rpAttribute.isEncrypted());
 			}
-			saveExtraAttribute(attachedRp, overrideRemoveCard, removeCard);
+			saveExtraAttribute(attachedRp, overrideRemoveCard, removeCard,
+					blocked, blockedMessage);
 			return attachedRp;
 		} else {
 			// add
@@ -171,18 +169,23 @@ public class RPServiceBean implements RPService {
 						rpAttribute.getAttribute());
 				this.entityManager.persist(newRpAttribute);
 			}
-			saveExtraAttribute(rp, overrideRemoveCard, removeCard);
+			saveExtraAttribute(rp, overrideRemoveCard, removeCard, blocked,
+					blockedMessage);
 			return rp;
 		}
 	}
 
 	private void saveExtraAttribute(RPEntity attachedRp,
-			Boolean overrideRemoveCard, Boolean removeCard) {
+			Boolean overrideRemoveCard, Boolean removeCard, Boolean blocked,
+			String blockedMessage) {
 		String idx = attachedRp.getId().toString();
 		this.configuration.setValue(ConfigProperty.OVERRIDE_REMOVE_CARD, idx,
 				overrideRemoveCard);
 		this.configuration
 				.setValue(ConfigProperty.REMOVE_CARD, idx, removeCard);
+		this.configuration.setValue(ConfigProperty.BLOCKED, idx, blocked);
+		this.configuration.setValue(ConfigProperty.BLOCKED_MESSAGE, idx,
+				blockedMessage);
 	}
 
 	@Override
@@ -202,5 +205,19 @@ public class RPServiceBean implements RPService {
 		String idx = rp.getId().toString();
 		return this.configuration.getValue(ConfigProperty.REMOVE_CARD, idx,
 				Boolean.class);
+	}
+
+	@Override
+	public Boolean getBlocked(RPEntity rp) {
+		String idx = rp.getId().toString();
+		return this.configuration.getValue(ConfigProperty.BLOCKED, idx,
+				Boolean.class);
+	}
+
+	@Override
+	public String getBlockedMessage(RPEntity rp) {
+		String idx = rp.getId().toString();
+		return this.configuration.getValue(ConfigProperty.BLOCKED_MESSAGE, idx,
+				String.class);
 	}
 }
