@@ -3,13 +3,13 @@
 	<parent>
 		<groupId>be.fedict</groupId>
 		<artifactId>eid-idp</artifactId>
-		<version>1.0.1.RC1</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<name>FedICT eID Identity Provider Webapp</name>
 	<description>Web Application for eID Identity Provider</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-webapp</artifactId>
-	<version>1.0.1.RC1</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<build>
 		<plugins>
