@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,6 +18,9 @@
 
 package be.fedict.eid.idp.webapp;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
@@ -30,7 +33,7 @@ import org.jboss.seam.web.Session;
 
 /**
  * Via this JSF phase listener we clean-up the HTTP session when the eID DSS
- * hits the protocol-response-post.xhtml page.
+ * hits certain pages.
  * 
  * @author Frank Cornelis
  */
@@ -41,12 +44,20 @@ public class SessionCleanupPhaseListener implements PhaseListener {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final Set<String> cleanupViewIds;
+
+	static {
+		cleanupViewIds = new HashSet<String>();
+		cleanupViewIds.add("/protocol-response-post.xhtml");
+		cleanupViewIds.add("/blocked.xhtml");
+	}
+
 	public void afterPhase(PhaseEvent event) {
 		FacesContext facesContext = event.getFacesContext();
 		UIViewRoot viewRoot = facesContext.getViewRoot();
 		String viewId = viewRoot.getViewId();
 		LOG.debug("view ID: " + viewId);
-		if ("/protocol-response-post.xhtml".equals(viewId)) {
+		if (cleanupViewIds.contains(viewId)) {
 			LOG.debug("invalidating the HTTP session");
 			Session seamSession = Session.getInstance();
 			seamSession.invalidate();
