@@ -266,6 +266,8 @@ public class SecurityTokenServicePortImpl implements SecurityTokenServicePort {
 							"saml2:Conditions/saml2:AudienceRestriction/saml2:Audience/text()",
 							nsElement).getNodeValue();
 			if (false == expectedAudience.equals(audience)) {
+				LOG.debug("expected audience: " + expectedAudience);
+				LOG.debug("actual audience: " + audience);
 				throw new SecurityException("incorrect SAML audience");
 			}
 			LOG.debug("SAML Audience OK");
