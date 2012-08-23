@@ -172,10 +172,7 @@ public abstract class AbstractWSFederationProtocolService implements
 		storeWCtx(wctx, request);
 
 		// get optional language hint
-		String language = null;
-		if (null != request.getParameter(LANGUAGE_PARAM)) {
-			language = request.getParameter(LANGUAGE_PARAM);
-		}
+		String language = request.getParameter(LANGUAGE_PARAM);
 
 		return new IncomingRequest(getAuthenticationFlow(), wtrealm, null,
 				Collections.singletonList(language), null);
