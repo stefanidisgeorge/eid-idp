@@ -9,11 +9,14 @@
 			Integrating your web applications with the eID Identity
 			Provider.
 		</subtitle>
+		<subtitle>
+			Version &project.version;
+		</subtitle>
 		<copyright>
 			<year>2009-2012</year>
 			<holder>FedICT</holder>
 		</copyright>
-		<releaseinfo>9 Feb 2012</releaseinfo>
+		<releaseinfo>23 Aug 2012</releaseinfo>
 		<authorgroup>
 			<author>
 				<firstname>Wim</firstname>
@@ -80,6 +83,17 @@
 			The eID Identity Provider supports different protocols, as
 			highlighted in following sections.
 		</para>
+		<tip>
+			<title>Clock synchronization</title>
+			<para>
+				Most authentication token formats delivered by the eID IdP
+				contain some type of time-stamp. Because of this it is important to
+				have a correct clock synchronization between the eID IdP clock and
+				the clock of the relying party web application. Synchronizing the
+				clock of the relying party web application hosting machine using NTP
+				is the easiest way to achieve this.
+			</para>
+		</tip>
 	</section>
 	<section>
 		<title>SAML v2.0 Browser POST</title>
@@ -1191,6 +1205,24 @@ wct=2011-01-05T08:14:31]]></programlisting>
 			</para>
 		</section>
 		<section>
+			<title>Sign out</title>
+			<para>
+				Some WS-Federation implementations automatically perform a sign-out
+				operation on their federated identity providers. Because of this
+				we've also implemented the
+				<code>wsignout1.0</code>
+				action.
+			</para>
+			<para>
+				Below is an example of the WS-Federation sign-out request
+				parameters
+				in the request string send to the FedICT eID Identity
+				Provider.
+				<programlisting role="XML"><![CDATA[wa=wsignout1.0
+wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
+			</para>
+		</section>
+		<section>
 			<title>WS-Trust STS validation web service</title>
 			<para>
 				The eID IdP offers a WS-Trust based STS validation web service.
@@ -1673,6 +1705,11 @@ wct=2011-01-05T08:14:31]]></programlisting>
 						<entry>9 Feb 2012</entry>
 						<entry>Frank Cornelis</entry>
 						<entry>WS-Trust STS validation service.</entry>
+					</row>
+					<row>
+						<entry>23 Aug 2012</entry>
+						<entry>Frank Cornelis</entry>
+						<entry>Clock synchronization tip.</entry>
 					</row>
 				</tbody>
 			</tgroup>
