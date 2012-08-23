@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -20,6 +20,7 @@ package test.unit.be.fedict.eid.idp.protocol.ws_federation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -98,6 +99,7 @@ import be.fedict.eid.idp.protocol.ws_federation.AbstractWSFederationProtocolServ
 import be.fedict.eid.idp.protocol.ws_federation.WSFederationProtocolServiceAuthIdent;
 import be.fedict.eid.idp.spi.IdPIdentity;
 import be.fedict.eid.idp.spi.IdentityProviderConfiguration;
+import be.fedict.eid.idp.spi.IncomingRequest;
 import be.fedict.eid.idp.spi.NameValuePair;
 import be.fedict.eid.idp.spi.ReturnResponse;
 
@@ -114,6 +116,36 @@ public class WSFederationProtocolServiceTest {
 	@Before
 	public void setUp() throws Exception {
 		Init.init();
+	}
+
+	@Test
+	public void testSignOut() throws Exception {
+		// setup
+		WSFederationProtocolServiceAuthIdent testedInstance = new WSFederationProtocolServiceAuthIdent();
+		HttpServletRequest mockRequest = EasyMock
+				.createMock(HttpServletRequest.class);
+		HttpServletResponse mockResponse = EasyMock
+				.createMock(HttpServletResponse.class);
+
+		// expectations
+		String targetUrl = "http://localhost/landing-page";
+		EasyMock.expect(mockRequest.getParameter("wa")).andStubReturn(
+				"wsignout1.0");
+		EasyMock.expect(mockRequest.getParameter("wreply")).andStubReturn(
+				targetUrl);
+
+		mockResponse.sendRedirect(targetUrl);
+
+		// prepare
+		EasyMock.replay(mockRequest, mockResponse);
+
+		// operate
+		IncomingRequest result = testedInstance.handleIncomingRequest(
+				mockRequest, mockResponse);
+
+		// verify
+		EasyMock.verify(mockRequest, mockResponse);
+		assertNull(result);
 	}
 
 	@Test
