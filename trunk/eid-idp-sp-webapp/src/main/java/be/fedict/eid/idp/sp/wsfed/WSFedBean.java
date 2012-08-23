@@ -48,7 +48,7 @@ public class WSFedBean {
 		if (null == idpValidationService || idpValidationService.isEmpty()) {
 			validationServiceLocation = null;
 		} else {
-			validationServiceLocation = "http://localhost/eid-idp/"
+			validationServiceLocation = "http://localhost:8080/eid-idp/"
 					+ idpValidationService;
 			LOG.debug("STS location: " + validationServiceLocation);
 		}
@@ -69,10 +69,6 @@ public class WSFedBean {
 				+ "/" + spResponseEndpoint;
 		StartupServletContextListener.getWSFedRequestBean()
 				.setSpResponseEndpoint(fullSpResponseEndpoint);
-
-		WSFedAuthenticationResponseServiceBean wsFedResponseBean = StartupServletContextListener
-				.getWSFedResponseBean();
-		wsFedResponseBean.setExpectedAudience(fullSpResponseEndpoint);
 	}
 
 	public void setSpRealm(String spRealm) {
@@ -80,6 +76,10 @@ public class WSFedBean {
 		WSFedAuthenticationRequestServiceBean wsFedRequestBean = StartupServletContextListener
 				.getWSFedRequestBean();
 		wsFedRequestBean.setSPRealm(spRealm);
+
+		WSFedAuthenticationResponseServiceBean wsFedResponseBean = StartupServletContextListener
+				.getWSFedResponseBean();
+		wsFedResponseBean.setExpectedAudience(spRealm);
 	}
 
 	public HttpServletRequest getRequest() {
