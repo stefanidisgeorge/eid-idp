@@ -126,6 +126,15 @@ public abstract class AbstractWSFederationProtocolService implements
 		if (null == wa) {
 			throw new ServletException("wa parameter missing");
 		}
+
+		if ("wsignout1.0".equals(wa)) {
+			LOG.debug("wa=wsignout1.0");
+			String wreply = request.getParameter("wreply");
+			LOG.debug("wreply: " + wreply);
+			response.sendRedirect(wreply);
+			return null;
+		}
+
 		if (!"wsignin1.0".equals(wa)) {
 			throw new ServletException("wa action not \"wsignin1.0\"");
 		}
