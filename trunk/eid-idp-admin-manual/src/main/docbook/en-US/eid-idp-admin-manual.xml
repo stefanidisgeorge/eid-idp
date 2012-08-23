@@ -7,15 +7,22 @@
 		<title>
 			Fedict eID Identity Provider Administrator Manual
 		</title>
+		<subtitle>
+			Version &project.version;
+		</subtitle>
 		<copyright>
-			<year>2010</year>
+			<year>2010-2012</year>
 			<holder>Fedict</holder>
 		</copyright>
-		<releaseinfo>17 Jan 2012</releaseinfo>
+		<releaseinfo>23 Aug 2012</releaseinfo>
 		<authorgroup>
 			<author>
 				<firstname>Wim</firstname>
 				<surname>Vandenhaute</surname>
+			</author>
+			<author>
+				<firstname>Frank</firstname>
+				<surname>Cornelis</surname>
 			</author>
 		</authorgroup>
 		<abstract>
@@ -299,6 +306,10 @@
 					Parties", then select/create a relying party. Go to the "Secrets"
 					tab and set a value for "HMAC-SHA1 Identifier Secret".
 				</para>
+				<para>
+					If you don't configure the HMAC secret, the national
+					registration number will not be hashed.
+				</para>
 			</section>
 		</section>
 		<section>
@@ -460,6 +471,11 @@
 						<entry>Update on supported SAML bindings, typos and
 							usefull links.
 						</entry>
+					</row>
+					<row>
+						<entry>23 Aug 2012</entry>
+						<entry>Frank Cornelis</entry>
+						<entry>Versioning, RRN hashing.</entry>
 					</row>
 				</tbody>
 			</tgroup>
