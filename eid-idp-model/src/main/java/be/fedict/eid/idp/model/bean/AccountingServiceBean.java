@@ -53,7 +53,11 @@ public class AccountingServiceBean implements AccountingService {
 	}
 
 	@Override
-	public AccountingEntity addRequest(String domain) {
+	public void addRequest(String domain) {
+
+		if (null == domain) {
+			return;
+		}
 
 		LOG.debug("Add request: " + domain);
 
@@ -69,7 +73,6 @@ public class AccountingServiceBean implements AccountingService {
 			accountingEntity.setRequests(accountingEntity.getRequests() + 1);
 
 		}
-		return accountingEntity;
 	}
 
 	@Override
