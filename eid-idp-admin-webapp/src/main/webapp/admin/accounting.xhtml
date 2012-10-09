@@ -25,6 +25,11 @@
 					<h:outputText
 						value="# of requests: #{idpAccounting.numberOfRequests}" />
 
+					<p>
+						<a
+							href="#{facesContext.externalContext.requestContextPath}/accounting.csv">Export
+							as CSV file</a>
+					</p>
 				</h:panelGrid>
 
 				<rich:dataTable id="data" var="item" value="#{idpAccountingList}"

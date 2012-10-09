@@ -126,4 +126,14 @@
         <url-pattern>/applet-service-authentication</url-pattern>
     </servlet-mapping>
 
+	<!-- Accounting export -->
+	<servlet>
+		<servlet-name>AccountingExportServlet</servlet-name>
+		<servlet-class>be.fedict.eid.idp.admin.webapp.AccountingExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AccountingExportServlet</servlet-name>
+		<url-pattern>/accounting.csv</url-pattern>
+	</servlet-mapping>
+	
 </web-app>
