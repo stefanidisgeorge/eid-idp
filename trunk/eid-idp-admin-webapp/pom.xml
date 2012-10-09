@@ -111,6 +111,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>be.fedict.eid-idp</groupId>
+			<artifactId>eid-idp-model</artifactId>
+			<version>${project.version}</version>
+			<type>ejb-client</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging-api</artifactId>
 			<scope>provided</scope>
