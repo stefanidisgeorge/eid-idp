@@ -9,7 +9,7 @@
           -->
         <groupId>be.fedict</groupId>
         <artifactId>eid-applet</artifactId>
-        <version>1.0.5.RC1</version>
+        <version>1.0.5.GA</version>
     </parent>
     <groupId>be.fedict</groupId>
     <artifactId>eid-idp</artifactId>
@@ -279,7 +279,7 @@
         </repository>
     </repositories>
     <properties>
-        <eid-applet.version>1.0.5.RC1</eid-applet.version>
+        <eid-applet.version>1.0.5.GA</eid-applet.version>
         <eid-trust-service.version>1.0.1.RC2</eid-trust-service.version>
         <openid4java.version>0.9.6</openid4java.version>
         <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
