@@ -24,6 +24,12 @@ import javax.ejb.Local;
 
 import be.fedict.eid.idp.entity.AccountingEntity;
 
+/**
+ * Interface for accounting service EJB3 bean.
+ * 
+ * @author Frank Cornelis
+ * 
+ */
 @Local
 public interface AccountingService {
 
@@ -31,7 +37,13 @@ public interface AccountingService {
 
 	void resetAll();
 
-	AccountingEntity addRequest(String domain);
+	/**
+	 * Increase the number of requests for the given domain. If domain is
+	 * <code>null</code> we don't account it of course.
+	 * 
+	 * @param domain
+	 */
+	void addRequest(String domain);
 
 	long getNumberOfRequests();
 }

@@ -214,6 +214,9 @@ public abstract class AbstractOpenIDProtocolService implements
 		}
 
 		String openidRealm = parameterList.getParameterValue("openid.realm");
+		if (null == openidRealm) {
+			openidRealm = authRequest.getReturnTo();
+		}
 
 		return new IncomingRequest(getAuthenticationFlow(), openidRealm, null,
 				languages, requiredAttributes);
