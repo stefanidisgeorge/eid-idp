@@ -73,6 +73,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.utils.Constants;
+import org.apache.xpath.XPathAPI;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 import org.opensaml.Configuration;
@@ -179,8 +180,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
-
-import com.sun.org.apache.xpath.internal.XPathAPI;
 
 /**
  * Utility class for SAML v2.0
@@ -1553,8 +1552,8 @@ public abstract class Saml2Util {
 		String documentId = documentElement.getAttribute("ID");
 		LOG.debug("document ID=" + documentId);
 
-		XMLSignatureFactory signatureFactory = XMLSignatureFactory.getInstance(
-				"DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
+		XMLSignatureFactory signatureFactory = XMLSignatureFactory
+				.getInstance("DOM");
 
 		XMLSignContext signContext = new DOMSignContext(
 				identity.getPrivateKey(), documentElement, nextSibling);
