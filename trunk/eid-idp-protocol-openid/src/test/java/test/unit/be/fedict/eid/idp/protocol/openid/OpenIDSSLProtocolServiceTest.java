@@ -608,7 +608,7 @@ public class OpenIDSSLProtocolServiceTest {
 
 		public X509Certificate[] getAcceptedIssuers() {
 			LOG.error("getAcceptedIssuers");
-			throw new UnsupportedOperationException();
+			return null;
 		}
 	}
 
