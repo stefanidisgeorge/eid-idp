@@ -192,6 +192,9 @@ public class AuthenticationResponseProcessor {
 		// validate assertion's signature if any
 		if (null != assertion.getSignature()) {
 			try {
+				// fix for recent versions of Apache xmlsec
+				assertion.getDOM().setIdAttribute("ID", true);
+				
 				List<X509Certificate> certificateChain = Saml2Util
 						.validateSignature(assertion.getSignature());
 
