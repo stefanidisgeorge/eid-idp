@@ -164,6 +164,8 @@ public abstract class AbstractSAML2ProtocolService implements
 		// Signature validation
 		X509Certificate certificate = null;
 		if (null != authnRequest.getSignature()) {
+			// fix for recent versions of Apache xmlsec.
+			authnRequest.getDOM().setIdAttribute("ID", true);
 
 			List<X509Certificate> certChain = Saml2Util
 					.validateSignature(authnRequest.getSignature());

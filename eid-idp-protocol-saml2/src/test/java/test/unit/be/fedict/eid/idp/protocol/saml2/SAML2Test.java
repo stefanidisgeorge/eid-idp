@@ -46,6 +46,7 @@ import javax.crypto.SecretKey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.xml.security.Init;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -75,6 +76,8 @@ import org.opensaml.xml.encryption.EncryptionException;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.util.DatatypeHelper;
 import org.opensaml.xml.util.XMLConstants;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
 
 import be.fedict.eid.idp.common.SamlAuthenticationPolicy;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
@@ -86,6 +89,7 @@ public class SAML2Test {
 	@BeforeClass
 	public static void before() {
 		Security.addProvider(new BouncyCastleProvider());
+		// Init.init();
 	}
 
 	@Test
@@ -341,6 +345,17 @@ public class SAML2Test {
 				true);
 		LOG.debug("signed assertion: " + result2);
 		assertEquals(result, result2);
+
+		// Fix for recent Apache Xmlsec libraries.
+		Element signedAssertionElement = (Element) signedAssertion.getDOM();
+		String assertionId = assertion.getID();
+		Element locatedElement = signedAssertionElement.getOwnerDocument()
+				.getElementById(assertionId);
+		LOG.debug("element located by ID: " + (null != locatedElement));
+
+		Attr attr = signedAssertionElement.getAttributeNode("ID");
+		signedAssertionElement.setIdAttributeNode(attr, true);
+		signedAssertion.setDOM(signedAssertionElement);
 
 		// Operate: validate
 		Saml2Util.validateSignature(signedAssertion.getSignature());

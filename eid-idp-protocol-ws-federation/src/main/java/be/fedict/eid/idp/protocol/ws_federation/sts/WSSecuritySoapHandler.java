@@ -39,6 +39,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.message.WSSecHeader;
 import org.apache.ws.security.message.WSSecTimestamp;
 import org.w3c.dom.Element;
@@ -130,7 +131,12 @@ public class WSSecuritySoapHandler implements SOAPHandler<SOAPMessageContext> {
 		}
 
 		WSSecHeader wsSecHeader = new WSSecHeader();
-		Element securityElement = wsSecHeader.insertSecurityHeader(soapPart);
+		Element securityElement;
+		try {
+			securityElement = wsSecHeader.insertSecurityHeader(soapPart);
+		} catch (WSSecurityException e) {
+			throw new SOAPException("WS-Security error: " + e.getMessage(), e);
+		}
 		soapHeader.removeChild(securityElement);
 		soapHeader.appendChild(securityElement);
 

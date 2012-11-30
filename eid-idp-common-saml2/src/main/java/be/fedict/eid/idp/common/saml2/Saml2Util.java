@@ -173,6 +173,7 @@ import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.validation.ValidationException;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -1551,6 +1552,9 @@ public abstract class Saml2Util {
 		// get document ID
 		String documentId = documentElement.getAttribute("ID");
 		LOG.debug("document ID=" + documentId);
+
+		// fix for recent versions of Apache xmlsec.
+		documentElement.setIdAttribute("ID", true);
 
 		XMLSignatureFactory signatureFactory = XMLSignatureFactory
 				.getInstance("DOM");

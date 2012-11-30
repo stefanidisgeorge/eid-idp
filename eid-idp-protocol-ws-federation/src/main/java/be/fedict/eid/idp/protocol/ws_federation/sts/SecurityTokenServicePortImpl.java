@@ -225,6 +225,10 @@ public class SecurityTokenServicePortImpl implements SecurityTokenServicePort {
 		LOG.debug("token element: " + tokenElement.getLocalName());
 		LOG.debug("token element namespace: " + tokenElement.getNamespaceURI());
 		LOG.debug("token: " + toString(tokenElement));
+		
+		// fix for recent versions of Apache xmlsec.
+		tokenElement.setIdAttribute("ID", true);
+		
 		Element signatureElement = (Element) XPathAPI.selectSingleNode(
 				tokenElement, "ds:Signature", nsElement);
 		if (null == signatureElement) {

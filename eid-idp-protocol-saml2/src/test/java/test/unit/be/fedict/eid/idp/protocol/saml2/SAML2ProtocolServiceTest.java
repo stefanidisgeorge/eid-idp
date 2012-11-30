@@ -58,7 +58,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.xpath.XPathAPI;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -84,9 +83,6 @@ import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.tidy.Tidy;
 
 import be.fedict.eid.applet.service.Gender;
 import be.fedict.eid.applet.service.Identity;
@@ -186,12 +182,14 @@ public class SAML2ProtocolServiceTest {
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
 				baos.toByteArray());
 		LOG.debug("SAML2 Request Browser POST: " + baos.toString());
-		Tidy tidy = new Tidy();
-		Document document = tidy.parseDOM(byteArrayInputStream, null);
+		// JTidy comes with an outdated W3C DOM implementation. Cannot use it
+		// anymore.
+		// Tidy tidy = new Tidy();
+		// Document document = tidy.parseDOM(byteArrayInputStream, null);
 
-		//Node actionNode = XPathAPI.selectSingleNode(document,
-		//		"//form[@action='http&#x3a;&#x2f;&#x2f;idp.be']");
-		//assertNotNull(actionNode);
+		// Node actionNode = XPathAPI.selectSingleNode(document,
+		// "//form[@action='http&#x3a;&#x2f;&#x2f;idp.be']");
+		// assertNotNull(actionNode);
 	}
 
 	@Test
