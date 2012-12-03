@@ -68,7 +68,9 @@ public enum ConfigProperty {
 
 	BLOCKED_MESSAGE("blocked-message", String.class),
 
-	OMIT_SECURE_CHANNEL_BINDING("omit-secure-channel-binding", Boolean.class);
+	OMIT_SECURE_CHANNEL_BINDING("omit-secure-channel-binding", Boolean.class),
+
+	XSS_PROTECTION("xss-protection", Boolean.class);
 
 	private final String name;
 

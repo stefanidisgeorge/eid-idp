@@ -88,6 +88,7 @@ public class ConfigBean implements Config {
 	private String hmacSecret;
 	private Integer tokenValidity;
 	private Boolean hsts;
+	private Boolean xssProtection;
 
 	private String xkmsUrl;
 	private String xkmsAuthTrustDomain;
@@ -117,6 +118,8 @@ public class ConfigBean implements Config {
 				ConfigProperty.TOKEN_VALIDITY, Integer.class);
 		this.hsts = this.configuration.getValue(ConfigProperty.HSTS,
 				Boolean.class);
+		this.xssProtection = this.configuration.getValue(
+				ConfigProperty.XSS_PROTECTION, Boolean.class);
 
 		// XKMS Config
 		this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
@@ -152,7 +155,6 @@ public class ConfigBean implements Config {
 
 	@Override
 	public String saveXkms() {
-
 		this.log.debug("save xkms");
 
 		// XKMS Config
@@ -169,7 +171,6 @@ public class ConfigBean implements Config {
 
 	@Override
 	public String saveIdP() {
-
 		this.log.debug("save idp");
 
 		// IdP Config
@@ -202,7 +203,6 @@ public class ConfigBean implements Config {
 
 	@Override
 	public String saveNetwork() {
-
 		this.log.debug("save proxy");
 
 		// Proxy Config
@@ -221,7 +221,6 @@ public class ConfigBean implements Config {
 	@Override
 	@End
 	public String saveApplet() {
-
 		this.log.debug("save applet config");
 
 		// Applet config
@@ -251,7 +250,6 @@ public class ConfigBean implements Config {
 
 	@Override
 	public String removeApplet() {
-
 		this.log.debug("remove applet config");
 		this.configuration.removeAppletConfig(this.appletConfig);
 		this.appletConfig = new AppletConfigEntity();
@@ -263,7 +261,6 @@ public class ConfigBean implements Config {
 	@Override
 	@Factory("keyStoreTypes")
 	public List<SelectItem> keyStoreTypeFactory() {
-
 		List<SelectItem> keyStoreTypes = new LinkedList<SelectItem>();
 		for (KeyStoreType type : KeyStoreType.values()) {
 			keyStoreTypes.add(new SelectItem(type.name(), type.name()));
@@ -384,7 +381,6 @@ public class ConfigBean implements Config {
 	@Override
 	@Begin(join = true)
 	public void uploadListener(UploadEvent event) throws IOException {
-
 		UploadItem item = event.getUploadItem();
 		this.log.debug(item.getContentType());
 		this.log.debug(item.getFileSize());
@@ -400,7 +396,6 @@ public class ConfigBean implements Config {
 
 	private X509Certificate getCertificate(byte[] certificateBytes)
 			throws CertificateException {
-
 		CertificateFactory certificateFactory = CertificateFactory
 				.getInstance("X.509");
 		return (X509Certificate) certificateFactory
@@ -442,6 +437,8 @@ public class ConfigBean implements Config {
 		this.configuration.setValue(ConfigProperty.TOKEN_VALIDITY,
 				this.tokenValidity);
 		this.configuration.setValue(ConfigProperty.HSTS, this.hsts);
+		this.configuration.setValue(ConfigProperty.XSS_PROTECTION,
+				this.xssProtection);
 		this.selectedTab = ConfigurationTab.tab_security.name();
 		return "success";
 	}
@@ -454,5 +451,15 @@ public class ConfigBean implements Config {
 	@Override
 	public Boolean getOmitSecureChannelBinding() {
 		return this.omitSecureChannelBinding;
+	}
+
+	@Override
+	public Boolean getXssProtection() {
+		return this.xssProtection;
+	}
+
+	@Override
+	public void setXssProtection(Boolean xssProtection) {
+		this.xssProtection = xssProtection;
 	}
 }
