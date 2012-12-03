@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -24,9 +24,12 @@ import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
 
 import be.fedict.eid.applet.service.spi.ChannelBindingService;
+import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.Constants;
 
@@ -34,6 +37,7 @@ import be.fedict.eid.idp.model.Constants;
  * eID Applet Channel Binding Service implementation.
  * 
  * @author Wim Vandenhaute
+ * @author Frank Cornelis
  */
 @Stateless
 @Local(ChannelBindingService.class)
@@ -41,12 +45,27 @@ import be.fedict.eid.idp.model.Constants;
 		+ "ChannelBindingServiceBean")
 public class ChannelBindingServiceBean implements ChannelBindingService {
 
+	private static final Log LOG = LogFactory
+			.getLog(ChannelBindingServiceBean.class);
+
 	@EJB
 	private Configuration configuration;
 
 	@Override
 	public X509Certificate getServerCertificate() {
-
-		return this.configuration.getAppletConfig().getServerCertificate();
+		Boolean omitSecureChannelBinding = this.configuration.getValue(
+				ConfigProperty.OMIT_SECURE_CHANNEL_BINDING, Boolean.class);
+		if (null != omitSecureChannelBinding) {
+			if (omitSecureChannelBinding.equals(Boolean.TRUE)) {
+				LOG.warn("omitting secure channel binding");
+				return null;
+			}
+		}
+		X509Certificate serverCertificate = this.configuration
+				.getAppletConfig().getServerCertificate();
+		if (null == serverCertificate) {
+			LOG.warn("secure channel binding not yet configured");
+		}
+		return serverCertificate;
 	}
 }

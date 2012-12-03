@@ -74,6 +74,11 @@
 								maxFilesQuantity="1" id="upload" immediateUpload="true">
 							</rich:fileUpload>
 
+							<h:outputLabel for="omitSecureChannelBinding"
+								value="Omit secure channel binding" />
+							<h:selectBooleanCheckbox id="omitSecureChannelBinding"
+								value="#{idpConfig.omitSecureChannelBinding}" />
+
 							<h:outputLabel for="removeCard" value="Remove eID card" />
 							<h:selectBooleanCheckbox id="removeCard"
 								value="#{idpConfig.removeCard}" />

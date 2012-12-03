@@ -26,30 +26,49 @@ package be.fedict.eid.idp.model;
  */
 public enum ConfigProperty {
 
-	ISSUER("default-issuer", String.class), TOKEN_VALIDITY("token-validity",
-			Integer.class), HSTS("hsts", Boolean.class),
+	ISSUER("default-issuer", String.class),
 
-	XKMS_URL("xkms-url", String.class), XKMS_AUTH_TRUST_DOMAIN(
-			"xkms-auth-trust-domain", String.class), XKMS_IDENT_TRUST_DOMAIN(
-			"xkms-ident-trust-domain", String.class),
+	TOKEN_VALIDITY("token-validity", Integer.class),
 
-	HTTP_PROXY_ENABLED("http-proxy", Boolean.class), HTTP_PROXY_HOST(
-			"http-proxy-host", String.class), HTTP_PROXY_PORT(
-			"http-proxy-port", Integer.class),
+	HSTS("hsts", Boolean.class),
+
+	XKMS_URL("xkms-url", String.class),
+
+	XKMS_AUTH_TRUST_DOMAIN("xkms-auth-trust-domain", String.class),
+
+	XKMS_IDENT_TRUST_DOMAIN("xkms-ident-trust-domain", String.class),
+
+	HTTP_PROXY_ENABLED("http-proxy", Boolean.class),
+
+	HTTP_PROXY_HOST("http-proxy-host", String.class),
+
+	HTTP_PROXY_PORT("http-proxy-port", Integer.class),
 
 	HMAC_SECRET("hmac-secret", String.class),
 
-	ACTIVE_IDENTITY("active-identity", String.class), KEY_STORE_TYPE(
-			"key-store-type", KeyStoreType.class), KEY_STORE_PATH(
-			"key-store-path", String.class), KEY_STORE_SECRET(
-			"key-store-secret", String.class), KEY_ENTRY_SECRET(
-			"key-entry-secret", String.class), KEY_ENTRY_ALIAS(
-			"key-entry-alias", String.class),
+	ACTIVE_IDENTITY("active-identity", String.class),
 
-	REMOVE_CARD("remove-card", Boolean.class), OVERRIDE_REMOVE_CARD(
-			"override-remove-card", Boolean.class), TRANSACTION_MESSAGE_SIGNING(
-			"transaction-message-signing", Boolean.class), BLOCKED("blocked",
-			Boolean.class), BLOCKED_MESSAGE("blocked-message", String.class);
+	KEY_STORE_TYPE("key-store-type", KeyStoreType.class),
+
+	KEY_STORE_PATH("key-store-path", String.class),
+
+	KEY_STORE_SECRET("key-store-secret", String.class),
+
+	KEY_ENTRY_SECRET("key-entry-secret", String.class),
+
+	KEY_ENTRY_ALIAS("key-entry-alias", String.class),
+
+	REMOVE_CARD("remove-card", Boolean.class),
+
+	OVERRIDE_REMOVE_CARD("override-remove-card", Boolean.class),
+
+	TRANSACTION_MESSAGE_SIGNING("transaction-message-signing", Boolean.class),
+
+	BLOCKED("blocked", Boolean.class),
+
+	BLOCKED_MESSAGE("blocked-message", String.class),
+
+	OMIT_SECURE_CHANNEL_BINDING("omit-secure-channel-binding", Boolean.class);
 
 	private final String name;
 
