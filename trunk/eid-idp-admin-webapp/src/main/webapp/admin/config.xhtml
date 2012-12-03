@@ -112,6 +112,10 @@
 
 							<h:outputLabel for="hsts" value="HTTP Strict Transport Security" />
 							<h:selectBooleanCheckbox id="hsts" value="#{idpConfig.hsts}" />
+
+							<h:outputLabel for="xssProtection" value="XSS Protection" />
+							<h:selectBooleanCheckbox id="xssProtection"
+								value="#{idpConfig.xssProtection}" />
 						</h:panelGrid>
 						<h:commandButton value="Save" action="#{idpConfig.saveSecurity}" />
 					</rich:tab>

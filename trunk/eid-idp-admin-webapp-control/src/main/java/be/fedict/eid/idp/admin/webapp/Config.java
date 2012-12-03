@@ -94,6 +94,10 @@ public interface Config {
 
 	void setHsts(Boolean hsts);
 
+	Boolean getXssProtection();
+
+	void setXssProtection(Boolean xssProtection);
+
 	/*
 	 * Listeners.
 	 */
