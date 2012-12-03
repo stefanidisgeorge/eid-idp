@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -100,6 +100,7 @@ public class ConfigBean implements Config {
 	private AppletConfigEntity appletConfig;
 	private Boolean removeCard;
 	private Boolean transactionMessageSigning;
+	private Boolean omitSecureChannelBinding;
 
 	@Override
 	@PostConstruct
@@ -139,6 +140,8 @@ public class ConfigBean implements Config {
 				ConfigProperty.REMOVE_CARD, Boolean.class);
 		this.transactionMessageSigning = this.configuration.getValue(
 				ConfigProperty.TRANSACTION_MESSAGE_SIGNING, Boolean.class);
+		this.omitSecureChannelBinding = this.configuration.getValue(
+				ConfigProperty.OMIT_SECURE_CHANNEL_BINDING, Boolean.class);
 	}
 
 	@Override
@@ -239,6 +242,8 @@ public class ConfigBean implements Config {
 				.setValue(ConfigProperty.REMOVE_CARD, this.removeCard);
 		this.configuration.setValue(ConfigProperty.TRANSACTION_MESSAGE_SIGNING,
 				this.transactionMessageSigning);
+		this.configuration.setValue(ConfigProperty.OMIT_SECURE_CHANNEL_BINDING,
+				this.omitSecureChannelBinding);
 
 		this.selectedTab = ConfigurationTab.tab_applet.name();
 		return "success";
@@ -439,5 +444,15 @@ public class ConfigBean implements Config {
 		this.configuration.setValue(ConfigProperty.HSTS, this.hsts);
 		this.selectedTab = ConfigurationTab.tab_security.name();
 		return "success";
+	}
+
+	@Override
+	public void setOmitSecureChannelBinding(Boolean omitSecureChannelBinding) {
+		this.omitSecureChannelBinding = omitSecureChannelBinding;
+	}
+
+	@Override
+	public Boolean getOmitSecureChannelBinding() {
+		return this.omitSecureChannelBinding;
 	}
 }
