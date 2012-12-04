@@ -116,6 +116,13 @@
 							<h:outputLabel for="xssProtection" value="XSS Protection" />
 							<h:selectBooleanCheckbox id="xssProtection"
 								value="#{idpConfig.xssProtection}" />
+
+							<h:outputLabel for="xFrameOptions" value="X-Frame-Options" />
+							<h:selectOneMenu id="xFrameOptions"
+								value="#{idpConfig.XFrameOptions}">
+								<f:selectItems value="#{xFrameOptionsList}" />
+								<h:message for="xFrameOptions" styleClass="error" />
+							</h:selectOneMenu>
 						</h:panelGrid>
 						<h:commandButton value="Save" action="#{idpConfig.saveSecurity}" />
 					</rich:tab>

@@ -57,6 +57,7 @@ import be.fedict.eid.idp.model.ConfigProperty;
 import be.fedict.eid.idp.model.Configuration;
 import be.fedict.eid.idp.model.CryptoUtil;
 import be.fedict.eid.idp.model.KeyStoreType;
+import be.fedict.eid.idp.model.XFrameOptions;
 
 @Stateful
 @Name("idpConfig")
@@ -89,6 +90,7 @@ public class ConfigBean implements Config {
 	private Integer tokenValidity;
 	private Boolean hsts;
 	private Boolean xssProtection;
+	private XFrameOptions xFrameOptions;
 
 	private String xkmsUrl;
 	private String xkmsAuthTrustDomain;
@@ -120,6 +122,8 @@ public class ConfigBean implements Config {
 				Boolean.class);
 		this.xssProtection = this.configuration.getValue(
 				ConfigProperty.XSS_PROTECTION, Boolean.class);
+		this.xFrameOptions = this.configuration.getValue(
+				ConfigProperty.X_FRAME_OPTIONS, XFrameOptions.class);
 
 		// XKMS Config
 		this.xkmsUrl = this.configuration.getValue(ConfigProperty.XKMS_URL,
@@ -439,6 +443,8 @@ public class ConfigBean implements Config {
 		this.configuration.setValue(ConfigProperty.HSTS, this.hsts);
 		this.configuration.setValue(ConfigProperty.XSS_PROTECTION,
 				this.xssProtection);
+		this.configuration.setValue(ConfigProperty.X_FRAME_OPTIONS,
+				this.xFrameOptions);
 		this.selectedTab = ConfigurationTab.tab_security.name();
 		return "success";
 	}
@@ -461,5 +467,35 @@ public class ConfigBean implements Config {
 	@Override
 	public void setXssProtection(Boolean xssProtection) {
 		this.xssProtection = xssProtection;
+	}
+
+	@Override
+	@Factory("xFrameOptionsList")
+	public List<SelectItem> xFrameOptionsFactory() {
+		List<SelectItem> selectItems = new LinkedList<SelectItem>();
+		selectItems.add(new SelectItem("disabled"));
+		for (XFrameOptions xFrameOptions : XFrameOptions.values()) {
+			SelectItem selectItem = new SelectItem(xFrameOptions.name());
+			selectItems.add(selectItem);
+		}
+		return selectItems;
+	}
+
+	@Override
+	public String getXFrameOptions() {
+		if (null != this.xFrameOptions) {
+			return this.xFrameOptions.name();
+		}
+		return null;
+	}
+
+	@Override
+	public void setXFrameOptions(String xFrameOptions) {
+		if (null == xFrameOptions || xFrameOptions.isEmpty()
+				|| xFrameOptions.equals("disabled")) {
+			this.xFrameOptions = null;
+		} else {
+			this.xFrameOptions = XFrameOptions.valueOf(xFrameOptions);
+		}
 	}
 }
