@@ -70,7 +70,9 @@ public enum ConfigProperty {
 
 	OMIT_SECURE_CHANNEL_BINDING("omit-secure-channel-binding", Boolean.class),
 
-	XSS_PROTECTION("xss-protection", Boolean.class);
+	XSS_PROTECTION("xss-protection", Boolean.class),
+
+	X_FRAME_OPTIONS("x-frame-options", XFrameOptions.class);
 
 	private final String name;
 

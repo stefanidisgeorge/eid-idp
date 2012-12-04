@@ -98,6 +98,10 @@ public interface Config {
 
 	void setXssProtection(Boolean xssProtection);
 
+	String getXFrameOptions();
+
+	void setXFrameOptions(String xFrameOptions);
+
 	/*
 	 * Listeners.
 	 */
@@ -107,6 +111,8 @@ public interface Config {
 	 * Factories
 	 */
 	List<SelectItem> keyStoreTypeFactory();
+
+	List<SelectItem> xFrameOptionsFactory();
 
 	/*
 	 * Actions.
