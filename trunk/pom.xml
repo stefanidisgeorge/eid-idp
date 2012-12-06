@@ -13,7 +13,7 @@
 	</parent>
 	<groupId>be.fedict</groupId>
 	<artifactId>eid-idp</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1.RC3</version>
 	<packaging>pom</packaging>
 	<inceptionYear>2010</inceptionYear>
 	<scm>
@@ -315,7 +315,7 @@
 	</repositories>
 	<properties>
 		<eid-applet.version>1.0.5.GA</eid-applet.version>
-		<eid-trust-service.version>1.0.1-SNAPSHOT</eid-trust-service.version>
+		<eid-trust-service.version>1.0.1.RC3</eid-trust-service.version>
 		<openid4java.version>0.9.6</openid4java.version>
 		<hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
 		<hibernate.jdbc.use_streams_for_binary>true
