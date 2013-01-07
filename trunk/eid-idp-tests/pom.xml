@@ -4,13 +4,13 @@
 	<parent>
 		<groupId>be.fedict</groupId>
 		<artifactId>eid-idp</artifactId>
-		<version>1.0.1.RC4</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<name>FedICT eID Identity Provider Tests</name>
 	<description>Integration Tests for eID Identity Provider</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-tests</artifactId>
-	<version>1.0.1.RC4</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<build>
 		<plugins>
