@@ -24,11 +24,13 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.xml.validation.ValidationException;
 
 import be.fedict.eid.idp.common.AttributeConstants;
+import be.fedict.eid.idp.common.OpenIDAXConstants;
 import be.fedict.eid.idp.common.saml2.AuthenticationResponse;
 import be.fedict.eid.idp.common.saml2.Saml2Util;
 import be.fedict.eid.idp.sp.protocol.openid.OpenIDAuthenticationResponse;
@@ -92,6 +94,13 @@ public class ResponseBean {
 					.containsKey(AttributeConstants.PHOTO_CLAIM_TYPE_URI)) {
 				byte[] photoData = (byte[]) this.attributeMap
 						.get(AttributeConstants.PHOTO_CLAIM_TYPE_URI);
+				this.session.setAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE,
+						photoData);
+			} else if (this.attributeMap
+					.containsKey(OpenIDAXConstants.AX_PHOTO_TYPE)) {
+				String encodedPhotoData = (String) this.attributeMap
+						.get(OpenIDAXConstants.AX_PHOTO_TYPE);
+				byte[] photoData = Base64.decodeBase64(encodedPhotoData);
 				this.session.setAttribute(PhotoServlet.PHOTO_SESSION_ATTRIBUTE,
 						photoData);
 			} else {

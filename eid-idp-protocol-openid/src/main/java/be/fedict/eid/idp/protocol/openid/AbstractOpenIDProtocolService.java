@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.association.AssociationException;
@@ -442,9 +443,8 @@ public abstract class AbstractOpenIDProtocolService implements
 							.format(((GregorianCalendar) attribute.getValue())
 									.getTime());
 				case BINARY:
-					throw new RuntimeException("Binary "
-							+ "attribute type not supported "
-							+ "for OpenID (uri=" + attribute.getUri());
+					return Base64.encodeBase64URLSafeString((byte[]) attribute
+							.getValue());
 				}
 			}
 		}
@@ -480,8 +480,9 @@ public abstract class AbstractOpenIDProtocolService implements
 			case PLACE_OF_BIRTH:
 				return OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE;
 			case IDENTIFIER:
-			case PHOTO:
 				return null;
+			case PHOTO:
+				return OpenIDAXConstants.AX_PHOTO_TYPE;
 			case CARD_NUMBER:
 				return OpenIDAXConstants.AX_CARD_NUMBER_TYPE;
 			case CARD_VALIDITY_BEGIN:

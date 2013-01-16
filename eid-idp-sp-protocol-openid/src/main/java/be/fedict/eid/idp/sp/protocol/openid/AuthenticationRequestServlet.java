@@ -342,6 +342,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 					OpenIDAXConstants.AX_CARD_VALIDITY_BEGIN_TYPE, false);
 			fetchRequest.addAttribute(
 					OpenIDAXConstants.AX_CARD_VALIDITY_END_TYPE, false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_PHOTO_TYPE, false);
 
 			authRequest.addExtension(fetchRequest);
 
