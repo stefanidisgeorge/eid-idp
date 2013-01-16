@@ -23,7 +23,7 @@ package be.fedict.eid.idp.common;
  * <p/>
  * 
  * @author Wim Vandenhaute
- * @see <a href="http://www.axschema.org/types">OpenID AX Schema</a>
+ * @see <a href="http://openid.net/specs/openid-attribute-properties-list-1_0-01.html">OpenID AX Schema</a>
  */
 public abstract class OpenIDAXConstants {
 
@@ -42,6 +42,7 @@ public abstract class OpenIDAXConstants {
 	public static final String AX_GENDER_TYPE = "http://axschema.org/person/gender";
 	public static final String AX_NATIONALITY_TYPE = "http://axschema.org/eid/nationality";
 	public static final String AX_PLACE_OF_BIRTH_TYPE = "http://axschema.org/eid/pob";
+	public static final String AX_PHOTO_TYPE = "http://axschema.org/eid/photo";
 
 	// card attributes
 	public static final String AX_CARD_NUMBER_TYPE = "http://axschema.org/eid/card-number";
