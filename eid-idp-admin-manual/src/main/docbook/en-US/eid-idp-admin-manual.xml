@@ -11,10 +11,10 @@
 			Version &project.version;
 		</subtitle>
 		<copyright>
-			<year>2010-2012</year>
+			<year>2010-2013</year>
 			<holder>Fedict</holder>
 		</copyright>
-		<releaseinfo>23 Aug 2012</releaseinfo>
+		<releaseinfo>25 Jan 2013</releaseinfo>
 		<authorgroup>
 			<author>
 				<firstname>Wim</firstname>
@@ -321,6 +321,25 @@
 				Relying
 				Parties.
 			</para>
+			<section>
+				<title>OpenID and Apache</title>
+				<para>
+					The OpenID XRDS mimetype might be wrong when using recent
+					versions of Apache as front-end web server.
+					This can be fixed by the following Apache config work-around:	
+					<programlisting><![CDATA[<Location "/eid-idp/endpoints/openid/ident/xrds">
+        ForceType application/xrds+xml
+</Location>
+
+<Location "/eid-idp/endpoints/openid/auth/xrds">
+        ForceType application/xrds+xml
+</Location>
+
+<Location "/eid-idp/endpoints/openid/auth-ident/xrds">
+        ForceType application/xrds+xml
+</Location>]]></programlisting>				
+				</para>
+			</section>
 		</section>
 	</section>
 	<appendix id="links">
@@ -476,6 +495,11 @@
 						<entry>23 Aug 2012</entry>
 						<entry>Frank Cornelis</entry>
 						<entry>Versioning, RRN hashing.</entry>
+					</row>
+					<row>
+						<entry>25 Jan 2013</entry>
+						<entry>Frank Cornelis</entry>
+						<entry>OpenID and Apache.</entry>
 					</row>
 				</tbody>
 			</tgroup>
