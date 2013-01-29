@@ -26,7 +26,7 @@
 				};
 				var parameters = {
 					TargetPage : 'protocol-exit',
-					AppletService : 'applet-identification-service',
+					AppletService : 'applet-identification-service;jsessionid=#{facesContext.externalContext.getSession(false).id}',
 					Language : '#{localeSelector.language}',
 					NavigatorUserAgent : navigator.userAgent,
 					NavigatorAppName : navigator.appName,
