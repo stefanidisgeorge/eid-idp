@@ -34,6 +34,7 @@ import java.util.Date;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -48,6 +49,9 @@ import org.openid4java.server.ServerAssociationStore;
  * An implementation of a {@link ServerAssociationStore} that is completely
  * stateless. The state is kept within the handle itself. We protect the handle
  * via AES. The handle is a concatenation of IV and encrypted association data.
+ * <p/>
+ * Optionally you can also provide an HMAC secret key. This gives you an
+ * additional message integrity verification.
  * 
  * @author Frank Cornelis
  * 
@@ -58,21 +62,31 @@ public class StatelessServerAssociationStore implements ServerAssociationStore {
 
 	private final SecretKeySpec secretKeySpec;
 
+	private final SecretKeySpec macSecretKeySpec;
+
 	private final SecureRandom secureRandom;
 
+	public StatelessServerAssociationStore(SecretKeySpec secretKeySpec) {
+		this(secretKeySpec, null);
+	}
+
 	/**
-	 * Default constructor.
+	 * Main constructor.
 	 * 
 	 * @param secretKeySpec
-	 *            the AES secret key to protect the handle.
+	 *            the AES secret key to protect the handle (confidentiality).
+	 * @param macSecretKeySpec
+	 *            the MAC secret key to protect the handle (integrity).
 	 */
-	public StatelessServerAssociationStore(SecretKeySpec secretKeySpec) {
+	public StatelessServerAssociationStore(SecretKeySpec secretKeySpec,
+			SecretKeySpec macSecretKeySpec) {
 		int length = secretKeySpec.getEncoded().length;
 		if (length != 16 && length != 24 && length != 32) {
 			throw new IllegalArgumentException(
 					"secret key should be 16/24/32 bytes");
 		}
 		this.secretKeySpec = secretKeySpec;
+		this.macSecretKeySpec = macSecretKeySpec;
 		this.secureRandom = new SecureRandom();
 		this.secureRandom.setSeed(System.currentTimeMillis());
 	}
@@ -138,6 +152,16 @@ public class StatelessServerAssociationStore implements ServerAssociationStore {
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
 		result.write(iv);
 		result.write(handleValue);
+		if (null != this.macSecretKeySpec) {
+			Mac mac = Mac.getInstance("HmacSHA256");
+			mac.init(this.macSecretKeySpec);
+			byte[] toBeSigned = result.toByteArray();
+			byte[] signature = mac.doFinal(toBeSigned);
+			result = new ByteArrayOutputStream();
+			result.write(signature);
+			result.write(iv);
+			result.write(handleValue);
+		}
 		String handle = Base64.encodeBase64URLSafeString(result.toByteArray());
 		this.secureRandom.setSeed(result.toByteArray());
 		if (handle.getBytes().length > 255) {
@@ -157,6 +181,20 @@ public class StatelessServerAssociationStore implements ServerAssociationStore {
 			BadPaddingException, IOException,
 			InvalidAlgorithmParameterException {
 		byte[] encodedHandle = Base64.decodeBase64(handle);
+		if (null != this.macSecretKeySpec) {
+			byte[] signature = new byte[32];
+			System.arraycopy(encodedHandle, 0, signature, 0, 32);
+			byte[] toBeSigned = new byte[encodedHandle.length - 32];
+			System.arraycopy(encodedHandle, 32, toBeSigned, 0,
+					encodedHandle.length - 32);
+			Mac mac = Mac.getInstance("HmacSHA256");
+			mac.init(this.macSecretKeySpec);
+			byte[] actualSignature = mac.doFinal(toBeSigned);
+			if (false == Arrays.equals(actualSignature, signature)) {
+				return null;
+			}
+			encodedHandle = toBeSigned;
+		}
 		byte[] iv = new byte[16];
 		System.arraycopy(encodedHandle, 0, iv, 0, iv.length);
 		byte[] encodedData = Arrays.copyOfRange(encodedHandle, 16,

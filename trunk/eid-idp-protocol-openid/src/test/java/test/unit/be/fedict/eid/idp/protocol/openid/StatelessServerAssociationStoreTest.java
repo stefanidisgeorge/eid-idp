@@ -114,4 +114,52 @@ public class StatelessServerAssociationStoreTest {
 		assertArrayEquals(association.getMacKey().getEncoded(),
 				loadedAssociation.getMacKey().getEncoded());
 	}
+
+	@Test
+	public void testAssociationGenerationWithHMAC() throws Exception {
+		SecretKeySpec secretKeySpec = new SecretKeySpec(new byte[16], "AES");
+		SecretKeySpec macSecretKeySpec = new SecretKeySpec(new byte[16],
+				"HmacSHA256");
+		StatelessServerAssociationStore testedInstance = new StatelessServerAssociationStore(
+				secretKeySpec, macSecretKeySpec);
+
+		Association association = testedInstance.generate(
+				Association.TYPE_HMAC_SHA1, 1000);
+		LOG.debug("handle size: " + association.getHandle().length());
+
+		Association loadedAssociation = testedInstance.load(association
+				.getHandle());
+
+		assertNotNull(loadedAssociation);
+
+		assertEquals(association.getHandle(), loadedAssociation.getHandle());
+		assertEquals(association.getExpiry(), loadedAssociation.getExpiry());
+		assertEquals(association.getType(), loadedAssociation.getType());
+		assertArrayEquals(association.getMacKey().getEncoded(),
+				loadedAssociation.getMacKey().getEncoded());
+	}
+
+	@Test
+	public void testAssociation256GenerationWithHMAC() throws Exception {
+		SecretKeySpec secretKeySpec = new SecretKeySpec(new byte[16], "AES");
+		SecretKeySpec macSecretKeySpec = new SecretKeySpec(new byte[16],
+				"HmacSHA256");
+		StatelessServerAssociationStore testedInstance = new StatelessServerAssociationStore(
+				secretKeySpec, macSecretKeySpec);
+
+		Association association = testedInstance.generate(
+				Association.TYPE_HMAC_SHA256, 1000);
+		LOG.debug("handle size: " + association.getHandle().length());
+
+		Association loadedAssociation = testedInstance.load(association
+				.getHandle());
+
+		assertNotNull(loadedAssociation);
+
+		assertEquals(association.getHandle(), loadedAssociation.getHandle());
+		assertEquals(association.getExpiry(), loadedAssociation.getExpiry());
+		assertEquals(association.getType(), loadedAssociation.getType());
+		assertArrayEquals(association.getMacKey().getEncoded(),
+				loadedAssociation.getMacKey().getEncoded());
+	}
 }
