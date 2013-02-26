@@ -25,12 +25,17 @@ import static org.junit.Assert.fail;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.openid4java.association.Association;
 
 import be.fedict.eid.idp.protocol.openid.StatelessServerAssociationStore;
 
 public class StatelessServerAssociationStoreTest {
+
+	private static final Log LOG = LogFactory
+			.getLog(StatelessServerAssociationStoreTest.class);
 
 	@Test
 	public void testSecretKeySize() throws Exception {
@@ -51,9 +56,11 @@ public class StatelessServerAssociationStoreTest {
 
 		Association association = testedInstance.generate(
 				Association.TYPE_HMAC_SHA1, 1000);
+		LOG.debug("handle size: " + association.getHandle().length());
 
 		Association loadedAssociation = testedInstance.load(association
 				.getHandle());
+
 		assertNotNull(loadedAssociation);
 
 		assertEquals(association.getHandle(), loadedAssociation.getHandle());
@@ -71,9 +78,34 @@ public class StatelessServerAssociationStoreTest {
 
 		Association association = testedInstance.generate(
 				Association.TYPE_HMAC_SHA256, 1000);
+		LOG.debug("handle size: " + association.getHandle().length());
 
 		Association loadedAssociation = testedInstance.load(association
 				.getHandle());
+		assertNotNull(loadedAssociation);
+
+		assertEquals(association.getHandle(), loadedAssociation.getHandle());
+		assertEquals(association.getExpiry(), loadedAssociation.getExpiry());
+		assertEquals(association.getType(), loadedAssociation.getType());
+		assertArrayEquals(association.getMacKey().getEncoded(),
+				loadedAssociation.getMacKey().getEncoded());
+	}
+
+	// @Test
+	// requires Java Cryptography Extension (JCE) Unlimited Strength
+	// Jurisdiction Policy Files
+	public void testAssociationGenerationAES256() throws Exception {
+		SecretKeySpec secretKeySpec = new SecretKeySpec(new byte[32], "AES");
+		StatelessServerAssociationStore testedInstance = new StatelessServerAssociationStore(
+				secretKeySpec);
+
+		Association association = testedInstance.generate(
+				Association.TYPE_HMAC_SHA1, 1000);
+		LOG.debug("handle size: " + association.getHandle().length());
+
+		Association loadedAssociation = testedInstance.load(association
+				.getHandle());
+
 		assertNotNull(loadedAssociation);
 
 		assertEquals(association.getHandle(), loadedAssociation.getHandle());
