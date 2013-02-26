@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
@@ -66,8 +67,10 @@ public class StatelessServerAssociationStore implements ServerAssociationStore {
 	 *            the AES secret key to protect the handle.
 	 */
 	public StatelessServerAssociationStore(SecretKeySpec secretKeySpec) {
-		if (secretKeySpec.getEncoded().length != 16) {
-			throw new IllegalArgumentException("secret key should be 16 bytes");
+		int length = secretKeySpec.getEncoded().length;
+		if (length != 16 && length != 24 && length != 32) {
+			throw new IllegalArgumentException(
+					"secret key should be 16/24/32 bytes");
 		}
 		this.secretKeySpec = secretKeySpec;
 		this.secureRandom = new SecureRandom();
@@ -101,13 +104,14 @@ public class StatelessServerAssociationStore implements ServerAssociationStore {
 		/*
 		 * Nothing needs to be removed as we're operating stateless.
 		 */
+		this.secureRandom.setSeed(System.currentTimeMillis());
 	}
 
 	private Association setHandle(Association association)
 			throws AssociationException, IOException, NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException,
-			InvalidAlgorithmParameterException {
+			InvalidAlgorithmParameterException, NoSuchProviderException {
 		ByteArrayOutputStream encodedAssociation = new ByteArrayOutputStream();
 		String type = association.getType();
 		if (type == Association.TYPE_HMAC_SHA1) {
@@ -135,6 +139,7 @@ public class StatelessServerAssociationStore implements ServerAssociationStore {
 		result.write(iv);
 		result.write(handleValue);
 		String handle = Base64.encodeBase64URLSafeString(result.toByteArray());
+		this.secureRandom.setSeed(result.toByteArray());
 		if (handle.getBytes().length > 255) {
 			throw new AssociationException("handle size > 255");
 		}
