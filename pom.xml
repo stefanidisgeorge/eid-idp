@@ -198,13 +198,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.openid4java</groupId>
-				<artifactId>openid4java-consumer</artifactId>
-				<version>${openid4java.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>org.openid4java</groupId>
-				<artifactId>openid4java-nodeps</artifactId>
+				<artifactId>openid4java</artifactId>
 				<version>${openid4java.version}</version>
 			</dependency>
 			<dependency>
@@ -316,7 +310,7 @@
 	<properties>
 		<eid-applet.version>1.1.0.RC2</eid-applet.version>
 		<eid-trust-service.version>1.0.1.RC4</eid-trust-service.version>
-		<openid4java.version>0.9.6</openid4java.version>
+		<openid4java.version>0.9.7</openid4java.version>
 		<hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
 		<hibernate.jdbc.use_streams_for_binary>true
 		</hibernate.jdbc.use_streams_for_binary>
