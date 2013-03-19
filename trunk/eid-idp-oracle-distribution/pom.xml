@@ -3,13 +3,13 @@
     <parent>
         <groupId>be.fedict</groupId>
         <artifactId>eid-idp</artifactId>
-        <version>1.0.1.RC6</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <name>FedICT eID IdP Oracle Distribution</name>
     <description>Oracle Distribution for eID Identity Provider</description>
     <groupId>be.fedict.eid-idp</groupId>
     <artifactId>eid-idp-oracle-distribution</artifactId>
-    <version>1.0.1.RC6</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <build>
         <plugins>

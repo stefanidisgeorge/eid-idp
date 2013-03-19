@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>be.fedict</groupId>
 		<artifactId>eid-idp</artifactId>
-		<version>1.0.1.RC6</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<name>FedICT eID IdP Service Provider Test Webapp</name>
 	<description>Test Web Application for an eID IdP based Service Provider
@@ -13,7 +13,7 @@
     </description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-sp-webapp</artifactId>
-	<version>1.0.1.RC6</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<build>
