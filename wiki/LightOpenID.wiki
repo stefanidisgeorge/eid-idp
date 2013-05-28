@@ -63,6 +63,11 @@ if ($openid->mode) {
 	$_SESSION['photo'] = $photo;
 	echo '<img src="photo.php"/>';
 } else {
+/* for $openid->identity = ... you can choose one of those (eid use with or without pincode) : */
+/* https://www.e-contract.be/eid-idp/endpoints/openid/auth-ident */
+/* https://www.e-contract.be/eid-idp/endpoints/openid/auth */
+/* https://www.e-contract.be/eid-idp/endpoints/openid/ident */
+
 	$openid->identity = 'https://www.e-contract.be/eid-idp/endpoints/openid/ident';
 	$openid->required = array('namePerson/first', 'namePerson/last',
 		'namePerson', 'person/gender', 'contact/postalCode/home',
