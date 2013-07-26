@@ -19,6 +19,9 @@
 	<category name="httpclient.wire">
 		<priority value="INFO" />
 	</category>
+	<category name="org.openid4java">
+		<priority value="DEBUG" />
+	</category>
 
 	<root>
 		<appender-ref ref="CONSOLE" />
