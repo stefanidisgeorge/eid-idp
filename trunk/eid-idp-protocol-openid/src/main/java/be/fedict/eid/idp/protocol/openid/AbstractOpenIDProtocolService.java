@@ -97,6 +97,10 @@ public abstract class AbstractOpenIDProtocolService implements
 		}
 		LOG.debug("creating an OpenID server manager");
 		serverManager = new ServerManager();
+		/*
+		 * Important that the shared association store and the private association store are different.
+		 * See also: http://code.google.com/p/openid4java/source/detail?r=738
+		 */
 		serverManager
 				.setSharedAssociations(new InMemoryServerAssociationStore());
 		serverManager
