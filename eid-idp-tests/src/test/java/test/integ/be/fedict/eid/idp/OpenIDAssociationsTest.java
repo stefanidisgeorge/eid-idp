@@ -95,4 +95,62 @@ public class OpenIDAssociationsTest {
 		SecretKey secretKey = association.getMacKey();
 		LOG.debug("association MAC key algo: " + secretKey.getAlgorithm());
 	}
+	
+	/**
+	 * http://code.google.com/p/openid4java/issues/detail?id=192
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testEstablishAssociationSteam() throws Exception {
+		// setup
+		AssociationSessionType associationSessionType = AssociationSessionType.NO_ENCRYPTION_SHA1MAC;
+		String opEndpoint = "https://steamcommunity.com/openid/login";
+
+		// operate
+		DiffieHellmanSession dhSession;
+		if (null != associationSessionType.getHAlgorithm()) {
+			// Diffie-Hellman
+			DHParameterSpec dhParameterSpec = DiffieHellmanSession
+					.getDefaultParameter();
+			dhSession = DiffieHellmanSession.create(associationSessionType,
+					dhParameterSpec);
+
+		} else {
+			dhSession = null;
+		}
+		AssociationRequest associationRequest = AssociationRequest
+				.createAssociationRequest(associationSessionType, dhSession);
+		LOG.debug("association type: "
+				+ associationRequest.getType().getAssociationType());
+		LOG.debug("session type: "
+				+ associationRequest.getType().getSessionType());
+
+		Map<String, String> parameters = associationRequest.getParameterMap();
+
+		HttpClient httpClient = new HttpClient();
+		httpClient.getHostConfiguration().setProxy("proxy.yourict.net", 8080);
+		PostMethod postMethod = new PostMethod(opEndpoint);
+		for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+			postMethod.addParameter(parameter.getKey(), parameter.getValue());
+		}
+
+		int statusCode = httpClient.executeMethod(postMethod);
+		LOG.debug("status code: " + statusCode);
+		assertEquals(HttpURLConnection.HTTP_OK, statusCode);
+
+		postMethod.getResponseBody();
+
+		ParameterList responseParameterList = ParameterList
+				.createFromKeyValueForm(postMethod.getResponseBodyAsString());
+		AssociationResponse associationResponse = AssociationResponse
+				.createAssociationResponse(responseParameterList);
+
+		Association association = associationResponse.getAssociation(dhSession);
+		LOG.debug("association type: " + association.getType());
+		LOG.debug("association handle: " + association.getHandle());
+		LOG.debug("association expiry: " + association.getExpiry());
+		SecretKey secretKey = association.getMacKey();
+		LOG.debug("association MAC key algo: " + secretKey.getAlgorithm());
+	}
 }
