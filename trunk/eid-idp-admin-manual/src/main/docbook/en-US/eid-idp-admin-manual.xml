@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE article PUBLIC
-        "-//OASIS//DTD DocBook XML V4.5//EN"
-        "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<article lang="en">
+<article version="5.0"
+	xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd"
+	xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<articleinfo>
 		<title>
 			Fedict eID Identity Provider Administrator Manual
@@ -325,9 +324,11 @@
 				<title>OpenID and Apache</title>
 				<para>
 					The OpenID XRDS mimetype might be wrong when using recent
-					versions of Apache as front-end web server.
-					This can be fixed by the following Apache config work-around:	
-					<programlisting><![CDATA[<Location "/eid-idp/endpoints/openid/ident/xrds">
+					versions
+					of Apache as front-end web server.
+					This can be fixed by the
+					following Apache config work-around:
+					<programlisting language="XML"><![CDATA[<Location "/eid-idp/endpoints/openid/ident/xrds">
         ForceType application/xrds+xml
 </Location>
 
@@ -337,7 +338,7 @@
 
 <Location "/eid-idp/endpoints/openid/auth-ident/xrds">
         ForceType application/xrds+xml
-</Location>]]></programlisting>				
+</Location>]]></programlisting>
 				</para>
 			</section>
 		</section>
