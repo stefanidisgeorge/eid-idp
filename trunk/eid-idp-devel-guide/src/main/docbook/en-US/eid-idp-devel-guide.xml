@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE article PUBLIC
-        "-//OASIS//DTD DocBook XML V4.5//EN"
-        "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<article lang="en">
+<article version="5.0"
+	xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd"
+	xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<articleinfo>
 		<title>FedICT eID Identity Provider Developer's Guide</title>
 		<subtitle>
@@ -109,7 +108,7 @@
 			<para>
 				Following is an example of such a SAML v2.0 authentication
 				request:
-				<programlisting role="XML"><![CDATA[<saml2p:AuthnRequest xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
+				<programlisting language="XML"><![CDATA[<saml2p:AuthnRequest xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
     AssertionConsumerServiceURL="https://192.168.1.101:443/eid-idp-sp/saml2-landing"
     Destination="https://192.168.1.101:443/eid-idp/protocol/saml2"
     ForceAuthn="true"
@@ -207,7 +206,7 @@
 					<code>web.xml</code>
 					for configuring the servlet.
 				</para>
-				<programlisting role="XML"><![CDATA[<servlet>
+				<programlisting language="XML"><![CDATA[<servlet>
 	<servlet-name>SAML2AuthenticationRequestServlet</servlet-name>
 	<servlet-class>
 		be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet
@@ -250,7 +249,7 @@
 			<para>
 				Following is an example of such a SAML v2.0 authentication
 				response:
-				<programlisting role="XML"><![CDATA[<saml2p:Response xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
+				<programlisting language="XML"><![CDATA[<saml2p:Response xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
     Destination="https://192.168.1.101:443/eid-idp-sp/saml2-landing"
     ID="saml-response-eccaf61a-f8f1-4346-9c25-a83c1e8fa599"
     IssueInstant="2010-08-03T08:56:53.366Z"
@@ -400,7 +399,7 @@
 					<code>web.xml</code>
 					for configuring the servlet.
 				</para>
-				<programlisting role="XML"><![CDATA[<servlet>
+				<programlisting language="XML"><![CDATA[<servlet>
 	<servlet-name>SAML2AuthenticationResponseServlet</servlet-name>
 	<servlet-class>
 		be.fedict.eid.idp.sp.protocol.saml2.AuthenticationResponseServlet
@@ -470,7 +469,7 @@
 			</para>
 			<para>
 				Following is an example of a SAML v2.0 Artifact response:
-				<programlisting role="XML"><![CDATA[HTTP/1.1 302 Object Moved
+				<programlisting language="XML"><![CDATA[HTTP/1.1 302 Object Moved
 Date: 21 Jan 2004 07:00:49 GMT
 Location: https://www.rp.com/SAML?SAMLart=AAQAADWNEw5VT47wcO4z
 X%2FiEzMmFQvGknDfws2ZtqSGdkNSbsW1cmVR0bzU%
@@ -480,7 +479,7 @@ Content-Type: text/html; charset=iso-8859-1]]></programlisting>
 				sent to the eID IdP SAML v2.0 Artifact Resolution Web Service
 				over
 				SOAP. Following is an example of such a request:
-				<programlisting role="XML"><![CDATA[POST /SAML/Artifact/Resolve HTTP/1.1
+				<programlisting language="XML"><![CDATA[POST /SAML/Artifact/Resolve HTTP/1.1
 Host: eid-idp.be
 Content-Type: text/xml
 Content-Length: nnn
@@ -506,7 +505,7 @@ SOAPAction: http://www.oasis-open.org/committees/security
 				Authentication
 				Response. Following is an example of such a
 				response:
-				<programlisting role="XML"><![CDATA[HTTP/1.1 200 OK
+				<programlisting language="XML"><![CDATA[HTTP/1.1 200 OK
 Date: 21 Jan 2004 07:00:49 GMT
 Content-Type: text/xml
 Content-Length: nnnn
@@ -647,7 +646,7 @@ Content-Length: nnnn
 		</para>
 		<para>
 			Following is an example of such a SAML v2.0 Metadata document:
-			<programlisting role="XML"><![CDATA[<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+			<programlisting language="XML"><![CDATA[<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
     entityID="https://eid-idp.be/eid-idp/protocol/saml2/post/auth">
 
     <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
@@ -714,7 +713,7 @@ Content-Length: nnnn
 			<title>OpenID Protocol</title>
 			<para>
 				The OpenID URL delivers following file:
-				<programlisting role="XML"><![CDATA[<HTML>
+				<programlisting language="XML"><![CDATA[<HTML>
     <HEAD>
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <META content="https://localhost:48745/identity/xrds" http-equiv="X-XRDS-Location"/>
@@ -728,7 +727,7 @@ Content-Length: nnnn
 			<para>
 				Following, the OpenID Consumer will download the YADIS document,
 				which contains:
-				<programlisting role="XML"><![CDATA[<xrds:XRDS xmlns:xrds="xri://$xrds" xmlns="xri://$xrd*($v*2.0)">
+				<programlisting language="XML"><![CDATA[<xrds:XRDS xmlns:xrds="xri://$xrds" xmlns="xri://$xrd*($v*2.0)">
     <XRD>
         <Service>
             <Type>http://specs.openid.net/auth/2.0/server</Type>
@@ -750,7 +749,7 @@ Content-Length: nnnn
 			<para>
 				The association request sent out using HTTP POST by the OpenID
 				Consumer to the eID IdP contais:
-				<programlisting role="XML"><![CDATA[openid.ns:http://specs.openid.net/auth/2.0
+				<programlisting language="XML"><![CDATA[openid.ns:http://specs.openid.net/auth/2.0
 openid.mode:associate
 openid.session_type:DH-SHA256
 openid.assoc_type:HMAC-SHA256
@@ -759,7 +758,7 @@ openid.dh_consumer_public:...]]></programlisting>
 			<para>
 				The eID IdP reacts to this association request with following
 				message:
-				<programlisting role="XML"><![CDATA[openid.ns:http://specs.openid.net/auth/2.0
+				<programlisting language="XML"><![CDATA[openid.ns:http://specs.openid.net/auth/2.0
 openid.session_type:DH-SHA256
 openid.assoc_type:HMAC-SHA256
 openid.assoc_handle:1273064471124-0
@@ -774,7 +773,7 @@ openid.enc_mac_key:...]]></programlisting>
 				authentication request
 				using a browser redirect with following
 				arguments:
-				<programlisting role="XML"><![CDATA[openid.ns.ext1:http://openid.net/srv/ax/1.0
+				<programlisting language="XML"><![CDATA[openid.ns.ext1:http://openid.net/srv/ax/1.0
 openid.ext1.type.name:http://schema.openid.net/namePerson/first
 openid.ns:http://specs.openid.net/auth/2.0
 openid.identity:http://specs.openid.net/auth/2.0/identifier_select
@@ -801,7 +800,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 				himself.
 				After this a response redirect will be sent back to the OpenID
 				Consumer containing following arguments:
-				<programlisting role="XML"><![CDATA[openid.op_endpoint:https://localhost:48745/producer
+				<programlisting language="XML"><![CDATA[openid.op_endpoint:https://localhost:48745/producer
 openid.signed:op_endpoint,claimed_id,identity,return_to,response_nonce,
     assoc_handle,ns.ext1,ns.ext2,ext1.mode,ext1.type.name,ext1.value.name,
     ext2.auth_policies
@@ -883,7 +882,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 					<code>web.xml</code>
 					for configuring the servlet.
 				</para>
-				<programlisting role="XML"><![CDATA[<servlet>
+				<programlisting language="XML"><![CDATA[<servlet>
 	<servlet-name>OpenIDAuthenticationRequestServlet</servlet-name>
 	<servlet-class>
 		be.fedict.eid.idp.sp.protocol.openid.AuthenticationRequestServlet
@@ -947,7 +946,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 					<code>web.xml</code>
 					for configuring the servlet.
 				</para>
-				<programlisting role="XML"><![CDATA[<servlet>
+				<programlisting language="XML"><![CDATA[<servlet>
 	<servlet-name>OpenIDAuthenticationResponseServlet</servlet-name>
 	<servlet-class>
 		be.fedict.eid.idp.sp.protocol.openid.AuthenticationResponseServlet
@@ -982,7 +981,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 				The FedICT eID IdP discovery for WS-Federation makes use of a
 				metadata document as described in OASIS SAML v2.0 Metadata.
 				Following is an example of such document:
-				<programlisting role="XML"><![CDATA[<md:EntityDescriptor
+				<programlisting language="XML"><![CDATA[<md:EntityDescriptor
     xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
     xmlns:auth="http://docs.oasis-open.org/wsfed/authorization/200706"
     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
@@ -1124,7 +1123,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 				parameters in the request string sent to the FedICT eID
 				Identity
 				Provider.
-				<programlisting role="XML"><![CDATA[wa=wsignin1.0
+				<programlisting language="XML"><![CDATA[wa=wsignin1.0
 wtrealm=http://localhost:49267/EidIdpTest/
 wctx=rm=0
 id=passive
@@ -1141,7 +1140,7 @@ wct=2011-01-05T08:14:31]]></programlisting>
 				successfull eID Authentication. A SAML v2.0 Assertion is
 				delivered as
 				token by the eID IdP.
-				<programlisting role="XML"><![CDATA[<trust:RequestSecurityTokenResponseCollection
+				<programlisting language="XML"><![CDATA[<trust:RequestSecurityTokenResponseCollection
     xmlns:trust="http://docs.oasis-open.org/ws-sx/ws-trust/200512"
     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
@@ -1218,7 +1217,7 @@ wct=2011-01-05T08:14:31]]></programlisting>
 				parameters
 				in the request string send to the FedICT eID Identity
 				Provider.
-				<programlisting role="XML"><![CDATA[wa=wsignout1.0
+				<programlisting language="XML"><![CDATA[wa=wsignout1.0
 wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
 			</para>
 		</section>
@@ -1266,7 +1265,7 @@ wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
 					relying party can use the eID IdP STS to validate the received SAML
 					assertion. The web service request looks as follows:
 				</para>
-				<programlisting role="XML"><![CDATA[<soap12:Envelope xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+				<programlisting language="XML"><![CDATA[<soap12:Envelope xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
 	<soap12:Header>
 		<wsse:Security
 			xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
@@ -1330,7 +1329,7 @@ wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
 				<para>
 					The eID IdP STS web service can respond as follows:
 				</para>
-				<programlisting role="XML"><![CDATA[<soap12:Envelope xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+				<programlisting language="XML"><![CDATA[<soap12:Envelope xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
 	<soap12:Header>
 		<wsse:Security 
 			xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" 
@@ -1523,7 +1522,7 @@ wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
 			mod_mellon requires you to specify a SAML v2.0 Metadata file for
 			your
 			Service Provider. Following is an example of such metadata:
-			<programlisting role="XML"><![CDATA[<EntityDescriptor
+			<programlisting language="XML"><![CDATA[<EntityDescriptor
     entityID="TestSP"
     xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
   <SPSSODescriptor
@@ -1567,7 +1566,7 @@ wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
 			<code>MellonRequire</code>
 			directive in mellon.conf.
 			Something like:
-			<programlisting role="XML"><![CDATA[MellonRequire "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname" "Wim"]]></programlisting>
+			<programlisting language="XML"><![CDATA[MellonRequire "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname" "Wim"]]></programlisting>
 			If successfully authenticated, mod_mellon will match these directives
 			against the SAML attributes in the authentication response.
 		</para>
@@ -1588,7 +1587,7 @@ wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
 				<ulink url="http://code.google.com/p/modmellon/issues/detail?id=9">
 					mod_mellon caching issue.
 				</ulink>
-				<programlisting role="XML"><![CDATA[[Fri Feb 18 11:36:42 2011] [error] Unable to store session data because it is to big.
+				<programlisting language="XML"><![CDATA[[Fri Feb 18 11:36:42 2011] [error] Unable to store session data because it is to big.
     Name = "be:fedict:eid:idp:photo"; Value = "..."]]></programlisting>
 			</para>
 		</section>
