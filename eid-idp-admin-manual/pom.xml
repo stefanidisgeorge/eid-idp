@@ -20,15 +20,15 @@
 				<artifactId>maven-jdocbook-plugin</artifactId>
 				<dependencies>
 					<dependency>
-						<groupId>org.jboss</groupId>
-						<artifactId>jbossorg-docbook-xslt</artifactId>
-						<version>1.1.1</version>
+						<groupId>org.jboss.pressgang</groupId>
+						<artifactId>pressgang-xslt-ns</artifactId>
+						<version>2.0.2</version>
 					</dependency>
 					<dependency>
-						<groupId>org.jboss</groupId>
-						<artifactId>jbossorg-jdocbook-style</artifactId>
-						<version>1.1.1</version>
+						<groupId>org.jboss.pressgang</groupId>
+						<artifactId>pressgang-jdocbook-style</artifactId>
 						<type>jdocbook-style</type>
+						<version>2.0.2</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -47,10 +47,6 @@
 					<options>
 						<xincludeSupported>true</xincludeSupported>
 						<xmlTransformerType>saxon</xmlTransformerType>
-						<!-- needed for uri-resolvers; can be ommitted if using 'current' uri 
-							scheme -->
-						<!-- could also locate the docbook dependency and inspect its version... -->
-						<docbookVersion>1.72.0</docbookVersion>
 					</options>
 					<injections>
 						<injection>
