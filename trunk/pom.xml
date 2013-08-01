@@ -310,7 +310,7 @@
 	<properties>
 		<eid-applet.version>1.1.0-SNAPSHOT</eid-applet.version>
 		<eid-trust-service.version>1.0.1.RC5</eid-trust-service.version>
-		<openid4java.version>0.9.7</openid4java.version>
+		<openid4java.version>0.9.8</openid4java.version>
 		<hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
 		<hibernate.jdbc.use_streams_for_binary>true
 		</hibernate.jdbc.use_streams_for_binary>

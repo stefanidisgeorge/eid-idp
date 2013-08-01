@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2013 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -98,8 +98,9 @@ public abstract class AbstractOpenIDProtocolService implements
 		LOG.debug("creating an OpenID server manager");
 		serverManager = new ServerManager();
 		/*
-		 * Important that the shared association store and the private association store are different.
-		 * See also: http://code.google.com/p/openid4java/source/detail?r=738
+		 * Important that the shared association store and the private
+		 * association store are different. See also:
+		 * http://code.google.com/p/openid4java/source/detail?r=738
 		 */
 		serverManager
 				.setSharedAssociations(new InMemoryServerAssociationStore());
@@ -366,7 +367,7 @@ public abstract class AbstractOpenIDProtocolService implements
 						}
 					}
 
-					authSuccess.addExtension(fetchResponse);
+					authSuccess.addExtension(fetchResponse, "ax");
 					authSuccess
 							.setSignExtensions(new String[] { AxMessage.OPENID_NS_AX });
 				}
@@ -394,7 +395,7 @@ public abstract class AbstractOpenIDProtocolService implements
 				break;
 			}
 
-			authSuccess.addExtension(papeResponse);
+			authSuccess.addExtension(papeResponse, "pape");
 			/*
 			 * We manually sign the auth response as we also want to add our own
 			 * attributes.

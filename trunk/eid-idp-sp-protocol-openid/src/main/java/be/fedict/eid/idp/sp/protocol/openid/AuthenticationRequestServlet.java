@@ -1,6 +1,6 @@
 /*
  * eID Identity Provider Project.
- * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2010-2013 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -344,7 +344,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 					OpenIDAXConstants.AX_CARD_VALIDITY_END_TYPE, false);
 			fetchRequest.addAttribute(OpenIDAXConstants.AX_PHOTO_TYPE, false);
 
-			authRequest.addExtension(fetchRequest);
+			authRequest.addExtension(fetchRequest, "ax");
 
 			/*
 			 * Piggy back UI Extension if any languages were specified
@@ -352,7 +352,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			if (null != languages) {
 				UserInterfaceMessage uiMessage = new UserInterfaceMessage();
 				uiMessage.setLanguages(languages);
-				authRequest.addExtension(uiMessage);
+				authRequest.addExtension(uiMessage, "ui");
 			}
 
 			LOG.debug("redirecting to producer with authn request...");
