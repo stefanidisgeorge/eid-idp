@@ -3,30 +3,27 @@
 	<parent>
 		<groupId>be.fedict</groupId>
 		<artifactId>eid-idp</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1.RC7</version>
 	</parent>
 	<name>FedICT eID Identity Provider SDK Package</name>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-sdk</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1.RC7</version>
 	<packaging>jar</packaging>
 
 	<build>
 		<plugins>
+			<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
+				<version>2.9.1</version>
 				<configuration>
-					<!-- switch on dependency-driven aggregation -->
 					<includeDependencySources>true</includeDependencySources>
 					<dependencySourceIncludes>
-						<!-- include ONLY dependencies I control -->
-						<dependencySourceInclude>be.fedict.eid-idp:*
-						</dependencySourceInclude>
+						<dependencySourceInclude>be.fedict.eid-idp:*</dependencySourceInclude>
 					</dependencySourceIncludes>
 					<dependencySourceExcludes>
-						<!-- exclude devel-guide -->
 						<dependencySourceExclude>
 							be.fedict.eid-idp:eid-idp-devel-guide
 						</dependencySourceExclude>
@@ -45,6 +42,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
