@@ -6,7 +6,7 @@
 		<artifactId>eid-idp</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
-	<name>FedICT eID IdP WS-Trust JAX-WS</name>
+	<name>eID IdP WS-Trust JAX-WS</name>
 	<description>JAX-WS stubs for WS-Trust</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-ws-trust</artifactId>

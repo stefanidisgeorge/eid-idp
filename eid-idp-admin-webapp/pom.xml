@@ -7,7 +7,7 @@
 		<artifactId>eid-idp</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
-	<name>FedICT eID Identity Provider Admin Webapp</name>
+	<name>eID Identity Provider Admin Webapp</name>
 	<description>Admin Web Application for eID Identity Provider</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-admin-webapp</artifactId>

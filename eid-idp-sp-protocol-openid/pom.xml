@@ -7,7 +7,7 @@
 		<artifactId>eid-idp</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
-	<name>FedICT eID IdP OpenID Protocol Service Provider</name>
+	<name>eID IdP OpenID Protocol Service Provider</name>
 	<description>OpenID Protocol Service Provider SDK for eID Identity Provider</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-sp-protocol-openid</artifactId>

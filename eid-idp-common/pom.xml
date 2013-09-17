@@ -5,7 +5,7 @@
 		<artifactId>eid-idp</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
-	<name>FedICT eID Identity Provider Common</name>
+	<name>eID Identity Provider Common</name>
 	<description>Common classes for eID Identity Provider</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-common</artifactId>
