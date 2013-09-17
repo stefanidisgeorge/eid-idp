@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd"
 	xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<articleinfo>
-		<title>FedICT eID Identity Provider Developer's Guide</title>
+		<title>eID Identity Provider Developer's Guide</title>
 		<subtitle>
 			Integrating your web applications with the eID Identity
 			Provider.
@@ -12,10 +12,10 @@
 			Version &project.version;
 		</subtitle>
 		<copyright>
-			<year>2009-2012</year>
+			<year>2009-2013</year>
 			<holder>FedICT</holder>
 		</copyright>
-		<releaseinfo>23 Aug 2012</releaseinfo>
+		<releaseinfo>17 Sep 2013</releaseinfo>
 		<authorgroup>
 			<author>
 				<firstname>Wim</firstname>
@@ -39,19 +39,19 @@
 	<section>
 		<title>Introduction</title>
 		<para>
-			The FedICT eID Identity Provider (eID IdP) is an identity
+			The eID Identity Provider (eID IdP) is an identity
 			provider
-			which makes use of the FedICT eID Applet for authenticating
+			which makes use of the eID Applet for authenticating
 			users.
 			The main goal of the eID Identity Provider is to ease the
 			integration
 			of eID in web applications of a Service Provider. It makes
 			use of
-			the FedICT eID Trust Service for validation of the eID
+			the eID Trust Service for validation of the eID
 			certificates.
 		</para>
 		<para>
-			The FedICT eID Identity Provider is not a complete IAM solution.
+			The eID Identity Provider is not a complete IAM solution.
 			Following
 			is out-of-scope:
 			<itemizedlist>
@@ -126,7 +126,7 @@
 			<section>
 				<title>Java SDK</title>
 				<para>
-					The FedICT eID Identity Provider Java SDK provides a servlet
+					The eID Identity Provider Java SDK provides a servlet
 					(
 					<code>
 						be.fedict.eid.idp.sp.protocol.saml2.AuthenticationRequestServlet
@@ -149,7 +149,7 @@
 								optional relay state, IdP destination,
 								SP destination and
 								optional language to display
-								the FedICT eID IdP webapp in.
+								the eID IdP webapp in.
 							</para>
 						</listitem>
 					</itemizedlist>
@@ -159,7 +159,7 @@
 						<listitem>
 							<para>
 								<code>IdPDestination</code>
-								The location of the FedICT eID IdP SAML v2.0
+								The location of the eID IdP SAML v2.0
 								landing servlet.
 							</para>
 						</listitem>
@@ -188,7 +188,7 @@
 						<listitem>
 							<para>
 								<code>Language</code>
-								Optional language to display the FedICT eID IdP
+								Optional language to display the eID IdP
 								webapp in.
 								Available locales are
 								<code>nl, fr,
@@ -237,7 +237,7 @@
 		<section>
 			<title>Authentication Response</title>
 			<para>
-				The FedICT Identity Provider will return a (Base64 encoded)
+				The Identity Provider will return a (Base64 encoded)
 				SAML v2.0
 				authentication response using an HTTP Post
 				via the web browser of the
@@ -313,7 +313,7 @@
 			<section>
 				<title>Java SDK</title>
 				<para>
-					The FedICT eID Identity Provider Java SDK provides a servlet
+					The eID Identity Provider Java SDK provides a servlet
 					(
 					<code>
 						be.fedict.eid.idp.sp.protocol.saml2.post.AuthenticationResponseServlet
@@ -533,7 +533,7 @@ Content-Length: nnnn
 			<section>
 				<title>Java SDK</title>
 				<para>
-					The FedICT eID Identity Provider Java SDK provides a servlet
+					The eID Identity Provider Java SDK provides a servlet
 					(
 					<code>
 						be.fedict.eid.idp.sp.protocol.saml2.artifact.AuthenticationResponseServlet
@@ -684,26 +684,26 @@ Content-Length: nnnn
 			OpenID support was added for seamless integration with popular
 			web
 			frameworks like Drupal. A dynamic YADIS identity document is used
-			to start an OpenID authentication. The FedICT eID Identity Provider
+			to start an OpenID authentication. The eID Identity Provider
 			uses OP-driven selection. It supports OpenID Association and direct
 			verification via the eID Idp OP Provider.
 		</para>
 		<para>
-			The FedICT eID Identity Provider supports OpenID Attribute
+			The eID Identity Provider supports OpenID Attribute
 			Exchange
 			( OpenID AX ) as part of the OpenID Authentication request.
 			By default the name and firstname are returned. The SP can request
 			other eID attributes explicitly.
 		</para>
 		<para>
-			The FedICT eID Identity Provider supports OpenID Provider
+			The eID Identity Provider supports OpenID Provider
 			Authentication Policy Extension 1.0 ( OpenID PAPE ) for
 			communicating
 			the authentication policy between the eID IdP and the
 			SP.
 		</para>
 		<para>
-			The FedICT eID Identity Provider supports the OpenID User
+			The eID Identity Provider supports the OpenID User
 			Interface
 			Extension 1.0 ( OpenID UI ) for communicating a list of
 			preferred
@@ -837,7 +837,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 			<section>
 				<title>Authentication Request</title>
 				<para>
-					The FedICT eID Identity Provider Java SDK provides a
+					The eID Identity Provider Java SDK provides a
 					servlet which
 					will generate and send out such a request.
 					This servlet is also
@@ -908,7 +908,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 			<section>
 				<title>Authentication Response</title>
 				<para>
-					The FedICT eID Identity Provider Java SDK provides a
+					The eID Identity Provider Java SDK provides a
 					servlet which
 					will handle the returned OpenID
 					authentication response.
@@ -978,7 +978,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 		<section>
 			<title>Metadata</title>
 			<para>
-				The FedICT eID IdP discovery for WS-Federation makes use of a
+				The eID IdP discovery for WS-Federation makes use of a
 				metadata document as described in OASIS SAML v2.0 Metadata.
 				Following is an example of such document:
 				<programlisting language="XML"><![CDATA[<md:EntityDescriptor
@@ -1120,7 +1120,7 @@ openid.return_to:https://localhost:48745/consumer]]></programlisting>
 			</title>
 			<para>
 				Below is an example of the WS-Federation authentication request
-				parameters in the request string sent to the FedICT eID
+				parameters in the request string sent to the eID
 				Identity
 				Provider.
 				<programlisting language="XML"><![CDATA[wa=wsignin1.0
@@ -1215,7 +1215,7 @@ wct=2011-01-05T08:14:31]]></programlisting>
 			<para>
 				Below is an example of the WS-Federation sign-out request
 				parameters
-				in the request string send to the FedICT eID Identity
+				in the request string send to the eID Identity
 				Provider.
 				<programlisting language="XML"><![CDATA[wa=wsignout1.0
 wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
@@ -1467,7 +1467,7 @@ wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
 	<section>
 		<title>Character Encodings</title>
 		<para>
-			The FedICT eID IdP will post/redirect all data UTF8 encoded. Beware
+			The eID IdP will post/redirect all data UTF8 encoded. Beware
 			that for example when using OpenID, the request parameter parsing,
 			depending on your environment, must be processed using UTF8 encoding.
 			JBoss 6's tomcat for example will default to ISO-8859-1 encoding
@@ -1709,6 +1709,11 @@ wreply=http://localhost:49267/EidIdpTest/]]></programlisting>
 						<entry>23 Aug 2012</entry>
 						<entry>Frank Cornelis</entry>
 						<entry>Clock synchronization tip.</entry>
+					</row>
+					<row>
+						<entry>17 Sep 2013</entry>
+						<entry>Frank Cornelis</entry>
+						<entry>Removed FedICT branding.</entry>
 					</row>
 				</tbody>
 			</tgroup>
