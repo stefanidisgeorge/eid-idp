@@ -7,7 +7,7 @@
 		<artifactId>eid-idp</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
-	<name>FedICT eID Identity Provider EAR</name>
+	<name>eID Identity Provider EAR</name>
 	<description>Java EE 5 EAR for eID Identity Provider</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-deploy</artifactId>

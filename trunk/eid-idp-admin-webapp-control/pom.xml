@@ -5,7 +5,7 @@
 		<artifactId>eid-idp</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
-	<name>FedICT eID IdP Admin Webapp Control</name>
+	<name>eID IdP Admin Webapp Control</name>
 	<description>EJB3 Seam Controller Components for eID Identity Provider Admin
         Web Application
     </description>

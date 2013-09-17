@@ -7,7 +7,7 @@
 		<artifactId>eid-idp</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
-	<name>FedICT eID IdP WS-Federation Protocol Service Provider</name>
+	<name>eID IdP WS-Federation Protocol Service Provider</name>
 	<description>WS-Federation Protocol Service Provider SDK for eID Identity Provider
     </description>
 	<groupId>be.fedict.eid-idp</groupId>

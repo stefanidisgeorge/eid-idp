@@ -1,9 +1,9 @@
-README for FedICT eID Identity Provider Project
-===============================================
+README for eID Identity Provider Project
+========================================
 
 === 1. Introduction
 
-This project contains the source code tree of the FedICT eID Identity Provider.
+This project contains the source code tree of the eID Identity Provider.
 The source code is hosted at: http://code.google.com/p/eid-idp/
 
 
