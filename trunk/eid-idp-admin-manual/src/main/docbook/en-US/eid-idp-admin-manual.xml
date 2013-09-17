@@ -4,7 +4,7 @@
 	xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<articleinfo>
 		<title>
-			Fedict eID Identity Provider Administrator Manual
+			eID Identity Provider Administrator Manual
 		</title>
 		<subtitle>
 			Version &project.version;
@@ -13,7 +13,7 @@
 			<year>2010-2013</year>
 			<holder>Fedict</holder>
 		</copyright>
-		<releaseinfo>25 Jan 2013</releaseinfo>
+		<releaseinfo>17 Sep 2013</releaseinfo>
 		<authorgroup>
 			<author>
 				<firstname>Wim</firstname>
@@ -78,17 +78,17 @@
 			deployed.
 		</para>
 		<para>
-			The source code of the Fedict eID Identity Provider Service is
+			The source code of the eID Identity Provider Service is
 			publicly available and can be found at
 			<ulink url="http://code.google.com/p/eid-idp/source/checkout">
 				eID Identity Provider Source Code
 			</ulink>
-			. Please note that the Fedict eID IdP has dependencies on the eID
+			. Please note that the eID IdP has dependencies on the eID
 			Trust Service product, which can be found at
 			<ulink url="http://code.google.com/p/eid-trust-service/source/checkout">
 				eID Trust Service source code
 			</ulink>
-			and on the Fedict eID Applet product, which can be found at
+			and on the eID Applet product, which can be found at
 			<ulink url="http://code.google.com/p/eid-applet/source/checkout">
 				eID Applet source code
 			</ulink>
@@ -501,6 +501,11 @@
 						<entry>25 Jan 2013</entry>
 						<entry>Frank Cornelis</entry>
 						<entry>OpenID and Apache.</entry>
+					</row>
+					<row>
+						<entry>17 Sep 2013</entry>
+						<entry>Frank Cornelis</entry>
+						<entry>Removed FedICT branding.</entry>
 					</row>
 				</tbody>
 			</tgroup>
