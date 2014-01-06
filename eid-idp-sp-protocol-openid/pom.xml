@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>be.fedict</groupId>
 		<artifactId>eid-idp</artifactId>
-		<version>1.0.2-SNAPSHOT</version>
+		<version>1.0.2-fedict</version>
 	</parent>
 	<name>eID IdP OpenID Protocol Service Provider</name>
 	<description>OpenID Protocol Service Provider SDK for eID Identity Provider</description>
 	<groupId>be.fedict.eid-idp</groupId>
 	<artifactId>eid-idp-sp-protocol-openid</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.2-fedict</version>
 	<packaging>jar</packaging>
 
 	<profiles>
