@@ -1,4 +1,4 @@
-#summary ASNP.NET integration for eID IdP using DotNetOpenAuth
+#summary ASP.NET integration of eID IdP using DotNetOpenAuth
 
 = !DotNetOpenAuth =
 
