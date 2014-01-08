@@ -165,3 +165,11 @@ string claimedIdentifier = response.ClaimedIdentifier.ToString();
 string nationalRegistrationNumber =
     claimedIdentifier.Substring(claimedIdentifier.IndexOf("?") + 1);
 </code>
+
+Note that you need an authorization from the privacy commission to store/process the national registration number. Hence it might be useful to transform the national registration number to an application specific unique user identifier as follows:
+<code language="C#">
+byte[] applicationKey = System.Text.Encoding.ASCII.GetBytes("application-specific-secret");
+HMACSHA1 hmac = new HMACSHA1(applicationKey);
+byte[] hash = hmac.ComputeHash(System.Text.Encoding.ASCII.GetBytes(nationalRegistrationNumber));
+string userIdentifier = BitConverter.ToString(hash).Replace("-", "");
+</code>
