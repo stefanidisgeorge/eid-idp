@@ -156,3 +156,12 @@ request.AddExtension(uiRequest);
 </code>
 
 This extension allows you to control the language used by the eID IdP towards the end-user.
+
+= National Registration Number =
+
+The national registration number can be retrieved from the claimed identifier as follows:
+<code language="C#">
+string claimedIdentifier = response.ClaimedIdentifier.ToString();
+string nationalRegistrationNumber =
+    claimedIdentifier.Substring(claimedIdentifier.IndexOf("?") + 1);
+</code>
