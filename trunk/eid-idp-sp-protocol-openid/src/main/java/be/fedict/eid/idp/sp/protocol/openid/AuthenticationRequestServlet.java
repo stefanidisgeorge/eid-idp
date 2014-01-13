@@ -1,6 +1,7 @@
 /*
  * eID Identity Provider Project.
  * Copyright (C) 2010-2013 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -343,6 +344,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			fetchRequest.addAttribute(
 					OpenIDAXConstants.AX_CARD_VALIDITY_END_TYPE, false);
 			fetchRequest.addAttribute(OpenIDAXConstants.AX_PHOTO_TYPE, false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_RRN_TYPE, false);
 
 			authRequest.addExtension(fetchRequest, "ax");
 
