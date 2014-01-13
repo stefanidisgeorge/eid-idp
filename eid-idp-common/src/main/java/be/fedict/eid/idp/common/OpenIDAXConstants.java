@@ -48,6 +48,7 @@ public abstract class OpenIDAXConstants {
 	public static final String AX_PLACE_OF_BIRTH_TYPE = "http://axschema.org/eid/pob";
 	public static final String AX_PHOTO_TYPE = "http://axschema.org/eid/photo";
 	public static final String AX_RRN_TYPE = "http://axschema.org/eid/rrn";
+	public static final String AX_CERT_AUTHN_TYPE = "http://axschema.org/eid/cert/auth";
 
 	// card attributes
 	public static final String AX_CARD_NUMBER_TYPE = "http://axschema.org/eid/card-number";

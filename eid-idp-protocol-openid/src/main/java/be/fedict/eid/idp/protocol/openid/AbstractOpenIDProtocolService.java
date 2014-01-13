@@ -495,6 +495,8 @@ public abstract class AbstractOpenIDProtocolService implements
 				return OpenIDAXConstants.AX_CARD_VALIDITY_BEGIN_TYPE;
 			case CARD_VALIDITY_END:
 				return OpenIDAXConstants.AX_CARD_VALIDITY_END_TYPE;
+			case AUTHN_CERT:
+				return OpenIDAXConstants.AX_CERT_AUTHN_TYPE;
 			}
 		}
 		return null;
