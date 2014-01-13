@@ -1,6 +1,7 @@
 /*
  * eID Digital Signature Service Project.
  * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -24,6 +25,7 @@ import be.fedict.eid.idp.common.AttributeType;
  * Enumeration of all default eID Attributes.
  * 
  * @author Wim Vandenhaute
+ * @author Frank Cornelis
  */
 public enum DefaultAttribute {
 
@@ -81,7 +83,11 @@ public enum DefaultAttribute {
 			"be:fedict:eid:idp:card-validity:begin", AttributeType.DATE),
 
 	CARD_VALIDITY_END("CardValidityEnd", "The card validity end.",
-			"be:fedict:eid:idp:card-validity:end", AttributeType.DATE);
+			"be:fedict:eid:idp:card-validity:end", AttributeType.DATE),
+
+	AUTHN_CERT("AuthenticationCertificate",
+			"The eID authentication certificate.",
+			"be:fedict:eid:idp:cert:authn", AttributeType.BINARY);
 
 	private final String name;
 	private final String description;

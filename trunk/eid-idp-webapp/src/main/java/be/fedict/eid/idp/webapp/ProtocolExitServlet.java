@@ -1,6 +1,7 @@
 /*
  * eID Identity Provider Project.
  * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -21,6 +22,7 @@ package be.fedict.eid.idp.webapp;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -397,6 +399,16 @@ public class ProtocolExitServlet extends HttpServlet {
 
 		attributes.put(DefaultAttribute.IDENTIFIER.getUri(),
 				getAttribute(DefaultAttribute.IDENTIFIER, userId));
+
+		try {
+			attributes.put(
+					DefaultAttribute.AUTHN_CERT.getUri(),
+					getAttribute(DefaultAttribute.AUTHN_CERT,
+							authnCertificate.getEncoded()));
+		} catch (CertificateEncodingException e) {
+			throw new RuntimeException(
+					"X509 encoding error: " + e.getMessage(), e);
+		}
 
 		if (null != address) {
 
