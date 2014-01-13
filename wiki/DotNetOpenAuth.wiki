@@ -143,6 +143,7 @@ The list of supported attribute URIs is given below.
 || <pre>http://axschema.org/eid/nationality</pre> ||
 || <pre>http://axschema.org/namePerson/last</pre> ||
 || <pre>http://axschema.org/namePerson</pre> ||
+|| <pre>http://axschema.org/eid/rrn</pre> ||
 
 = Internationalization =
 
