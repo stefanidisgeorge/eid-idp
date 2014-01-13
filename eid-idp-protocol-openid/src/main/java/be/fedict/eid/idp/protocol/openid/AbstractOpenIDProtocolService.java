@@ -1,6 +1,7 @@
 /*
  * eID Identity Provider Project.
  * Copyright (C) 2010-2013 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -485,7 +486,7 @@ public abstract class AbstractOpenIDProtocolService implements
 			case PLACE_OF_BIRTH:
 				return OpenIDAXConstants.AX_PLACE_OF_BIRTH_TYPE;
 			case IDENTIFIER:
-				return null;
+				return OpenIDAXConstants.AX_RRN_TYPE;
 			case PHOTO:
 				return OpenIDAXConstants.AX_PHOTO_TYPE;
 			case CARD_NUMBER:
