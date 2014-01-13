@@ -175,3 +175,21 @@ HMACSHA1 hmac = new HMACSHA1(applicationKey);
 byte[] hash = hmac.ComputeHash(System.Text.Encoding.ASCII.GetBytes(nationalRegistrationNumber));
 string userIdentifier = BitConverter.ToString(hash).Replace("-", "");
 </code>
+
+= Base 64 URL Safe encoded attributes =
+
+The eID photo and eID authentication certificate attributes are Base 64 URL Safe encoded.
+
+To request the eID authentication certificate attribute, add the following to the request:
+<code language="C#">
+FetchRequest fetchRequest = new FetchRequest();
+fetchRequest.Attributes.AddRequired("http://axschema.org/eid/cert/auth");
+request.AddExtension(fetchRequest);
+</code>
+
+Read out the eID authentication certificate attribute as follows:
+<code language="C#">
+FetchResponse fetchResponse = response.GetExtension<FetchResponse>();
+string base64AuthCert = fetchResponse.Attributes["http://axschema.org/eid/cert/auth"].Values[0];
+byte[] encodedAuthCert = HttpServerUtility.UrlTokenDecode(base64AuthCert);
+</code>
