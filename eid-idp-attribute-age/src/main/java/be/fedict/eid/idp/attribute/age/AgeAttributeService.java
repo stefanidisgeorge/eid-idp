@@ -1,6 +1,7 @@
 /*
  * eID Identity Provider Project.
  * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -37,6 +38,7 @@ import be.fedict.eid.idp.spi.IdentityProviderAttributeService;
  * Age Attribute service.
  * 
  * @author Wim Vandenhaute
+ * @author Frank Cornelis
  */
 public class AgeAttributeService implements IdentityProviderAttributeService {
 
@@ -48,20 +50,18 @@ public class AgeAttributeService implements IdentityProviderAttributeService {
 	}
 
 	public void addAttribute(Map<String, Attribute> attributeMap) {
-
-		LOG.debug("Add age attribute");
 		Attribute dobAttribute = attributeMap
 				.get(DefaultAttribute.DATE_OF_BIRTH.getUri());
-		if (null != dobAttribute) {
-
-			GregorianCalendar dobValue = (GregorianCalendar) dobAttribute
-					.getValue();
-			DateTime dob = new DateTime(dobValue.getTime());
-			DateTime now = new DateTime();
-			Years years = Years.yearsBetween(dob, now);
-			int age = years.getYears();
-			attributeMap.put(URI,
-					new Attribute(URI, AttributeType.INTEGER, age));
+		if (null == dobAttribute) {
+			return;
 		}
+		LOG.debug("Add age attribute");
+		GregorianCalendar dobValue = (GregorianCalendar) dobAttribute
+				.getValue();
+		DateTime dob = new DateTime(dobValue.getTime());
+		DateTime now = new DateTime();
+		Years years = Years.yearsBetween(dob, now);
+		int age = years.getYears();
+		attributeMap.put(URI, new Attribute(URI, AttributeType.INTEGER, age));
 	}
 }
