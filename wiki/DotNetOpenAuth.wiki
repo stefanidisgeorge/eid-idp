@@ -145,6 +145,7 @@ The list of supported attribute URIs is given below.
 || <pre>http://axschema.org/namePerson</pre> ||
 || <pre>http://axschema.org/eid/rrn</pre> ||
 || <pre>http://axschema.org/eid/cert/auth</pre> ||
+|| <pre>http://axschema.org/eid/age</pre> ||
 
 = Internationalization =
 
