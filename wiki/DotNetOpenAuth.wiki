@@ -190,6 +190,7 @@ request.AddExtension(fetchRequest);
 Read out the eID authentication certificate attribute as follows:
 <code language="C#">
 FetchResponse fetchResponse = response.GetExtension<FetchResponse>();
+string base64UrlSafeAuthCert = fetchResponse.Attributes["http://axschema.org/eid/cert/auth"].Values[0];
 string base64AuthCert = base64UrlSafeAuthCert.Replace('-', '+').Replace('_', '/');
 if (base64AuthCert.Length % 3 != 0) base64AuthCert += '=';
 if (base64AuthCert.Length % 3 != 0) base64AuthCert += '=';
