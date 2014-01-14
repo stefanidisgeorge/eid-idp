@@ -347,6 +347,7 @@ public class AuthenticationRequestServlet extends HttpServlet {
 			fetchRequest.addAttribute(OpenIDAXConstants.AX_RRN_TYPE, false);
 			fetchRequest.addAttribute(OpenIDAXConstants.AX_CERT_AUTHN_TYPE,
 					false);
+			fetchRequest.addAttribute(OpenIDAXConstants.AX_AGE_TYPE, false);
 
 			authRequest.addExtension(fetchRequest, "ax");
 
