@@ -499,6 +499,9 @@ public abstract class AbstractOpenIDProtocolService implements
 				return OpenIDAXConstants.AX_CERT_AUTHN_TYPE;
 			}
 		}
+		if ("be:fedict:eid:idp:age".equals(uri)) {
+			return OpenIDAXConstants.AX_AGE_TYPE;
+		}
 		return null;
 	}
 
