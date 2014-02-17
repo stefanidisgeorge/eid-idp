@@ -256,6 +256,21 @@
 				<artifactId>xmlsec</artifactId>
 				<version>1.5.2</version>
 			</dependency>
+			<dependency>
+				<groupId>org.richfaces.framework</groupId>
+				<artifactId>richfaces-impl-jsf2</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.richfaces.ui</groupId>
+				<artifactId>richfaces-ui</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.richfaces.framework</groupId>
+				<artifactId>richfaces-api</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<pluginRepositories>
@@ -308,9 +323,10 @@
 		</repository>
 	</repositories>
 	<properties>
-        	<eid-applet.version>1.1.3</eid-applet.version>
-        	<eid-trust-service.version>1.0.2</eid-trust-service.version>
+		<eid-applet.version>1.1.3</eid-applet.version>
+		<eid-trust-service.version>1.0.2</eid-trust-service.version>
 		<openid4java.version>0.9.8</openid4java.version>
+		<richfaces.version>3.3.4.Final</richfaces.version>
 		<hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
 		<hibernate.jdbc.use_streams_for_binary>true
 		</hibernate.jdbc.use_streams_for_binary>
