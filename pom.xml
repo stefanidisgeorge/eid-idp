@@ -13,7 +13,7 @@
 	</parent>
 	<groupId>be.fedict</groupId>
 	<artifactId>eid-idp</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.4</version>
 	<packaging>pom</packaging>
 	<inceptionYear>2010</inceptionYear>
 	<scm>
