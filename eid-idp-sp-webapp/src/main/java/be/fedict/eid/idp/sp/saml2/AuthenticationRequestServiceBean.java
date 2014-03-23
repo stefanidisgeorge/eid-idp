@@ -57,7 +57,7 @@ public class AuthenticationRequestServiceBean implements
 	@Override
 	public String getIdPDestination() {
 
-		LOG.debug("get IdP destionation: " + this.idPEntryPoint);
+		LOG.debug("get IdP destination: " + this.idPEntryPoint);
 		return this.idPEntryPoint;
 	}
 
