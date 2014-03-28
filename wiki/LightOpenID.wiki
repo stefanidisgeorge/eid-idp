@@ -31,6 +31,12 @@ if ($openid->mode) {
 ?>
 }}}
 
+The available eID IdP OpenID endpoints (i.e., value of `$openid->identity`) at e-contract.be are:
+|| *eID IdP OpenID endpoint URL* ||
+|| <pre>https://www.e-contract.be/eid-idp/endpoints/openid/ident</pre> ||
+|| <pre>https://www.e-contract.be/eid-idp/endpoints/openid/auth</pre> ||
+|| <pre>https://www.e-contract.be/eid-idp/endpoints/openid/auth-ident</pre> ||
+
 It is always advised to have deep integration within the security layer of your used PHP framework if possible.
 
 = Example with eID photo =
