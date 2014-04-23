@@ -400,14 +400,20 @@ public class ProtocolExitServlet extends HttpServlet {
 		attributes.put(DefaultAttribute.IDENTIFIER.getUri(),
 				getAttribute(DefaultAttribute.IDENTIFIER, userId));
 
-		try {
-			attributes.put(
-					DefaultAttribute.AUTHN_CERT.getUri(),
-					getAttribute(DefaultAttribute.AUTHN_CERT,
-							authnCertificate.getEncoded()));
-		} catch (CertificateEncodingException e) {
-			throw new RuntimeException(
-					"X509 encoding error: " + e.getMessage(), e);
+		if (null != authnCertificate) {
+			/*
+			 * authnCertificate can be null for recent eID cards that can have
+			 * no certificates embedded at all.
+			 */
+			try {
+				attributes.put(
+						DefaultAttribute.AUTHN_CERT.getUri(),
+						getAttribute(DefaultAttribute.AUTHN_CERT,
+								authnCertificate.getEncoded()));
+			} catch (CertificateEncodingException e) {
+				throw new RuntimeException("X509 encoding error: "
+						+ e.getMessage(), e);
+			}
 		}
 
 		if (null != address) {
