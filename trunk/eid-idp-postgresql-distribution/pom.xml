@@ -3,13 +3,13 @@
     <parent>
         <groupId>be.fedict</groupId>
         <artifactId>eid-idp</artifactId>
-        <version>1.0.5</version>
+        <version>1.0.6-SNAPSHOT</version>
     </parent>
     <name>eID IdP PostgreSQL Distribution</name>
     <description>PostgreSQL Distribution for eID Identity Provider</description>
     <groupId>be.fedict.eid-idp</groupId>
     <artifactId>eid-idp-postgresql-distribution</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <build>
         <plugins>
