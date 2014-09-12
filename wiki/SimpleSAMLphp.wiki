@@ -130,3 +130,46 @@ session_start();
 echo base64_decode($_SESSION["imagedata"]);
 ?>
 }}}
+
+
+= Security Analysis =
+
+We performed a pragmatic security analysis of SimpleSAMLphp using !WebScarab.
+
+== Replay attack ==
+
+In this attack we replay a previous captured SAML authentication response message.
+The SimpleSAMLphp library refuses to accept the replayed SAML message.
+
+== Remove signature ==
+
+In this attack we remove the XML signature on the SAML assertion within the authentication response message.
+The SimpleSAMLphp library refuses to accept an unsigned SAML assertion.
+
+== Resign assertion ==
+
+In this attack we resign the SAML assertion received within the authentication response message using our own service provider key.
+The SimpleSAMLphp library refuses to accept the resigned SAML assertion.
+
+== Assertion decryption ==
+
+In this attack we decrypt the SAML assertion received within the authentication response message using our own service provider key.
+Per default the SimpleSAMLphp library does not detect a man-in-the-middle decryption of the incoming SAML assertion.
+This attack can be mitigated by adding the following configuration option to `metadata/saml20-idp-remote.php` under the metadata entry of the identity provider:
+{{{
+'assertion.encryption' => true,
+}}}
+
+Note that this option only makes sense for identity providers that support encryption. The eID Identity Provider does not support encryption per default.
+
+== Attribute injection ==
+
+In this attack we inject a new value for an attribute within the SAML assertion received within the authentication response message.
+The SimpleSAMLphp library refuses to accept an altered SAML assertion. It detects this integrity attack by checking the XML signature creates by the identity provider.
+
+== Signature wrapping ==
+
+In this setup we scanned the signature wrapping attack vector.
+We could successfully duplicate the SAML assertion using both the `ds:Object` and `samlp:Extensions` free XML extension points.
+However, SimpleSAMLphp successfully detected various attempts in altering the SAML assertion ID attribute.
+Hence we could not inject altered attribute values without SimpleSAMLphp detecting our attacks.
