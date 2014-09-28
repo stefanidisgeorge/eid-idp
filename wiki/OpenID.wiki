@@ -32,6 +32,9 @@ The following table lists the supported OpenID attribute URIs.
 || <pre>http://axschema.org/contact/city/home</pre> ||
 || <pre>http://axschema.org/contact/postalCode/home</pre> ||
 || <pre>http://axschema.org/birthDate</pre> ||
+|| <pre>http://openid.net/schema/birthDate/birthYear</pre> ||
+|| <pre>http://openid.net/schema/birthDate/birthMonth</pre> ||
+|| <pre>http://openid.net/schema/birthDate/birthday</pre> ||
 || <pre>http://axschema.org/eid/pob</pre> ||
 || <pre>http://axschema.org/eid/card-number</pre> ||
 || <pre>http://axschema.org/eid/nationality</pre> ||
